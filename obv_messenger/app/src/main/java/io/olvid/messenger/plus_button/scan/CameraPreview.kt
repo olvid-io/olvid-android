@@ -112,9 +112,9 @@ fun CameraPreview(
         }
     }
 
-    LaunchedEffect(cameraProviderFuture, paused, useFrontCamera) {
+    LaunchedEffect(cameraProviderFuture, paused, useFrontCamera, hasCameraPermission) {
         val cameraProvider = cameraProviderFuture.get()
-        if (paused) {
+        if (paused || !hasCameraPermission) {
             cameraProvider.unbindAll()
             // remove any touch listener
             previewView.setOnTouchListener { _: View?, _: MotionEvent? ->

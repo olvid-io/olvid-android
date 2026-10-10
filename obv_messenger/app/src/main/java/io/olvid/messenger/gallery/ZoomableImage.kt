@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -63,6 +62,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.withSave
+import io.olvid.messenger.discussion.message.attachments.decodedThumbnailCacheKey
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.PreviewUtils
@@ -153,14 +153,15 @@ fun ZoomableImage(
         value = Pair(content != null, content)
     }
     // Low-res thumbnail from the shared preview cache (previewPixelSize 1 accepts any cached
-    // size), shown while the full-resolution decode runs so page swipes never land on a black
-    // page. Once loading finishes, the real content (or the error message) takes over.
+    // size), or the tile thumbnail Coil already decoded, shown while the full-resolution decode
+    // runs so neither page swipes nor the viewer's opening morph land on a black page. Once
+    // loading finishes, the real content (or the error message) takes over.
     val placeholder = remember(fyleAndStatus, fyleAndStatus.fyle.filePath) {
         PreviewUtils.getCachedBitmapPreview(
             fyleAndStatus.fyle,
             fyleAndStatus.fyleMessageJoinWithStatus,
             1
-        )
+        ) ?: fyleAndStatus.decodedThumbnailCacheKey()?.let { App.imageLoader.memoryCache?.get(it)?.bitmap }
     }
     val loadedContent = if (loadResult == null) placeholder else loadResult?.second
 

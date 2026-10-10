@@ -76,6 +76,16 @@
         android:order="15"
         />
     <DropDownPreference
+        android:key="pref_key_truncate_long_messages"
+        android:defaultValue="full_screen"
+        app:singleLineTitle="false"
+        android:title="@string/pref_truncate_long_messages_title"
+        app:useSimpleSummaryProvider="true"
+        android:entries="@array/truncate_long_messages"
+        android:entryValues="@array/truncate_long_messages_values"
+        android:icon="@drawable/ic_pref_visibility"
+        android:order="16" />
+    <DropDownPreference
         android:key="pref_key_ping_connectivity_indicator"
         android:title="@string/pref_ping_connectivity_indicator_title"
         app:useSimpleSummaryProvider="true"

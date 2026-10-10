@@ -59,7 +59,8 @@ import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
-import io.olvid.messenger.customClasses.InitialView;
+import androidx.compose.ui.platform.ComposeView;
+import io.olvid.messenger.designsystem.avatar.AvatarComposeViewKt;
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.LoadAwareAdapter;
 import io.olvid.messenger.customClasses.SearchHighlightSpan;
@@ -442,7 +443,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
                     }
                 }
                 if ((changesMask & DISPLAY_NAME_OR_PHOTO_CHANGE_MASK) != 0 || (changesMask & ACTIVE_CHANGE_MASK) != 0) {
-                    holder.initialView.setContact(selectableContact.contact);
+                    AvatarComposeViewKt.setAvatar(holder.initialView, selectableContact.contact);
                 }
 
                 if ((changesMask & ESTABLISHED_CHANNEL_CHANGE_MASK) != 0 || (changesMask & ACTIVE_CHANGE_MASK) != 0) {
@@ -507,7 +508,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         }
 
         public class ContactViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-            final InitialView initialView;
+            final ComposeView initialView;
             final TextView contactNameTextView;
             final TextView contactNameSecondLineTextView;
             final ImageView establishingChannelImageView;

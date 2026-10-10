@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Vienas iš jūsų įrenginių netrukus nustos veikti ir bus deaktyvuotas – tai įvyks **per mažiau nei %1$d dieną**.\nGalite įsigyti **„Olvid+“** prenumeratą, kad įrenginys ir toliau veiktų.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Vienas iš jūsų įrenginių netrukus nustos veikti ir bus deaktyvuotas per **mažiau nei %1$d dienų**.\nGalite įsigyti **„Olvid+“** prenumeratą, kad jis ir toliau veiktų.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Šio įrenginio galiojimo laikas baigsis ir jis bus deaktyvuotas per **mažiau nei %1$d dieną**.\nNorėdami, kad jis ir toliau veiktų, galite įsigyti **Olvid+** prenumeratą.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Šio įrenginio galiojimo laikas baigsis ir jis bus deaktyvuotas per **mažiau nei %1$d dienų**.\nNorėdami, kad jis ir toliau veiktų, galite įsigyti **Olvid+** prenumeratą.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s prisijungė prie grupės</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s prisijungė prie grupės</item>
@@ -123,12 +127,12 @@
 		<item quantity="other" state="needs_review" hash="-1558931055">Jūs ruošiatės **visiškai** ištrinti %1$d pokalbius ir visus juose esančius pranešimus **visiems** šių pokalbių dalyviams. Įsitikinkite, kad tai yra būtent tai, ko norite.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">Jūs ruošiatės pakviesti kiekvieną grupės narį, su kuriuo bendraujate per kanalą (šiuo metu 1 narys), į privačią diskusiją.\nAr norite tęsti?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">Jūs ruošiatės pakviesti kiekvieną grupės narį, su kuriuo bendraujate per kanalą (šiuo metu %1$d narių), į privačią diskusiją.\nAr norite tęsti?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">Jūs ruošiatės pakviesti kiekvieną grupės narį, su kuriuo bendraujate per kanalą (šiuo metu 1 narys), į privatų pokalbį.\nAr norite tęsti?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Jūs ruošiatės pakviesti kiekvieną grupės narį, su kuriuo bendraujate per kanalą (šiuo metu %1$d narių), į privatų pokalbį.\nAr norite tęsti?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">1 grupės narys gali būti pakviestas į privačią diskusiją</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d grupės nariai gali būti pakviesti į privačią diskusiją</item>
+		<item quantity="one" state="needs_review" hash="-127723614">1 grupės narys gali būti pakviestas į privatų pokalbį</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d grupės nariai gali būti pakviesti į privatų pokalbį</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 bendra grupė</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Pridėti prie %1$d grupės</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Pridėti prie %1$d grupių</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Jūs jau bendraujate su šiais dalyviais.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Jūs jau turite %1$d pokalbių su šiais dalyviais.</item>
 	</plurals>
 </resources>

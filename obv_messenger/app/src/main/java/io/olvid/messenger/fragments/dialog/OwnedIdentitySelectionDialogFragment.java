@@ -49,7 +49,8 @@ import java.util.List;
 
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.R;
-import io.olvid.messenger.customClasses.InitialView;
+import androidx.compose.ui.platform.ComposeView;
+import io.olvid.messenger.designsystem.avatar.AvatarComposeViewKt;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -212,7 +213,7 @@ public class OwnedIdentitySelectionDialogFragment extends DialogFragment {
             }
             OwnedIdentity ownedIdentity = ownedIdentities.get(position);
             holder.bytesOwnedIdentity = ownedIdentity.bytesOwnedIdentity;
-            holder.initialView.setOwnedIdentity(ownedIdentity);
+            AvatarComposeViewKt.setAvatar(holder.initialView, ownedIdentity);
             if (ownedIdentity.shouldMuteNotifications()) {
                 holder.notificationMutedImageView.setVisibility(View.VISIBLE);
             } else {
@@ -255,7 +256,7 @@ public class OwnedIdentitySelectionDialogFragment extends DialogFragment {
     }
 
     public static class OwnedIdentityViewHolder extends RecyclerView.ViewHolder {
-        final InitialView initialView;
+        final ComposeView initialView;
         final TextView displayNameTextView;
         final TextView displayNameSecondLineTextView;
         final ImageView notificationMutedImageView;

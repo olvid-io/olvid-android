@@ -67,8 +67,11 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
-import io.olvid.messenger.customClasses.InitialView;
+import androidx.compose.ui.platform.ComposeView;
+import io.olvid.messenger.designsystem.avatar.AvatarComposeViewKt;
 import io.olvid.messenger.lock_screen.LockScreenOrNotActivity;
+import io.olvid.messenger.designsystem.avatar.AvatarBitmapRenderer;
+import io.olvid.messenger.designsystem.avatar.AvatarSource;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -82,7 +85,7 @@ import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel;
 
 
 public class ShortcutActivity extends LockScreenOrNotActivity {
-    private InitialView currentIdentityInitialView;
+    private ComposeView currentIdentityInitialView;
     private TextView currentNameTextView;
     private TextView currentNameSecondLineTextView;
     private ImageView currentIdentityMutedImageView;
@@ -173,7 +176,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
         }
 
         if (ownedIdentity == null) {
-            currentIdentityInitialView.setUnknown();
+            AvatarComposeViewKt.setAvatar(currentIdentityInitialView, AvatarSource.unknown());
             currentIdentityMutedImageView.setVisibility(View.GONE);
             return;
         }
@@ -205,7 +208,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
                 currentNameSecondLineTextView.setText(null);
             }
         }
-        currentIdentityInitialView.setOwnedIdentity(ownedIdentity);
+        AvatarComposeViewKt.setAvatar(currentIdentityInitialView, ownedIdentity);
         if (ownedIdentity.shouldMuteNotifications()) {
             currentIdentityMutedImageView.setVisibility(View.VISIBLE);
         } else {
@@ -252,7 +255,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
     private void proceed(final FilteredDiscussionListViewModel.SearchableDiscussion searchableDiscussion) {
         if (searchableDiscussion != null) {
             final String title;
-            if (searchableDiscussion.title.length() == 0) {
+            if (searchableDiscussion.title.isEmpty()) {
                 title = App.getContext().getString(R.string.text_unnamed_discussion);
             } else {
                 title = searchableDiscussion.title;
@@ -294,9 +297,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
                 // first remove anything related to the deleted discussion
                 Intent intent = new Intent(App.getContext(), MainActivity.class);
                 intent.setAction(Intent.ACTION_MAIN);
-                InitialView initialView = new InitialView(App.getContext());
-                initialView.setUnknown();
-                Bitmap bitmap = initialView.getAdaptiveBitmap();
+                Bitmap bitmap = AvatarBitmapRenderer.renderAdaptive(App.getContext(), AvatarSource.Companion.unknown(false));
 
                 ShortcutInfoCompat.Builder builder = new ShortcutInfoCompat.Builder(App.getContext(), DiscussionActivity.SHORTCUT_PREFIX + discussionId)
                         .setShortLabel(App.getContext().getString(R.string.text_invalid_shortcut))
@@ -325,9 +326,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
 
 
 
-        InitialView initialView = new InitialView(App.getContext());
-        initialView.setDiscussion(discussion);
-        Bitmap bitmap = initialView.getAdaptiveBitmap();
+        Bitmap bitmap = AvatarBitmapRenderer.renderAdaptive(App.getContext(), discussion);
 
         return new ShortcutInfoCompat.Builder(App.getContext(), DiscussionActivity.SHORTCUT_PREFIX + discussionId)
                 .setShortLabel(title)

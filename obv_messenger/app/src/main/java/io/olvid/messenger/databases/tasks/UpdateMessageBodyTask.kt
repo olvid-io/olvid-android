@@ -35,6 +35,9 @@ class UpdateMessageBodyTask(val messageId: Long, val body: String, val mentions:
         }
         val db = AppDatabase.getInstance()
         val message = db.messageDao().get(messageId) ?: return
+        if (message.isPollMessage) {
+            return
+        }
         val newBody = body.trim()
         message.contentBody = newBody
         try {

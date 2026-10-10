@@ -44,7 +44,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -54,9 +53,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.ContactCacheSingleton
+import io.olvid.messenger.designsystem.avatar.Avatar
+import io.olvid.messenger.designsystem.avatar.AvatarSource
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionActivity
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.services.AudioPlaybackNotificationManager
 import io.olvid.messenger.services.AudioTrackData
@@ -105,16 +105,9 @@ fun AudioPlaybackNotification(
             modifier = Modifier.padding(8.dp),
             verticalAlignment = CenterVertically,
         ) {
-            InitialView(
+            Avatar(
                 modifier = Modifier.size(48.dp),
-                initialViewSetup = { iv ->
-                    val sender = track.senderIdentity
-                    if (sender != null) {
-                        iv.setFromCache(sender)
-                    } else {
-                        iv.setUnknown()
-                    }
-                },
+                target = track.senderIdentity?.let { AvatarSource.fromCache(it) },
             )
             Spacer(Modifier.width(12.dp))
             Column(

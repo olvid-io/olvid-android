@@ -29,6 +29,7 @@ import android.text.Editable;
 import android.text.Spanned;
 import android.util.AttributeSet;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -46,26 +47,55 @@ import io.olvid.messenger.discussion.mention.MentionUrlSpan;
 public class DiscussionInputEditText extends AppCompatEditText {
     private ImeContentCommittedHandler imeContentCommittedHandler = null;
     private OnSelectionChangeListener onSelectionChangeListener = null;
+    private CharSequence fullHint = null;
 
     public DiscussionInputEditText(Context context) {
         super(context);
-        int vPadding = (int) (6 * context.getResources().getDisplayMetrics().density);
-        setPadding(getPaddingLeft(), vPadding, getPaddingRight(), vPadding);
-        setBackgroundResource(0);
+        init(context);
     }
 
     public DiscussionInputEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
-        int vPadding = (int) (6 * context.getResources().getDisplayMetrics().density);
-        setPadding(getPaddingLeft(), vPadding, getPaddingRight(), vPadding);
-        setBackgroundResource(0);
+        init(context);
     }
 
     public DiscussionInputEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init(context);
+    }
+
+    private void init(Context context) {
         int vPadding = (int) (6 * context.getResources().getDisplayMetrics().density);
+        // drop the font's top/bottom padding (which grows with the zoom text size) but keep a fixed
+        // vertical buffer so a large first-line span (e.g. a markdown heading) still has headroom
+        setIncludeFontPadding(false);
+        // center a single line vertically so it isn't lopsided when the box floor (heightIn) exceeds
+        // one line; multi-line content fills the box and is unaffected
+        setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
         setPadding(getPaddingLeft(), vPadding, getPaddingRight(), vPadding);
         setBackgroundResource(0);
+        addTextChangedListener(new TextChangeListener() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                applyHintForCurrentText();
+            }
+        });
+    }
+
+    // a TextView measures its height against the hint layout even when text is present: at high
+    // zoom the wrapped multi-line hint would keep a single-line field two lines tall
+    // --> only forward the hint to the TextView while the text is empty (setHint is final).
+    // Never call setHint() directly on this view: the next text change would overwrite it with fullHint.
+    public void setHintWhenEmpty(CharSequence hint) {
+        fullHint = hint;
+        applyHintForCurrentText();
+    }
+
+    private void applyHintForCurrentText() {
+        CharSequence target = (length() == 0) ? fullHint : null;
+        if (getHint() != target) {
+            setHint(target);
+        }
     }
 
 

@@ -8,7 +8,7 @@
     android:foreground="?attr/selectableItemBackground"
     android:theme="@style/GreyRipple">
 
-    <io.olvid.messenger.customClasses.InitialView
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/group_member_initial_view"
         android:layout_width="40dp"
         android:layout_height="40dp"

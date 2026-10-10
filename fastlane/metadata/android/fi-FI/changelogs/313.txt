@@ -1,0 +1,5 @@
+- Näytä vain viestin neljä ensimmäistä kuvaa ja lisää albuminäkymä, josta kaikki kuvat näkyvät.
+- Lisätty dokumenttiskanneri.
+- Kaksoisnapauta vastaanotettua viestiä reagoidaksesi oletus-emojilla.
+- Uudet avatarit kontakteille ja ryhmille, joilla ei ole profiilikuvaa.
+- Lisätty painike, jolla voit lähettää valokuvan suoraan päävalikosta.

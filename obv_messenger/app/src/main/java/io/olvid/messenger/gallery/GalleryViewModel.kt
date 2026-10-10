@@ -238,6 +238,12 @@ class GalleryViewModel : ViewModel() {
         currentPagerPosition.postValue(position)
     }
 
+    /** Drops the previous list and pager position so a reused instance starts blank for a new request. */
+    fun resetForNewRequest() {
+        currentPagerPosition.value = null
+        imageAndVideoFyleAndStatusList.value = null
+    }
+
     class MessageAndFyleId(@JvmField val messageId: Long, @JvmField val fyleId: Long) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -417,7 +423,7 @@ class GalleryViewModel : ViewModel() {
             addSource(currentPagerPosition) { position: Int? ->
                 this.onPositionChanged(position)
             }
-            addSource<List<FyleAndStatus>>(imageAndVideoFyleAndStatusList) { list: List<FyleAndStatus> ->
+            addSource(imageAndVideoFyleAndStatusList) { list: List<FyleAndStatus>? ->
                 this.onListChanged(list)
             }
         }
@@ -427,7 +433,7 @@ class GalleryViewModel : ViewModel() {
             updateValue()
         }
 
-        private fun onListChanged(list: List<FyleAndStatus>) {
+        private fun onListChanged(list: List<FyleAndStatus>?) {
             this.list = list
             updateValue()
         }

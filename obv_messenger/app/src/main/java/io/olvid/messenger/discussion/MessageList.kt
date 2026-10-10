@@ -66,9 +66,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionOnScreen
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
@@ -84,10 +86,12 @@ import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
+import io.olvid.messenger.discussion.message.attachments.attachmentTileModifier
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.jsons.JsonLocation
 import io.olvid.messenger.databases.tasks.CreateReadMessageMetadata
+import io.olvid.messenger.databases.tasks.ToggleDefaultReactionTask
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
@@ -101,6 +105,7 @@ import io.olvid.messenger.discussion.message.LocationSharing
 import io.olvid.messenger.discussion.message.MessageDisclaimer
 import io.olvid.messenger.discussion.message.MissedMessageCount
 import io.olvid.messenger.discussion.message.ScrollDownButton
+import io.olvid.messenger.discussion.message.isReactable
 import io.olvid.messenger.discussion.search.DiscussionSearchViewModel
 import io.olvid.messenger.main.invitations.InvitationListItem
 import io.olvid.messenger.main.invitations.InvitationListViewModel
@@ -114,6 +119,7 @@ import io.olvid.messenger.discussion.audio.openPlayingAudioMessage
 import io.olvid.messenger.services.AudioPlaybackNotificationManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -143,7 +149,21 @@ fun MessageList(
     val context = LocalContext.current
     val activity = LocalActivity.current as DiscussionActivity
     val keyboardController = LocalSoftwareKeyboardController.current
+    val haptic = LocalHapticFeedback.current
     var scrollToFirstUnread by rememberSaveable { mutableStateOf(true) }
+
+    // double-tap: enter edit mode for outbound messages, toggle the default reaction for inbound ones
+    val messageDoubleClicked: (Message) -> Unit = { message ->
+        when {
+            message.messageType != Message.TYPE_INBOUND_MESSAGE ->
+                messageEditHandler.enterEditModeIfAllowed(message)
+
+            message.isReactable && discussionViewModel.discussion.value?.isNormalOrReadOnly == true -> {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                App.runThread(ToggleDefaultReactionTask(message.id))
+            }
+        }
+    }
 
     val unreadCountAndFirstMessage by discussionViewModel.unreadCountAndFirstMessage.observeAsState()
     var startCollectingMessagesToMarkAsRead by rememberSaveable { mutableStateOf(false) }
@@ -180,7 +200,7 @@ fun MessageList(
                     )
                 } else {
                     coroutineScope.launch {
-                        delay(300)
+                        delay(300.milliseconds)
                         startCollectingMessagesToMarkAsRead = true
                     }
                     lazyListState.scrollToItem(
@@ -292,12 +312,7 @@ fun MessageList(
                             invitation = invitation,
                             title = AnnotatedString(invitation.statusText),
                             date = invitation.getAnnotatedDate(context = context),
-                            initialViewSetup = { initialView ->
-                                invitationViewModel.initialViewSetup(
-                                    initialView,
-                                    invitation
-                                )
-                            },
+                            avatar = invitationViewModel.avatar(invitation),
                             onClick = { action, invite, lastSAS ->
                                 invitationViewModel.invitationClicked(
                                     action,
@@ -424,7 +439,7 @@ fun MessageList(
                                     val press = PressInteraction.Press(offset)
                                     try {
                                         interactionSource.emit(press)
-                                        delay(500)
+                                        delay(500.milliseconds)
                                         highlightMessageId = -1
                                     } finally {
                                         interactionSource.emit(
@@ -454,9 +469,7 @@ fun MessageList(
                                                     )
                                                 ),
                                                 onDoubleClick = {
-                                                    messageEditHandler.enterEditModeIfAllowed(
-                                                        message
-                                                    )
+                                                    messageDoubleClicked(message)
                                                 },
                                                 onLongClick = {
                                                     if (discussionViewModel.isSelectingForDeletion) {
@@ -499,7 +512,7 @@ fun MessageList(
                                     }
                                 },
                                 onDoubleClick = {
-                                    messageEditHandler.enterEditModeIfAllowed(message)
+                                    messageDoubleClicked(message)
                                 },
                                 onLocationClick = {
                                     locationMessageHandler.onLocationClick(it)
@@ -582,6 +595,17 @@ fun MessageList(
                                 openViewerCallback = {
                                     discussionViewModel.markAsReadOnPause = false
                                 },
+                                openImageAttachment = { openedMessage, fyleAndStatus, showTextBlocks, wholeMessage ->
+                                    if (wholeMessage) {
+                                        discussionViewModel.albumMessageId = openedMessage.id
+                                    } else {
+                                        discussionViewModel.galleryRequest =
+                                            GalleryRequest(openedMessage.id, fyleAndStatus.fyle.id, showTextBlocks)
+                                    }
+                                },
+                                imageTileModifier = { fyleAndStatus, hiddenCount ->
+                                    with(sharedTransitionScope) { attachmentTileModifier(discussionViewModel, fyleAndStatus, hiddenCount) }
+                                },
                                 onCancelAttachmentUpload = onCancelAttachmentUpload,
                                 saveAttachment = saveAttachment,
                                 saveAllAttachments = saveAllAttachments,
@@ -602,6 +626,7 @@ fun MessageList(
                             DateHeader(
                                 modifier = Modifier.animateItem(),
                                 date = date,
+                                scale = fontScale,
                                 onClick = {
                                     discussionViewModel.calendarInitialDateMillis = message.timestamp
                                     discussionViewModel.showCalendarView = true
@@ -616,7 +641,8 @@ fun MessageList(
                                 .animateItem()
                                 .fillMaxWidth()
                                 .padding(8.dp)
-                                .widthIn(max = 400.dp)
+                                .widthIn(max = 400.dp),
+                            scale = fontScale
                         )
                     }
                 }
@@ -627,7 +653,8 @@ fun MessageList(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp)
-                                .widthIn(max = 400.dp)
+                                .widthIn(max = 400.dp),
+                            scale = fontScale
                         )
                     }
                 }
@@ -649,7 +676,7 @@ fun MessageList(
                     if (CallNotificationManager.currentCallData != null) {
                         cachedCallData = CallNotificationManager.currentCallData
                     } else {
-                        delay(500)
+                        delay(500.milliseconds)
                         cachedCallData = null
                     }
                 }
@@ -670,7 +697,7 @@ fun MessageList(
                     if (AudioPlaybackNotificationManager.currentTrack != null) {
                         cachedAudioTrack = AudioPlaybackNotificationManager.currentTrack
                     } else {
-                        delay(500)
+                        delay(500.milliseconds)
                         cachedAudioTrack = null
                     }
                 }
@@ -752,7 +779,7 @@ fun MessageList(
                 visible = stickyDate != null && lazyListState.isScrollInProgress
             ) {
                 stickyDate?.let {
-                    DateHeader(date = it.toString())
+                    DateHeader(date = it.toString(), scale = fontScale)
                 }
             }
         }

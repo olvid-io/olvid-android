@@ -20,8 +20,10 @@
 package io.olvid.messenger.main.contacts
 
 import io.olvid.engine.engine.types.JsonIdentityDetails
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.App
+import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.entity.Contact
+import io.olvid.messenger.designsystem.avatar.AvatarSource
 import io.olvid.messenger.settings.SettingsActivity
 
 
@@ -65,9 +67,16 @@ data class DisplayableContact(
         trustLevel = contact.trustLevel
     )
 
-    fun getInitialViewSetup() : (InitialView) -> Unit = { initialView ->
-        initialView.setContact(this)
-    }
+    fun avatarSource(): AvatarSource = AvatarSource.Single(
+        bytes = bytesContactIdentity,
+        initial = StringUtils.getInitial(name),
+        photoUrl = App.absolutePathFromRelative(photoUrl),
+        keycloakCertified = keycloakManaged,
+        inactive = !active,
+        notOneToOne = !oneToOne,
+        recentlyOnline = recentlyOnline,
+        trustLevel = trustLevel,
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

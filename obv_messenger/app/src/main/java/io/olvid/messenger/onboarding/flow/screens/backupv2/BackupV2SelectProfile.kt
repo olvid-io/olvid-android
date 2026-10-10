@@ -70,7 +70,8 @@ import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.DeviceBackupProfile
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.avatarDarkColorArgb
+import io.olvid.messenger.designsystem.avatar.avatarLightColorArgb
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.designsystem.constantSp
 import io.olvid.messenger.designsystem.theme.OlvidTypography
@@ -167,7 +168,7 @@ fun NavGraphBuilder.backupV2SelectProfile(
                                         colorResource(R.color.mediumGrey)
                                     else
                                         Color(
-                                            InitialView.getLightColor(
+                                            avatarLightColorArgb(
                                                 context = context,
                                                 bytes = deviceBackupProfile.bytesProfileIdentity
                                             )
@@ -185,7 +186,7 @@ fun NavGraphBuilder.backupV2SelectProfile(
                                     colorResource(R.color.lightGrey)
                                 else
                                     Color(
-                                        InitialView.getDarkColor(
+                                        avatarDarkColorArgb(
                                             context = context,
                                             bytes = deviceBackupProfile.bytesProfileIdentity
                                         )

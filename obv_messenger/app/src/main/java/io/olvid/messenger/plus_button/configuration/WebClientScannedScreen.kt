@@ -85,6 +85,7 @@ import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.webclient.WebClientManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 sealed class WebClientUiState {
     object Connecting : WebClientUiState()
@@ -306,7 +307,7 @@ fun WebClientScannedScreen(
         }
         WebClientUiState.Success -> {
             LaunchedEffect(Unit) {
-                delay(3000)
+                delay(3000.milliseconds)
                 onFinish()
             }
             Column(

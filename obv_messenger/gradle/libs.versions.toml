@@ -1,16 +1,15 @@
 [versions]
 # Plugins
-android-gradle-plugin = "9.4.0"
-kotlin = "2.4.10"
+android-gradle-plugin = "9.4.1"
+kotlin = "2.4.20"
 ksp = "2.3.6"
 google-services = "4.5.0"
 protobuf-plugin = "0.10.0"
-protobuf-protoc = "4.34.0"
-protobuf-protocgenjavalite = "3.0.0"
+protobuf-javalite = "4.36.2" # used for both protoc and the javalite runtime (protoc must not be newer than the runtime)
 oss-licenses-plugin = "0.13.0"
 
 # Engine
-olvid-engine = "1.2.0"
+olvid-engine = "1.2.3"
 
 # Libraries
 androidx-core = "1.19.0"
@@ -27,11 +26,11 @@ androidx-exifinterface = "1.4.2"
 androidx-biometric = "1.1.0"
 androidx-security-crypto = "1.1.0"
 androidx-camera = "1.6.2"
-androidx-media3 = "1.11.0"
+androidx-media3 = "1.11.1"
 androidx-media = "1.8.0"
 androidx-navigation = "2.9.8" # 2.10 requires API 24
 androidx-lifecycle = "2.11.0"
-androidx-room = "2.8.4"
+androidx-room = "2.8.5"
 androidx-paging = "3.5.1"
 androidx-work = "2.11.2"
 androidx-datastore = "1.2.1"
@@ -39,13 +38,12 @@ androidx-emoji2 = "1.6.0"
 androidx-credentials = "1.6.0"
 androidx-sharetarget = "1.2.0"
 androidx-splashscreen = "1.2.0"
-androidx-compose-bom = "2026.08.00"
+androidx-compose-bom = "2026.09.00"
 
 google-material = "1.14.0"
 google-zxing = "3.3.3" # starting with zxing 3.4.0, API level 24 is required...
-google-protobuf-lite = "3.0.1"
 google-play-billing = "9.1.0"
-google-firebase-messaging = "25.1.2"
+google-firebase-messaging = "25.1.3"
 google-play-services-maps = "20.0.0"
 google-play-services-location = "21.4.0"
 google-play-services-auth = "21.6.0" # 22.0.0 requires API 24 + deprecates GoogleSignIn
@@ -56,6 +54,8 @@ google-play-review = "2.0.2"
 google-play-services-oss-licenses = "17.3.0" # version 17.4.0 requires API 24
 google-mlkit-barcode = "17.3.0"
 google-mlkit-text = "16.0.1"
+google-mlkit-document-scanner = "16.0.0"
+google-play-installreferrer = "2.2"
 
 accompanist = "0.37.3"
 accompanist-themeadapter = "0.36.0"
@@ -70,15 +70,12 @@ jackson = "2.13.4" # starting with jackson 2.14, API level 26 is required...
 jsoup = "1.23.2"
 zip4j = "2.11.6"
 appauth = "0.11.1"
-jose4j = "0.9.6"
+jose4j = "0.9.7"
 maplibre = "12.3.1" # maplibre 13.0.0 switches to vulkan which is incompatible with old Android versions. And the opengl-only version of maplibre is not compatible with maplibre annoatations
 maplibre-annotation = "3.0.2"
 commonmark = "0.30.0"
 okhttp = "4.12.0"
-okhttp5 = "5.4.0"
 simple-xml = "2.7.1"
-slf4j = "2.0.19"
-iharder-base64 = "2.3.9"
 olvid-webrtc = "7778"
 olvid-sqlite-jdbc = "3.50.3.0" # only here to check if a new version is available
 
@@ -145,7 +142,7 @@ androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
 # Google
 google-material = { group = "com.google.android.material", name = "material", version.ref = "google-material" }
 google-zxing = { group = "com.google.zxing", name = "core", version.ref = "google-zxing" }
-google-protobuf-lite = { group = "com.google.protobuf", name = "protobuf-lite", version.ref = "google-protobuf-lite" }
+google-protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protobuf-javalite" }
 google-play-billing = { group = "com.android.billingclient", name = "billing", version.ref = "google-play-billing" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "google-firebase-messaging" }
 google-play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "google-play-services-maps" }
@@ -158,6 +155,8 @@ google-play-review-ktx = { group = "com.google.android.play", name = "review-ktx
 google-play-services-oss-licenses = { group = "com.google.android.gms", name = "play-services-oss-licenses", version.ref = "google-play-services-oss-licenses" }
 google-mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "google-mlkit-barcode" }
 google-mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "google-mlkit-text" }
+google-mlkit-document-scanner = { group = "com.google.android.gms", name = "play-services-mlkit-document-scanner", version.ref = "google-mlkit-document-scanner" }
+google-play-installreferrer = { group = "com.android.installreferrer", name = "installreferrer", version.ref = "google-play-installreferrer" }
 
 # Accompanist
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
@@ -186,15 +185,10 @@ maplibre-android-plugin-annotation = { group = "org.maplibre.gl", name = "androi
 commonmark = { group = "org.commonmark", name = "commonmark", version.ref = "commonmark" }
 commonmark-ext-gfm-strikethrough = { group = "org.commonmark", name = "commonmark-ext-gfm-strikethrough", version.ref = "commonmark" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-okhttp5 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp5" }
 simple-xml = { group = "org.simpleframework", name = "simple-xml", version.ref = "simple-xml" }
-slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
-slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
-iharder-base64 = { group = "net.iharder", name = "base64", version.ref = "iharder-base64" }
 olvid-webrtc-android = { group = "io.olvid.messenger", name = "olvid-webrtc-android", version.ref = "olvid-webrtc" }
 olvid-sqlite-jdbc-android = { group = "io.olvid.messenger", name = "olvid-sqlite-jdbc-android", version.ref = "olvid-sqlite-jdbc" }
 olvid-engine = { group = "io.olvid.messenger", name = "olvid-kotlin-engine", version.ref = "olvid-engine" }
-sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "olvid-sqlite-jdbc" }
 
 # Build
 desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar-libs" }

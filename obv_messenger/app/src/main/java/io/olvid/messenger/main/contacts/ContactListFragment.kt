@@ -56,6 +56,7 @@ import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.main.RefreshingFragment
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDetails
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
+import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.GROUP
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_MORE_RESULTS
 import io.olvid.messenger.openid.KeycloakManager
@@ -227,6 +228,9 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                         }
                     }
                 }
+
+                // groups are never displayed in the main contact list tab
+                GROUP -> {}
 
                 KEYCLOAK_MORE_RESULTS -> {}
             }

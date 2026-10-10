@@ -81,6 +81,13 @@
         android:icon="@drawable/ic_pref_auto_open"
         android:defaultValue="false" />
 
+    <Preference
+        android:order="14"
+        android:key="pref_key_default_reaction"
+        android:title="@string/pref_default_reaction_title"
+        app:singleLineTitle="false"
+        android:icon="@drawable/ic_pref_default_reaction" />
+
     <SwitchPreference
         android:key="pref_key_send_with_hardware_enter"
         android:defaultValue="false"

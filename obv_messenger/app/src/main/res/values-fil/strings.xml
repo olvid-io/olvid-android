@@ -76,14 +76,13 @@
 	<string name="dialog_title_recreate_channels" state="needs_review" hash="65265340">Gusto mo bang muling likhain ang mga secure na channel?</string>
 	<string name="dialog_title_remove_group_members" state="needs_review" hash="1574412714">Alisin ang mga miyembro ng grupo</string>
 	<string name="dialog_title_rename_contact" state="needs_review" hash="15923258">Palitan ang pangalan ng contact</string>
-	<string name="dialog_title_rename_discussion" state="needs_review" hash="1413472286">Palitan ang pangalan ng usapan</string>
+	<string name="dialog_title_rename_discussion" state="needs_review" hash="1413472286">Palitan ang pangalan ng pag-uusap</string>
 	<string name="dialog_title_rename_group" state="needs_review" hash="1461324427">Palitan ang pangalan ng grupo</string>
 	<string name="dialog_title_restart_channel_establishment" state="needs_review" hash="-645769680">I-restart ba ang pagtatatag ng channel?</string>
-	<string name="dialog_title_share_with" state="needs_review" hash="854107768">Ibahagi sa…</string>
-	<string name="dialog_title_share_recipients" state="needs_review" hash="1157053138">Pumili ng mga tatanggap</string>
+	<string name="dialog_title_share_recipients" state="needs_review" hash="463614560">Pumili ng mga pag-uusap</string>
 	<string name="share_label_from" state="needs_review" hash="2049052075">Mula:</string>
 	<string name="share_label_to" state="needs_review" hash="-1785690373">Para sa:</string>
-	<string name="share_label_choose_recipients" state="needs_review" hash="1157053138">Pumili ng mga tatanggap</string>
+	<string name="share_label_choose_recipients" state="needs_review" hash="463614560">Pumili ng mga pag-uusap</string>
 	<string name="hint_share_message" state="needs_review" hash="-763169957">Magdagdag ng mensahe…</string>
 	<string name="content_description_delete_attachment" state="needs_review" hash="-220348329">Alisin ang kalakip</string>
 	<string name="dialog_title_shortcut_to" state="needs_review" hash="-1193591200">Gumawa ng shortcut sa…</string>
@@ -111,7 +110,7 @@
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">Walang nakitang attachment</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">Walang nakitang link</string>
 	<string name="hint_company" state="needs_review" hash="988571519">Kumpanya</string>
-	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Sumulat ng mensahe</string>
+	<string name="hint_compose_your_message" state="needs_review" hash="809999904">Mensahe</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Pansamantalang mensahe</string>
 	<string name="label_edit_your_message" state="needs_review" hash="1091877412">I-edit ang iyong mensahe</string>
 	<string name="label_reply_to_x" state="needs_review" hash="1941377665">Sumagot sa %s</string>
@@ -208,9 +207,19 @@
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">Palitan ang pangalan ng contact</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">I-save</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">Mga setting</string>
+	<string name="menu_action_send_photo" state="needs_review" hash="13932391">Magpadala ng larawan</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">Ibahagi</string>
 	<string name="menu_action_bookmark" state="needs_review" hash="1146136289">I-bookmark</string>
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Alisin sa mga bookmark</string>
+	<string name="menu_action_view_message" state="needs_review" hash="-211312046">Tingnan ang mensahe</string>
+	<string name="label_see_more" state="needs_review" hash="-1206298538">Tingnan pa</string>
+	<string name="label_formatted_text" state="needs_review" hash="664283030">Naka-format</string>
+	<string name="label_raw_text" state="needs_review" hash="-1645103337">Hilaw</string>
+	<string name="pref_truncate_long_messages_title" state="needs_review" hash="576500375">Paikliin ang mahahabang mensahe</string>
+	<string name="pref_truncate_long_messages_full_screen" state="needs_review" hash="1513604976">I-click para buksan sa full screen</string>
+	<string name="pref_truncate_long_messages_inline" state="needs_review" hash="1658956871">I-click para palawakin</string>
+	<string name="pref_truncate_long_messages_never" state="needs_review" hash="1348404810">Huwag putulin</string>
+	<string name="label_select_message_to_copy" state="needs_review" hash="1560698970">Piliin ang bahagi ng mensahe upang kopyahin ito.</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">I-archive</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Alisin sa archive</string>
 	<string name="menu_check_update" state="needs_review" hash="1635875089">Suriin ang pag-update</string>
@@ -248,6 +257,8 @@
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">Napakataas</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Umalis ka sa grupo</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Muli ka nang sumali sa grupo</string>
+	<string name="label_groups_administered" state="needs_review" hash="353496672">Mga grupong iyong pinamamahalaan</string>
+	<string name="label_groups_joined" state="needs_review" hash="-1353689862">Mga grupong sinalihan</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Sumali ka na sa grupo.</string>
 	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">Idinagdag ka ni %1$s sa grupong ito</string>
 	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">Idinagdag ka ulit ni %1$s sa grupong ito</string>
@@ -324,7 +335,7 @@
 	<string name="text_user_added_to_contacts" state="needs_review" hash="-792506872">Idinagdag ang user sa iyong mga contact</string>
 	<string name="toast_message_user_deleted" state="needs_review" hash="-1664642954">Tinanggal na ang gumagamit</string>
 	<string name="text_original_message_not_found" state="needs_review" hash="2014071006">Hindi nakita ang orihinal na mensahe</string>
-	<string name="text_discussion_end2end_disclaimer" state="needs_review" hash="165389435">Ang mga mensaheng nai-post sa diskusyong ito ay protektado gamit ang end-to-end encryption.\nAng kanilang pagiging kumpidensyal, pagiging tunay, at ang pagkakakilanlan ng kanilang nagpadala ay ginagarantiyahan sa pamamagitan ng cryptography.</string>
+	<string name="text_discussion_end2end_disclaimer" state="needs_review" hash="165389435">Ang mga mensaheng nai-post sa pag-uusap na ito ay protektado gamit ang end-to-end encryption.\nAng kanilang pagiging kumpidensyal, pagiging tunay, at ang pagkakakilanlan ng kanilang nagpadala ay ginagarantiyahan sa pamamagitan ng cryptography.</string>
 	<string name="text_unknown_member_joined_the_group" state="needs_review" hash="1051900858">May isang hindi kilalang miyembro na sumali sa grupo</string>
 	<string name="text_unknown_member_left_the_group" state="needs_review" hash="183620441">Isang hindi kilalang miyembro ang umalis sa grupo.</string>
 	<string name="pref_reset_dialogs_title" state="needs_review" hash="-1377245223">I-reset ang lahat ng babala sa pag-uusap</string>
@@ -333,7 +344,7 @@
 	<string name="menu_action_discussion_settings" state="needs_review" hash="-480622798">Mga setting ng pag-uusap</string>
 	<string name="menu_action_discussion_mark_as_read" state="needs_review" hash="-805086989">Markahan bilang nabasa</string>
 	<string name="menu_action_discussion_mark_as_unread" state="needs_review" hash="2143711418">Markahan bilang hindi pa nababasa</string>
-	<string name="dialog_title_pick_discussion_color" state="needs_review" hash="922181510">Pumili ng kulay para sa usapan</string>
+	<string name="dialog_title_pick_discussion_color" state="needs_review" hash="922181510">Pumili ng kulay para sa pag-uusap</string>
 	<string name="button_label_clear" state="needs_review" hash="-1693541689">Burahin</string>
 	<string name="hint_color_hex" state="needs_review" hash="-169268955">Hex code ng kulay</string>
 	<string name="hint_alpha" state="needs_review" hash="752686784">Alpha</string>
@@ -350,7 +361,7 @@
 	<string name="text_null_timestamp" state="needs_review" hash="1440">-</string>
 	<string name="text_no_recipient_details" state="needs_review" hash="-196217368">Walang available na detalye ng mensahe</string>
 	<string name="activity_title_discussion_settings" state="needs_review" hash="138563346">Mga setting ng pag-uusap</string>
-	<string name="pref_discussion_color_title" state="needs_review" hash="922181510">Pumili ng kulay para sa usapan</string>
+	<string name="pref_discussion_color_title" state="needs_review" hash="922181510">Pumili ng kulay para sa pag-uusap</string>
 	<string name="pref_discussion_background_image_title" state="needs_review" hash="-1798270953">Larawan sa background</string>
 	<string name="pref_discussion_background_image_click_to_remove_summary" state="needs_review" hash="-1148277484">I-click upang alisin ang larawan</string>
 	<string name="pref_discussion_background_image_click_to_choose_summary" state="needs_review" hash="459765195">I-click upang pumili ng isang larawan</string>
@@ -509,6 +520,8 @@
 	<string name="pref_text_dark_mode_on" state="needs_review" hash="794872984">Palaging gamitin ang madilim na tema</string>
 	<string name="pref_text_dark_mode_off" state="needs_review" hash="1031187033">Palaging gamitin ang light theme</string>
 	<string name="pref_text_dark_mode_auto" state="needs_review" hash="-1140013121">Sundin ang setting ng system</string>
+	<string name="pref_use_pattern_avatars_title" state="needs_review" hash="-184462474">Mga avatar na nabuo gamit ang AI</string>
+	<string name="pref_use_pattern_avatars_summary" state="needs_review" hash="-1895366464">Para sa mga contact na walang larawan, ipakita ang isang natatanging makulay na pattern sa halip na ang kanilang inisyal.</string>
 	<string name="menu_action_help_faq" state="needs_review" hash="971329012">Tulong / Madalas Itanong</string>
 	<string name="menu_action_call_contact" state="needs_review" hash="546297186">Tawagan ang contact</string>
 	<string name="notification_title_incoming_webrtc_call" state="needs_review" hash="-2109880396">Papasok na tawag mula sa Olvid na %1$s</string>
@@ -692,7 +705,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">Server ng lisensya:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">Ang iyong server:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">May sira ang link para sa pag-activate ng lisensya.\n\nMangyaring makipag-ugnayan sa taong nagpadala sa iyo ng link na ito.</string>
-	<string name="label_checking_license" state="needs_review" hash="-777109669">Sinusuri ang lisensya…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">Hindi maaaring suriin ang katayuan ng lisensya</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Hindi kilalang lisensya</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Balidong lisensya</string>
@@ -740,6 +752,16 @@
 	<string name="text_message_content_wiped" state="needs_review" hash="1781783786">(Nilalaman ng mensahe ay tinanggal)</string>
 	<string name="text_ephemeral_message_explanation" state="needs_review" hash="612413232">I-click upang tingnan ang nilalaman ng mensahe</string>
 	<string name="text_visible_once" state="needs_review" hash="962464352">Makikita lamang nang isang beses</string>
+	<string name="dialog_title_ephemeral_message" state="needs_review" hash="-1527208333">Pansamantalang mensahe</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave" state="needs_review" hash="1852111882">Ang mensaheng ito ay mabubura kapag umalis ka sa pag-uusap na ito.</string>
+	<string name="text_ephemeral_read_once_erased_on_leave" state="needs_review" hash="-1031412379">Ang nilalaman ng mensaheng ito ay mabubura kapag umalis ka sa pag-uusap na ito.</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave_once_opened" state="needs_review" hash="-1827602456">Kapag nabuksan na, ang mensaheng ito ay mabubura kapag umalis ka sa pag-uusap na ito.</string>
+	<string name="text_ephemeral_deleted_at_time" state="needs_review" hash="831937049">Made-delete sa %1$s</string>
+	<string name="text_ephemeral_deleted_on_date_at_time" state="needs_review" hash="667854133">Buburahin sa %1$s sa %2$s</string>
+	<string name="text_ephemeral_content_erased_at_time" state="needs_review" hash="1038815627">Ang nilalaman ay mabubura sa %1$s</string>
+	<string name="text_ephemeral_content_erased_on_date_at_time" state="needs_review" hash="848079053">Ang nilalaman ay buburahin sa %1$s sa %2$s</string>
+	<string name="text_ephemeral_countdown_starts_when_sent" state="needs_review" hash="-1010200489">Magsisimula ang countdown kapag naipadala na ang mensahe.</string>
+	<string name="text_ephemeral_countdown_starts_when_opened" state="needs_review" hash="1194691757">Magsisimula ang countdown kapag binuksan mo ang mensahe.</string>
 	<string name="text_timer_s" state="needs_review" hash="-1146250144">%1$ds</string>
 	<string name="text_timer_m" state="needs_review" hash="-1318025056">%1$dm</string>
 	<string name="text_timer_h" state="needs_review" hash="-1461170816">%1$dh</string>
@@ -775,8 +797,10 @@
 	<string name="pref_auto_open_limited_visibility_inbound_title" state="needs_review" hash="-1870189996">Awtomatikong buksan ang mga pansamantalang mensahe</string>
 	<string name="pref_retain_wiped_outbound_messages_title" state="needs_review" hash="-342021313">Panatilihin ang mga mensaheng papalabas na nabura</string>
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Pagpapadala at pagtanggap ng mga mensahe</string>
-	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Kapag aktibo, ang mga mensaheng \"basahin nang isang beses\" at mga mensaheng may limitadong tagal ng pagpapakita ay awtomatikong mabubuksan kapag pumasok ka sa usapan. Kung hindi, kinakailangan ang pag-click.</string>
+	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Kapag aktibo, ang mga mensaheng \"basahin nang isang beses\" at mga mensaheng may limitadong tagal ng pagpapakita ay awtomatikong mabubuksan kapag pumasok ka sa pag-uusap. Kung hindi, kinakailangan ang pag-click.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Kapag aktibo, ang mga mensaheng binura ay mananatili upang makita mo kung kailan ito naihatid o nabasa. Kung hindi, ito ay buburahin.</string>
+	<string name="pref_default_reaction_title" state="needs_review" hash="1457188713">Default na reaksyon</string>
+	<string name="pref_default_reaction_summary" state="needs_review" hash="-1065900793">I-double tap ang isang mensaheng natanggap upang mag-react gamit ang %1$s. I-double tap muli upang alisin ang iyong reaksyon.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Web Client</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">May error sa pagproseso ng link para sa pag-update ng mga setting.</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Pagpapadala at pagtanggap ng mga mensahe</string>
@@ -784,7 +808,7 @@
 	<string name="pref_discussion_category_shared_ephemeral_settings_summary" state="needs_review" hash="-1511387101">Ang mga setting sa ibaba ay ibinabahagi sa lahat ng kalahok sa pag-uusap na ito. Ang pagbabago sa mga ito ay makakaapekto sa default na visibility at tagal ng pagiging available ng mga mensaheng ipinapadala ng lahat ng kalahok.</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_summary_only_owner" state="needs_review" hash="507098821">Ang mga setting sa ibaba ay ibinabahagi sa lahat ng kalahok sa pag-uusap na ito. Ang pagbabago sa mga ito ay makakaapekto sa default na visibility at tagal ng pag-iral ng mga mensaheng ipinapadala ng lahat ng kalahok.\n\nHindi ka pinahihintulutang baguhin ang mga setting na ito.</string>
 	<string name="pref_discussion_read_once_title" state="needs_review" hash="1347493911">Mga mensaheng mababasa nang isang beses lamang</string>
-	<string name="pref_discussion_read_once_summary" state="needs_review" hash="-126623825">Kapag in-activate, ang mga mensahe at mga kalakip ay ipapakita nang isang beses lamang, at buburahin kapag lumabas ka sa usapan.</string>
+	<string name="pref_discussion_read_once_summary" state="needs_review" hash="-126623825">Kapag in-activate, ang mga mensahe at mga kalakip ay ipapakita nang isang beses lamang, at buburahin kapag lumabas ka sa pag-uusap.</string>
 	<string name="pref_discussion_visibility_duration_title" state="needs_review" hash="-640499771">Tagal ng pagpapakita ng mensahe</string>
 	<string name="pref_discussion_existence_duration_title" state="needs_review" hash="530735129">Tagal ng pag-iral ng mensahe</string>
 	<string name="pref_discussion_remote_delete_title" state="needs_review" hash="1812520789">Sino ang maaaring \"burahin sa lahat ng dako\" ang mga mensahe mula sa ibang mga gumagamit?</string>
@@ -816,7 +840,7 @@
 	<string name="dialog_message_shared_ephemeral_settings_modified" state="needs_review" hash="715864223">Binago mo ang mga default na setting para sa mga pansamantalang mensahe sa pag-uusap na ito.\n\nGusto mo bang i-update ang mga setting na ito para sa iyo at sa lahat ng iba pang kalahok sa pag-uusap, o gusto mo bang balewalain ang iyong mga pagbabago?</string>
 	<string name="text_discussion_shared_settings_updated" state="needs_review" hash="-151974912">Na-update ang mga ibinahaging setting ng pag-uusap</string>
 	<string name="text_updated_shared_settings" state="needs_review" hash="1457023446">In-update ni %1$s ang mga setting para sa pinagbabahaginang pag-uusap</string>
-	<string name="text_updated_shared_settings_you" state="needs_review" hash="40728921">In-update mo ang mga setting para sa pinagbabahaginang diskusyon.</string>
+	<string name="text_updated_shared_settings_you" state="needs_review" hash="40728921">In-update mo ang mga setting para sa pinagbabahaginang pag-uusap.</string>
 	<string name="text_non_ephemeral_messages" state="needs_review" hash="402305240">Mga mensaheng hindi nawawala</string>
 	<string name="pref_category_default_retention_policy_title" state="needs_review" hash="925391440">Patakaran sa pagpapanatili ng mensahe</string>
 	<string name="pref_category_default_retention_policy_summary" state="needs_review" hash="-1071833812">Pinapayagan ka ng mga setting sa ibaba na awtomatikong burahin ang mga lumang mensahe sa iyong mga pag-uusap. Maaari itong baguhin sa bawat pag-uusap.</string>
@@ -832,7 +856,7 @@
 	<string name="pref_discussion_default_retention_count_dialog_message" state="needs_review" hash="113844640">Ipasok ang bilang ng mga mensaheng nais mong panatilihin sa bawat pag-uusap. Iwanang blangko upang panatilihin ang lahat ng mga mensahe.\n\nAng mga hindi pa nababasang mensahe ay hindi kailanman buburahin.</string>
 	<string name="pref_discussion_retention_count_dialog_message_default_null" state="needs_review" hash="-86538410">Ipasok ang bilang ng mga mensaheng nais mong panatilihin sa pag-uusap na ito.\nIwanang blangko upang gamitin ang iyong default na setting (panatilihin ang lahat ng mensahe).\n\nAng mga hindi pa nababasang mensahe ay hindi kailanman mabubura.</string>
 	<string name="pref_discussion_retention_count_dialog_message_default_number" state="needs_review" hash="-2144782876">Ipasok ang bilang ng mga mensaheng nais mong panatilihin sa pag-uusap na ito.\nIwanang blangko upang gamitin ang iyong default na setting (panatilihin ang pinakabagong %1$d na mga mensahe).\nIpasok ang 0 upang panatilihin ang lahat ng mga mensahe.\n\nAng mga hindi pa nababasang mensahe ay hindi kailanman buburahin.</string>
-	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">Patakaran sa pagpapanatili ng mga mensahe sa diskusyon</string>
+	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">Patakaran sa pagpapanatili ng mga mensahe sa pag-uusap</string>
 	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">Pinapayagan ka ng mga setting sa ibaba na awtomatikong burahin ang mga lumang mensahe sa pag-uusap na ito. Mas uunahin ang mga ito kaysa sa iyong default na patakaran sa pagpapanatili.</string>
 	<string name="pref_text_app_default_string" state="needs_review" hash="-1921282000">Gamitin ang iyong default na setting (%1$s)</string>
 	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1349151852">Magrekord ng mensahe sa boses</string>
@@ -896,7 +920,8 @@
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Lisensya: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Tagapagbigay ng pagkakakilanlan</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Server ng tagapagbigay ng pagkakakilanlan</string>
-	<string name="explanation_identity_provider" state="needs_review" hash="-964456322">Sa screen na ito, maaari mong i-configure ang identity provider ng iyong kumpanya sa Olvid. Kapag na-configure na, maaari kang mag-authenticate sa server na ito, at papayagan ka ng Olvid na idagdag ang iba pang mga empleyado sa iyong mga contact nang walang kahirap-hirap.\nMangyaring makipag-ugnayan sa iyong administrator para sa karagdagang detalye.</string>
+	<string name="explanation_identity_provider" state="needs_review" hash="-1014276138">Hinahayaan ka ng screen na ito na i-configure ang identity provider ng iyong organisasyon sa Olvid. Kapag na-configure na, maaari kang mag-authenticate at papayagan ka ng Olvid na madaling magdagdag ng iba pang mga user sa iyong mga contact.\nMangyaring makipag-ugnayan sa iyong administrator para sa karagdagang detalye.</string>
+	<string name="explanation_identity_provider_mdm" state="needs_review" hash="-1274626281">Ang pag-install na ito ay pinamamahalaan ng iyong organisasyon at na-configure upang gumamit ng isang identity provider. Ang mga setting sa ibaba ay paunang na-configure at hindi maaaring baguhin.\nMangyaring makipag-ugnayan sa iyong administrator para sa karagdagang detalye.</string>
 	<string name="button_label_authenticate" state="needs_review" hash="272245375">Magpatunay</string>
 	<string name="button_label_check_identity_provider" state="needs_review" hash="508428497">Suriin ang tagapagbigay ng pagkakakilanlan</string>
 	<string name="menu_action_use_identity_provider" state="needs_review" hash="1305090894">Gumamit ng tagapagbigay ng pagkakakilanlan</string>
@@ -980,8 +1005,6 @@
 	<string name="text_failed_call" state="needs_review" hash="-1934816919">Nabigo ang pagtawag sa telepono</string>
 	<string name="text_busy_call" state="needs_review" hash="-310279946">May papasok na tawag habang abala ka</string>
 	<string name="text_busy_outgoing_call" state="needs_review" hash="92373387">Tawag sa telepono sa isang taong abala</string>
-	<string name="content_description_profile_picture" state="needs_review" hash="-1074340378">Larawan sa profile</string>
-	<string name="ime_action_rename" state="needs_review" hash="-1795678977">Palitan ng pangalan</string>
 	<string name="pref_storage_explorer_title" state="needs_review" hash="735816049">Tagahanap ng panloob na imbakan</string>
 	<string name="pref_storage_explorer_summary" state="needs_review" hash="-1991214388">Galugarin ang panloob na imbakan ng iyong aplikasyon ng Olvid!</string>
 	<string name="activity_title_storage_explorer" state="needs_review" hash="735816049">Tagahanap ng panloob na imbakan</string>
@@ -1052,6 +1075,8 @@
 	<string name="pref_image_text_recognition_title" state="needs_review" hash="1877261687">Kilalanin at i-index ang teksto sa mga larawan</string>
 	<string name="pref_image_text_recognition_summary" state="needs_review" hash="1217699919">Pinapayagan kang maghanap at kopyahin ang teksto na matatagpuan sa mga larawan na naka-attach. Maaaring gumamit ito ng maraming resources sa mga low-end na device: i-disable ito kung hindi mo ito kailangan.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">Hindi maipakita ang larawan</string>
+	<string name="label_unsupported_image_format" state="needs_review" hash="-1487560676">Hindi sinusuportahang format ng larawan</string>
+	<string name="label_unsupported_video_format" state="needs_review" hash="2131303733">Hindi sinusuportahang format ng video</string>
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">Kinakailangan ang pag-sign in sa iyong cloud provider.</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Nai-configure mo ang Olvid upang gumamit ng awtomatikong pag-backup sa isang cloud provider, ngunit nag-expire na ang iyong session. Kailangan mong mag-sign in muli sa provider na ito.\n\nKung hindi mo na gustong gumamit ng awtomatikong pag-backup, maaari mo itong i-disable sa Mga Setting ng App. Tandaan na ang awtomatikong pag-backup ang tanging paraan upang maiwasan ang pagkawala ng iyong mga contact kung mawala o masira ang iyong device.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Mag-sign in</string>
@@ -1146,7 +1171,7 @@
 	<string name="dialog_title_hide_profile" state="needs_review" hash="-1488467848">Itago ang profile?</string>
 	<string name="dialog_message_hide_profile" state="needs_review" hash="472022286">Itinatago mo na ang isang profile ng Olvid. Kung makalimutan mo ang password na pinili mo para sa profile na ito, permanenteng mawawala ang iyong access dito.\nSigurado ka bang gusto mong ipagpatuloy?</string>
 	<string name="menu_action_mute_profile_notifications" state="needs_review" hash="676556801">Patayin ang mga notipikasyon</string>
-	<string name="dialog_message_mute_all_profile_switch_label" state="needs_review" hash="1172300745">I-mute ang buong profile sa halip na ang usapang ito</string>
+	<string name="dialog_message_mute_all_profile_switch_label" state="needs_review" hash="1172300745">I-mute ang buong profile sa halip na ang pag-uusap na ito</string>
 	<string name="dialog_message_mute_except_mentioned" state="needs_review" hash="635884418">Abisuhan mo ako kapag nabanggit ang pangalan ko</string>
 	<string name="pref_hidden_profile_close_policy_title" state="needs_review" hash="-279332062">Patakaran sa pagtatago ng profile kapag isinasara</string>
 	<string name="text_close_profile_instantly" state="needs_review" hash="-710679740">isara agad ang profile</string>
@@ -1180,9 +1205,9 @@
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">Tanggalin ang mensahe bilang tugon</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">Nagpapakita na naka-mute ang mga notification para sa profile na ito.</string>
 	<string name="button_label_create_a_profile" state="needs_review" hash="-1568207484">Gumawa ng isang profile</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="1428471064">Ang tagapagbigay ng pagkakakilanlan ng iyong kumpanya ay matagumpay na na-configure. Pindutin ang button na \"mag-authenticate\" sa ibaba upang mag-authenticate dito at makuha ang iyong personal na impormasyon.</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="1823898406">Ang tagapagbigay ng pagkakakilanlan ng iyong kumpanya ay matagumpay na na-configure. Pindutin ang button na \"gamitin ang magic link\" sa ibaba upang makuha ang iyong personal na impormasyon.</string>
-	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="1340457300">Maligayang pagdating sa Olvid.\n\nAng pag-install na ito ay pinamamahalaan ng iyong kumpanya at na-configure upang gumamit ng isang identity provider. Pindutin ang button na \"authenticate\" sa ibaba upang mag-authenticate dito at makuha ang iyong personal na impormasyon.\n\nKung ginamit mo na ang Olvid at nais mong ibalik ang iyong mga key at contact mula sa isang backup, pindutin ang \"restore a backup\".</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="-2030851622">Ang identity provider ng iyong organisasyon ay matagumpay na na-configure. Pindutin ang button na \"authenticate\" sa ibaba upang mag-authenticate dito at kunin ang iyong personal na impormasyon.</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="903193568">Ang identity provider ng iyong organisasyon ay matagumpay na na-configure. Pindutin ang button na \"gamitin ang magic link\" sa ibaba upang makuha ang iyong personal na impormasyon.</string>
+	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="-5109440">Ang pag-install na ito ay pinamamahalaan ng iyong organisasyon at na-configure upang gumamit ng isang identity provider. Pindutin ang button na \"%1$s\" sa ibaba upang mag-authenticate dito at kunin ang iyong personal na impormasyon.</string>
 	<string name="button_label_see_details" state="needs_review" hash="238834473">Tingnan ang mga detalye</string>
 	<string name="link_label_invitation_url" state="needs_review" hash="744905192">Magdagdag ng kontak</string>
 	<string name="link_label_configuration_url" state="needs_review" hash="-441435162">Mag-import ng configuration o lisensya</string>
@@ -1223,6 +1248,33 @@
 	<string name="label_attach_timer" state="needs_review" hash="-1527208333">Pansamantalang mensahe</string>
 	<string name="label_attach_camera" state="needs_review" hash="-1123080444">Kumuha ng larawan</string>
 	<string name="label_attach_video" state="needs_review" hash="1626268086">Magrekord ng isang video</string>
+	<string name="label_attach_scan" state="needs_review" hash="1128596739">I-scan ang isang dokumento</string>
+	<string name="label_scan_page_count" state="needs_review" hash="1987610035">Pahina %1$d ng %2$d</string>
+	<string name="button_label_scan_add_page" state="needs_review" hash="1724653886">Magdagdag ng pahina</string>
+	<string name="button_label_scan_crop" state="needs_review" hash="-292939300">Gupitin</string>
+	<string name="button_label_scan_rotate" state="needs_review" hash="807341684">Iikot</string>
+	<string name="button_label_scan_auto_crop" state="needs_review" hash="1502815262">Awtomatiko</string>
+	<string name="button_label_scan_full_image" state="needs_review" hash="1366902062">Buong larawan</string>
+	<string name="label_scan_filter_original" state="needs_review" hash="-817276190">Orihinal</string>
+	<string name="label_scan_filter_enhanced" state="needs_review" hash="851648098">Pinahusay</string>
+	<string name="label_scan_filter_grayscale" state="needs_review" hash="-695463257">Kulay abo</string>
+	<string name="label_scan_filter_black_and_white" state="needs_review" hash="1668578691">Itim at puti</string>
+	<string name="dialog_title_discard_scan" state="needs_review" hash="-94972780">Gusto mo bang kanselahin ang pag-scan na ito?</string>
+	<string name="dialog_message_discard_scan" state="needs_review" hash="-1145223011">Ang mga pahinang na-scan ay mawawala.</string>
+	<string name="toast_message_scan_failed" state="needs_review" hash="512858351">Hindi maaaring gumawa ng PDF</string>
+	<string name="button_label_scan_retake" state="needs_review" hash="-439420481">Subukan muli</string>
+	<string name="button_label_scan_enhance" state="needs_review" hash="-1842671012">Pagbutihin</string>
+	<string name="button_label_scan_filters" state="needs_review" hash="-1898368294">Mga filter</string>
+	<string name="button_label_scan_crop_rotate" state="needs_review" hash="-1750423698">Gupitin at paikutin</string>
+	<string name="button_label_scan_discard" state="needs_review" hash="-248729677">Burahin ang pag-scan</string>
+	<string name="label_scan_mode_manual" state="needs_review" hash="-751509695">Manu-mano</string>
+	<string name="label_scan_mode_auto" state="needs_review" hash="315272314">Awtomatikong pagkuha</string>
+	<string name="label_scan_hint" state="needs_review" hash="289920901">Ilagay ang dokumento sa loob ng frame</string>
+	<string name="label_scan_hint_hold_still" state="needs_review" hash="584896298">Huwag gumalaw…</string>
+	<string name="button_label_scan_flash" state="needs_review" hash="775381504">Flash</string>
+	<string name="label_scan_camera_permission" state="needs_review" hash="-1855763825">Payagan ang Olvid na gamitin ang camera upang i-scan ang mga dokumento. Maaari mo pa ring i-import ang mga larawan mula sa iyong gallery.</string>
+	<string name="button_label_scan_file_name" state="needs_review" hash="2098556706">Pangalan ng file</string>
+	<string name="dialog_title_scan_file_name" state="needs_review" hash="1332508838">Pangalan ng PDF file</string>
 	<string name="pref_font_scale" state="needs_review" hash="1773040591">Laki ng font</string>
 	<string name="pref_text_font_scale_0_75" state="needs_review" hash="-1963894407">Maliit (75%)</string>
 	<string name="pref_text_font_scale_0_9" state="needs_review" hash="-708054676">Maliit (90%)</string>
@@ -1261,7 +1313,7 @@
 	<string name="label_color" state="needs_review" hash="-907776484">Kulay</string>
 	<string name="hint_widget_label" state="needs_review" hash="-298521469">Pamagat ng widget</string>
 	<string name="label_show_olvid_badge" state="needs_review" hash="732863458">Ipakita ang badge ng Olvid</string>
-	<string name="label_tap_to_choose_discussion" state="needs_review" hash="-1162539627">I-tap upang pumili ng isang usapan</string>
+	<string name="label_tap_to_choose_discussion" state="needs_review" hash="-1162539627">I-tap upang pumili ng isang pag-uusap</string>
 	<string name="dialog_title_send_predefined_message" state="needs_review" hash="1737830167">Ipadala ba ang nakatakdang mensahe?</string>
 	<string name="pref_title_widgets" state="needs_review" hash="1824870688">Mga widget</string>
 	<string name="explanation_no_widget" state="needs_review" hash="-2143370910">Wala ka pang ginawang widget.</string>
@@ -1274,6 +1326,9 @@
 	<string name="your_message" state="needs_review" hash="1739533147">iyong mensahe</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d reaksyon sa: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s ay nag-react sa %2$s</string>
+	<string name="menu_action_remove_your_reaction" state="needs_review" hash="-1609298248">Alisin ang iyong reaksyon</string>
+	<string name="menu_action_add_to_favorites" state="needs_review" hash="-1933720211">Idagdag sa mga paborito</string>
+	<string name="menu_action_remove_from_favorites" state="needs_review" hash="1796304724">Alisin sa mga paborito</string>
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Maglagay ng emoji</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Impormasyon para sa pag-debug</string>
 	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">Bilang ng mga device:</string>
@@ -1380,7 +1435,7 @@
 	<string name="label_swipe_reply" state="needs_review" hash="-410287287">Sumagot</string>
 	<string name="label_swipe_select" state="needs_review" hash="103682895">Piliin</string>
 	<string name="menu_action_discussion_pin" state="needs_review" hash="554322472">I-pin ang pag-uusap na ito</string>
-	<string name="menu_action_discussion_unpin" state="needs_review" hash="1464070527">Alisin ang pagkakapin sa usapang ito</string>
+	<string name="menu_action_discussion_unpin" state="needs_review" hash="1464070527">Alisin ang pagkakapin sa pag-uusap na ito</string>
 	<string name="pref_discussion_pin_title" state="needs_review" hash="554322472">I-pin ang pag-uusap na ito</string>
 	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">Ang mga naka-pin na pag-uusap ay palaging mananatili sa itaas ng iyong listahan ng pag-uusap.</string>
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Laki ng display</string>
@@ -1389,6 +1444,14 @@
 	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Nakahanda na\nmaaaring basahin lamang</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Tagapamahala</string>
 	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Nakahanda pa\nang admin</string>
+	<string name="label_moderator" state="needs_review" hash="767421225">Tagapamahala</string>
+	<string name="label_pending_moderator" state="needs_review" hash="1955900662">Naghahantay ng pag-apruba mula sa moderator</string>
+	<string name="dialog_title_group_roles" state="needs_review" hash="1155086227">Mga tungkulin sa grupo</string>
+	<string name="content_description_group_roles" state="needs_review" hash="-449063250">Paliwanag tungkol sa mga tungkulin sa grupo</string>
+	<string name="explanation_group_role_admin" state="needs_review" hash="731519662">Maaaring magdagdag at mag-alis ng mga miyembro sa grupo.</string>
+	<string name="explanation_group_role_moderator" state="needs_review" hash="2037600722">Maaaring burahin ang mga mensahe mula sa kahit sinong user.</string>
+	<string name="explanation_group_role_read_only" state="needs_review" hash="1017523379">Makikita ang usapan, makapag-react sa mga mensahe at makasagot sa mga poll, ngunit hindi makakapag-post ng mga mensahe.</string>
+	<string name="explanation_group_role_pending" state="needs_review" hash="-843291456">Naimbitahan sa grupo ngunit hindi pa tinatanggap ang imbitasyon. Ang mga mensaheng ipinadala sa pagitan ay ipapadala sa kanila kapag tinanggap na nila ito.</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Hindi maipakita ang pangalan ng gumagamit na ito.</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Hindi pinangalanang grupo</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Mga abiso sa pag-uusap</string>
@@ -1396,7 +1459,7 @@
 	<string name="pref_discussion_category_message_notifications_title" state="needs_review" hash="-466271953">Mga abiso sa mensahe</string>
 	<string name="pref_discussion_category_call_notifications_title" state="needs_review" hash="-1776813002">Mga abiso para sa mga papasok na tawag</string>
 	<string name="dialog_title_pick_led_color" state="needs_review" hash="174987784">Pumili ng kulay ng LED</string>
-	<string name="pref_discussion_category_locked_explanation_title" state="needs_review" hash="-661795104">Nakasara na ang usapan</string>
+	<string name="pref_discussion_category_locked_explanation_title" state="needs_review" hash="-661795104">Nakasara na ang pag-uusap</string>
 	<string name="pref_discussion_category_locked_explanation_summary" state="needs_review" hash="-2027915932">May ilang mga setting na hindi magagamit para sa mga naka-lock na pag-uusap.</string>
 	<string name="pref_discussion_message_custom_notification_title" state="needs_review" hash="-625696878">Mga pasadyang abiso ng mensahe para sa pag-uusap na ito</string>
 	<string name="pref_discussion_call_custom_notification_title" state="needs_review" hash="2074412984">Mga pasadyang abiso ng tawag para sa pag-uusap na ito</string>
@@ -1518,6 +1581,10 @@
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">Ginagawa ang grupo</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">Bagong grupo</string>
 	<string name="label_group_type" state="needs_review" hash="498463258">Uri ng grupo</string>
+	<string name="label_existing_discussions" state="needs_review" hash="-2089160663">Mga kasalukuyang pag-uusap</string>
+	<string name="label_last_message_date" state="needs_review" hash="1218222521">Pinakahuling mensahe %1$s</string>
+	<string name="button_label_open" state="needs_review" hash="-2066377003">Buksan</string>
+	<string name="button_label_create_a_new_group" state="needs_review" hash="-1073202815">Gumawa ng bagong grupo</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">Pamantayan</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">Lahat ng miyembro ng grupo ay maaaring mag-imbita ng mga bagong miyembro.</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">kontrolado</string>
@@ -1531,6 +1598,8 @@
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Hindi ka na isang tagapamahala ng grupo</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Pinapayagan ka na ngayong mag-post ng mga mensahe</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-930933808">Hindi ka maaaring magpadala ng mga mensahe dito.</string>
+	<string name="text_you_became_moderator" state="needs_review" hash="-609725743">Ikaw na ngayon ang tagapamahala ng grupo</string>
+	<string name="text_you_are_no_longer_moderator" state="needs_review" hash="1396461107">Hindi ka na isang tagapamahala ng grupo</string>
 	<string name="label_pending" state="needs_review" hash="1975294811">Nakahandusay</string>
 	<string name="pref_app_language_title" state="needs_review" hash="-1748962099">Wika ng app</string>
 	<string name="pref_text_default_device_language" state="needs_review" hash="-1062620207">Default na wika ng device</string>
@@ -1557,7 +1626,7 @@
 	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">\"• Kinakailangan ang lock screen: \"</string>
 	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">\"\u2023 I-reset ang token ng lock screen: \"</string>
 	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">\"\u2023 Awtomatikong i-download ang mga nakalakip na file mula sa mga na-archive na pag-uusap: \"</string>
-	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">\"• I-unarchive ang usapan sa abiso: \"</string>
+	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">\"• I-unarchive ang pag-uusap sa abiso: \"</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">\"• Natanggap na ang preview ng link: \"</string>
 	<string name="text_setting_link_preview_outbound" state="needs_review" hash="744187602">\"• Ipinadala ang preview ng link: \"</string>
 	<string name="text_setting_send_read_receipt" state="needs_review" hash="1359371222">\"\u2023 Magpadala ng mga resibo ng pagbasa: \"</string>
@@ -1631,6 +1700,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_title" state="needs_review" hash="-434788963">Huwag paganahin ang mga abiso tungkol sa pagbabago ng sertipiko para sa mga preview ng link</string>
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">I-enable ang opsyon na ito upang huwag paganahin ang pagtuklas ng pagbabago sa sertipiko kapag kinukuha ang preview ng isang link. Maaaring magpakita ang ilang mga site ng ibang sertipiko sa bawat koneksyon, at maaari kang makatanggap ng madalas na mga notification kung naka-off ang opsyon na ito.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Gamitin ang lumang bersyon ng ZXing library para sa pag-scan ng QR code.</string>
+	<string name="pref_use_in_house_document_scanner_title" state="needs_review" hash="1552486206">Gamitin ang document scanner ng Olvid</string>
+	<string name="pref_use_in_house_document_scanner_summary" state="needs_review" hash="-2092532938">Bilang default, ang mga dokumento ay ini-scan gamit ang ML Kit bilang bahagi ng mga serbisyo ng Google Play. I-enable ang opsyon na ito upang gamitin ang built-in na scanner ng Olvid.</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">Bilang default, ginagamit ang ML Kit para sa pag-scan ng QR code. I-enable ang opsyon na ito kung mayroon kang mga isyu sa pag-scan ng mga QR code sa loob ng Olvid.</string>
 	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Gamitin ang panloob na PDF viewer</string>
 	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">Bilang default, ang mga PDF attachment ay binubuksan sa isang (simpleng) panloob na viewer. I-disable ang opsyon na ito upang gumamit ng panlabas na viewer sa halip.</string>
@@ -1638,7 +1709,7 @@
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Kagamitan %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">Ang aparatong ito</string>
 	<string name="menu_action_rename_device" state="needs_review" hash="43131083">Palitan ang pangalan ng device</string>
-	<string name="menu_action_trust_device" state="needs_review" hash="360435227">Pagkatiwalaan ang aparato</string>
+	<string name="menu_action_trust_device" state="needs_review" hash="105728494">Nakikilala ko ang device na ito</string>
 	<string name="menu_action_remove_device" state="needs_review" hash="-1485256427">Alisin ang device</string>
 	<string name="menu_action_refresh_device_list" state="needs_review" hash="1430227802">I-refresh ang listahan ng mga device</string>
 	<string name="menu_action_recreate_channel" state="needs_review" hash="837900266">Muling likhain ang ligtas na channel</string>
@@ -1706,8 +1777,9 @@
 	<string name="button_label_add_device_xxx" state="needs_review" hash="-1479212354">Idagdag ang device na \"%1$s\"</string>
 	<string name="notification_title_device_trust" state="needs_review" hash="-1568042777">Bagong aparato: \"%1$s\"</string>
 	<string name="notification_title_unnamed_device_trust" state="needs_review" hash="1704207127">Bagong aparato</string>
-	<string name="notification_message_device_trust" state="needs_review" hash="753501294">Isang bagong device ang idinagdag sa isa sa iyong mga profile ng Olvid.</string>
-	<string name="notification_action_device_trust" state="needs_review" hash="1450001608">Pagkatiwalaan ang aparatong ito</string>
+	<string name="notification_message_device_trust" state="needs_review" hash="-1646747013">May bagong device na idinagdag sa isa sa iyong mga profile ng Olvid. Kung hindi ito ikaw, alisin ito sa iyong mga device.</string>
+	<string name="notification_action_device_trust" state="needs_review" hash="936727529">Oo, ako ito</string>
+	<string name="notification_action_device_see_devices" state="needs_review" hash="-1832505809">Mga device ko</string>
 	<string name="notification_channel_device_name" state="needs_review" hash="1347557771">Pamamahala ng mga aparato</string>
 	<string name="notification_channel_device_description" state="needs_review" hash="-36703170">Mga abiso tungkol sa iyong mga device</string>
 	<string name="notification_title_device_expiration" state="needs_review" hash="202400638">Pag-deactivate ng \"%1$s\"</string>
@@ -1805,7 +1877,7 @@
 	<string name="dialog_title_invite_all_group_members" state="needs_review" hash="2130589049">I-imbita ba ang lahat ng miyembro ng grupo?</string>
 	<string name="toast_message_no_member_can_be_invited" state="needs_review" hash="-297427783">Walang miyembro ng grupo na maaaring imbitahan.</string>
 	<string name="pref_retain_remote_deleted_messages_title" state="needs_review" hash="-1838732805">Subaybayan ang mga mensaheng tinanggal mula sa malayo</string>
-	<string name="pref_retain_remote_deleted_messages_summary" state="needs_review" hash="1999984049">Kapag aktibo, ang mga mensaheng \"tinanggal sa lahat ng device\" ng ibang tao ay nag-iiwan ng marka sa usapan.</string>
+	<string name="pref_retain_remote_deleted_messages_summary" state="needs_review" hash="1999984049">Kapag aktibo, ang mga mensaheng \"tinanggal sa lahat ng device\" ng ibang tao ay nag-iiwan ng marka sa pag-uusap.</string>
 	<string name="dialog_title_delete_remote_deleted_messages" state="needs_review" hash="1587856321">Burahin ba ang lahat ng mga tag na nagpapakita na may mga mensaheng nabura na sa malayo?</string>
 	<string name="button_label_do_nothing" state="needs_review" hash="112132690">Wala kang gagawin</string>
 	<string name="menu_action_go_to_message" state="needs_review" hash="215195399">Pumunta sa mensahe</string>
@@ -2080,6 +2152,8 @@
 	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">Kinakailangan ang isang password upang buksan ang PDF file na ito.</string>
 	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">Password</string>
 	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">Maling password</string>
+	<string name="content_description_previous_match" state="needs_review" hash="-124264476">Nakaraang resulta</string>
+	<string name="content_description_next_match" state="needs_review" hash="-405381756">Susunod na resulta</string>
 	<string name="label_poll_create" state="needs_review" hash="-1677246175">Gumawa ng isang botohan</string>
 	<string name="label_poll_question" state="needs_review" hash="-1615603188">Tanong</string>
 	<string name="hint_poll_question" state="needs_review" hash="1961289317">Magtanong</string>
@@ -2110,6 +2184,7 @@
 	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">Wala pang sagot</string>
 	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">Papalapit na ang pag-deactivate ng iyong device.</string>
 	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">Pamahalaan ang aking mga device</string>
+	<string name="tip_expiring_current_device_title" state="needs_review" hash="-2044212270">Ang aparatong ito ay malapit nang hindi paganahin</string>
 	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">Naka-offline na aparato</string>
 	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">Ang isa sa iyong mga device ay hindi online sa loob ng **mahigit 30 araw**.\nKung hindi mo na ito ginagamit, inirerekomenda naming **tanggalin ito** upang maiwasan ang mga problema sa pag-synchronize.</string>
 	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">Pamahalaan ang aking mga device</string>
@@ -2185,8 +2260,15 @@
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Gamitin ang \"magic link\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Hindi balidong magic link</string>
 	<string name="label_hanged_up" state="needs_review" hash="-1516413384">Natapos na ang tawag</string>
-	<string name="store_link_need_licenses" state="needs_review" hash="-1212508527">Kailangan mo ba ng mga subscription para sa iyong grupo?</string>
 	<string name="store_link_olvid_store" state="needs_review" hash="-1825630369">Bisitahin ang Olvid Store</string>
+	<string name="store_link_need_more_options" state="needs_review" hash="-839181230">Kailangan mo pa ba ng ibang opsyon?</string>
+	<string name="button_label_check_all_offers_olvid_store" state="needs_review" hash="361882901">Tingnan ang lahat ng aming alok sa Olvid Store</string>
+	<string name="label_store_offer_individual" state="needs_review" hash="-1969313106">Indibidwal</string>
+	<string name="label_store_offer_individual_description" state="needs_review" hash="368977236">Isang personal na lisensya, para lamang sa iyo.</string>
+	<string name="label_store_offer_family" state="needs_review" hash="-2103729206">Pamilya</string>
+	<string name="label_store_offer_family_description" state="needs_review" hash="-1487232440">Isang set ng 6 lisensya para sa iyo at sa iyong pamilya.</string>
+	<string name="label_store_offer_team" state="needs_review" hash="-421568242">Grupo</string>
+	<string name="label_store_offer_team_description" state="needs_review" hash="687093077">Maraming lisensya para ipamahagi sa iyong koponan.</string>
 	<string name="toast_message_reminder_set" state="needs_review" hash="-961055414">Itinakdang paalala</string>
 	<string name="dialog_title_keycloak_authentication_impossible" state="needs_review" hash="325273853">Hindi posible ang pagpapatunay</string>
 	<string name="dialog_message_keycloak_authentication_impossible" state="needs_review" hash="-2031322232">Kasalukuyang pinamamahalaan ng iyong organisasyon ang iyong profile at kinakailangan ang muling pagpapatunay. Gayunpaman, mukhang walang available na suportadong paraan ng pagpapatunay.\nMangyaring makipag-ugnayan sa iyong administrator para sa karagdagang detalye.</string>
@@ -2196,7 +2278,7 @@
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Itigil ang kasalukuyang paglilipat?</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Kasulukuyang isinasagawa ang paglilipat ng kasaysayan. Nais mo bang ihinto ito?</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Itigil ang paglilipat</string>
-	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Naghihintay na sumali sa diskusyong ito</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Naghihintay na sumali sa pag-uusap na ito</string>
 	<string name="label_your_other_device" state="needs_review" hash="-339632056">Iyong iba pang device</string>
 	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">nais ilipat ang iyong kasaysayan ng pag-uusap sa aparatong ito</string>
 	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">\"%1$s\" ay gustong ilipat ang iyong kasaysayan ng pag-uusap sa aparatong ito.</string>
@@ -2242,7 +2324,7 @@
 	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Kumpletong paglilipat. Kasama ang lahat ng mensahe at mga kalakip.</string>
 	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">I-export ang iyong kasaysayan ng pag-uusap bilang isang .zip file. Maaari mo itong i-import sa ibang device ng iyong profile sa ibang pagkakataon **%1$s**.\n\nMaaari mo ring i-unzip ang file na ito upang **ipakita ang iyong kasaysayan ng pag-uusap sa isang web page**.</string>
 	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Gumawa ng .zip file</string>
-	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d na mga talakayan at %2$d na mga mensahe</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d na mga pag-uusap at %2$d na mga mensahe</string>
 	<string name="label_computing" state="needs_review" hash="1393495921">Kinukuwenta…</string>
 	<string name="label_total_size" state="needs_review" hash="-788411929">Kabuuang laki: %1$s</string>
 	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Protektahan ang iyong pag-export</string>
@@ -2298,8 +2380,6 @@
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Sinusuri ang nilalaman</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Sinusuri ang mga ineksport na pag-uusap</string>
 	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">Nagkaroon ng error habang kinukuha ang OpenStreetMap style file.</string>
-	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Hindi available ang mga subscription sa loob ng app</string>
-	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Ang bersyon ng Olvid na iyong in-install ay hindi kasama ang Google Billing library at hindi sinusuportahan ang mga pagbili sa loob ng app.\n\nPara sa karagdagang impormasyon, mangyaring makipag-ugnayan sa amin sa **feedback@olvid.io**.</string>
 	<string name="ftux_next" state="needs_review" hash="1158639077">Susunod</string>
 	<string name="ftux_start" state="needs_review" hash="646298532">Magsimula</string>
 	<string name="ftux_page_indicator" state="needs_review" hash="1987610035">Pahina %1$d ng %2$d</string>
@@ -2309,7 +2389,7 @@
 	<string name="ftux_page_private_body" state="needs_review" hash="-590644231">Sa %1$s, ikaw ang pumipili kung sino ang gusto mong kausapin. Walang spam, walang mga rekomendasyon, walang hindi kinakailangang abiso, at walang mensahe mula sa mga estranghero.\n\nWalang makakapag-ugnay sa iyo nang walang iyong pahintulot.\n\nAng %1$s ay ang iyong digital na mundo.</string>
 	<string name="ftux_page_everyone_title" state="needs_review" hash="1506796386">Pagmemensahe para sa <b>lahat</b></string>
 	<string name="ftux_page_everyone_body" state="needs_review" hash="-586100377">Nasaan ka man, ang %1$s ay nag-aalok sa iyo ng pinakamahusay na seguridad. Hindi kailangan ng email o numero ng telepono.\n\nHindi nanghihingi ng anumang impormasyon tungkol sa iyo ang %1$s, at binabago nito ang lahat.</string>
-	<string name="ftux_page_protect_title" state="needs_review" hash="1969120191">Pinoprotektahan ka ng Olvid. Pinoprotektahan ng Olvid ang mga taong mahalaga sa iyo.</string>
+	<string name="ftux_page_protect_title" state="needs_review" hash="1969120191"><b>Pinoprotektahan</b> ka ng Olvid. Pinoprotektahan ng Olvid ang mga taong mahalaga sa iyo.</string>
 	<string name="ftux_page_protect_body" state="needs_review" hash="881847930">Hindi lamang ito isang pangako — nagbibigay ang %1$s ng kriptograpikong patunay.\n\nKahit na idagdag mo ang iyong mga contact nang malayo o harapan, ang iyong mga pag-uusap ay palaging tunay at naka-encrypt mula sa dulo hanggang sa dulo.</string>
 	<string name="ftux_page_pricing_title" state="needs_review" hash="-1948277889">Isang <b>malinaw</b> na modelo ng negosyo</string>
 	<string name="ftux_page_pricing_body" state="needs_review" hash="-1064278870">Hindi ginagamit ng %1$s ang iyong personal na datos para kumita — dahil wala itong hinihingi!\n\nAng libre ay libre. Ang may bayad, may presyo.</string>

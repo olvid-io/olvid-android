@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Salah satu perangkat Anda akan kedaluwarsa dan dinonaktifkan dalam **kurang dari %1$d hari**.\nAnda dapat membeli langganan **Olvid+** untuk menjaganya tetap aktif.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Salah satu perangkat Anda akan kedaluwarsa dan dinonaktifkan dalam **kurang dari %1$d hari**.\nAnda dapat membeli langganan **Olvid+** untuk menjaganya tetap aktif.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Perangkat ini akan kedaluwarsa dan dinonaktifkan dalam **kurang dari %1$d hari**.\nAnda dapat membeli langganan **Olvid+** untuk tetap mengaktifkannya.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Perangkat ini akan kedaluwarsa dan dinonaktifkan dalam **kurang dari %1$d hari**.\nAnda dapat membeli langganan **Olvid+** untuk tetap mengaktifkannya.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s bergabung dengan grup</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s bergabung dengan grup</item>
@@ -79,19 +83,19 @@
 		<item quantity="other" state="needs_review" hash="1022571360">%1$d kontak</item>
 	</plurals>
 	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="1772966333">Diskusi telah diarsipkan</item>
-		<item quantity="other" state="needs_review" hash="1402495414">%1$d diskusi diarsipkan</item>
+		<item quantity="one" state="needs_review" hash="1772966333">Percakapan telah diarsipkan</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d percakapan diarsipkan</item>
 	</plurals>
 	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1312483800">Diskusi tidak diarsipkan</item>
-		<item quantity="other" state="needs_review" hash="-2093736213">%1$d diskusi yang tidak lagi diarsipkan</item>
+		<item quantity="one" state="needs_review" hash="-1312483800">Percakapan tidak diarsipkan</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d percakapan yang tidak lagi diarsipkan</item>
 	</plurals>
 	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-2045500103">Pesan dihapus dari daftar simpanan</item>
 		<item quantity="other" state="needs_review" hash="204728896">%1$d pesan dihapus dari daftar simpanan</item>
 	</plurals>
 	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-716893580">Hapus diskusi yang dipilih?</item>
+		<item quantity="one" state="needs_review" hash="-716893580">Hapus percakapan yang dipilih?</item>
 		<item quantity="other" state="needs_review" hash="-15840526">Hapus percakapan yang dipilih?</item>
 	</plurals>
 	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -123,12 +127,12 @@
 		<item quantity="other" state="needs_review" hash="-1558931055">Anda akan **permanen** menghapus %1$d percakapan dan semua pesan yang terkandung di dalamnya untuk **semua** peserta percakapan tersebut. Pastikan ini adalah yang Anda inginkan.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">Anda akan mengundang setiap anggota grup yang memiliki saluran dengan Anda (saat ini 1 anggota) ke diskusi pribadi.\nApakah Anda ingin melanjutkan?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">Anda akan mengundang setiap anggota grup yang memiliki saluran dengan Anda (saat ini %1$d anggota) ke diskusi pribadi.\nApakah Anda ingin melanjutkan?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">Anda akan mengundang setiap anggota grup yang memiliki saluran dengan Anda (saat ini 1 anggota) ke percakapan pribadi.\nApakah Anda ingin melanjutkan?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Anda akan mengundang setiap anggota grup yang memiliki saluran dengan Anda (saat ini %1$d anggota) ke percakapan pribadi.\nApakah Anda ingin melanjutkan?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">Satu anggota grup dapat diundang ke diskusi pribadi</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d anggota grup dapat diundang ke diskusi pribadi</item>
+		<item quantity="one" state="needs_review" hash="-127723614">Satu anggota grup dapat diundang ke percakapan pribadi</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d anggota grup dapat diundang ke percakapan pribadi</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 grup umum</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Tambahkan ke grup %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Tambahkan ke grup %1$d</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Anda sudah memiliki percakapan dengan peserta ini.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Anda sudah memiliki %1$d percakapan dengan peserta ini.</item>
 	</plurals>
 </resources>

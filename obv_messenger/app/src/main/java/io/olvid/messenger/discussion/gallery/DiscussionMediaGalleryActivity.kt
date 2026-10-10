@@ -642,6 +642,7 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                                                         ),
                                                     model = imageUri,
                                                     placeholder = ColorPainter(colorResource(id = R.color.grey)),
+                                                    error = ColorPainter(colorResource(id = R.color.grey)),
                                                     imageLoader = imageLoader,
                                                     contentScale = ContentScale.Crop,
                                                     contentDescription = item.fyleAndStatus.fyleMessageJoinWithStatus.fileName

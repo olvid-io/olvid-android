@@ -23,6 +23,8 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.res.colorResource
+import io.olvid.messenger.R
 
 /**
  * Makes a Material ripple the default [LocalIndication] for everything in [content].
@@ -32,6 +34,11 @@ import androidx.compose.runtime.CompositionLocalProvider
  * `indication = ripple()` explicitly. Wrapping a screen root in this gives every
  * `clickable`/`selectable`/`toggleable` below it a ripple for free.
  *
+ * The ripple color is fixed to `almostBlack` (dark in light mode, light in dark
+ * mode) rather than following `LocalContentColor`: most screens apply no Material
+ * theme, so the content color defaults to black and a default ripple would be
+ * invisible on dark surfaces. Material3 components keep their own ripple.
+ *
  * Call sites keep full control: passing an explicit `indication` (including
  * `indication = null` for tap-to-dismiss surfaces that should not ripple) still
  * wins over this default.
@@ -39,7 +46,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 @Composable
 fun ProvideOlvidRipple(content: @Composable () -> Unit) {
     CompositionLocalProvider(
-        LocalIndication provides ripple(),
+        LocalIndication provides ripple(color = colorResource(R.color.almostBlack)),
         content = content,
     )
 }

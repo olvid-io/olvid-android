@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">您的其中一台设备将在**少于%1$d天**内过期并停用。\n您可以购买**Olvid+**订阅以使其保持活跃。</item>
 		<item quantity="other" state="needs_review" hash="-574658149">您的其中一台设备将在 **少于 %1$d 天** 后过期并停用。\n您可以购买 **Olvid+** 订阅以使其保持活跃。</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">此设备将在**%1$d天内**到期并停用。\n您可以购买**Olvid+**订阅以保持其激活状态。</item>
+		<item quantity="other" state="needs_review" hash="993103846">此设备将在**%1$d天内**到期并停用。\n您可以购买**Olvid+**订阅以保持其激活状态。</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s 加入了群组</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s 加入了群组</item>
@@ -80,11 +84,11 @@
 	</plurals>
 	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1772966333">对话已归档</item>
-		<item quantity="other" state="needs_review" hash="1402495414">已归档 %1$d 个讨论</item>
+		<item quantity="other" state="needs_review" hash="1402495414">已归档 %1$d 个对话</item>
 	</plurals>
 	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1312483800">对话已取消归档</item>
-		<item quantity="other" state="needs_review" hash="-2093736213">已恢复 %1$d 个讨论</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">已恢复 %1$d 个对话</item>
 	</plurals>
 	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-2045500103">消息已取消收藏</item>
@@ -100,11 +104,11 @@
 	</plurals>
 	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-931157230">您确定要删除选定的对话以及其中包含的所有消息吗？\n此操作无法撤销。</item>
-		<item quantity="other" state="needs_review" hash="-1815739098">您真的要删除选定的 %1$d 讨论和其中包含的所有消息吗？\n此操作无法撤销。</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">您真的要删除选定的 %1$d 对话和其中包含的所有消息吗？\n此操作无法撤销。</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-2139168692">您想如何删除选定的对话以及其中包含的所有消息？\n此操作无法撤销。</item>
-		<item quantity="other" state="needs_review" hash="-1430564144">您希望如何删除选定的 %1$d 会话以及其中包含的所有消息？\n此操作无法撤销。</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">您希望如何删除选定的 %1$d 对话以及其中包含的所有消息？\n此操作无法撤销。</item>
 	</plurals>
 	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-947341357">您真的要删除选定的消息吗？\n此操作无法撤销。</item>
@@ -123,12 +127,12 @@
 		<item quantity="other" state="needs_review" hash="-1558931055">您即将**永久**删除 %1$d 组对话以及其中包含的消息，对这些对话中的**所有人**可见。请确保您确实想这样做。</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">您即将邀请您拥有频道（当前 1 名成员）的每个群组成员参与私人讨论。\n您想继续吗？</item>
-		<item quantity="other" state="needs_review" hash="-994717142">您即将邀请您拥有频道（目前 %1$d 位成员）的每个群组成员参与私人讨论。\n您要继续吗？</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">您即将邀请您拥有频道（当前 1 名成员）的每个群组成员参与私人对话。\n您想继续吗？</item>
+		<item quantity="other" state="needs_review" hash="-994717142">您即将邀请您拥有频道（目前 %1$d 位成员）的每个群组成员参与私人对话。\n您要继续吗？</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">可以邀请 1 名群组成员参与私人讨论</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d 群组成员可以被邀请到私密讨论</item>
+		<item quantity="one" state="needs_review" hash="-127723614">可以邀请 1 名群组成员参与私人对话</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d 群组成员可以被邀请到私密对话</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 个共同群组</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">添加到%1$d群组</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">添加到%1$d个群组</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">您已经与这些参与者建立了一个对话群组。</item>
+		<item quantity="other" state="needs_review" hash="809550612">您已经与这些参与者进行了 %1$d 次对话。</item>
 	</plurals>
 </resources>

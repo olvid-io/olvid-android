@@ -59,10 +59,11 @@ import io.olvid.messenger.designsystem.components.OlvidSlider
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.designsystem.theme.olvidDefaultTextFieldColors
+import io.olvid.messenger.designsystem.avatar.Avatar
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.avatarTextColorArgb
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoViewModel.Type
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.owneddetails.rememberDetailsPhotoPicker
-import io.olvid.messenger.customClasses.InitialView as InitialViewView
 
 /**
  * Compose replacement for the legacy dialog_fragment_edit_name_and_photo layout. Lets the user set a
@@ -105,7 +106,7 @@ fun EditNameAndPhotoDialog(
     val showReset = type != Type.LOCKED_DISCUSSION
 
     val nameColor: Color = customNameHue?.let {
-        Color(InitialViewView.getTextColor(context, ByteArray(1), it))
+        Color(avatarTextColorArgb(context, ByteArray(1), it))
     } ?: colorResource(R.color.almostBlack)
 
     DialogSecure(onDismissRequest = onDismiss) {
@@ -114,32 +115,24 @@ fun EditNameAndPhotoDialog(
         content = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box {
-                        InitialView(
+                        Avatar(
                             modifier = Modifier.requiredSize(64.dp),
                             editable = true,
                             onClick = { showPhotoMenu = true },
-                            initialViewSetup = { iv ->
-                                val content = initialViewContent
-                                if (content == null) {
-                                    iv.setUnknown()
-                                } else if (content.absolutePhotoUrl != null) {
-                                    iv.setLocked(content.type == Type.LOCKED_DISCUSSION)
-                                    iv.setAbsolutePhotoUrl(content.bytesInitial, content.absolutePhotoUrl)
-                                } else {
-                                    when (content.type) {
-                                        Type.GROUP, Type.GROUP_V2 -> {
-                                            iv.setLocked(false)
-                                            iv.setGroup(content.bytesInitial)
-                                        }
-                                        Type.CONTACT -> {
-                                            iv.setLocked(false)
-                                            iv.setInitial(content.bytesInitial, content.initial)
-                                        }
-                                        Type.LOCKED_DISCUSSION -> {
-                                            iv.setLocked(true)
-                                            iv.setInitial(ByteArray(0), "")
-                                        }
-                                        null -> iv.setUnknown()
+                            target = initialViewContent.let { content ->
+                                when {
+                                    content == null -> AvatarSource.unknown()
+                                    content.absolutePhotoUrl != null -> AvatarSource.of(
+                                        content.bytesInitial,
+                                        null,
+                                        content.absolutePhotoUrl,
+                                        content.type == Type.LOCKED_DISCUSSION,
+                                    )
+                                    else -> when (content.type) {
+                                        Type.GROUP, Type.GROUP_V2 -> AvatarSource.group(content.bytesInitial)
+                                        Type.CONTACT -> AvatarSource.initial(content.bytesInitial, content.initial)
+                                        Type.LOCKED_DISCUSSION -> AvatarSource.of(ByteArray(0), "", null, true)
+                                        null -> AvatarSource.unknown()
                                     }
                                 }
                             },

@@ -133,7 +133,7 @@ fun AudioCallContent(
                                     }
                                 }
                             ),
-                        initialViewSetup = audioParticipant.initialViewSetup(),
+                        avatar = audioParticipant.avatar(),
                         name = audioParticipant.displayName ?: "",
                         isMute = audioParticipant.peerIsMuted,
                         state = audioParticipant.peerState,

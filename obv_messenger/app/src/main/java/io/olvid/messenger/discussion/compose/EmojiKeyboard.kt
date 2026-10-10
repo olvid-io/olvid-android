@@ -38,7 +38,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -49,16 +48,14 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.olvid.messenger.R
-import io.olvid.messenger.designsystem.components.SearchBar
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
-import io.olvid.messenger.discussion.message.reactions.emoji.EmojiPicker
-import io.olvid.messenger.discussion.message.reactions.emoji.EmojiSearchViewModel
+import io.olvid.messenger.discussion.message.reactions.emoji.rememberEmojiSearchState
+import io.olvid.messenger.discussion.message.reactions.emoji.SearchableEmojiPicker
 
 @Composable
 fun EmojiKeyboard(
@@ -69,14 +66,12 @@ fun EmojiKeyboard(
     focusState: MutableState<Boolean>,
     height: Dp
 ) {
-    val emojiSearchViewModel: EmojiSearchViewModel =
-        viewModel()
+    val emojiSearchState = rememberEmojiSearchState()
+    val emojiKeyboardViewModel: EmojiKeyboardViewModel = viewModel()
 
-    LaunchedEffect(focusState.value) {
-        if (focusState.value) {
-            emojiSearchViewModel.shownEmojiVariants.value =
-                null
-        }
+    // reload the recents column once per keyboard opening: its order stays frozen while open
+    LaunchedEffect(Unit) {
+        emojiKeyboardViewModel.refreshRecentEmojis()
     }
 
     val statusBarHeight = with(LocalDensity.current) {
@@ -120,33 +115,21 @@ fun EmojiKeyboard(
                             .height(height - statusBarHeight)
                 )
         ) {
-            SearchBar(
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp).height(40.dp),
-                placeholderText = stringResource(R.string.hint_search_emoji),
-                searchText = emojiSearchViewModel.searchText,
-                onSearchTextChanged = {
-                    emojiSearchViewModel.onSearchTextChanged(
-                        it
-                    )
-                },
+            SearchableEmojiPicker(
+                emojiSearchState = emojiSearchState,
                 focusState = focusState,
-                onClearClick = { emojiSearchViewModel.reset() },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = colorResource(R.color.olvid_gradient_light),
-                    unfocusedBorderColor = colorResource(R.color.mediumGrey),
-                    cursorColor = colorResource(R.color.olvid_gradient_light)
-                )
-            )
-            EmojiPicker(
-                Modifier
-                    .weight(1f, true),
+                searchBarModifier = Modifier
+                    .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+                    .height(40.dp),
+                fillRemainingHeight = true,
+                searchOnFocus = false,
                 onReact = { emoji ->
                     insertEmoji(emoji)
+                    emojiKeyboardViewModel.onEmojiInserted(emoji)
                 },
-                isSearch = emojiSearchViewModel.searchText.isNotEmpty(),
-                emojis = emojiSearchViewModel.emojis,
-                onBackSpace = onBackSpace,
-                shownEmojiVariants = emojiSearchViewModel.shownEmojiVariants
+                recentEmojis = emojiKeyboardViewModel.recentEmojis,
+                recentsAsColumn = true,
+                onBackSpace = onBackSpace
             )
         }
         if (showBottomRow) {

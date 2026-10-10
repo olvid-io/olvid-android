@@ -57,7 +57,7 @@
 	<string name="dialog_message_group_reinvite" state="needs_review" hash="-180516223">ನೀವು %1$s ಅವರಿಗೆ %2$s ಗುಂಪಿನಲ್ಲಿ ಸೇರಲು ಹೊಸ ಆಹ್ವಾನವನ್ನು ಕಳುಹಿಸಲು ಬಯಸುತ್ತೀರಾ?</string>
 	<string name="dialog_message_leave_group" state="needs_review" hash="-1662560406">ನೀವು %1$s ಗುಂಪನ್ನು ತೊರೆಯಲು ಹೊರಟಿರಿದ್ದೀರಿ. ಗುಂಪಿನ ಇತರ ಸದಸ್ಯರಿಗೆ ಸೂಚಿಸಲಾಗುವುದು ಮತ್ತು ಈ ಗುಂಪಿಗೆ ಕಳುಹಿಸಲಾದ ಸಂದೇಶಗಳನ್ನು ನೀವು ಸ್ವೀಕರಿಸುವುದನ್ನು ನಿಲ್ಲಿಸಲಾಗುವುದು.\n\nನೀವು ನಿಜವಾಗಿಯೂ ಗುಂಪನ್ನು ತೊರೆಯಲು ಬಯಸುತ್ತೀರಾ?</string>
 	<string name="dialog_message_recreate_channels" state="needs_review" hash="-561666395">ನೀವು ಮತ್ತು ನಿಮ್ಮ ಸಂಪರ್ಕದ ನಡುವಿನ ಸುರಕ್ಷಿತ ಚಾನಲ್‌ಗಳು ಸಿಂಕ್‌ಗೆ ಸಿಂಕ್‌ಗೆ ಹೋಗಬಹುದು. ನೀವು ಕಳುಹಿಸುವ ಸಂದೇಶಗಳನ್ನು ನಿಮ್ಮ ಸಂಪರ್ಕವು ಸ್ವೀಕರಿಸುತ್ತಿಲ್ಲ ಎಂದು ನೀವು ಗಮನಿಸಿದರೆ, ಸುರಕ್ಷಿತ ಚಾನಲ್‌ಗಳನ್ನು ಮರು-ಸೃಷ್ಟಿಸುವುದರಿಂದ ಅದನ್ನು ಸರಿಪಡಿಸಬಹುದು.\n\nನೀವು ಸುರಕ್ಷಿತ ಚಾನಲ್‌ಗಳನ್ನು ಮರು-ಸೃಷ್ಟಿಸುವ ಪ್ರಕ್ರಿಯೆಯನ್ನು ಪ್ರಾರಂಭಿಸಲು ಬಯಸುತ್ತೀರಾ?</string>
-	<string name="dialog_message_restart_channel_establishment" state="needs_review" hash="1438599907">ನೀವು ನಿಜವಾಗಿಯೂ ನಡೆಯುತ್ತಿರುವ ಸುರಕ್ಷಿತ ಚಾಟ್ ಚಾನಲ್ ಸ್ಥಾಪನೆಯ ಪ್ರಕ್ರಿಯೆಯನ್ನು ಮರುಪ್ರಾರಂಭಿಸಲು ಬಯಸುತ್ತೀರಾ?</string>
+	<string name="dialog_message_restart_channel_establishment" state="needs_review" hash="1438599907">ನೀವು ನಿಜವಾಗಿಯೂ ನಡೆಯುತ್ತಿರುವ ಸುರಕ್ಷಿತ ಚರ್ಚೆ ಚಾನಲ್ ಸ್ಥಾಪನೆಯ ಪ್ರಕ್ರಿಯೆಯನ್ನು ಮರುಪ್ರಾರಂಭಿಸಲು ಬಯಸುತ್ತೀರಾ?</string>
 	<string name="dialog_title_abort_invitation" state="needs_review" hash="1866349160">ನೀವು ನಿಜವಾಗಿಯೂ ಇದನ್ನು ರದ್ದುಗೊಳಿಸಲು ಬಯಸುತ್ತೀರಾ?</string>
 	<string name="dialog_title_about_olvid" state="needs_review" hash="-1845320867">ಒಲ್ವಿಡ್ ಬಗ್ಗೆ</string>
 	<string name="dialog_title_contact_introduction" state="needs_review" hash="402798978">ಸಂಪರ್ಕ ಪರಿಚಯ</string>
@@ -79,11 +79,10 @@
 	<string name="dialog_title_rename_discussion" state="needs_review" hash="1413472286">ಚರ್ಚೆಯ ಹೆಸರನ್ನು ಬದಲಾಯಿಸಿ</string>
 	<string name="dialog_title_rename_group" state="needs_review" hash="1461324427">ಗುಂಪಿನ ಹೆಸರನ್ನು ಬದಲಾಯಿಸಿ</string>
 	<string name="dialog_title_restart_channel_establishment" state="needs_review" hash="-645769680">ಚಾನಲ್ ಸ್ಥಾಪನೆಯನ್ನು ಮರುಪ್ರಾರಂಭಿಸಬೇಕೇ?</string>
-	<string name="dialog_title_share_with" state="needs_review" hash="854107768">ಹೊಂದಿ ಹಂಚಿಕೊಳ್ಳಿ…</string>
-	<string name="dialog_title_share_recipients" state="needs_review" hash="1157053138">ಪ್ರತಿಪಕ್ಷರನ್ನು ಆಯ್ಕೆ ಮಾಡಿ</string>
+	<string name="dialog_title_share_recipients" state="needs_review" hash="463614560">ಚರ್ಚೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ</string>
 	<string name="share_label_from" state="needs_review" hash="2049052075">ಯಾರಿಂದ:</string>
 	<string name="share_label_to" state="needs_review" hash="-1785690373">ಗೆ:</string>
-	<string name="share_label_choose_recipients" state="needs_review" hash="1157053138">ಪ್ರತಿಪಕ್ಷರನ್ನು ಆಯ್ಕೆ ಮಾಡಿ</string>
+	<string name="share_label_choose_recipients" state="needs_review" hash="463614560">ಚರ್ಚೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ</string>
 	<string name="hint_share_message" state="needs_review" hash="-763169957">ಒಂದು ಸಂದೇಶವನ್ನು ಸೇರಿಸಿ…</string>
 	<string name="content_description_delete_attachment" state="needs_review" hash="-220348329">ಅಂಟರ್ತವನ್ನು ತೆಗೆದುಹಾಕಿ</string>
 	<string name="dialog_title_shortcut_to" state="needs_review" hash="-1193591200">… ಗೆ ಶોર્ટકಟ್ ರಚಿಸಿ</string>
@@ -111,7 +110,7 @@
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">ಯಾವುದೇ ಲಗತ್ತನ್ನು ಕಂಡುಹಿಡಿಯಲಾಗಿಲ್ಲ</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">ಯಾವುದೇ ಲಿಂಕ್ ಕಂಡುಬರಲಿಲ್ಲ</string>
 	<string name="hint_company" state="needs_review" hash="988571519">ಕಂಪನಿ</string>
-	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">ಸಂದೇಶವನ್ನು ಬರೆಯಿರಿ</string>
+	<string name="hint_compose_your_message" state="needs_review" hash="809999904">ಸಂದೇಶ</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">ತಾತ್ಕಾಲಿಕ ಸಂದೇಶ</string>
 	<string name="label_edit_your_message" state="needs_review" hash="1091877412">ನಿಮ್ಮ ಸಂದೇಶವನ್ನು ಸಂಪಾದಿಸಿ</string>
 	<string name="label_reply_to_x" state="needs_review" hash="1941377665">%s ಗೆ ಪ್ರತಿಕ್ರಿಯೆ</string>
@@ -208,15 +207,25 @@
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">ಸಂಪರ್ಕದ ಹೆಸರನ್ನು ಬದಲಾಯಿಸಿ</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">ಉ ಉಳించు</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">ಅಂತರ್ನಿರ್ಮಿತ</string>
+	<string name="menu_action_send_photo" state="needs_review" hash="13932391">ಒಂದು ಫೋಟೋವನ್ನು ಕಳುಹಿಸಿ</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">ಹಂಚಿಕೊಳ್ಳಿ</string>
 	<string name="menu_action_bookmark" state="needs_review" hash="1146136289">ಬುಕ್‌ಮಾರ್ಕ್</string>
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">ಬುಕ್‌ಮಾರ್ಕ್ ತೆಗೆದುಹಾಕಿ</string>
+	<string name="menu_action_view_message" state="needs_review" hash="-211312046">ಸಂದೇಶವನ್ನು ವೀಕ್ಷಿಸಿ</string>
+	<string name="label_see_more" state="needs_review" hash="-1206298538">ಹೆಚ್ಚು ನೋಡಿ</string>
+	<string name="label_formatted_text" state="needs_review" hash="664283030">ಫಾರ್ಮ್ಯಾಟ್ ಮಾಡಲಾಗಿದೆ</string>
+	<string name="label_raw_text" state="needs_review" hash="-1645103337">ಸರಳ</string>
+	<string name="pref_truncate_long_messages_title" state="needs_review" hash="576500375">ದೀರ್ಘ ಸಂದೇಶಗಳನ್ನು ಸಂಕ್ಷಿಪ್ತಗೊಳಿಸಿ</string>
+	<string name="pref_truncate_long_messages_full_screen" state="needs_review" hash="1513604976">ಪೂರ್ಣ ಪರದೆಯನ್ನು ತೆರೆಯಲು ಕ್ಲಿಕ್ ಮಾಡಿ</string>
+	<string name="pref_truncate_long_messages_inline" state="needs_review" hash="1658956871">ತೆರೆಯಲು ಕ್ಲಿಕ್ ಮಾಡಿ</string>
+	<string name="pref_truncate_long_messages_never" state="needs_review" hash="1348404810">ಯಾವುದನ್ನು ಕಡಿಮೆ ಮಾಡಬೇಡಿ</string>
+	<string name="label_select_message_to_copy" state="needs_review" hash="1560698970">ಸಂದೇಶದ ಭಾಗವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ ಮತ್ತು ಅದನ್ನು ನಕಲಿಸಿ.</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">ದಾಖಲించు</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">ಆರ್ಕೈವ್‌ನಿಂದ ತೆಗೆದುಹಾಕಿ</string>
 	<string name="menu_check_update" state="needs_review" hash="1635875089">ಅಪ್‌ಡೇಟ್ಗಾಗಿ ಪರಿಶೀಲಿಸಿ</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">ಈ ಚರ್ಚೆಯನ್ನು ಮುಚ್ಚಲಾಗಿದೆ</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">ಈ ಚರ್ಚೆಯನ್ನು ಓದಲು ಮಾತ್ರ</string>
-	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">ಈ ಚಾಟ್‍ಗಾಗಿ ಸುರಕ್ಷಿತ ಸಂಪರ್ಕ ಸ್ಥಾಪಿತವಾದ ನಂತರ ನಿಮ್ಮ ಸಂದೇಶಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕಳುಹಿಸಲ್ಪಡುತ್ತವೆ. ಅಲ್ಲಿಯವರೆಗೆ, ಅವು ಅಮಾನತಿನಲ್ಲಿರುತ್ತವೆ.</string>
+	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">ಈ ಚರ್ಚೆ‍ಗಾಗಿ ಸುರಕ್ಷಿತ ಸಂಪರ್ಕ ಸ್ಥಾಪಿತವಾದ ನಂತರ ನಿಮ್ಮ ಸಂದೇಶಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕಳುಹಿಸಲ್ಪಡುತ್ತವೆ. ಅಲ್ಲಿಯವರೆಗೆ, ಅವು ಅಮಾನತಿನಲ್ಲಿರುತ್ತವೆ.</string>
 	<string name="message_error_first_or_last_name_needed" state="needs_review" hash="-1907938730">ದಯವಿಟ್ಟು ಮೊದಲ ಹೆಸರು ಅಥವಾ ಕೊನೆಯ ಹೆಸರನ್ನು ನಮೂದಿಸಿ.</string>
 	<string name="message_error_trust_origin" state="needs_review" hash="51944132">ಸಂಪರ್ಕದ ವಿಶ್ವಾಸ ಮೂಲವನ್ನು ಪಡೆಯುವಲ್ಲಿ ದೋಷ</string>
 	<string name="message_user_invitation" state="needs_review" hash="609322254">%1$s ಒಲ್ವಿಡ್‌ನಲ್ಲಿ ನಿಮ್ಮೊಂದಿಗೆ ಚರ್ಚಿಸಲು ಬಯಸುತ್ತಾನೆ. ಒಪ್ಪಿಕೊಳ್ಳಲು, ಕೆಳಗಿನ ಲಿಂಕ್ ಅನ್ನು ಬಳಸಿ:\n\n%2$s</string>
@@ -248,6 +257,8 @@
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">ತುಂಬಾ ಹೆಚ್ಚು</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">ನೀವು ಗುಂಪನ್ನು ತೊರೆದಿದ್ದೀರಿ</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">ನೀವು ಮತ್ತೆ ಗುಂಪಿಗೆ ಸೇರಿದ್ದೀರಿ</string>
+	<string name="label_groups_administered" state="needs_review" hash="353496672">ನೀವು ನಿರ್ವಹಿಸುವ ಗುಂಪುಗಳು</string>
+	<string name="label_groups_joined" state="needs_review" hash="-1353689862">ಸೇರಲಾದ ಗುಂಪುಗಳು</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">ನೀವು ಗುಂಪಿನಲ್ಲಿ ಸೇರಿದೆ</string>
 	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s ನಿಮನ್ನು ಈ ಗುಂಪಿಗೆ ಸೇರಿಸಿದ್ದಾರೆ</string>
 	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s ನಿಮ್ಮನ್ನು ಈ ಗುಂಪಿಗೆ ಮತ್ತೆ ಸೇರಿಸಿದ್ದಾರೆ</string>
@@ -509,6 +520,8 @@
 	<string name="pref_text_dark_mode_on" state="needs_review" hash="794872984">ಯಾವಾಗಲೂ ಡಾರ್ಕ್ ಥೀಮ್ ಬಳಸಿ</string>
 	<string name="pref_text_dark_mode_off" state="needs_review" hash="1031187033">ಯಾವಾಗಲೂ ಲಘು ಥೀಮ್ ಬಳಸಿ</string>
 	<string name="pref_text_dark_mode_auto" state="needs_review" hash="-1140013121">ಸಿಸ್ಟಮ್ ಆದ್ಯತೆಯನ್ನು ಅನುಸರಿಸಿ</string>
+	<string name="pref_use_pattern_avatars_title" state="needs_review" hash="-184462474">ಉತ್ಪಾದನಾ ಅವತಾರಗಳು</string>
+	<string name="pref_use_pattern_avatars_summary" state="needs_review" hash="-1895366464">ಚಿತ್ರವಿಲ್ಲದ ಸಂಪರ್ಕಗಳಿಗೆ, ಅವರ ಹೆಸರಿನ ಮೊದಲ ಅಕ್ಷರದ ಬದಲಾಗಿ ವಿಶಿಷ್ಟವಾದ ಬಣ್ಣದ ವಿನ್ಯಾಸವನ್ನು ತೋರಿಸಿ.</string>
 	<string name="menu_action_help_faq" state="needs_review" hash="971329012">ಸಹಾಯ / ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೆಗಳು</string>
 	<string name="menu_action_call_contact" state="needs_review" hash="546297186">ಸಂಪರ್ಕಕ್ಕೆ ಕರೆ ಮಾಡಿ</string>
 	<string name="notification_title_incoming_webrtc_call" state="needs_review" hash="-2109880396">%1$s ರಿಂದ ಒಳಬರುವ ಒಲ್ವಿಡ್ ಕರೆ</string>
@@ -536,7 +549,7 @@
 	<string name="pref_text_vibration_pattern_three_long" state="needs_review" hash="1282701901">3 ದೀರ್ಘ ಕಂಪನಗಳು</string>
 	<string name="pref_message_led_color_title" state="needs_review" hash="659767003">ಎಲ್ಇಡಿ ಬಣ್ಣ</string>
 	<string name="pref_discussion_mute_notifications_title" state="needs_review" hash="676556801">ಧ್ವನಿ ಸೂಚನೆಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ</string>
-	<string name="pref_discussion_mute_notifications_summary" state="needs_review" hash="-1153944445">ಇದನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, ಈ ಸಂಭಾಷಣೆಯಲ್ಲಿ ಹೊಸ ಸಂದೇಶಗಳ ಕುರಿತು ನಿಮಗೆ ಅಧिसूಚನೆಗಳು ಬರುವುದಿಲ್ಲ.</string>
+	<string name="pref_discussion_mute_notifications_summary" state="needs_review" hash="-1153944445">ಇದನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, ಈ ಚರ್ಚೆಯಲ್ಲಿ ಹೊಸ ಸಂದೇಶಗಳ ಕುರಿತು ನಿಮಗೆ ಅಧिसूಚನೆಗಳು ಬರುವುದಿಲ್ಲ.</string>
 	<string name="pref_discussion_mute_notifications_on_summary" state="needs_review" hash="-1889261525">ಹೊಸ ಸಂದೇಶ ಅಧिसूಚನೆಗಳನ್ನು ಶಾಶ್ವತವಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ.</string>
 	<string name="pref_discussion_mute_notifications_on_until_summary" state="needs_review" hash="-1740468420">ಹೊಸ ಸಂದೇಶ ಅಧिसूಚನೆಗಳು %1$s ರವರೆಗೆ ನಿಶ್ಯಬ್ದಗೊಳಿಸಲಾಗಿದೆ.</string>
 	<string name="pref_call_ringtone_title" state="needs_review" hash="29019015">ರಿಂಗ್ಟೋನ್</string>
@@ -692,7 +705,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">లైసెన్స్ సర్వర్:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">ನಿಮ್ಮ ಸರ್ವರ್:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">ತಪ್ಪು ರೀತಿಯಲ್ಲಿ ರಚಿಸಲಾದ ಪರವಾನಗಿ ಸಕ್ರಿಯಗೊಳಿಸುವ ಲಿಂಕ್.\n\nದಯವಿಟ್ಟು ಈ ಲಿಂಕ್ ಅನ್ನು ನಿಮಗೆ ಕಳುಹಿಸಿದ ವ್ಯಕ್ತಿಯನ್ನು ಸಂಪರ್ಕಿಸಿ.</string>
-	<string name="label_checking_license" state="needs_review" hash="-777109669">లైసెన్స్ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">లైసెన్స్ స్థితిని తనిఖీ చేయలేకపోయాము</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">తెలియని લાઇసెన్స్</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">માન્ય ಪರವಾನಗಿ</string>
@@ -740,6 +752,16 @@
 	<string name="text_message_content_wiped" state="needs_review" hash="1781783786">(ಸಂದೇಶದ ವಿಷಯವನ್ನು ಅಳಿಸಲಾಗಿದೆ)</string>
 	<string name="text_ephemeral_message_explanation" state="needs_review" hash="612413232">ಸಂದೇಶದ ವಿಷಯವನ್ನು ವೀಕ್ಷಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ</string>
 	<string name="text_visible_once" state="needs_review" hash="962464352">ಒಂದು ಬಾರಿ ಮಾತ್ರ ಕಾಣಿಸುತ್ತದೆ</string>
+	<string name="dialog_title_ephemeral_message" state="needs_review" hash="-1527208333">ತಾತ್ಕಾಲಿಕ ಸಂದೇಶ</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave" state="needs_review" hash="1852111882">ನೀವು ಈ ಚರ್ಚೆಯಿಂದ ಹೊರಬಿದ್ದಾಗ ಈ ಸಂದೇಶವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ.</string>
+	<string name="text_ephemeral_read_once_erased_on_leave" state="needs_review" hash="-1031412379">ನೀವು ಈ ಚರ್ಚೆಯನ್ನು ಬಿಡಿಸಿದಾಗ, ಈ ಸಂದೇಶದ ವಿಷಯವು ಅಳಿಸಿಹಾಕಲ್ಪಡುತ್ತದೆ.</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave_once_opened" state="needs_review" hash="-1827602456">ಒಮ್ಮೆ ತೆರೆದ ನಂತರ, ನೀವು ಈ ಚರ್ಚೆಯಿಂದ ಹೊರಬಂದರೆ ಈ ಸಂದೇಶವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ.</string>
+	<string name="text_ephemeral_deleted_at_time" state="needs_review" hash="831937049">%1$s ನಲ್ಲಿ ಅಳಿಸಲಾಗುವುದು</string>
+	<string name="text_ephemeral_deleted_on_date_at_time" state="needs_review" hash="667854133">%1$sರಂದು %2$sಕ್ಕೆ ಅಳಿಸಲಾಗುವುದು</string>
+	<string name="text_ephemeral_content_erased_at_time" state="needs_review" hash="1038815627">%1$s ನಲ್ಲಿ ವಿಷಯವನ್ನು ಅಳಿಸಲಾಗುವುದು</string>
+	<string name="text_ephemeral_content_erased_on_date_at_time" state="needs_review" hash="848079053">%1$s ರಂದು %2$s ಕ್ಕೆ ವಿಷಯವು ಅಳಿಸಲ್ಪಡುತ್ತದೆ</string>
+	<string name="text_ephemeral_countdown_starts_when_sent" state="needs_review" hash="-1010200489">ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಿದ ನಂತರ, ಕೌಂಟ್‌ಡೌನ್ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ.</string>
+	<string name="text_ephemeral_countdown_starts_when_opened" state="needs_review" hash="1194691757">ನೀವು ಸಂದೇಶವನ್ನು ತೆರೆದಾಗ, ಕೌಂಟ್‌ಡೌನ್ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ.</string>
 	<string name="text_timer_s" state="needs_review" hash="-1146250144">%1$ds</string>
 	<string name="text_timer_m" state="needs_review" hash="-1318025056">%1$dમી</string>
 	<string name="text_timer_h" state="needs_review" hash="-1461170816">%1$dh</string>
@@ -777,6 +799,8 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸುವುದು ಮತ್ತು ಸ್ವೀಕರಿಸುವುದು</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, \'ಒಂದು ಬಾರಿ ಓದು\' ಸಂದೇಶಗಳು ಮತ್ತು ಡೀಫಾಲ್ಟ್ ಸೀಮಿತ ಗೋಚರತೆ ಅವಧಿಯೊಂದಿಗೆ ಸಂದೇಶಗಳು ನೀವು ಚರ್ಚೆಗೆ ಪ್ರವೇಶಿಸಿದ ತಕ್ಷಣ ತೆರೆಯಲ್ಪಡುತ್ತವೆ. ಇಲ್ಲದಿದ್ದರೆ, ಕ್ಲಿಕ್ ಮಾಡುವುದು ಅಗತ್ಯವಾಗಿರುತ್ತದೆ.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, ಕಳುಹಿಸಲಾದ ಸಂದೇಶಗಳನ್ನು ಅಳಿಸಿದ ನಂತರವೂ ಉಳಿಸಿಕೊಳ್ಳಲಾಗುತ್ತದೆ, ಇದರಿಂದ ಅವು ಯಾವಾಗ ಕಳುಹಿಸಲಾಗಿದೆ ಅಥವಾ ಓದಲಾಯಿತು ಎಂದು ನೀವು ನೋಡಬಹುದು. ಇಲ್ಲದಿದ್ದರೆ, ಅವುಗಳನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ.</string>
+	<string name="pref_default_reaction_title" state="needs_review" hash="1457188713">ಡೀಫಾಲ್ಟ್ ಪ್ರತಿಕ್ರಿಯೆ</string>
+	<string name="pref_default_reaction_summary" state="needs_review" hash="-1065900793">ಸ್ವೀಕರಿಸಿದ ಸಂದೇಶವನ್ನು ಡಬಲ್ ಟ್ಯಾಪ್ ಮಾಡಿ ಮತ್ತು %1$s ಬಳಸಿ ಪ್ರತಿಕ್ರಿಯಿಸಿ. ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ತೆಗೆದುಹಾಕಲು ಮತ್ತೆ ಡಬಲ್ ಟ್ಯಾಪ್ ಮಾಡಿ.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">ವೆಬ್ ಕ್ಲೈಂಟ್</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">ಸೆಟ್ಟಿಂಗ್‌ಗಳ ನವೀಕರಣ ಲಿಂಕ್‌ ಅನ್ನು ವಿశ్ಲೇಷಿಸುವಲ್ಲಿ ದೋಷ</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸುವುದು ಮತ್ತು ಸ್ವೀಕರಿಸುವುದು</string>
@@ -821,7 +845,7 @@
 	<string name="pref_category_default_retention_policy_title" state="needs_review" hash="925391440">ಸಂದೇಶ ಉಳಿಸಿಕೊಳ್ಳುವಿಕೆಯ ನಿಯಮ</string>
 	<string name="pref_category_default_retention_policy_summary" state="needs_review" hash="-1071833812">ಕೆಳಗೆ ನೀಡಲಾದ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ನಿಮ್ಮ ಚರ್ಚೆಗಳಲ್ಲಿ ಹಳೆಯ ಸಂದೇಶಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಅಳಿಸಲು ನಿಮಗೆ ಅನುವು ಮಾಡಿಕೊಡುತ್ತದೆ. ನೀವು ಪ್ರತಿ ಚರ್ಚೆಯಲ್ಲಿ ಅವುಗಳನ್ನು ಬದಲಾಯಿಸಬಹುದು.</string>
 	<string name="pref_category_default_ephemeral_settings_title" state="needs_review" hash="745077800">ಡೀಫಾಲ್ಟ್ ಅಸ್ಥಾಯಿ ಸಂದೇಶ ಸೆಟ್ಟಿಂಗ್‌ಗಳು</string>
-	<string name="pref_category_default_ephemeral_settings_summary" state="needs_review" hash="1187796008">ನೀವು ಪ್ರಾರಂಭಿಸುವ ಯಾವುದೇ ಹೊಸ ಚಾಟ್‌ಗೆ ಕೆಳಗೆ ನೀಡಲಾದ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅನ್ವಯಿಸುತ್ತವೆ. ಈ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಈ ಚಾಟ್‌ನಲ್ಲಿ ಭಾಗವಹಿಸುವ ಇತರವರೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತದೆ.</string>
+	<string name="pref_category_default_ephemeral_settings_summary" state="needs_review" hash="1187796008">ನೀವು ಪ್ರಾರಂಭಿಸುವ ಯಾವುದೇ ಹೊಸ ಚರ್ಚೆಗೆ ಕೆಳಗೆ ನೀಡಲಾದ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅನ್ವಯಿಸುತ್ತವೆ. ಈ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಈ ಚರ್ಚೆಯಲ್ಲಿ ಭಾಗವಹಿಸುವ ಇತರವರೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತದೆ.</string>
 	<string name="pref_discussion_retention_count_title" state="needs_review" hash="347866597">ಸಂಖ್ಯೆ ಆಧಾರಿತ ಉಳಿಸಿಕೊಳ್ಳುವಿಕೆಯ ನೀತಿ</string>
 	<string name="pref_discussion_retention_count_summary" state="needs_review" hash="1625700173">ಕೇವಲ ಇತ್ತೀಚಿನ %1$d ಸಂದೇಶಗಳನ್ನು ಮಾತ್ರ ಇರಿಸಿ</string>
 	<string name="pref_discussion_retention_duration_title" state="needs_review" hash="1541646210">ಸಮಯ ಆಧಾರಿತ ಉಳಿವ ನೀತಿ</string>
@@ -829,10 +853,10 @@
 	<string name="pref_discussion_retention_count_summary_null" state="needs_review" hash="1734971768">ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಉಳಿಸಿ</string>
 	<string name="pref_discussion_retention_count_hint" state="needs_review" hash="-1516581060">ಸಂಗ್ರಹಿಸಲು ಸಂದೇಶಗಳ ಸಂಖ್ಯೆ</string>
 	<string name="pref_discussion_retention_duration_summary_null" state="needs_review" hash="1734971768">ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಉಳಿಸಿ</string>
-	<string name="pref_discussion_default_retention_count_dialog_message" state="needs_review" hash="113844640">ಪ್ರತಿ ಚಾಟ್‌ನಲ್ಲಿ ಉಳಿಸಿಕೊಳ್ಳಬೇಕಾದ ಸಂದೇಶಗಳ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ. ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಉಳಿಸಿಕೊಳ್ಳಲು ಈ ಕ್ಷೇತ್ರವನ್ನು ಖಾಲಿ ಬಿಡಿ.\n\nಓದದ ಸಂದೇಶಗಳನ್ನು ಎಂದಿಗೂ ಅಳಿಸಲಾಗುವುದಿಲ್ಲ.</string>
-	<string name="pref_discussion_retention_count_dialog_message_default_null" state="needs_review" hash="-86538410">ಈ ಸಂಭಾಷಣೆಯಲ್ಲಿ ಉಳಿಸಿಕೊಳ್ಳಬೇಕಾದ ಸಂದೇಶಗಳ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.\nನಿಮ್ಮ ಡೀಫಾಲ್ಟ್ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬಳಸಲು ಈ ಕ್ಷೇತ್ರವನ್ನು ಖಾಲಿ ಬಿಡಿ (ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಉಳಿಸಿ).\n\nಓದದ ಸಂದೇಶಗಳನ್ನು ಎಂದಿಗೂ ಅಳಿಸಲಾಗುವುದಿಲ್ಲ.</string>
-	<string name="pref_discussion_retention_count_dialog_message_default_number" state="needs_review" hash="-2144782876">ಈ ಸಂಭಾಷಣೆಯಲ್ಲಿ ಉಳಿಸಿಕೊಳ್ಳಬೇಕಾದ ಸಂದೇಶಗಳ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.\ನಿಮ್ಮ ಡೀಫಾಲ್ಟ್ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬಳಸಲು ಈ ಕ್ಷೇತ್ರವನ್ನು ಖಾಲಿ ಬಿಡಿ (ಇತ್ತೀಚಿನ %1$d ಸಂದೇಶಗಳನ್ನು ಉಳಿಸಿ).\ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಉಳಿಸಲು 0 ಅನ್ನು ನಮೂದಿಸಿ.\ಪರದೇರದ ಸಂದೇಶಗಳನ್ನು ಎಂದಿಗೂ తొలగించబడదు.</string>
-	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">ಚಾಟ್ ಸಂದೇಶಗಳ ಉಳಿವಿನ ನೀತಿ</string>
+	<string name="pref_discussion_default_retention_count_dialog_message" state="needs_review" hash="113844640">ಪ್ರತಿ ಚರ್ಚೆಯಲ್ಲಿ ಉಳಿಸಿಕೊಳ್ಳಬೇಕಾದ ಸಂದೇಶಗಳ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ. ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಉಳಿಸಿಕೊಳ್ಳಲು ಈ ಕ್ಷೇತ್ರವನ್ನು ಖಾಲಿ ಬಿಡಿ.\n\nಓದದ ಸಂದೇಶಗಳನ್ನು ಎಂದಿಗೂ ಅಳಿಸಲಾಗುವುದಿಲ್ಲ.</string>
+	<string name="pref_discussion_retention_count_dialog_message_default_null" state="needs_review" hash="-86538410">ಈ ಚರ್ಚೆಯಲ್ಲಿ ಉಳಿಸಿಕೊಳ್ಳಬೇಕಾದ ಸಂದೇಶಗಳ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.\nನಿಮ್ಮ ಡೀಫಾಲ್ಟ್ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬಳಸಲು ಈ ಕ್ಷೇತ್ರವನ್ನು ಖಾಲಿ ಬಿಡಿ (ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಉಳಿಸಿ).\n\nಓದದ ಸಂದೇಶಗಳನ್ನು ಎಂದಿಗೂ ಅಳಿಸಲಾಗುವುದಿಲ್ಲ.</string>
+	<string name="pref_discussion_retention_count_dialog_message_default_number" state="needs_review" hash="-2144782876">ಈ ಚರ್ಚೆಯಲ್ಲಿ ಉಳಿಸಿಕೊಳ್ಳಬೇಕಾದ ಸಂದೇಶಗಳ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.\nನಿಮ್ಮ ಡೀಫಾಲ್ಟ್ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬಳಸಲು ಈ ಕ್ಷೇತ್ರವನ್ನು ಖಾಲಿ ಬಿಡಿ (ಇತ್ತೀಚಿನ %1$d ಸಂದೇಶಗಳನ್ನು ಉಳಿಸಿ).\nಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಉಳಿಸಲು 0 ಅನ್ನು ನಮೂದಿಸಿ.\nಪರದೇರದ ಸಂದೇಶಗಳನ್ನು ಎಂದಿಗೂ ತೊಲಗಿಸಲಾಗುವುದಿಲ್ಲ.</string>
+	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">ಚರ್ಚೆ ಸಂದೇಶಗಳ ಉಳಿವಿನ ನೀತಿ</string>
 	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">ಕೆಳಗೆ ನೀಡಲಾದ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಚರ್ಚೆಯಲ್ಲಿ ಹಳೆಯ ಸಂದೇಶಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಅಳಿಸಲು ನಿಮಗೆ ಅನುವು ಮಾಡಿಕೊಡುತ್ತದೆ. ಅವು ನಿಮ್ಮ ಡೀಫಾಲ್ಟ್ ಉಳಿಸಿಕೊಳ್ಳುವ ನಿಯಮಕ್ಕಿಂತ ಹೆಚ್ಚಿನ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಹೊಂದಿವೆ.</string>
 	<string name="pref_text_app_default_string" state="needs_review" hash="-1921282000">ನಿಮ್ಮ ಡೀಫಾಲ್ಟ್ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬಳಸಿ (%1$s)</string>
 	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1349151852">ಧ್ವನಿ ಸಂದೇಶವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ</string>
@@ -866,7 +890,7 @@
 	<string name="label_metadata_kind_uploaded" state="needs_review" hash="1997774857">ಸಂದೇಶವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ</string>
 	<string name="text_message_timeline" state="needs_review" hash="1756817909">ಸಂದೇಶ ಕಾಲಾನುಕ್ರಮ</string>
 	<string name="text_message_recipients_status" state="needs_review" hash="787471611">గ్రహೀతల ಸ್ಥಿತಿ</string>
-	<string name="text_discussion_remotely_deleted" state="needs_review" hash="-1501958906">ದೂರದಿಂದ ತೆಗೆದುಹಾಕಲ್ಪಟ್ಟ ಚಾಟ್</string>
+	<string name="text_discussion_remotely_deleted" state="needs_review" hash="-1501958906">ದೂರದಿಂದ ತೆಗೆದುಹಾಕಲ್ಪಟ್ಟ ಚರ್ಚೆ</string>
 	<string name="text_discussion_remotely_deleted_by" state="needs_review" hash="-747992584">%1$s ರಿಂದ ದೂರದಿಂದ ಚರ್ಚೆಯನ್ನು ಅಳಿಸಲಾಯಿತು.</string>
 	<string name="toast_message_unable_to_update_message" state="needs_review" hash="-624831163">ಸಂದೇಶವನ್ನು ನವೀಕರಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ</string>
 	<string name="text_edited" state="needs_review" hash="-853838602">ಸರಿಪಡಿಸಲಾಗಿದೆ</string>
@@ -896,7 +920,8 @@
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">లైసెన్స్: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">ಗುರುತಿಸುವಿಕೆ ಒದಗಿಸುವವರು</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">ಗುర్ತಿಸುವಿಕೆ ಒದಗಿಸುವ ಸರ್ವರ್</string>
-	<string name="explanation_identity_provider" state="needs_review" hash="-964456322">ಈ ಪರದೆಯು ನಿಮ್ಮ ಕಂಪನಿಯ ಗುರುತು ಒದಗಿಸುವವರನ್ನು ಒಲ್ವಿಡ್‌ನಲ್ಲಿ ಕಾನ್ಫಿಗರ್ ಮಾಡಲು ನಿಮಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಕಾನ್ಫಿಗರ್ ಮಾಡಿದ ನಂತರ, ನೀವು ಈ ಸರ್ವರ್‌ಗೆ ದೃಢೀಕರಣವನ್ನು ಪಡೆಯಬಹುದು ಮತ್ತು ಒಲ್ವಿಡ್ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳಲ್ಲಿ ಇತರ ಉದ್ಯೋಗಿಗಳನ್ನು ತಡೆರಹಿತವಾಗಿ ಸೇರಿಸಲು ನಿಮಗೆ ಅನುಮತಿಸುತ್ತದೆ.\nಹೆಚ್ಚಿನ ವಿವರಗಳಿಗಾಗಿ ದಯವಿಟ್ಟು ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.</string>
+	<string name="explanation_identity_provider" state="needs_review" hash="-1014276138">ಈ ಪರದೆಯು Olvid ನಲ್ಲಿ ನಿಮ್ಮ ಸಂಸ್ಥೆಯ ಗುರುತು ದಾತವನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಲು ನಿಮಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಕಾನ್ಫಿಗರ್ ಮಾಡಿದ ನಂತರ, ನೀವು ದೃಢೀಕರಣವನ್ನು ಪಡೆಯಬಹುದು ಮತ್ತು Olvid ನಿಮಗೆ ಇತರ ಬಳಕೆದಾರರನ್ನು ನಿಮ್ಮ ಸಂಪರ್ಕಗಳಿಗೆ ಸುಲಭವಾಗಿ ಸೇರಿಸಲು ಅನುವು ಮಾಡಿಕೊಡುತ್ತದೆ.\nಹೆಚ್ಚಿನ ವಿವರಗಳಿಗಾಗಿ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.</string>
+	<string name="explanation_identity_provider_mdm" state="needs_review" hash="-1274626281">ಈ ಅನುಸ್ಥಾಪನೆಯನ್ನು ನಿಮ್ಮ ಸಂಸ್ಥೆ ನಿರ್ವಹಿಸುತ್ತದೆ ಮತ್ತು ಗುರುತಿಸುವಿಕೆ ಒದಗಿಸುವವರನ್ನು ಬಳಸಲು ಇದು ಸಂರಚಿಸಲಾಗಿದೆ. ಕೆಳಗಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪೂರ್ವ-ಸಂರಚಿಸಲಾಗಿದೆ ಮತ್ತು ಅವುಗಳನ್ನು ಬದಲಾಯಿಸಲಾಗುವುದಿಲ್ಲ.\nಹೆಚ್ಚಿನ ವಿವರಗಳಿಗಾಗಿ ದಯವಿಟ್ಟು ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.</string>
 	<string name="button_label_authenticate" state="needs_review" hash="272245375">ಪರಿಶೀಲಿಸು</string>
 	<string name="button_label_check_identity_provider" state="needs_review" hash="508428497">ಗುర్ತಿಸುವಿಕೆ ಒದಗಿಸುವವರನ್ನು ಪರಿಶೀಲಿಸಿ</string>
 	<string name="menu_action_use_identity_provider" state="needs_review" hash="1305090894">ಒಂದು ಗುರುತು ಒದಗಿಸುವವರನ್ನು ಬಳಸಿ</string>
@@ -980,8 +1005,6 @@
 	<string name="text_failed_call" state="needs_review" hash="-1934816919">ಫೋನ್ ಕರೆ ವಿಫಲವಾಯಿತು</string>
 	<string name="text_busy_call" state="needs_review" hash="-310279946">ನೀವು ಬಿಜಿಯಾಗಿದ್ದಾಗ ಒಳಬರುವ ಕರೆ</string>
 	<string name="text_busy_outgoing_call" state="needs_review" hash="92373387">ಬಿಡುವಿಲ್ಲದ ಸಂಪರ್ಕಕ್ಕೆ ಫೋನ್ ಕರೆ</string>
-	<string name="content_description_profile_picture" state="needs_review" hash="-1074340378">ಪ್ರೊಫೈಲ್ ಚಿತ್ರ</string>
-	<string name="ime_action_rename" state="needs_review" hash="-1795678977">ಹೆಸರು ಬದಲಾಯಿಸಿ</string>
 	<string name="pref_storage_explorer_title" state="needs_review" hash="735816049">ಆಂತರಿಕ ಸಂಗ್ರಹಣೆ ಅನ್ವೇಷಕ</string>
 	<string name="pref_storage_explorer_summary" state="needs_review" hash="-1991214388">ನಿಮ್ಮ ಓಲ್ವಿಡ್ ಅಪ್ಲಿಕೇಶನ್‌ನ ಆಂತರಿಕ ಸಂಗ್ರಹಣೆಯನ್ನು ಅನ್ವೇಷಿಸಿ!</string>
 	<string name="activity_title_storage_explorer" state="needs_review" hash="735816049">ಆಂತರಿಕ ಸಂಗ್ರಹಣೆ ಅನ್ವೇಷಕ</string>
@@ -1052,6 +1075,8 @@
 	<string name="pref_image_text_recognition_title" state="needs_review" hash="1877261687">ಚಿತ್ರಗಳಲ್ಲಿನ ಪಠ್ಯವನ್ನು ಗುರುತಿಸಿ ಮತ್ತು ಸೂಚ್ಯಂಕ ಮಾಡಿ</string>
 	<string name="pref_image_text_recognition_summary" state="needs_review" hash="1217699919">ಇಮೇಜ್ ಅಟ್ಯಾಚ್‌ಮೆಂಟ್‌ಗಳಲ್ಲಿ ಕಂಡುಬರುವ ಪಠ್ಯವನ್ನು ಹುಡುಕಲು ಮತ್ತು ನಕಲಿಸಲು ಅನುಮತಿಸುತ್ತದೆ. ಈ ವೈಶಿಷ್ಟ್ಯವು ಕಡಿಮೆ-ಶ್ರೇಣಿಯ ಸಾಧನಗಳಲ್ಲಿ ಹೆಚ್ಚಿನ ಸಂಪನ್ಮೂಲಗಳನ್ನು ಬಳಸಬಹುದು: ನಿಮಗೆ ಅಗತ್ಯವಿಲ್ಲದಿದ್ದರೆ ಅದನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">ಚಿತ್ರವನ್ನು ಪ್ರದರ್ಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ</string>
+	<string name="label_unsupported_image_format" state="needs_review" hash="-1487560676">ಬಳಕೆಗೆ ಅನುಕೂಲವಾಗದ ಚಿತ್ರ ಸ್ವರೂಪ</string>
+	<string name="label_unsupported_video_format" state="needs_review" hash="2131303733">ಬಳಕೆಗೆ ಅನುಕೂಲವಾಗದ ವೀಡಿಯೊ ಸ್ವರೂಪ</string>
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">ಕ್ಲೌಡ್ ಪ್ರೊವೈಡರ್‌ನೊಂದಿಗೆ ಲಾಗ್ ಇನ್ ಮಾಡುವುದು ಕಡ್ಡಾಯ</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">ನೀವು Olvid ಅನ್ನು ಕ್ಲೌಡ್ ಪ್ರೊವೈಡರ್‌ಗೆ ಸ್ವಯಂಚಾಲಿತ ಬ್ಯಾಕಪ್‌ಗಳನ್ನು ಬಳಸಲು ಕಾನ್ಫಿಗರ್ ಮಾಡಿದ್ದೀರಿ, ಆದರೆ ನಿಮ್ಮ ಸೆಷನ್ ಅವಧಿ ಮುಕ್ತಾಯವಾಗಿದೆ. ನೀವು ಈ ಪ್ರೊವೈಡರ್‌ಗೆ ಮತ್ತೆ ಲಾಗ್ ಇನ್ ಮಾಡಬೇಕಾಗುತ್ತದೆ.\n\nನೀವು ಸ್ವಯಂಚಾಲಿತ ಬ್ಯಾಕಪ್‌ಗಳನ್ನು ಇನ್ನು ಮುಂದೆ ಬಳಸಲು ಬಯಸದಿದ್ದರೆ, ನೀವು ಅದನ್ನು ಅಪ್ಲಿಕೇಶನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಬಹುದು. ಸ್ವಯಂಚಾಲಿತ ಬ್ಯಾಕಪ್‌ಗಳು ನಿಮ್ಮ ಸಾಧನವು ಕಳೆದುಹೋದರೆ ಅಥವಾ ಹಾನಿಗೊಳಗಾದರೆ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಕಳೆದುಕೊಳ್ಳುವುದನ್ನು ತಡೆಯಲು ಇರುವ ಏಕೈಕ ಮಾರ್ಗವಾಗಿದೆ ಎಂಬುದನ್ನು ನೆನಪಿಡಿ.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">ಸೈನ್ ಇನ್ ಮಾಡಿ</string>
@@ -1099,7 +1124,7 @@
 	<string name="toast_message_failed_to_unblock_contact" state="needs_review" hash="457134560">ಚರ್ಚೆಯನ್ನು ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ, ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</string>
 	<string name="button_label_unblock" state="needs_review" hash="-1980951299">ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಿ</string>
 	<string name="dialog_title_unblock_revoked_contact_discussion" state="needs_review" hash="1781806471">ರದ್ದುಗೊಳಿಸಲಾದ ಸಂಪರ್ಕವನ್ನು ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಿ</string>
-	<string name="dialog_message_unblock_revoked_contact_discussion" state="needs_review" hash="1756654447">ಈ ಚಾಟ್ ಅನ್ನು ಲಾಕ್ ಮಾಡಲಾಗಿದೆ ಏಕೆಂದರೆ ನಿಮ್ಮ ಕಂಪನಿಯ ಗುರುತು ಒದಗಿಸುವವರಿಂದ ನಿಮ್ಮ ಸಂಪರ್ಕವನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ. ಅವರ ಓಲ್ವಿಡ್ ಐಡಿ ರಾಜಿ ಮಾಡಲ್ಪಟ್ಟಿರಬಹುದು ಮತ್ತು ನಿಮ್ಮ ಸಂವಹನದ ಸುರಕ್ಷತೆಯನ್ನು ಖಚಿತಪಡಿಸಲಾಗುವುದಿಲ್ಲ. ನಿಮ್ಮ ಸಂಪರ್ಕದ ಓಲ್ವಿಡ್ ಐಡಿ ಎಂದಿಗೂ ರಾಜಿ ಮಾಡಲ್ಪಟ್ಟಿಲ್ಲ ಎಂದು ನಿಮಗೆ ಖಚಿತವಾದರೆ ಮಾತ್ರ ಈ ಚಾಟ್ ಅನ್ನು ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಿ.\nಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ ದಯವಿಟ್ಟು ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.</string>
+	<string name="dialog_message_unblock_revoked_contact_discussion" state="needs_review" hash="1756654447">ಈ ಚರ್ಚೆ ಅನ್ನು ಲಾಕ್ ಮಾಡಲಾಗಿದೆ ಏಕೆಂದರೆ ನಿಮ್ಮ ಕಂಪನಿಯ ಗುರುತು ಒದಗಿಸುವವರಿಂದ ನಿಮ್ಮ ಸಂಪರ್ಕವನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ. ಅವರ ಓಲ್ವಿಡ್ ಐಡಿ ರಾಜಿ ಮಾಡಲ್ಪಟ್ಟಿರಬಹುದು ಮತ್ತು ನಿಮ್ಮ ಸಂವಹನದ ಸುರಕ್ಷತೆಯನ್ನು ಖಚಿತಪಡಿಸಲಾಗುವುದಿಲ್ಲ. ನಿಮ್ಮ ಸಂಪರ್ಕದ ಓಲ್ವಿಡ್ ಐಡಿ ಎಂದಿಗೂ ರಾಜಿ ಮಾಡಲ್ಪಟ್ಟಿಲ್ಲ ಎಂದು ನಿಮಗೆ ಖಚಿತವಾದರೆ ಮಾತ್ರ ಈ ಚರ್ಚೆ ಅನ್ನು ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಿ.\nಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ ದಯವಿಟ್ಟು ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.</string>
 	<string name="text_contact_was_blocked" state="needs_review" hash="-945793876">ಸಂಪರ್ಕವನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ</string>
 	<string name="text_contact_was_blocked_revoked" state="needs_review" hash="447469977">ನಿಮ್ಮ ಕಂಪನಿಯ ಗುರುತಿನ ಒದಗಿಸುವವರಿಂದ ಸಂಪರ್ಕವನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ</string>
 	<string name="toast_message_unable_to_write_to_folder" state="needs_review" hash="1365085880">ಆಯ್ಕೆ ಮಾಡಿದ ಫೋಲ್ಡರ್‌ನಲ್ಲಿ ಬರೆಯಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ</string>
@@ -1146,7 +1171,7 @@
 	<string name="dialog_title_hide_profile" state="needs_review" hash="-1488467848">ಪ್ರೊಫೈಲ್ ಅನ್ನು ಮರೆಮಾಡು?</string>
 	<string name="dialog_message_hide_profile" state="needs_review" hash="472022286">ನೀವು ಒಂದು ಓಲ್ವಿಡ್ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಮರೆಮಾಡಲು ಸಿದ್ಧರಾಗುತ್ತೀರಿ. ನೀವು ಈ ಪ್ರೊಫೈಲ್ಗಾಗಿ ಆಯ್ಕೆ ಮಾಡಿದ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಮರೆತರೆ, ನೀವು ಅದನ್ನು ಶಾಶ್ವತವಾಗಿ ಬಳಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ.\nನೀವು ಮುಂದುವರಿಯಲು ಬಯಸುತ್ತೀರಾ?</string>
 	<string name="menu_action_mute_profile_notifications" state="needs_review" hash="676556801">ಧ್ವನಿ ಸೂಚನೆಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ</string>
-	<string name="dialog_message_mute_all_profile_switch_label" state="needs_review" hash="1172300745">ಈ ಚಾಟ್ ಬದಲಿಗೆ ಸಂಪೂರ್ಣ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಮ್ಯೂಟ್ ಮಾಡಿ</string>
+	<string name="dialog_message_mute_all_profile_switch_label" state="needs_review" hash="1172300745">ಈ ಚರ್ಚೆ ಬದಲಿಗೆ ಸಂಪೂರ್ಣ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಮ್ಯೂಟ್ ಮಾಡಿ</string>
 	<string name="dialog_message_mute_except_mentioned" state="needs_review" hash="635884418">ನನ್ನ ಹೆಸರನ್ನು ಉಲ್ಲೇಖಿಸಿದಾಗ ನನಗೆ ತಿಳಿಸಿ</string>
 	<string name="pref_hidden_profile_close_policy_title" state="needs_review" hash="-279332062">దాచిన ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಮುಚ್ಚುವ ನೀತಿ</string>
 	<string name="text_close_profile_instantly" state="needs_review" hash="-710679740">ಪ್ರೊಫೈಲ್ ಅನ್ನು ತಕ್ಷಣವೇ ಮುಚ್ಚಿ</string>
@@ -1180,9 +1205,9 @@
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">ಉತ್ತರದ ಸಂದೇಶವನ್ನು ತೆಗೆದುಹಾಕಿ</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">ಈ ಪ್ರೊಫೈಲ್‍ಗಾಗಿ ಅಧಿಸೂಚನೆಗಳು ನಿಶ್ಯಬ್ದಗೊಳಿಸಲಾಗಿದೆ ಎಂದು ಸೂಚಿಸುವ ಸೂಚಕ</string>
 	<string name="button_label_create_a_profile" state="needs_review" hash="-1568207484">ಒಂದು ಪ್ರೊಫೈಲ್ ಅನ್ನು ರಚಿಸಿ</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="1428471064">ನಿಮ್ಮ ಕಂಪನಿಯ ಗುರುತು ಒದಗಿಸುವವರನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ. ಅದರೊಂದಿಗೆ ದೃಢೀಕರಣ ಮಾಡಲು ಮತ್ತು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಪಡೆಯಲು ಕೆಳಗಿನ \"ದೃಢೀಕರಣ\" ಬಟನ್ ಅನ್ನು ಒತ್ತಿರಿ.</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="1823898406">ನಿಮ್ಮ ಕಂಪನಿಯ ಗುರುತಿನ ಒದಗಕೆದಾರನು ಯಶಸ್ವಿಯಾಗಿ ಸಂರಚಿಸಲ್ಪಟ್ಟಿದೆ. ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಪಡೆಯಲು ಕೆಳಗೆ ನೀಡಲಾದ \"ಮ್ಯಾಜಿಕ್ ಲಿಂಕ್ ಬಳಸಿ\" ಬಟನ್ ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ.</string>
-	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="1340457300">ಒಲ್ವಿಡ್‌ಗೆ ಸುಸ್ವಾಗತ.\n\nಈ ಅನುಸ್ಥಾಪನೆಯನ್ನು ನಿಮ್ಮ ಕಂಪನಿಯು ನಿರ್ವಹಿಸುತ್ತದೆ ಮತ್ತು ಇದನ್ನು ಗುರುತಿಸುವಿಕೆ ಒದಗಿಸುವವರನ್ನು ಬಳಸಲು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ. ಅದರೊಂದಿಗೆ ದೃಢೀಕರಿಸಲು ಮತ್ತು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಪಡೆಯಲು ಕೆಳಗಿನ \"ದೃಢೀಕರಣ\" ಬಟನ್ ಅನ್ನು ಒತ್ತಿರಿ.\n\nನೀವು ಈಗಾಗಲೇ ಒಲ್ವಿಡ್ ಅನ್ನು ಬಳಸಿದ್ದರೆ ಮತ್ತು ಬ್ಯಾಕಪ್‌ನಿಂದ ನಿಮ್ಮ ಕೀಗಳು ಮತ್ತು ಸಂಪರ್ಕಗಳನ್ನು ಪುನಃಸ್ಥಾಪಿಸಲು ಬಯಸಿದರೆ, \"ಬ್ಯಾಕಪ್ ಅನ್ನು ಪುನಃಸ್ಥಾಪಿಸಿ\" ಒತ್ತಿರಿ.</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="-2030851622">ನಿಮ್ಮ ಸಂಸ್ಥೆಯ ಗುರುತು ಒದಗಿಸುವವರು ಯಶಸ್ವಿಯಾಗಿ ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ. ಅದರೊಂದಿಗೆ ದೃಢೀಕರಣವನ್ನು ಪಡೆಯಲು ಮತ್ತು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಪಡೆಯಲು ಕೆಳಗೆರುವ \"ದೃಢೀಕರಣ\" ಬಟನ್ ಅನ್ನು ಒತ್ತಿರಿ.</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="903193568">ನಿಮ್ಮ ಸಂಸ್ಥೆಯ ಗುರುತು ಒದಗಿಸುವವರು ಯಶಸ್ವಿಯಾಗಿ ಕಾನ್ಫಿಗರ್ ಮಾಡಲ್ಪಟ್ಟಿದ್ದಾರೆ. ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಪಡೆಯಲು ಕೆಳಗೆ ನೀಡಲಾದ \"ಮ್ಯಾಜಿಕ್ ಲಿಂಕ್ ಬಳಸಿ\" ಬಟನ್ ಅನ್ನು ಒತ್ತಿರಿ.</string>
+	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="-5109440">ಈ ಅನುಸ್ಥಾಪನೆಯನ್ನು ನಿಮ್ಮ ಸಂಸ್ಥೆ ನಿರ್ವಹಿಸುತ್ತದೆ ಮತ್ತು ಗುರುತಿಸುವಿಕೆ ಒದಗಿಸುವವರನ್ನು ಬಳಸಲು ಇದು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ. ಇದರೊಂದಿಗೆ ದೃಢೀಕರಣವನ್ನು ಪಡೆಯಲು ಮತ್ತು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಪಡೆಯಲು ಕೆಳಗೆರುವ \"%1$s\" ಬಟನ್ ಅನ್ನು ಒತ್ತಿರಿ.</string>
 	<string name="button_label_see_details" state="needs_review" hash="238834473">ವಿವರಗಳನ್ನು ನೋಡಿ</string>
 	<string name="link_label_invitation_url" state="needs_review" hash="744905192">ಸಂಪರ್ಕವನ್ನು ಸೇರಿಸಿ</string>
 	<string name="link_label_configuration_url" state="needs_review" hash="-441435162">ಆರ୍କಣ ಅಥವಾ ಪರವಾನಗಿ ಆಮದು ಮಾಡು</string>
@@ -1197,8 +1222,8 @@
 	<string name="button_label_configure_lock_screen" state="needs_review" hash="870348426">ಲಾಕ್ સ્ક್ರೀನ್ ಅನ್ನು ગોઠಿಸಿ</string>
 	<string name="menu_action_delete_profile" state="needs_review" hash="1272822783">ಈ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಅಳಿಸಿ</string>
 	<string name="dialog_title_delete_profile" state="needs_review" hash="658803224">ಪ್ರಸ್ತುತ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಅಳಿಸಬೇಕೇ?</string>
-	<string name="dialog_message_delete_profile" state="needs_review" hash="-329228509">ಒಂದು ಪ್ರೊಫೈಲ್ ಅನ್ನು ಅಳಿಸುವುದರಿಂದ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಈ ಪ್ರೊಫೈಲ್‌ಗೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಮಾಹಿತಿಯನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ. ಇದರಲ್ಲಿ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು, ಗುಂಪುಗಳು ಮತ್ತು ಈ ಪ್ರೊಫೈಲ್‌ನ ಎಲ್ಲಾ ಚಾಟ್‌ಗಳ (ಸಂದೇಶಗಳು ಮತ್ತು ಲಗತ್ತುಗಳು) ವಿಷಯವು ಸೇರಿರುತ್ತದೆ. ಈ ಕಾರ್ಯಾಚರಣೆಯು ನಿಮ್ಮ ಇತರ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ప్రభావితం ಮಾಡುವುದಿಲ್ಲ.\nನೀವು Olvid ನಲ್ಲಿ ಬ್ಯಾಕಪ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದ್ದರೆ, ನಿಮ್ಮ ಭವಿಷ್ಯದ ಬ್ಯಾಕಪ್‌ಗಳಲ್ಲಿ ಈ ಪ್ರೊಫೈಲ್‌ನ ಯಾವುದೇ ಟ್ರ್ಯಾಕ್ ಇರುವುದಿಲ್ಲ ಮತ್ತು ನೀವು ಅದನ್ನು ಪುನಃಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ.\nಈ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಹೇಗೆ ಅಳಿಸಬೇಕೆಂದು ಆಯ್ಕೆ ಮಾಡಲು \"ಮುಂದೆ\" ಕ್ಲಿಕ್ ಮಾಡಿ.</string>
-	<string name="dialog_message_delete_last_profile" state="needs_review" hash="-2123774331">ಒಂದು ಪ್ರೊಫೈಲ್ ಅನ್ನು ಅಳಿಸುವುದರಿಂದ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಈ ಪ್ರೊಫೈಲ್‌ಗೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಮಾಹಿತಿಯನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ. ಇದರಲ್ಲಿ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು, ಗುಂಪುಗಳು ಮತ್ತು ಈ ಪ್ರೊಫೈಲ್‌ನ ಎಲ್ಲಾ ಚಾಟ್‌ಗಳ (ಸಂದೇಶಗಳು ಮತ್ತು ಲಗತ್ತುಗಳು) ವಿಷಯವು ಸೇರಿರುತ್ತದೆ.\n\n<b>ಇದು ನಿಮ್ಮ ಏಕೈಕ ಗೋಚರಿಸುವ ಪ್ರೊಫೈಲ್ ಆಗಿದೆ ಮತ್ತು ನೀವು ಯಾವುದೇ ಗುಪ್ತ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಹೊಂದಿದ್ದರೆ, ಅವುಗಳನ್ನು ಸಹ ಏಕಕಾಲದಲ್ಲಿ ಅಳಿಸಲಾಗುತ್ತದೆ.</b>\n\nನೀವು Olvid ನಲ್ಲಿ ಬ್ಯಾಕಪ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದ್ದರೆ, ನಿಮ್ಮ ಭವಿಷ್ಯದ ಬ್ಯಾಕಪ್‌ಗಳಲ್ಲಿ ಈ ಪ್ರೊಫೈಲ್‌ನ ಯಾವುದೇ ಜಾಡ್ಯ ಇರುವುದಿಲ್ಲ ಮತ್ತು ನೀವು ಅದನ್ನು ಪುನಃಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ.\n\nಈ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಹೇಗೆ ಅಳಿಸಬೇಕೆಂದು ಆಯ್ಕೆ ಮಾಡಲು \"ಮುಂದೆ\" ಕ್ಲಿಕ್ ಮಾಡಿ.</string>
+	<string name="dialog_message_delete_profile" state="needs_review" hash="-329228509">ಒಂದು ಪ್ರೊಫೈಲ್ ಅನ್ನು ಅಳಿಸುವುದರಿಂದ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಈ ಪ್ರೊಫೈಲ್‌ಗೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಮಾಹಿತಿಯನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ. ಇದರಲ್ಲಿ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು, ಗುಂಪುಗಳು ಮತ್ತು ಈ ಪ್ರೊಫೈಲ್‌ನ ಎಲ್ಲಾ ಚರ್ಚೆಗಳ (ಸಂದೇಶಗಳು ಮತ್ತು ಲಗತ್ತುಗಳು) ವಿಷಯವು ಸೇರಿರುತ್ತದೆ. ಈ ಕಾರ್ಯಾಚರಣೆಯು ನಿಮ್ಮ ಇತರ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ప్రభావితం ಮಾಡುವುದಿಲ್ಲ.\nನೀವು Olvid ನಲ್ಲಿ ಬ್ಯಾಕಪ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದ್ದರೆ, ನಿಮ್ಮ ಭವಿಷ್ಯದ ಬ್ಯಾಕಪ್‌ಗಳಲ್ಲಿ ಈ ಪ್ರೊಫೈಲ್‌ನ ಯಾವುದೇ ಟ್ರ್ಯಾಕ್ ಇರುವುದಿಲ್ಲ ಮತ್ತು ನೀವು ಅದನ್ನು ಪುನಃಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ.\nಈ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಹೇಗೆ ಅಳಿಸಬೇಕೆಂದು ಆಯ್ಕೆ ಮಾಡಲು \"ಮುಂದೆ\" ಕ್ಲಿಕ್ ಮಾಡಿ.</string>
+	<string name="dialog_message_delete_last_profile" state="needs_review" hash="-2123774331">ಒಂದು ಪ್ರೊಫೈಲ್ ಅನ್ನು ಅಳಿಸುವುದರಿಂದ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಈ ಪ್ರೊಫೈಲ್‌ಗೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಮಾಹಿತಿಯನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ. ಇದರಲ್ಲಿ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು, ಗುಂಪುಗಳು ಮತ್ತು ಈ ಪ್ರೊಫೈಲ್‌ನ ಎಲ್ಲಾ ಚರ್ಚೆಗಳ (ಸಂದೇಶಗಳು ಮತ್ತು ಲಗತ್ತುಗಳು) ವಿಷಯವು ಸೇರಿರುತ್ತದೆ.\n\n<b>ಇದು ನಿಮ್ಮ ಏಕೈಕ ಗೋಚರಿಸುವ ಪ್ರೊಫೈಲ್ ಆಗಿದೆ ಮತ್ತು ನೀವು ಯಾವುದೇ ಗುಪ್ತ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಹೊಂದಿದ್ದರೆ, ಅವುಗಳನ್ನು ಸಹ ಏಕಕಾಲದಲ್ಲಿ ಅಳಿಸಲಾಗುತ್ತದೆ.</b>\n\nನೀವು Olvid ನಲ್ಲಿ ಬ್ಯಾಕಪ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದ್ದರೆ, ನಿಮ್ಮ ಭವಿಷ್ಯದ ಬ್ಯಾಕಪ್‌ಗಳಲ್ಲಿ ಈ ಪ್ರೊಫೈಲ್‌ನ ಯಾವುದೇ ಜಾಡ್ಯ ಇರುವುದಿಲ್ಲ ಮತ್ತು ನೀವು ಅದನ್ನು ಪುನಃಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ.\n\nಈ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಹೇಗೆ ಅಳಿಸಬೇಕೆಂದು ಆಯ್ಕೆ ಮಾಡಲು \"ಮುಂದೆ\" ಕ್ಲಿಕ್ ಮಾಡಿ.</string>
 	<string name="dialog_message_delete_profile_multi" state="needs_review" hash="-2003495595">ಒಂದು ಪ್ರೊಫೈಲ್ ಅನ್ನು ಅಳಿಸುವುದರಿಂದ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಈ ಪ್ರೊಫೈಲ್‌ಗೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಮಾಹಿತಿಯನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ. ಇದರಲ್ಲಿ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು, ಗುಂಪುಗಳು ಮತ್ತು ಈ ಪ್ರೊಫೈಲ್‌ನ ಎಲ್ಲಾ ಚರ್ಚೆಗಳ (ಸಂದೇಶಗಳು ಮತ್ತು ಲಗತ್ತುಗಳು) ವಿಷಯವು ಸೇರಿರುತ್ತದೆ. ಈ ಕಾರ್ಯಾಚರಣೆಯು ನಿಮ್ಮ ಇತರ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ప్రభావితం ಮಾಡುವುದಿಲ್ಲ.\n\nಈ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಹೇಗೆ ಅಳಿಸಬೇಕೆಂದು ಆಯ್ಕೆ ಮಾಡಲು \"ಮುಂದೆ\" ಕ್ಲಿಕ್ ಮಾಡಿ.</string>
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">ಒಂದು ಪ್ರೊಫೈಲ್ ಅನ್ನು ಅಳಿಸುವುದರಿಂದ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಈ ಪ್ರೊಫೈಲ್‌ಗೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಮಾಹಿತಿಯನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ. ಇದರಲ್ಲಿ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು, ಗುಂಪುಗಳು ಮತ್ತು ಈ ಪ್ರೊಫೈಲ್‌ನ ಎಲ್ಲಾ ಚರ್ಚೆಗಳ (ಸಂದೇಶಗಳು ಮತ್ತು ಲಗತ್ತುಗಳು) ವಿಷಯವು ಸೇರಿರುತ್ತದೆ.\n\n<b>ಇದು ನಿಮ್ಮ ಏಕೈಕ ಗೋಚರಿಸುವ ಪ್ರೊಫೈಲ್ ಆಗಿದೆ ಮತ್ತು ನೀವು ಯಾವುದೇ ಗುಪ್ತ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಹೊಂದಿದ್ದರೆ, ಅವುಗಳನ್ನು ಸಹ ಏಕಕಾಲದಲ್ಲಿ ಅಳಿಸಲಾಗುತ್ತದೆ.</b>\n\nಈ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಹೇಗೆ ಅಳಿಸಬೇಕೆಂದು ಆಯ್ಕೆ ಮಾಡಲು \"ಮುಂದೆ\" ಕ್ಲಿಕ್ ಮಾಡಿ.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">ಈ ಪ್ರೊಫೈಲ್ ಅನ್ನು <b>ಎಲ್ಲೆಡೆ</b> ಅಳಿಸಿಹಾಕಿ</string>
@@ -1223,6 +1248,33 @@
 	<string name="label_attach_timer" state="needs_review" hash="-1527208333">ತಾತ್ಕಾಲಿಕ ಸಂದೇಶ</string>
 	<string name="label_attach_camera" state="needs_review" hash="-1123080444">ಒಂದು ಚಿತ್ರವನ್ನು ತೆಗೆಯಿರಿ</string>
 	<string name="label_attach_video" state="needs_review" hash="1626268086">ವೀಡಿಯೊವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ</string>
+	<string name="label_attach_scan" state="needs_review" hash="1128596739">ಒಂದು ದಾಖಲೆಯನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ</string>
+	<string name="label_scan_page_count" state="needs_review" hash="1987610035">%2$d ರಲ್ಲಿ %1$d ಪುಟ</string>
+	<string name="button_label_scan_add_page" state="needs_review" hash="1724653886">ಒಂದು ಪುಟವನ್ನು ಸೇರಿಸಿ</string>
+	<string name="button_label_scan_crop" state="needs_review" hash="-292939300">ಕತ್ತರಿಸಿ</string>
+	<string name="button_label_scan_rotate" state="needs_review" hash="807341684">ತಿರುಗಿಸು</string>
+	<string name="button_label_scan_auto_crop" state="needs_review" hash="1502815262">ಸ್ವಯಂಚಾಲಿತ</string>
+	<string name="button_label_scan_full_image" state="needs_review" hash="1366902062">ಪೂರ್ಣ ಚಿತ್ರ</string>
+	<string name="label_scan_filter_original" state="needs_review" hash="-817276190">ಮೂಲ</string>
+	<string name="label_scan_filter_enhanced" state="needs_review" hash="851648098">ಉತ್ತಮಗೊಳಿಸಲಾಗಿದೆ</string>
+	<string name="label_scan_filter_grayscale" state="needs_review" hash="-695463257">ಗ್ರೇಸ್ಕೇಲ್</string>
+	<string name="label_scan_filter_black_and_white" state="needs_review" hash="1668578691">ಬಿಳಿ ಮತ್ತು ಕಪ್ಪು</string>
+	<string name="dialog_title_discard_scan" state="needs_review" hash="-94972780">ಈ ಸ್ಕ್ಯಾನ್ ಅನ್ನು ರದ್ದುಗೊಳಿಸಬೇಕೇ?</string>
+	<string name="dialog_message_discard_scan" state="needs_review" hash="-1145223011">ಪರಿಶೀಲಿಸಿದ ಪುಟಗಳು ಕಳೆದುಹೋಗುತ್ತವೆ.</string>
+	<string name="toast_message_scan_failed" state="needs_review" hash="512858351">PDF ಅನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ</string>
+	<string name="button_label_scan_retake" state="needs_review" hash="-439420481">ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</string>
+	<string name="button_label_scan_enhance" state="needs_review" hash="-1842671012">ಉತ್ತಮಗೊಳಿಸು</string>
+	<string name="button_label_scan_filters" state="needs_review" hash="-1898368294">ಫಿಲ್ಟರ್‌ಗಳು</string>
+	<string name="button_label_scan_crop_rotate" state="needs_review" hash="-1750423698">ಕತ್ತರಿಸಿ ಮತ್ತು ತಿರುಗಿಸಿ</string>
+	<string name="button_label_scan_discard" state="needs_review" hash="-248729677">ಸ್ಕ್ಯಾನ್ ಅನ್ನು ಅಳಿಸಿ</string>
+	<string name="label_scan_mode_manual" state="needs_review" hash="-751509695">ಕೈಪಿಡಿ</string>
+	<string name="label_scan_mode_auto" state="needs_review" hash="315272314">ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸೆರೆಹಿಡಿಯಿರಿ</string>
+	<string name="label_scan_hint" state="needs_review" hash="289920901">ದಾಸ್ತಾವೇಜನ್ನು ಚೌಕಟ್ಟಿನಲ್ಲಿ ಇರಿಸಿ</string>
+	<string name="label_scan_hint_hold_still" state="needs_review" hash="584896298">ಕದಲಬೇಡಿ...</string>
+	<string name="button_label_scan_flash" state="needs_review" hash="775381504">ಫ್ಲ್ಯಾಷ್</string>
+	<string name="label_scan_camera_permission" state="needs_review" hash="-1855763825">Olvid ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಕ್ಯಾಮೆರಾವನ್ನು ಬಳಸಿಕೊಂಡು ದಾಖಲೆಗಳನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ಅನುಮತಿ ನೀಡಿ. ನೀವು ಇನ್ನೂ ನಿಮ್ಮ ಗ್ಯಾಲರಿಯಿಂದ ಚಿತ್ರಗಳನ್ನು ಆಮದು ಮಾಡಿಕೊಳ್ಳಬಹುದು.</string>
+	<string name="button_label_scan_file_name" state="needs_review" hash="2098556706">ಫೈಲ್ ಹೆಸರು</string>
+	<string name="dialog_title_scan_file_name" state="needs_review" hash="1332508838">PDF ಫೈಲ್ ಹೆಸರು</string>
 	<string name="pref_font_scale" state="needs_review" hash="1773040591">ಅಕ್ಷರ ಗಾತ್ರ</string>
 	<string name="pref_text_font_scale_0_75" state="needs_review" hash="-1963894407">ತುಂಬಾ ಚಿಕ್ಕದು (೭೫%)</string>
 	<string name="pref_text_font_scale_0_9" state="needs_review" hash="-708054676">ಸಣ್ಣ (90%)</string>
@@ -1274,6 +1326,9 @@
 	<string name="your_message" state="needs_review" hash="1739533147">ನಿಮ್ಮ ಸಂದೇಶ</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d ರಿಂದ %2$s ಗೆ ಪ್ರತಿಕ್ರಿಯೆಗಳು</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s %2$s ಗೆ ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಿದರು</string>
+	<string name="menu_action_remove_your_reaction" state="needs_review" hash="-1609298248">ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ತೆಗೆದುಹಾಕಿ</string>
+	<string name="menu_action_add_to_favorites" state="needs_review" hash="-1933720211">ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಿ</string>
+	<string name="menu_action_remove_from_favorites" state="needs_review" hash="1796304724">ಮೆಚ್ಚಿನವುಗಳಿಂದ ತೆಗೆದುಹಾಕಿ</string>
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">ಒಂದು ಎಮೋಜಿ ಸೇರಿಸಿ</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">ಡಿಬಗ್ ಮಾಹಿತಿ</string>
 	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">ಸಾಧನಗಳ ಸಂಖ್ಯೆ:</string>
@@ -1318,7 +1373,7 @@
 	<string name="invitation_status_description_one_to_one_invitation" state="needs_review" hash="-1110963247">%1$s ನಿಮ್ಮನ್ನು ಖಾಸಗಿ ಚರ್ಚೆಗೆ ಆಹ್ವಾನಿಸುತ್ತಾನೆ.</string>
 	<string name="toast_message_contact_removed" state="needs_review" hash="1769880831">ಸಂಪರ್ಕವನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ</string>
 	<string name="dialog_title_remove_contact" state="needs_review" hash="967879802">ಸಂಪರ್ಕವನ್ನು ತೆಗೆದುಹಾಕಬೇಕೇ?</string>
-	<string name="dialog_message_remove_contact" state="needs_review" hash="-85916850">ನಿಮ್ಮ ಸಂಪರ್ಕಗಳಿಂದ %1$s ಅನ್ನು ತೆಗೆದುಹಾಕುವುದರಿಂದ ಅವರೊಂದಿಗೆ ನೀವು ನಡೆಸುತ್ತಿರುವ ಖಾಸಗಿ ಸಂಭಾಷಣೆ ಕೊನೆಗೊಳ್ಳುತ್ತದೆ. ಆದಾಗ್ಯೂ, ನೀವು ಇಬ್ಬರೂ ಸಾಮಾನ್ಯವಾಗಿ ಹೊಂದಿರುವ ಗುಂಪು ಸಂಭಾಷಣೆಗಳಲ್ಲಿ ನೀವು ಇನ್ನೂ ಸಂದೇಶಗಳನ್ನು ವಿನಿಮಯ ಮಾಡಿಕೊಳ್ಳಬಹುದು.</string>
+	<string name="dialog_message_remove_contact" state="needs_review" hash="-85916850">ನಿಮ್ಮ ಸಂಪರ್ಕಗಳಿಂದ %1$s ಅನ್ನು ತೆಗೆದುಹಾಕುವುದರಿಂದ ಅವರೊಂದಿಗೆ ನೀವು ನಡೆಸುತ್ತಿರುವ ಖಾಸಗಿ ಚರ್ಚೆ ಕೊನೆಗೊಳ್ಳುತ್ತದೆ. ಆದಾಗ್ಯೂ, ನೀವು ಇಬ್ಬರೂ ಸಾಮಾನ್ಯವಾಗಿ ಹೊಂದಿರುವ ಗುಂಪು ಚರ್ಚೆಗಳಲ್ಲಿ ನೀವು ಇನ್ನೂ ಸಂದೇಶಗಳನ್ನು ವಿನಿಮಯ ಮಾಡಿಕೊಳ್ಳಬಹುದು.</string>
 	<string name="notification_content_one_to_one_invitation" state="needs_review" hash="-1518952630">ಖಾಸಗಿ ಚರ್ಚೆಗೆ ಆಹ್ವಾನ</string>
 	<string name="notification_public_title_one_to_one_invitation" state="needs_review" hash="-1518952630">ಖಾಸಗಿ ಚರ್ಚೆಗೆ ಆಹ್ವಾನ</string>
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">ಸಂಪರ್ಕಗಳಿಗಾಗಿ \"ವಿಶ್ವಾಸಾರ್ಹ ಮೂಲ\" ಸೂಚಕವನ್ನು ತೋರಿಸು</string>
@@ -1379,16 +1434,24 @@
 	<string name="menu_action_select_all" state="needs_review" hash="346006780">ಎಲ್ಲಾ ಆಯ್ಕೆಮಾಡು</string>
 	<string name="label_swipe_reply" state="needs_review" hash="-410287287">ಉತ್ತರಿಸು</string>
 	<string name="label_swipe_select" state="needs_review" hash="103682895">ಆಯ್ಕೆ ಮಾಡಿ</string>
-	<string name="menu_action_discussion_pin" state="needs_review" hash="554322472">ಈ ಚಾಟ್ ಅನ್ನು ಪಿನ್ ಮಾಡಿ</string>
+	<string name="menu_action_discussion_pin" state="needs_review" hash="554322472">ಈ ಚರ್ಚೆಯನ್ನು ಪಿನ್ ಮಾಡಿ</string>
 	<string name="menu_action_discussion_unpin" state="needs_review" hash="1464070527">ಈ ಚರ್ಚೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಿ</string>
-	<string name="pref_discussion_pin_title" state="needs_review" hash="554322472">ಈ ಚಾಟ್ ಅನ್ನು ಪಿನ್ ಮಾಡಿ</string>
-	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">ನೀವು ಪಿನ್ ಮಾಡಿದ ಚಾಟ್‌ಗಳು ಯಾವಾಗಲೂ ನಿಮ್ಮ ಚಾಟ್ ಪಟ್ಟಿಯ ಮೇಲ್ಭಾಗದಲ್ಲಿರುತ್ತವೆ.</string>
+	<string name="pref_discussion_pin_title" state="needs_review" hash="554322472">ಈ ಚರ್ಚೆಯನ್ನು ಪಿನ್ ಮಾಡಿ</string>
+	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">ನೀವು ಪಿನ್ ಮಾಡಿದ ಚರ್ಚೆಗಳು ಯಾವಾಗಲೂ ನಿಮ್ಮ ಚರ್ಚೆ ಪಟ್ಟಿಯ ಮೇಲ್ಭಾಗದಲ್ಲಿರುತ್ತವೆ.</string>
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">ಪ್ರದರ್ಶನದ ಗಾತ್ರ</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">ಚರ್ಚೆಯನ್ನು ತೆರೆಯಿರಿ</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">માત્ર વાંચવા માટે</string>
 	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">ನಿರೀಕ್ಷಿತ\nಓದಲು ಮಾತ್ರ</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">ನಿರ್ವಾಹಕ</string>
 	<string name="label_pending_admin" state="needs_review" hash="-2032202913">ನಿರೀಕ್ಷಿತ\nನಿರ್ವಾಹಕ</string>
+	<string name="label_moderator" state="needs_review" hash="767421225">ನಿರ್ವಾಹಕ</string>
+	<string name="label_pending_moderator" state="needs_review" hash="1955900662">ನಿರೀಕ್ಷಿತ ನಿರ್ವಾಹಕ</string>
+	<string name="dialog_title_group_roles" state="needs_review" hash="1155086227">ಗುಂಪಿನ ಪಾತ್ರಗಳು</string>
+	<string name="content_description_group_roles" state="needs_review" hash="-449063250">ಗುಂಪಿನಲ್ಲಿನ ಪಾತ್ರಗಳ ವಿವರಣೆ</string>
+	<string name="explanation_group_role_admin" state="needs_review" hash="731519662">ಗುಂಪಿನ ಸದಸ್ಯರನ್ನು ಸೇರಿಸಬಹುದು ಮತ್ತು ತೆಗೆದುಹಾಕಬಹುದು.</string>
+	<string name="explanation_group_role_moderator" state="needs_review" hash="2037600722">ಯಾರೇ ಆದರೂ ಅವರ ಸಂದೇಶಗಳನ್ನು \"ಎಲ್ಲೆಡೆಯಿಂದಲೂ\" ಅಳಿಸಬಹುದು.</string>
+	<string name="explanation_group_role_read_only" state="needs_review" hash="1017523379">ಚರ್ಚೆಯನ್ನು ನೋಡಬಹುದು, ಸಂದೇಶಗಳಿಗೆ ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಬಹುದು ಮತ್ತು ಮತಗಟ್ಟೆಗಳಿಗೆ ಉತ್ತರಿಸಬಹುದು, ಆದರೆ ಸಂದೇಶಗಳನ್ನು ಪೋಸ್ಟ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ.</string>
+	<string name="explanation_group_role_pending" state="needs_review" hash="-843291456">ಗುಂಪಿಗೆ ಆಹ್ವಾನಿಸಲಾಗಿದೆ ಆದರೆ ಇನ್ನೂ ಆಹ್ವಾನವನ್ನು ಒಪ್ಪಿಕೊಂಡಿಲ್ಲ. ಈ ಮಧ್ಯೆ ಪೋಸ್ಟ್ ಮಾಡಲಾದ ಸಂದೇಶಗಳು ಅವರು ಒಪ್ಪಿಕೊಂಡ ನಂತರ ಅವರಿಗೆ ತಲುಪಿಸಲಾಗುವುದು.</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">ಈ ಬಳಕೆದಾರರ ಹೆಸರನ್ನು ಪ್ರದರ್ಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">ಹೆಸರಿಲ್ಲದ ಗುಂಪು</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">ಚರ್ಚಾ ಅಧिसूಚನೆಗಳು</string>
@@ -1518,6 +1581,10 @@
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">ಗುಂಪ್ ಅನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">ಹೊಸ ಗುಂಪು</string>
 	<string name="label_group_type" state="needs_review" hash="498463258">ಗುಂಪಿನ ಪ್ರಕಾರ</string>
+	<string name="label_existing_discussions" state="needs_review" hash="-2089160663">ಹಿಂದಿನ ಚರ್ಚೆಗಳು</string>
+	<string name="label_last_message_date" state="needs_review" hash="1218222521">ಕೊನೆಯ ಸಂದೇಶ %1$s</string>
+	<string name="button_label_open" state="needs_review" hash="-2066377003">ತೆರೆಯಿರಿ</string>
+	<string name="button_label_create_a_new_group" state="needs_review" hash="-1073202815">ಹೊಸ ಗುಂಪನ್ನು ರಚಿಸಿ</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">ಸಾಮಾನ್ಯ</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">ಎಲ್ಲಾ ಗುಂಪಿನ ಸದಸ್ಯರು ಹೊಸ ಸದಸ್ಯರನ್ನು ಆಹ್ವಾನಿಸಬಹುದು.</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">ನಿಯಂತ್ರಿತ</string>
@@ -1531,6 +1598,8 @@
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">ನೀವು ಈಗ ಈ ಗುಂಪಿನ ನಿರ್ವಾಹಕ ಅಲ್ಲ</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">ನೀವು ಈಗ ಸಂದೇಶಗಳನ್ನು ಪೋಸ್ಟ್ ಮಾಡಲು ಅನುಮತಿಸಲಾಗಿದೆ.</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-930933808">ನೀವು ಇಲ್ಲಿ ಸಂದೇಶಗಳನ್ನು ಪೋಸ್ಟ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ.</string>
+	<string name="text_you_became_moderator" state="needs_review" hash="-609725743">ನೀವು ಈಗ ಗುಂಪಿನ ನಿರ್ವಾಹಕರಾಗಿದ್ದೀರಿ</string>
+	<string name="text_you_are_no_longer_moderator" state="needs_review" hash="1396461107">ನೀವು ಇನ್ನು ಮುಂದೆ ಗುಂಪಿನ ನಿರ್ವಾಹಕರು ಅಲ್ಲ</string>
 	<string name="label_pending" state="needs_review" hash="1975294811">ನಿರೀಕ್ಷಿತ</string>
 	<string name="pref_app_language_title" state="needs_review" hash="-1748962099">ಅಪ್ಲಿಕೇಶನ್ ಭಾಷೆ</string>
 	<string name="pref_text_default_device_language" state="needs_review" hash="-1062620207">ಡೀಫಾಲ್ಟ್ ಸಾಧನ ಭಾಷೆ</string>
@@ -1556,7 +1625,7 @@
 	<string name="text_setting_lock_wipe_on_fail" state="needs_review" hash="658363602">\"\u2023 3 ખોಟಾದ ಪಿನ್‌ಗಳನ್ನು ನಮೂದಿಸಿದ ನಂತರ ಸೂಕ್ಷ್ಮ ಸಂದೇಶಗಳನ್ನು ಅಳಿಸಿಹಾಕಿ: \"</string>
 	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">\"• ಲಾಕ್ સ્ક્રીನ್ આવશ્યક: \"</string>
 	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">\"• ಲಾಕ್ સ્ક્રીನ್ ટોકನ್ ಅನ್ನು રીસેಟ್ કરો: \"</string>
-	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">\"• ಹಿಂದಿನ ಸಂಭಾಷಣೆಗಳಲ್ಲಿ ಲಗತ್ತಿಸಲಾದ ಫೈಲ್‌ಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ: \"</string>
+	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">\"• ಹಿಂದಿನ ಚರ್ಚೆಗಳಲ್ಲಿ ಲಗತ್ತಿಸಲಾದ ಫೈಲ್‌ಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ: \"</string>
 	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">\"• સૂચನೆಯ ಮೇಲೆ ಚರ್ಚೆಯನ್ನು ಪುನಃಸ್ಥಾಪಿಸಿ: \"</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">\"• ಲಿಂಕ್‌ನ ಪೂರ್ವವೀಕ್ಷಣೆ ಸ್ವೀಕರಿಸಲಾಗಿದೆ: \"</string>
 	<string name="text_setting_link_preview_outbound" state="needs_review" hash="744187602">\"• ಲಿಂಕ್‌ನ ಪೂರ್ವವೀಕ್ಷಣೆ ಕಳುಹಿಸಲಾಗಿದೆ: \"</string>
@@ -1631,6 +1700,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_title" state="needs_review" hash="-434788963">ಲಿಂಕ್ ಪ್ರಿವಿವ್‌ಗಳಿಗಾಗಿ ಪ್ರಮಾಣಪತ್ರ ಬದಲಾವಣೆಯ ಅಧिसूಚನೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ</string>
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">ಈ ಆಯ್ಕೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುವುದರಿಂದ ಲಿಂಕ್‌ನ ಪೂರ್ವವೀಕ್ಷಣೆ ಪಡೆಯುವಾಗ ಪ್ರಮಾಣಪತ್ರದಲ್ಲಿನ ಬದಲಾವಣೆಗಳನ್ನು ಗುರುತಿಸುವ ಕಾರ್ಯವನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಬಹುದು. ಕೆಲವು ವೆಬ್‌ಸೈಟ್‌ಗಳು ಪ್ರತಿ ಬಾರಿ ವಿಭಿನ್ನ ಪ್ರಮಾಣಪತ್ರವನ್ನು ತೋರಿಸಬಹುದು ಮತ್ತು ಈ ಆಯ್ಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುವುದರಿಂದ ನಿಮಗೆ ಆಗಾಗ್ಗೆ ಅಧिसूಚನೆಗಳು ಬರಬಹುದು.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">QR ಕೋಡ್‌ಗಳನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ಹಳೆಯ ZXing ಲೈಬ್ರರಿಯನ್ನು ಬಳಸಿ</string>
+	<string name="pref_use_in_house_document_scanner_title" state="needs_review" hash="1552486206">Olvid‌ನ ಡಾಕ್ಯುಮೆಂಟ್ ಸ್ಕ್ಯಾನರ್ ಅನ್ನು ಬಳಸಿ</string>
+	<string name="pref_use_in_house_document_scanner_summary" state="needs_review" hash="-2092532938">ಡೀಫಾಲ್ಟ್ ಆಗಿ, ದಾಖಲೆಗಳನ್ನು Google Play ಸೇವೆಗಳ ಭಾಗವಾಗಿ ML ಕಿಟ್ ಬಳಸಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗುತ್ತದೆ. Olvid ನ ಅಂತರ್ನಿರ್ಮಿತ ಸ್ಕ್ಯಾನರ್ ಅನ್ನು ಬಳಸಲು ಈ ಆಯ್ಕೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ.</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">ಅನುಗುಣವಾಗಿ, QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ML ಕಿಟ್ ಅನ್ನು Olvid ಬಳಸುತ್ತದೆ. Olvid ನಲ್ಲಿ QR ಕೋಡ್‌ಗಳನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡುವಲ್ಲಿ ಸಮಸ್ಯೆಗಳಿದ್ದರೆ, ಈ ಆಯ್ಕೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ.</string>
 	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">ಆಂತರಿಕ PDF ವೀಕ್ಷಕವನ್ನು ಬಳಸಿ</string>
 	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">ಅನುಗುಣವಾಗಿ, PDF ಲಗತ್ತುಗಳು (ಬೇಸಿಕ್) ಆಂತರಿಕ ವೀಕ್ಷಕದಲ್ಲಿ ತೆರೆಯಲ್ಪಡುತ್ತವೆ. ಬದಲಾಗಿ ಬಾಹ್ಯ ವೀಕ್ಷಕವನ್ನು ಬಳಸಲು ಈ ಆಯ್ಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ.</string>
@@ -1638,7 +1709,7 @@
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">ಸಾಧನ %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">ಈ ಸಾಧನ</string>
 	<string name="menu_action_rename_device" state="needs_review" hash="43131083">ಸಾಧನದ ಹೆಸರನ್ನು ಬದಲಾಯಿಸಿ</string>
-	<string name="menu_action_trust_device" state="needs_review" hash="360435227">ಸಾಧನವನ್ನು ಅನುಮೋದಿಸಿ</string>
+	<string name="menu_action_trust_device" state="needs_review" hash="105728494">ನಾನು ಈ ಸಾಧನವನ್ನು ಗುರುತಿಸುತ್ತೇನೆ</string>
 	<string name="menu_action_remove_device" state="needs_review" hash="-1485256427">ಸಾಧನವನ್ನು ತೆಗೆದುಹಾಕಿ</string>
 	<string name="menu_action_refresh_device_list" state="needs_review" hash="1430227802">ಸಾಧನಗಳ ಪಟ್ಟಿಯನ್ನು ನವೀಕರಿಸಿ</string>
 	<string name="menu_action_recreate_channel" state="needs_review" hash="837900266">ಸುರಕ್ಷಿತ ಚಾನಲ್ ಅನ್ನು ಮರು-ಸೃಷ್ಟಿಸಿ</string>
@@ -1706,8 +1777,9 @@
 	<string name="button_label_add_device_xxx" state="needs_review" hash="-1479212354">\"%1$s\" ಎಂಬ ಸಾಧನವನ್ನು ಸೇರಿಸಿ</string>
 	<string name="notification_title_device_trust" state="needs_review" hash="-1568042777">ಹೊಸ ಸಾಧನ: \"%1$s\"</string>
 	<string name="notification_title_unnamed_device_trust" state="needs_review" hash="1704207127">ಹೊಸ ಸಾಧನ</string>
-	<string name="notification_message_device_trust" state="needs_review" hash="753501294">ನಿಮ್ಮ Olvid ಪ್ರೊಫೈಲ್‌ಗಳಲ್ಲಿ ಒಂದಕ್ಕೆ ಹೊಸ ಸಾಧನವನ್ನು ಸೇರಿಸಲಾಗಿದೆ.</string>
-	<string name="notification_action_device_trust" state="needs_review" hash="1450001608">ಈ ಸಾಧನವನ್ನು ವಿಶ್വസಿಸಿ</string>
+	<string name="notification_message_device_trust" state="needs_review" hash="-1646747013">ನಿಮ್ಮ Olvid ಪ್ರೊಫೈಲ್‌ಗೆ ಹೊಸ ಸಾಧನವನ್ನು ಸೇರಿಸಲಾಗಿದೆ. ನೀವು ಅದನ್ನು ಸೇರಿಸದಿದ್ದರೆ, ನಿಮ್ಮ ಸಾಧನಗಳಿಂದ ಅದನ್ನು ತೆಗೆದುಹಾಕಿ.</string>
+	<string name="notification_action_device_trust" state="needs_review" hash="936727529">ಹೌದು, ಅದು ನಾನೇ</string>
+	<string name="notification_action_device_see_devices" state="needs_review" hash="-1832505809">ನನ್ನ ಸಾಧನಗಳು</string>
 	<string name="notification_channel_device_name" state="needs_review" hash="1347557771">ಸಾಧನ ನಿರ್ವಹಣೆ</string>
 	<string name="notification_channel_device_description" state="needs_review" hash="-36703170">ನಿಮ್ಮ ಸಾಧನಗಳ ಕುರಿತು ಅಧिसूکانೆಗಳು</string>
 	<string name="notification_title_device_expiration" state="needs_review" hash="202400638">\"%1$s\" ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುವುದು</string>
@@ -1874,8 +1946,8 @@
 	<string name="pref_app_icon_fragment_title" state="needs_review" hash="-639159435">ಅಪ್ಲಿಕೇಶನ್ ಐಕಾನ್ ಅನ್ನು ಬದಲಾಯಿಸಿ</string>
 	<string name="pref_app_icon_fragment_summary" state="needs_review" hash="655175894">ನಿಮ್ಮ ಹೋಮ್ ಸ್ಕ್ರೀನ್‌‌ನಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್‌ನ ಹೆಸರು ಮತ್ತು ಐಕಾನ್ ಬದಲಾಯಿಸಲ್ಪಡುತ್ತದೆ. ಇದು ಅಧिसूಚನೆ ಐಕಾನ್‌ಗೆ ಅನ್ವಯಿಸುವುದಿಲ್ಲ.</string>
 	<string name="pref_app_icon_apply" state="needs_review" hash="509380077">ಅನ್ವಯించు (ಅಪ್ಲಿಕೇಶನ್ ಮುಚ್ಚಬಹುದು)</string>
-	<string name="pref_app_icon_shortcut_warning_title" state="needs_review" hash="472834764">ಚಾಟ್‍ಗಾಗಿ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು</string>
-	<string name="pref_app_icon_shortcut_warning_text" state="needs_review" hash="648578102">ದಯವಿಟ್ಟು ಗಮನಿಸಿ, ನೀವು ಅಪ್ಲಿಕೇಶನ್ ಐಕಾನ್ ಅನ್ನು ಬದಲಾಯಿಸಿದರೆ, ನೀವು ರಚಿಸಿದ ಚಾಟ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು ಅಳಿಸಲ್ಪಡುತ್ತವೆ. ನೀವು ಅವುಗಳನ್ನು ಮರು-ಸೃಷ್ಟಿಸಬೇಕಾಗುತ್ತದೆ.</string>
+	<string name="pref_app_icon_shortcut_warning_title" state="needs_review" hash="472834764">ಚರ್ಚೆ‍ಗಾಗಿ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು</string>
+	<string name="pref_app_icon_shortcut_warning_text" state="needs_review" hash="648578102">ದಯವಿಟ್ಟು ಗಮನಿಸಿ, ನೀವು ಅಪ್ಲಿಕೇಶನ್ ಐಕಾನ್ ಅನ್ನು ಬದಲಾಯಿಸಿದರೆ, ನೀವು ರಚಿಸಿದ ಚರ್ಚೆ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು ಅಳಿಸಲ್ಪಡುತ್ತವೆ. ನೀವು ಅವುಗಳನ್ನು ಮರು-ಸೃಷ್ಟಿಸಬೇಕಾಗುತ್ತದೆ.</string>
 	<string name="app_name_weather" state="needs_review" hash="-202325750">ಹವಾಮಾನ</string>
 	<string name="app_name_bricks" state="needs_review" hash="-2084998503">ಇಟ್ಟಿಗೆಗಳು</string>
 	<string name="app_name_clock" state="needs_review" hash="638206110">ಗಡಿಯಾರ</string>
@@ -1887,7 +1959,7 @@
 	<string name="hint_search_anything" state="needs_review" hash="1061022728">ಏನನ್ನು ಬೇಕಾದರೂ ಹುಡುಕಿ…</string>
 	<string name="global_search_result_other_discussions" state="needs_review" hash="-499574138">ಇತರ ಚರ್ಚೆಗಳು</string>
 	<string name="at_least_xxx" state="needs_review" hash="-1588014948">ಕನಿಷ್ಠ %1$d</string>
-	<string name="label_discussion_list_pin_divider" state="needs_review" hash="-1071788594">ಮುಖ್ಯ ಸಂಭಾಷಣೆಗಳು</string>
+	<string name="label_discussion_list_pin_divider" state="needs_review" hash="-1071788594">ಮುಖ್ಯ ಚರ್ಚೆಗಳು</string>
 	<string name="explanation_empty_bookmarks" state="needs_review" hash="1791557175">ಯಾವುದೇ ಸಂದೇಶವನ್ನು ಬುಕ್‌ಮಾರ್ಕ್ ಮಾಡಲಾಗಿಲ್ಲ</string>
 	<string name="explanation_empty_archived_discussion" state="needs_review" hash="-295674917">ಯಾವ ಆರ್ಚೀವ್ ಮಾಡಿದ ಚರ್ಚೆಯೂ ಇಲ್ಲ</string>
 	<string name="button_label_delete_from_my_devices" state="needs_review" hash="1014652258">ನನ್ನ ಸಾಧನಗಳಿಂದ ತೆಗೆದುಹಾಕಿ</string>
@@ -1971,10 +2043,10 @@
 	<string name="dialog_unarchive_setting_message" state="needs_review" hash="1567686550">ನೀವು ನಿಮ್ಮ ಚರ್ಚೆಗಳನ್ನು ಯಾವಾಗ ಪುನಃಸ್ಥಾಪಿಸಲು ಬಯಸುತ್ತೀರಿ?</string>
 	<string name="dialog_unarchive_setting_button_notified" state="needs_review" hash="1859399328">ಮುಂದಿನ ಸಂದೇಶ ಸೂಚನೆಯ ಮೇಲೆ</string>
 	<string name="dialog_unarchive_setting_button_never" state="needs_review" hash="610329857">ಯಾವಾಗಲೂ ಇಲ್ಲ</string>
-	<string name="dialog_unarchive_setting_explain" state="needs_review" hash="1798267293">ನೀವು ಪ್ರತಿ ಚಾಟ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಅಧिसूಚನೆಗಳ ವರ್ತನೆಯನ್ನು ಬದಲಾಯಿಸಬಹುದು.</string>
-	<string name="pref_archived_attachments_title" state="needs_review" hash="-159125479">ಆರ್ಕೈವ್ ಮಾಡಲಾದ ಚಾಟ್‌ಗಳ ಲಗತ್ತುಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ</string>
-	<string name="pref_archived_attachments_summary" state="needs_review" hash="1596754073">ಇದು ಆನ್ ಆಗಿರುವಾಗ, ಆರ್ಕೈವ್ ಮಾಡಲಾದ ಚಾಟ್‌ಗಳ ಲಗತ್ತುಗಳು ಮೇಲಿನ ಸೆಟ್ಟಿಂಗ್ ಪ್ರಕಾರ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಡೌನ್‌ಲೋಡ್ ಆಗುತ್ತವೆ.</string>
-	<string name="pref_unarchive_on_notification_title" state="needs_review" hash="-1146947153">ಧರತೀಕರಣದಲ್ಲಿ ಸಂಭಾಷಣೆಗಳನ್ನು ಅನ್ಆರ್ಕೈವ್ ಮಾಡಿ</string>
+	<string name="dialog_unarchive_setting_explain" state="needs_review" hash="1798267293">ನೀವು ಪ್ರತಿ ಚರ್ಚೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಅಧिसूಚನೆಗಳ ವರ್ತನೆಯನ್ನು ಬದಲಾಯಿಸಬಹುದು.</string>
+	<string name="pref_archived_attachments_title" state="needs_review" hash="-159125479">ಆರ್ಕೈವ್ ಮಾಡಲಾದ ಚರ್ಚೆಗಳ ಲಗತ್ತುಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ</string>
+	<string name="pref_archived_attachments_summary" state="needs_review" hash="1596754073">ಇದು ಆನ್ ಆಗಿರುವಾಗ, ಆರ್ಕೈವ್ ಮಾಡಲಾದ ಚರ್ಚೆಗಳ ಲಗತ್ತುಗಳು ಮೇಲಿನ ಸೆಟ್ಟಿಂಗ್ ಪ್ರಕಾರ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಡೌನ್‌ಲೋಡ್ ಆಗುತ್ತವೆ.</string>
+	<string name="pref_unarchive_on_notification_title" state="needs_review" hash="-1146947153">ಧರತೀಕರಣದಲ್ಲಿ ಚರ್ಚೆಗಳನ್ನು ಅನ್ಆರ್ಕೈವ್ ಮಾಡಿ</string>
 	<string name="pref_unarchive_on_notification_summary" state="needs_review" hash="778062251">ಇದು ಆನ್ ಆಗಿರುವಾಗ, ಹೊಸ ಸಂದೇಶದ ಅಧिसूಚನೆಯನ್ನು ಸ್ವೀಕರಿಸಿದಾಗ, ಸಂಗ್ರಹಿಸಲಾದ ಚರ್ಚೆಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಅನ್‌ಆರ್ಕೈವ್ ಆಗುತ್ತವೆ.</string>
 	<string name="call_notification_incoming_call" state="needs_review" hash="-1223043344">ಒಳಬರುವ ಕರೆ</string>
 	<string name="menu_action_copy_text_from_image" state="needs_review" hash="-1072685983">ಈ ಪದವನ್ನು ನಕಲಿಸಿ</string>
@@ -2080,6 +2152,8 @@
 	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">ಈ ಪಿಡಿಎಫ್ ಫೈಲ್ ಅನ್ನು ತೆರೆಯಲು ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿದೆ</string>
 	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">ಪಾಸ್ವರ್ಡ್</string>
 	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">ತಪ್ಪು ಪಾಸ್‌ವರ್ಡ್</string>
+	<string name="content_description_previous_match" state="needs_review" hash="-124264476">ಹಿಂದಿನ ಫಲಿತಾಂಶ</string>
+	<string name="content_description_next_match" state="needs_review" hash="-405381756">ಮುಂದಿನ ಫಲಿತಾಂಶ</string>
 	<string name="label_poll_create" state="needs_review" hash="-1677246175">ಒಂದು ಮತಗಟ್ಟೆ ರಚಿಸಿ</string>
 	<string name="label_poll_question" state="needs_review" hash="-1615603188">ಪ್ರಶ್ನ</string>
 	<string name="hint_poll_question" state="needs_review" hash="1961289317">ಒಂದು ಪ್ರಶ್ನೆ ಕೇಳಿ</string>
@@ -2110,6 +2184,7 @@
 	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">ಇನ್ನೂ ಯಾವುದೇ ಉತ್ತರ ಬಂದಿಲ್ಲ</string>
 	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">ಮುಂಬರುವ ಸಾಧನ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುವಿಕೆ</string>
 	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">ನನ್ನ ಸಾಧನಗಳನ್ನು ನಿರ್ವಹಿಸಿ</string>
+	<string name="tip_expiring_current_device_title" state="needs_review" hash="-2044212270">ಈ ಸಾಧನವು ಶೀಘ್ರದಲ್ಲೇ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲ್ಪಡುತ್ತದೆ</string>
 	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">ಆಫ್‌ಲೈನ್ ಸಾಧನ</string>
 	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">ನಿಮ್ಮ ಸಾಧನಗಳಲ್ಲಿ ಒಂದು **30 ದಿನಗಳಿಗಿಂತಲೂ ಹೆಚ್ಚು ಕಾಲದಿಂದ** ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿದೆ.\nನೀವು ಅದನ್ನು ಬಳಸುತ್ತಿಲ್ಲವಾದರೆ, ಸಿಂಕ್ರೊನೈಸೇಶನ್ ಸಮಸ್ಯೆಗಳನ್ನು ತಪ್ಪಿಸಲು ಅದನ್ನು **ತೆಗೆದುಹಾಕಲು** ನಾವು ಶಿಫಾರಸು ಮಾಡುತ್ತೇವೆ.</string>
 	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">ನನ್ನ ಸಾಧನಗಳನ್ನು ನಿರ್ವಹಿಸಿ</string>
@@ -2148,7 +2223,7 @@
 	<string name="tab_title_contacts" state="needs_review" hash="-859216410">ಸಂಪರ್ಕಗಳು</string>
 	<string name="tab_title_groups" state="needs_review" hash="-990226727">ಗುಂಪುಗಳು</string>
 	<string name="tab_title_calls" state="needs_review" hash="541245696">ಕૉಲ್‌ಗಳು</string>
-	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">ಮುಖ್ಯ ಸಂಭಾಷಣೆ</string>
+	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">ಮುಖ್ಯ ಚರ್ಚೆ</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">%1$s ನಿಮ್ಮ ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲವೇ?</string>
 	<string name="label_untrusted_device" state="needs_review" hash="-683121720">ಅವಿಶ್ವಾಸಾರ್ಹ</string>
 	<string name="label_offline" state="needs_review" hash="315122527">ಆಫ್‌ಲೈನ್</string>
@@ -2185,8 +2260,15 @@
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">\"ಮ್ಯಾಜಿಕ್ ಲಿಂಕ್\" ಅನ್ನು ಬಳಸಿ</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">చెల్లாத ಮ್ಯಾಜಿಕ್ ಲಿಂಕ್</string>
 	<string name="label_hanged_up" state="needs_review" hash="-1516413384">ಕರೆ ಕಟ್ ಆಯಿತು</string>
-	<string name="store_link_need_licenses" state="needs_review" hash="-1212508527">ನಿಮ್ಮ ತಂಡಕ್ಕೆ ಚಂದಾದಾರಿಕೆಗಳ ಅಗತ್ಯವಿದೆಯೇ?</string>
 	<string name="store_link_olvid_store" state="needs_review" hash="-1825630369">ಒಲ್ವಿಡ್ ಸ್ಟೋರ್‌ಗೆ ಭೇಟಿ ನೀಡಿ</string>
+	<string name="store_link_need_more_options" state="needs_review" hash="-839181230">ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳ ಅಗತ್ಯವಿದೆಯೇ?</string>
+	<string name="button_label_check_all_offers_olvid_store" state="needs_review" hash="361882901">Olvid ಸ್ಟೋರ್‌ನಲ್ಲಿ ನಮ್ಮ ಎಲ್ಲಾ ಕೊಡುಗೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ</string>
+	<string name="label_store_offer_individual" state="needs_review" hash="-1969313106">ವ್ಯಕ್ತಿ</string>
+	<string name="label_store_offer_individual_description" state="needs_review" hash="368977236">ನಿಮಗಾಗಿ ಮಾತ್ರ ಒಂದು ವೈಯಕ್ತಿಕ ಪರವಾನಗಿ.</string>
+	<string name="label_store_offer_family" state="needs_review" hash="-2103729206">ಕುಟುಂಬ</string>
+	<string name="label_store_offer_family_description" state="needs_review" hash="-1487232440">ನೀವು ಮತ್ತು ನಿಮ್ಮ ಕುಟುಂಬಕ್ಕಾಗಿ 6 ಪರವಾನಗಿಗಳ ಒಂದು ಪ್ಯಾಕ್.</string>
+	<string name="label_store_offer_team" state="needs_review" hash="-421568242">ತಂಡ</string>
+	<string name="label_store_offer_team_description" state="needs_review" hash="687093077">ನಿಮ್ಮ ತಂಡಕ್ಕೆ ವಿತರಿಸಲು ಹಲವಾರು ಪರವಾನಗಿಗಳು.</string>
 	<string name="toast_message_reminder_set" state="needs_review" hash="-961055414">રીમાઇન્ડರ್ સેટ ಮಾಡಲಾಗಿದೆ</string>
 	<string name="dialog_title_keycloak_authentication_impossible" state="needs_review" hash="325273853">ಪರಿಶೀಲನೆ ಸಾಧ್ಯವಿಲ್ಲ</string>
 	<string name="dialog_message_keycloak_authentication_impossible" state="needs_review" hash="-2031322232">ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಪ್ರಸ್ತುತ ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ನಿರ್ವಹಿಸುತ್ತಿದೆ ಮತ್ತು ಮರು-ಪರಿಶೀಲನೆ ಅಗತ್ಯವಿದೆ. ಆದಾಗ್ಯೂ, ಯಾವುದೇ ಬೆಂಬಲಿತ ಪರಿಶೀಲನಾ ವಿಧಾನ ಲಭ್ಯವಿರುವುದಿಲ್ಲ.\n\nಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ ದಯವಿಟ್ಟು ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.</string>
@@ -2298,8 +2380,6 @@
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">ವಿಷಯವನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">ರಫ್ತು ಮಾಡಿದ ಚರ್ಚೆಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ</string>
 	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">ಒಂದು OpenStreetMap ಶೈಲಿಯ ಫೈಲ್ ಅನ್ನು ಲೋಡ್ ಮಾಡುವಾಗ ದೋಷ ಸಂಭವಿಸಿದೆ.</string>
-	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿ ಚಂದಾದಾರಿಕೆಗಳು ಲಭ್ಯವಿಲ್ಲ</string>
-	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">ನೀವು ಸ್ಥಾಪಿಸಿದ ಓಲ್ವಿಡ್‌ನ ಆವೃತ್ತಿಯಲ್ಲಿ ಗೂಗಲ್‌ನ ಬಿಲ್ಲಿಂಗ್ ಲೈಬ್ರರಿಯು ಸೇರಿಲ್ಲ ಮತ್ತು ಇದು ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿನ ಖರೀದಿಗಳನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ.\n\nಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ, ದಯವಿಟ್ಟು **feedback@olvid.io** ನಲ್ಲಿ ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಿ.</string>
 	<string name="ftux_next" state="needs_review" hash="1158639077">ಮುಂದೆ</string>
 	<string name="ftux_start" state="needs_review" hash="646298532">ಪ್ರಾರಂಭಿಸಿ</string>
 	<string name="ftux_page_indicator" state="needs_review" hash="1987610035">ಪುಟ %1$d, ಒಟ್ಟು %2$d ಪುಟಗಳು</string>
@@ -2313,7 +2393,7 @@
 	<string name="ftux_page_protect_body" state="needs_review" hash="881847930">ಇದು ಕೇವಲ ಒಂದು ವಾಗ್ದಾನವಲ್ಲ - %1$s ಕ್ರಿಪ್ಟೋಗ್ರಾಫಿಕ್ ಪುರಾವೆಯನ್ನು ಒದಗಿಸುತ್ತದೆ.\n\nನೀವು ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ದೂರದಿಂದ ಅಥವಾ ನೇರವಾಗಿ ಸೇರಿಸಿದರೂ, ನಿಮ್ಮ ಸಂಭಾಷಣೆಗಳು ಯಾವಾಗಲೂ ಅಧಿಕೃತ ಮತ್ತು ಎಂಡ್-ಟು-ಎಂಡ್ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಆಗಿರುತ್ತವೆ.</string>
 	<string name="ftux_page_pricing_title" state="needs_review" hash="-1948277889"><b>ಪಾರದರ್ಶಕ</b> ವ್ಯಾಪಾರ ಮಾದರಿ</string>
 	<string name="ftux_page_pricing_body" state="needs_review" hash="-1064278870">%1$s ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಡೇಟಾದೊಂದಿಗೆ ತನ್ನನ್ನು ತಾನೇ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ - ಏಕೆಂದರೆ ಅದು ಯಾವುದನ್ನೂ ಕೇಳುವುದಿಲ್ಲ!\n\nಉಚಿತವಾದದ್ದು ಉಚಿತ. ಪಾವತಿಸಿದವು ಒಂದು ಬೆಲೆಯನ್ನು ತೋರಿಸುತ್ತದೆ.</string>
-	<string name="ftux_page_media_title" state="needs_review" hash="558110518">ಒಲ್ವಿಡ್ ಎಲ್ಲವನ್ನೂ ಹೊಂದಿದೆ</string>
+	<string name="ftux_page_media_title" state="needs_review" hash="558110518">ಒಲ್ವಿಡ್ <b>ಎಲ್ಲವನ್ನೂ</b> ಹೊಂದಿದೆ</string>
 	<string name="ftux_page_media_body" state="needs_review" hash="1807247240">ಅನುಬಂಧದ ಗಾತ್ರಕ್ಕೆ ಯಾವುದೇ ಮಿತಿಯಿಲ್ಲ, ಹೆಚ್ಚಿನ ರೆಸಲ್ಯೂಶನ್ ಫೋಟೋಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು, ಮತಗಟ್ಟೆಗಳು, ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊ ಕರೆಗಳು, ಬಹು-ಸಾಧನ ಬೆಂಬಲ, ಜಿಯೋಲೋಕೇಶನ್ - ಇದೆಲ್ಲವೂ ಲಭ್ಯವಿದೆ!</string>
 	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">ಅಪ್‌ಲೋಡ್ ಅನ್ನು ರದ್ದುಮಾಡು</string>
 	<string name="label_suggested_contacts" state="needs_review" hash="816810770">ಸೂಚಿಸಿದ ಸಂಪರ್ಕಗಳು</string>

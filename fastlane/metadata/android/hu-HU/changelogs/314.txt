@@ -1,0 +1,5 @@
+- Csak az első 4 kép jelenik meg egy üzenetben, és hozzáadtunk egy albumnézetet az összes kép megtekintéséhez.
+- Dokumentumszkennert adtunk hozzá.
+- Dupla koppintson egy fogadott üzenetre, hogy alapértelmezett emojival reagáljon.
+- Új avatárok a profilképpel nem rendelkező kontaktok és csoportok számára.
+- Hozzáadtunk egy gombot a fényképek közvetlen küldéséhez a főképernyőről.

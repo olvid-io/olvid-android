@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Uno dei tuoi dispositivi scadrà e verrà disattivato in **meno di %1$d giorno**.\nPuoi acquistare un abbonamento **Olvid+** per mantenerlo attivo.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Uno dei tuoi dispositivi scadrà e verrà disattivato in **meno di %1$d giorni**.\nPuoi acquistare un abbonamento **Olvid+** per mantenerlo attivo.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Questo dispositivo scadrà e verrà disattivato entro **meno di %1$d giorno**.\nÈ possibile acquistare un abbonamento **Olvid+** per mantenerlo attivo.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Questo dispositivo scadrà e verrà disattivato entro **meno di %1$d giorni**.\nÈ possibile acquistare un abbonamento **Olvid+** per mantenerlo attivo.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s è entrato/a nel gruppo</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s è entrato/a nel gruppo</item>
@@ -80,11 +84,11 @@
 	</plurals>
 	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1772966333">Conversazione archiviata</item>
-		<item quantity="other" state="needs_review" hash="1402495414">%1$d discussioni archiviate</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d conversazioni archiviate</item>
 	</plurals>
 	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1312483800">Discussione ripristinata</item>
-		<item quantity="other" state="needs_review" hash="-2093736213">%1$d discussioni ripristinate</item>
+		<item quantity="one" state="needs_review" hash="-1312483800">Conversazione ripristinata</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d conversazioni ripristinate</item>
 	</plurals>
 	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-2045500103">Messaggio rimosso dai preferiti</item>
@@ -123,12 +127,12 @@
 		<item quantity="other" state="needs_review" hash="-1558931055">Stai per eliminare **definitivamente** %1$d conversazioni e i messaggi in esse contenuti per **tutti** i partecipanti a queste conversazioni. Assicurati che sia proprio quello che vuoi fare.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">Stai per invitare ogni membro del gruppo con cui hai un canale (attualmente 1 membro) in una discussione privata.\nVuoi procedere?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">Stai per invitare ogni membro del gruppo con cui hai un canale (attualmente %1$d membri) a una discussione privata.\nVuoi procedere?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">Stai per invitare ogni membro del gruppo con cui hai un canale (attualmente 1 membro) in una conversazione privata.\nVuoi procedere?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Stai per invitare ogni membro del gruppo con cui hai un canale (attualmente %1$d membri) a una conversazione privata.\nVuoi procedere?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">Un membro del gruppo può essere invitato a una discussione privata</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d i membri del gruppo possono essere invitati a una discussione privata</item>
+		<item quantity="one" state="needs_review" hash="-127723614">Un membro del gruppo può essere invitato a una conversazione privata</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d i membri del gruppo possono essere invitati a una conversazione privata</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 gruppo comune</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Aggiungi al gruppo %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Aggiungi ai gruppi %1$d</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Hai già una conversazione con questi partecipanti.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Hai già %1$d conversazioni con questi partecipanti.</item>
 	</plurals>
 </resources>

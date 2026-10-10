@@ -46,6 +46,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -93,6 +94,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
@@ -105,6 +107,7 @@ import io.olvid.messenger.customClasses.attachShareUri
 import io.olvid.messenger.customClasses.formatMarkdownToAnnotatedString
 import androidx.lifecycle.Observer
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.map
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
 import io.olvid.messenger.databases.entity.Message
@@ -119,6 +122,7 @@ import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.designsystem.theme.olvidSwitchDefaults
+import io.olvid.messenger.discussion.message.attachments.Attachment
 import io.olvid.messenger.gallery.GalleryViewModel.GalleryType.DRAFT
 import io.olvid.messenger.owneddetails.UseImageAsProfilePictureActivity
 import io.olvid.messenger.owneddetails.canBeUsedAsProfilePicture
@@ -160,7 +164,11 @@ fun GalleryScreen(
         onDispose { viewModel.imageAndVideoFyleAndStatusList.removeObserver(observer) }
     }
     val fyleList by fyleListState
-    val currentFyle by viewModel.currentFyleAndStatus.observeAsState()
+    val currentFyle by viewModel.currentFyleAndStatus.map { fyleAndStatus ->
+        fyleAndStatus?.let {
+            Attachment(it.fyle, it.fyleMessageJoinWithStatus)
+        }
+    }.observeAsState()
     val currentMessage by viewModel.currentAssociatedMessage.observeAsState()
     val currentExpiration by viewModel.currentAssociatedMessageExpiration.observeAsState()
     val textBlocks by viewModel.currentAssociatedTextBlocks.observeAsState()
@@ -205,6 +213,13 @@ fun GalleryScreen(
         if (!initialScrollDone) return@LaunchedEffect
         if (!fyleList?.getOrNull(pagerState.currentPage).isVideo()) {
             viewModel.mediaPlayer?.pause()
+        }
+    }
+
+    // Surface the file name/type and the open action right away on an unsupported format
+    LaunchedEffect(pagerState.currentPage, fyleList, initialScrollDone) {
+        if (initialScrollDone && fyleList?.getOrNull(pagerState.currentPage).isUnsupportedMedia()) {
+            controlsShown = true
         }
     }
 
@@ -403,7 +418,14 @@ fun GalleryScreen(
                             isCurrentPageZoomed = zoomed
                         }
                     }
-                    if (fyleAndStatus.isVideo()) {
+                    if (fyleAndStatus.isUnsupportedMedia()) {
+                        UnsupportedMediaPage(
+                            modifier = Modifier.fillMaxSize(),
+                            isVideo = fyleAndStatus.fyleMessageJoinWithStatus.nonNullMimeType.startsWith("video/"),
+                            onOpen = { onOpen(fyleAndStatus) },
+                            onSingleTap = { controlsShown = !controlsShown },
+                        )
+                    } else if (fyleAndStatus.isVideo()) {
                         GalleryVideoPlayer(
                             modifier = Modifier.fillMaxSize(),
                             mediaPlayer = viewModel.mediaPlayer,
@@ -411,7 +433,8 @@ fun GalleryScreen(
                             isCurrentPage = isCurrentPage && initialScrollDone,
                             initialScrollDone = initialScrollDone,
                             onSingleTap = { controlsShown = !controlsShown },
-                            onZoomedChanged = onZoomedChanged
+                            onZoomedChanged = onZoomedChanged,
+                            overlayBottomPadding = overlayBottomPadding
                         )
                     } else {
                         ZoomableImage(
@@ -452,8 +475,8 @@ fun GalleryScreen(
                 GalleryTopBar(
                     menuType = menuType,
                     onBack = onBack,
-                    onOpen = { currentFyle?.let { onOpen(it) } },
-                    onSave = { currentFyle?.let { onSave(it) } },
+                    onOpen = { currentFyle?.let { onOpen(it.fyleAndStatus) } },
+                    onSave = { currentFyle?.let { onSave(it.fyleAndStatus) } },
                     onShare = {
                         currentFyle?.let { fyle ->
                             val shareIntent = Intent(Intent.ACTION_SEND).attachShareUri(
@@ -471,9 +494,9 @@ fun GalleryScreen(
                     onDelete = {
                         currentFyle?.let { fyle ->
                             if (viewModel.galleryType == DRAFT) {
-                                App.runThread(DeleteAttachmentTask(fyle))
+                                App.runThread(DeleteAttachmentTask(fyle.fyleAndStatus))
                             } else {
-                                deleteTargetFyle = fyle
+                                deleteTargetFyle = fyle.fyleAndStatus
                                 showDeleteDialog = true
                             }
                         }
@@ -481,8 +504,8 @@ fun GalleryScreen(
                     onGoToDiscussion = onGoToDiscussion?.let { callback ->
                         currentMessage?.let { msg -> { callback(msg.discussionId, msg.id) } }
                     },
-                    onUseAsProfilePicture = currentFyle?.takeIf { it.canBeUsedAsProfilePicture }?.let { fyle ->
-                        { UseImageAsProfilePictureActivity.launch(context, fyle) }
+                    onUseAsProfilePicture = currentFyle?.takeIf { it.fyleAndStatus.canBeUsedAsProfilePicture }?.let { fyle ->
+                        { UseImageAsProfilePictureActivity.launch(context, fyle.fyleAndStatus) }
                     }
                 )
             }
@@ -499,7 +522,7 @@ fun GalleryScreen(
                     }
             ) {
                 Column {
-                    if (currentFyle.isVideo()) {
+                    if (currentFyle?.fyleAndStatus.isVideo()) {
                         viewModel.mediaPlayer?.let {
                             Box(
                                 modifier = Modifier.background(Color.Black.copy(alpha = 0.6f))
@@ -509,7 +532,7 @@ fun GalleryScreen(
                         }
                     }
                     GalleryBottomBar(
-                        fyleAndStatus = currentFyle,
+                        fyleAndStatus = currentFyle?.fyleAndStatus,
                         showTextBlockToggle = currentFyle?.fyleMessageJoinWithStatus?.textExtracted == true
                                 && !currentFyle?.fyleMessageJoinWithStatus?.textContent.isNullOrEmpty(),
                         showTextBlocks = showTextBlocks,
@@ -868,5 +891,58 @@ private fun GalleryExpirationBadge(
     }
 }
 
-private fun FyleAndStatus?.isVideo() =
-    this?.fyleMessageJoinWithStatus?.nonNullMimeType?.startsWith("video/") == true
+@Composable
+private fun UnsupportedMediaPage(
+    isVideo: Boolean,
+    onOpen: () -> Unit,
+    onSingleTap: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .clickable(
+                interactionSource = null,
+                indication = null,
+                onClick = onSingleTap
+            )
+            .padding(horizontal = 32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            modifier = Modifier.size(64.dp),
+            painter = painterResource(if (isVideo) R.drawable.mime_type_icon_video else R.drawable.mime_type_icon_image),
+            contentDescription = null,
+            tint = Color.White.copy(alpha = 0.7f)
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = stringResource(if (isVideo) R.string.label_unsupported_video_format else R.string.label_unsupported_image_format),
+            color = Color.White,
+            style = OlvidTypography.body1,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(8.dp))
+        OlvidTextButton(
+            text = stringResource(R.string.button_label_open_in_external_viewer),
+            onClick = onOpen
+        )
+    }
+}
+
+// imageResolution is set to "" once a complete attachment is known to have no decodable preview
+private fun FyleAndStatus?.isUnsupportedMedia() =
+    this?.fyle?.isComplete == true && fyleMessageJoinWithStatus.imageResolution == ""
+
+internal fun FyleAndStatus?.isVideo() = this?.fyleMessageJoinWithStatus?.nonNullMimeType?.startsWith("video/") == true
+        && !isUnsupportedMedia()
+
+@Preview
+@Composable
+private fun UnsupportedMediaPagePreview() {
+    UnsupportedMediaPage(
+        isVideo = false,
+        onOpen = {},
+        onSingleTap = {},
+    )
+}

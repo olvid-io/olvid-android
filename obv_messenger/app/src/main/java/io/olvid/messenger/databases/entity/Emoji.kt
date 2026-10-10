@@ -32,11 +32,14 @@ data class Emoji(
     val isFavorite: Boolean = false,
     @ColumnInfo(name = LAST_USED)
     val lastUsed: Long = 0,
+    @ColumnInfo(name = LAST_USED_KEYBOARD, defaultValue = "0")
+    val lastUsedKeyboard: Long = 0,
 ) {
     companion object {
         const val TABLE_NAME = "emojis"
         const val EMOJI = "emoji"
         const val IS_FAVORITE = "is_favorite"
         const val LAST_USED = "last_used"
+        const val LAST_USED_KEYBOARD = "last_used_keyboard"
     }
 }

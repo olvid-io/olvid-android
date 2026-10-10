@@ -89,7 +89,7 @@ class DiscussionListFragment : RefreshingFragment() {
                     onClick = ::discussionClicked,
                     onLongClick = ::discussionLongClicked,
                     onMarkAsRead = { discussionListViewModel.markAllDiscussionMessagesRead(it) },
-                    onMarkAsUnread = { discussionListViewModel.markDiscussionAsUnread(it) },
+                    onMarkAsUnread = { discussionListViewModel.markDiscussionsAsUnread(listOf(it)) },
                     invalidateActionMode = {
                         discussionListViewModel.refreshSelection()
                         actionMode?.invalidate()
@@ -163,9 +163,9 @@ class DiscussionListFragment : RefreshingFragment() {
                     }
 
                     R.id.popup_action_discussion_mark_as_unread -> {
-                        discussionListViewModel.selection.forEach {
-                            discussionListViewModel.markDiscussionAsUnread(it.discussion.id)
-                        }
+                        discussionListViewModel.markDiscussionsAsUnread(
+                            discussionListViewModel.selection.map { it.discussion }
+                        )
                         mode.finish()
                         return true
                     }

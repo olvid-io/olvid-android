@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">您的其中一臺裝置將在**少於%1$d天**內過期並停用。\n您可以購買**Olvid+**訂閱以使其保持活躍。</item>
 		<item quantity="other" state="needs_review" hash="-574658149">您的其中一臺裝置將在 **少於 %1$d 天** 後過期並停用。\n您可以購買 **Olvid+** 訂閱以使其保持活躍。</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">此裝置將在**%1$d天內**到期並停用。\n您可以購買**Olvid+**訂閱以保持其啟用狀態。</item>
+		<item quantity="other" state="needs_review" hash="993103846">此裝置將在**%1$d天內**到期並停用。\n您可以購買**Olvid+**訂閱以保持其啟用狀態。</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s 加入了群組</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s 加入了群組</item>
@@ -80,11 +84,11 @@
 	</plurals>
 	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1772966333">對話已封存</item>
-		<item quantity="other" state="needs_review" hash="1402495414">已封存 %1$d 則討論</item>
+		<item quantity="other" state="needs_review" hash="1402495414">已封存 %1$d 則對話</item>
 	</plurals>
 	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1312483800">對話已取消封存</item>
-		<item quantity="other" state="needs_review" hash="-2093736213">已恢復 %1$d 個討論</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">已恢復 %1$d 個對話</item>
 	</plurals>
 	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-2045500103">訊息已取消收藏</item>
@@ -123,12 +127,12 @@
 		<item quantity="other" state="needs_review" hash="-1558931055">您即將**永久**刪除 %1$d 則對話以及其中包含的訊息，對這些對話中的**所有人**可見。請確認您確實想要這麼做。</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">您即將邀請您擁有頻道（目前 1 名成員）的每個群組成員參與私人討論。\n您想繼續嗎？</item>
-		<item quantity="other" state="needs_review" hash="-994717142">您即將邀請您擁有頻道（目前 %1$d 位成員）的每個群組成員參與私人討論。\n您要繼續嗎？</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">您即將邀請您擁有頻道（目前 1 名成員）的每個群組成員參與私人對話。\n您想繼續嗎？</item>
+		<item quantity="other" state="needs_review" hash="-994717142">您即將邀請您擁有頻道（目前 %1$d 位成員）的每個群組成員參與私人對話。\n您要繼續嗎？</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">可以邀請 1 名群組成員參與私人討論</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d 群組成員可以被邀請到私密討論</item>
+		<item quantity="one" state="needs_review" hash="-127723614">可以邀請 1 名群組成員參與私人對話</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d 群組成員可以被邀請到私密對話</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 個共同群組</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">加入到%1$d群組</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">加入到%1$d個群組</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">您已經與這些參與者建立了一個對話群組。</item>
+		<item quantity="other" state="needs_review" hash="809550612">您已經與這些參與者進行了 %1$d 次對話。</item>
 	</plurals>
 </resources>

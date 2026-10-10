@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">אחד מהמכשירים שלך יפוג ויושבת בתוך **פחות מ-%1$d יום**.\nתוכל לרכוש מנוי **Olvid+** כדי לשמור אותו פעיל.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">אחד מהמכשירים שלך יפוג ויושבת בתוך **פחות מ-%1$d ימים**.\nתוכל לרכוש מנוי **Olvid+** כדי לשמור אותו פעיל.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">מכשיר זה יפוג ויכובה תוך **פחות מ-%1$d יום**.\nתוכלו לרכוש מנוי **Olvid+** כדי לשמור עליו פעיל.</item>
+		<item quantity="other" state="needs_review" hash="993103846">מכשיר זה יפוג ויכובה תוך **פחות מ-%1$d ימים**.\nתוכלו לרכוש מנוי **Olvid+** כדי לשמור עליו פעיל.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s הצטרף/ה לקבוצה</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s הצטרף/ה לקבוצה</item>
@@ -115,20 +119,20 @@
 		<item quantity="other" state="needs_review" hash="-895867176">איך תרצה למחוק את הודעות ה%1$d הנבחרות?\nפעולה זו אינה ניתנת לביטול.</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-606769319">אתה עומד למחוק **באופן קבוע** הודעה עבור **כולם** בדיון זה. אנא ודא שזה אכן מה שאתה רוצה לעשות.</item>
-		<item quantity="other" state="needs_review" hash="-1284393519">אתה עומד למחוק **באופן קבוע** %1$d הודעות עבור **כולם** בדיון זה. אנא ודא שזה אכן מה שאתה רוצה לעשות.</item>
+		<item quantity="one" state="needs_review" hash="-606769319">אתה עומד למחוק **באופן קבוע** הודעה עבור **כולם** בשיחה זו. אנא ודא שזה אכן מה שאתה רוצה לעשות.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">אתה עומד למחוק **באופן קבוע** %1$d הודעות עבור **כולם** בשיחה זו. אנא ודא שזה אכן מה שאתה רוצה לעשות.</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="2118446236">אתה עומד למחוק **לצמיתות** שיחה זו ואת כל ההודעות שהיא מכילה עבור **כל** המשתתפים בשיחה זו. אנא ודא שזה אכן מה שאתה רוצה לעשות.</item>
 		<item quantity="other" state="needs_review" hash="-1558931055">אתה עומד למחוק **בצורה קבועה** %1$d שיחות וההודעות שהן מכילות עבור **כולם** בשיחות אלה. אנא ודא שזה אכן מה שאתה רוצה לעשות.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">אתה עומד להזמין כל חבר בקבוצה שאיתו יש לך ערוץ (כרגע חבר אחד) לדיון פרטי.\nהאם תרצה להמשיך?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">אתה עומד להזמין כל חבר בקבוצה שאיתו יש לך ערוץ (כרגע %1$d חברים) לדיון פרטי.\nהאם תרצה להמשיך?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">אתה עומד להזמין כל חבר בקבוצה שאיתו יש לך ערוץ (כרגע חבר אחד) לשיחה פרטית.\nהאם תרצה להמשיך?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">אתה עומד להזמין כל חבר בקבוצה שאיתו יש לך ערוץ (כרגע %1$d חברים) לשיחה פרטית.\nהאם תרצה להמשיך?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">ניתן להזמין חבר אחד מהקבוצה לדיון פרטי</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d חברי הקבוצה יכולים להיות מוזמנים לדיון פרטי</item>
+		<item quantity="one" state="needs_review" hash="-127723614">ניתן להזמין חבר אחד מהקבוצה לשיחה פרטית</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d חברי הקבוצה יכולים להיות מוזמנים לשיחה פרטית</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 קבוצה משותפת</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">הוסף לקבוצה %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">הוסף לקבוצות %1$d</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">כבר יש לך שיחה עם המשתתפים האלה.</item>
+		<item quantity="other" state="needs_review" hash="809550612">כבר יש לך %1$d שיחות עם המשתתפים האלה.</item>
 	</plurals>
 </resources>

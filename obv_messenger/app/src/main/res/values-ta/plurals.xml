@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">உங்களுடைய சாதனங்களில் ஒன்று **%1$d நாளுக்குள்** காலாவதியாகும், மேலும் செயலிழக்கச் செய்யப்படும்.\n அதை தொடர்ந்து பயன்படுத்த, நீங்கள் **Olvid+** சந்தா வாங்கலாம்.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">உங்களுடைய சாதனங்களில் ஒன்று **%1$d நாட்களுக்குள்** காலாவதியாகும், மேலும் செயலிழக்கச் செய்யப்படும்.\n அதை தொடர்ந்து பயன்படுத்த, நீங்கள் **Olvid+** சந்தா வாங்கலாம்.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">இந்த சாதனம் **%1$d நாளுக்குள்** காலாவதியாகும், மேலும் செயலிழக்கச் செய்யப்படும்.\nஇதை தொடர்ந்து பயன்படுத்த, நீங்கள் **Olvid+** சந்தா வாங்கலாம்.</item>
+		<item quantity="other" state="needs_review" hash="993103846">இந்த சாதனம் **%1$d நாட்களுக்குள்** காலாவதியாகும், மேலும் செயலிழக்கச் செய்யப்படும்.\nஇதை தொடர்ந்து பயன்படுத்த, நீங்கள் **Olvid+** சந்தா வாங்கலாம்.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s குழுவில் இணைந்தார்</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s குழுவில் இணைந்தார்</item>
@@ -123,12 +127,12 @@
 		<item quantity="other" state="needs_review" hash="-1558931055">நீங்கள் %1$d உரையாடல்களை நிரந்தரமாக நீக்கப் போகிறீர்கள், மேலும் இந்த உரையாடல்களில் உள்ள செய்திகளையும் **எல்லோருக்கும்** நீக்கப் போகிறீர்கள். நீங்கள் இதைத்தான் செய்ய விரும்புகிறீர்கள் என்பதை உறுதிப்படுத்திக் கொள்ளுங்கள்.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">நீங்கள் ஒரு சேனலைக் கொண்ட ஒவ்வொரு குழு உறுப்பினரையும் (தற்போது 1 உறுப்பினர்) ஒரு தனிப்பட்ட கலந்துரையாடலுக்கு அழைக்கப் போகிறீர்கள்.\nதொடர விரும்புகிறீர்களா?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">நீங்கள் ஒரு சேனலைக் கொண்ட ஒவ்வொரு குழு உறுப்பினரையும் (தற்போது %1$d உறுப்பினர்கள்) ஒரு தனிப்பட்ட கலந்துரையாடலுக்கு அழைக்கப் போகிறீர்கள்.\nதொடர விரும்புகிறீர்களா?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">நீங்கள் ஒரு சேனலைக் கொண்ட ஒவ்வொரு குழு உறுப்பினரையும் (தற்போது 1 உறுப்பினர்) ஒரு தனிப்பட்ட உரையாடலுக்கு அழைக்கப் போகிறீர்கள்.\nதொடர விரும்புகிறீர்களா?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">நீங்கள் ஒரு சேனலைக் கொண்ட ஒவ்வொரு குழு உறுப்பினரையும் (தற்போது %1$d உறுப்பினர்கள்) ஒரு தனிப்பட்ட உரையாடலுக்கு அழைக்கப் போகிறீர்கள்.\nதொடர விரும்புகிறீர்களா?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">1 குழு உறுப்பினர் ஒரு தனிப்பட்ட கலந்துரையாடலுக்கு அழைக்கப்படலாம்</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d குழு உறுப்பினர்களை ஒரு தனிப்பட்ட கலந்துரையாடலுக்கு அழைக்கலாம்</item>
+		<item quantity="one" state="needs_review" hash="-127723614">1 குழு உறுப்பினர் ஒரு தனிப்பட்ட உரையாடலுக்கு அழைக்கப்படலாம்</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d குழு உறுப்பினர்களை ஒரு தனிப்பட்ட உரையாடலுக்கு அழைக்கலாம்</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 பொது குழு</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">%1$d குழுவில் சேர்</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">%1$d குழுக்களில் சேர்க்கவும்</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">இந்த பங்கேற்பாளர்களுடன் உங்களிடம் ஏற்கனவே ஒரு உரையாடல் உள்ளது.</item>
+		<item quantity="other" state="needs_review" hash="809550612">இந்த பங்கேற்பாளர்களுடன் உங்களுக்கு ஏற்கனவே %1$d உரையாடல்கள் உள்ளன.</item>
 	</plurals>
 </resources>

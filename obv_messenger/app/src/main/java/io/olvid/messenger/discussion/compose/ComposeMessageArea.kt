@@ -56,6 +56,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imeAnimationTarget
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.only
@@ -64,6 +65,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
@@ -113,7 +115,7 @@ import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
 import io.olvid.messenger.customClasses.DiscussionInputEditText
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.avatarTextColorArgb
 import io.olvid.messenger.customClasses.KeyboardUtils
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.focusAndShowKeyboard
@@ -124,7 +126,9 @@ import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.tasks.ClearDraftReplyTask
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask
 import io.olvid.messenger.designsystem.components.dashedBorder
+import io.olvid.messenger.designsystem.stableSystemBars
 import io.olvid.messenger.discussion.DiscussionViewModel
+import io.olvid.messenger.discussion.GalleryRequest
 import io.olvid.messenger.discussion.Utils
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.mention.MentionUrlSpan
@@ -303,7 +307,7 @@ fun ComposeMessageArea(
                     newDraft.mentions?.forEach { mention ->
                         if (mention.rangeEnd <= spannableString.length) {
                             val color =
-                                InitialView.getTextColor(
+                                avatarTextColorArgb(
                                     context,
                                     mention.userIdentifier,
                                     ContactCacheSingleton.getContactCustomHue(
@@ -354,7 +358,7 @@ fun ComposeMessageArea(
     Column(
         modifier = modifier.then(
             if (composeMessageViewModel.emojiExpanded.not()) {
-                Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+                Modifier.windowInsetsPadding(WindowInsets.stableSystemBars.union(WindowInsets.ime).only(WindowInsetsSides.Bottom))
             } else Modifier
         )
     ) {
@@ -812,10 +816,10 @@ fun ComposeMessageArea(
                         )
                     ) && SettingsActivity.useInternalImageViewer()
                 ) {
-                    App.openDraftGalleryActivity(
-                        activity,
-                        attachment.fyleMessageJoinWithStatus.messageId,
-                        attachment.fyleMessageJoinWithStatus.fyleId
+                    discussionViewModel.galleryRequest = GalleryRequest(
+                        messageId = attachment.fyleMessageJoinWithStatus.messageId,
+                        fyleId = attachment.fyleMessageJoinWithStatus.fyleId,
+                        draft = true,
                     )
                 } else {
                     App.openFyleViewer(activity, attachment.fyleAndStatus, null)

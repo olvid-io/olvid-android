@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">**%1$d일** 이내에 귀하의 기기 중 하나가 만료되어 비활성화됩니다.\n**Olvid+** 구독을 구매하여 활성 상태를 유지할 수 있습니다.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">**%1$d일** 이내에 귀하의 기기 중 하나가 만료되어 비활성화됩니다.\n**Olvid+** 구독을 구매하여 활성 상태를 유지할 수 있습니다.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">이 장치는 **%1$d일 이내**에 사용 기간이 만료되어 비활성화됩니다.\n활성 상태를 유지하려면 **Olvid+** 구독을 구매할 수 있습니다.</item>
+		<item quantity="other" state="needs_review" hash="993103846">이 장치는 **%1$d일 이내**에 사용 기간이 만료되어 비활성화됩니다.\n활성 상태를 유지하려면 **Olvid+** 구독을 구매하세요.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s님이 그룹에 참여했습니다.</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s님이 그룹에 참여했습니다.</item>
@@ -124,11 +128,11 @@
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">채널이 있는 그룹 멤버(현재 1명) 각각을 비공개 대화에 초대하려 합니다.\n계속하시겠습니까?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">채널이 있는 그룹의 각 멤버(%1$d명)를 개인 토론에 초대하려 합니다.\n계속하시겠습니까?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">채널이 있는 그룹의 각 멤버(%1$d명)를 개인 대화에 초대하려 합니다.\n계속하시겠습니까?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">그룹 멤버 1명을 개인 토론에 초대할 수 있습니다.</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d 그룹 멤버들은 비공개 토론에 초대될 수 있습니다.</item>
+		<item quantity="one" state="needs_review" hash="-127723614">그룹 멤버 1명을 개인 대화에 초대할 수 있습니다.</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d 그룹 멤버들은 비공개 대화에 초대될 수 있습니다.</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">일반 그룹</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">%1$d 그룹에 추가</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">%1$d 그룹에 추가</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">이미 이 참가자들과 대화 중입니다.</item>
+		<item quantity="other" state="needs_review" hash="809550612">이미 이 참여자들과 %1$d개의 대화가 있습니다.</item>
 	</plurals>
 </resources>

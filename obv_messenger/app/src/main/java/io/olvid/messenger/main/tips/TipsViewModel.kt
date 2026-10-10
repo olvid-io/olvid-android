@@ -37,6 +37,7 @@ import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.customClasses.AccessibilityManager
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.entity.OwnedDevice
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.settings.SettingsActivity
@@ -59,7 +60,7 @@ class TipsViewModel : ViewModel() {
     companion object {
         private const val READ_RECEIPT_MUTE_DURATION = 2 * 86_400_000L
         private const val TROUBLESHOOTING_MUTE_DURATION = 7 * 86_400_000L
-        private const val OTHER_DEVICE_EXPIRING_SOON_THRESHOLD = 7 * 86_400_000L
+        private const val DEVICE_EXPIRING_SOON_THRESHOLD = 7 * 86_400_000L
         const val OFFLINE_DEVICE_ALERT_THRESHOLD = 30 * 86_400_000L
         private const val EXPIRING_DEVICE_MUTE_DURATION = 2 * 86_400_000L
         private const val OFFLINE_DEVICE_MUTE_DURATION = 30 * 86_400_000L
@@ -129,17 +130,7 @@ class TipsViewModel : ViewModel() {
             tipToShow = Tip.UPDATE_AVAILABLE
             return
         }
-        val contactCount = AppDatabase.getInstance().contactDao().countAll()
-        if (!SettingsActivity.defaultSendReadReceipt) {
-            val lastReadReceiptAnswer = SettingsActivity.lastReadReceiptTipTimestamp
-            if (lastReadReceiptAnswer != -1L
-                && (System.currentTimeMillis() - lastReadReceiptAnswer > READ_RECEIPT_MUTE_DURATION)
-                && contactCount > 0
-            ) {
-                tipToShow = Tip.PROMPT_FOR_READ_RECEIPTS
-                return
-            }
-        }
+
         AppSingleton.getBytesCurrentIdentity()?.let { bytesCurrentIdentity ->
             if (OWNED_DEVICE_DISCOVERY_PERFORMED.value?.contains(BytesKey(bytesCurrentIdentity)) != true) {
                 return@let
@@ -150,17 +141,17 @@ class TipsViewModel : ViewModel() {
 
             if (System.currentTimeMillis() - SettingsActivity.lastExpiringDeviceTipTimestamp > EXPIRING_DEVICE_MUTE_DURATION) {
                 devices.filter {
-                    it.currentDevice.not()
-                            && it.expirationTimestamp?.let { expiration ->
-                        expiration - System.currentTimeMillis() in 0..OTHER_DEVICE_EXPIRING_SOON_THRESHOLD
+                    it.expirationTimestamp?.let { expiration ->
+                        expiration - System.currentTimeMillis() in 0..DEVICE_EXPIRING_SOON_THRESHOLD
                     } ?: false
-                }.minByOrNull {
-                    it.expirationTimestamp!!
-                }?.let { expiringDevice ->
+                }.minWithOrNull(
+                    // the current device takes precedence over other devices
+                    compareByDescending<OwnedDevice> { it.currentDevice }.thenBy { it.expirationTimestamp!! }
+                )?.let { expiringDevice ->
                     deviceExpirationDays =
                         ((expiringDevice.expirationTimestamp!! - System.currentTimeMillis()) / 86_400_000L).toInt()
                             .coerceAtLeast(0) + 1
-                    tipToShow = Tip.EXPIRING_DEVICE
+                    tipToShow = if (expiringDevice.currentDevice) Tip.EXPIRING_CURRENT_DEVICE else Tip.EXPIRING_DEVICE
                     return
                 }
             }
@@ -175,6 +166,18 @@ class TipsViewModel : ViewModel() {
                     tipToShow = Tip.OFFLINE_DEVICE
                     return
                 }
+            }
+        }
+
+        val contactCount = AppDatabase.getInstance().contactDao().countAll()
+        if (!SettingsActivity.defaultSendReadReceipt) {
+            val lastReadReceiptAnswer = SettingsActivity.lastReadReceiptTipTimestamp
+            if (lastReadReceiptAnswer != -1L
+                && (System.currentTimeMillis() - lastReadReceiptAnswer > READ_RECEIPT_MUTE_DURATION)
+                && contactCount > 0
+            ) {
+                tipToShow = Tip.PROMPT_FOR_READ_RECEIPTS
+                return
             }
         }
 
@@ -254,6 +257,7 @@ class TipsViewModel : ViewModel() {
         TROUBLESHOOTING,
         NEW_TRANSLATIONS,
         EXPIRING_DEVICE,
+        EXPIRING_CURRENT_DEVICE,
         AUTHENTICATION_REQUIRED,
         OFFLINE_DEVICE,
         PLAY_STORE_REVIEW,

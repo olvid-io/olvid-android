@@ -1,0 +1,5 @@
+- Vis kun de første 4 billeder i en besked, og tilføj et albumvisning for at se dem alle.
+- Tilføjet en dokumentscanner.
+- Dobbeltklik på en modtaget besked for at reagere med en standard-emoji.
+- Nye avatarer til kontakter og grupper uden profilbillede.
+- Tilføjet en knap til at sende et foto direkte fra hovedskærmen.

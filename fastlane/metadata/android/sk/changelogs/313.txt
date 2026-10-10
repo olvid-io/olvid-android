@@ -1,0 +1,5 @@
+- Zobrazuje sa iba prvých 4 obrázkov v správe, a pridali sme zobrazenie albumu, aby ste si mohli pozrieť všetky.
+- Pridaný skener dokumentov.
+- Dvojitým ťuknutím na prijatú správu môžete reagovať predvoleným emoji.
+- Nové avatary pre kontakty a skupiny bez profilovej fotografie.
+- Pridané tlačidlo na priame odoslanie fotografie z hlavnej obrazovky.

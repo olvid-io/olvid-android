@@ -260,9 +260,7 @@ class BookmarkedMessagesActivity : LockableActivity() {
                                             context,
                                             discussionAndMessage.message
                                         ),
-                                        initialViewSetup = { initialView ->
-                                            initialView.setDiscussion(discussionAndMessage.discussion)
-                                        },
+                                        avatar = discussionAndMessage.discussion,
                                         unread = discussionAndMessage.discussion.unread,
                                         unreadCount = 0,
                                         muted = false,

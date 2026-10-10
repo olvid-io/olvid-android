@@ -74,11 +74,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.designsystem.scaledDp
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
+import io.olvid.messenger.designsystem.components.AnimatedCounter
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -90,7 +92,7 @@ fun DiscussionListItem(
     title: AnnotatedString,
     body: AnnotatedString,
     date: AnnotatedString?,
-    initialViewSetup: (initialView: InitialView) -> Unit,
+    avatar: AvatarTarget?,
     @ColorInt customColor: Int = 0x00ffffff,
     backgroundImageUrl: String? = null,
     unread: Boolean,
@@ -153,7 +155,7 @@ fun DiscussionListItem(
             )
 
             // InitialView
-            InitialView(
+            Avatar(
                 modifier = Modifier
                     .padding(
                         top = 12.dp,
@@ -162,9 +164,9 @@ fun DiscussionListItem(
                         bottom = 12.dp
                     )
                     .requiredSize(56.dp),
-                initialViewSetup = initialViewSetup,
+                target = avatar,
                 selected = selected,
-                unreadMessages = unreadCount > 0 || unread,
+                unreadMessages = unread,
                 locked = locked,
             )
 
@@ -241,7 +243,7 @@ fun DiscussionListItem(
                             )
                         }
                         AnimatedVisibility(visible = unreadCount > 0) {
-                            Text(
+                            AnimatedCounter(
                                 modifier = Modifier
                                     .padding(start = 2.dp)
                                     .background(
@@ -249,9 +251,9 @@ fun DiscussionListItem(
                                         shape = CircleShape
                                     )
                                     .padding(horizontal = 7.dp, vertical = 2f.dp),
-                                text = "$unreadCount",
+                                count = unreadCount,
                                 style = OlvidTypography.body2,
-                                color = colorResource(id = R.color.alwaysWhite)
+                                color = colorResource(id = R.color.alwaysWhite),
                             )
                         }
                     }
@@ -535,7 +537,7 @@ private fun DiscussionListItemPreview() {
                     title = AnnotatedString("Discussion Title"),
                     body = AnnotatedString("Latest message content wrapping on 2 lines"),
                     date = AnnotatedString("17:25"),
-                    initialViewSetup = {},
+                    avatar = AvatarSource.unknown(),
                     unread = true,
                     unreadCount = 0,
                     muted = true,
@@ -569,7 +571,7 @@ private fun DiscussionListItemPreview() {
                     title = AnnotatedString("Discussion Title"),
                     body = AnnotatedString("Latest message content wrapping on 2 lines"),
                     date = AnnotatedString("17:25"),
-                    initialViewSetup = {},
+                    avatar = AvatarSource.unknown(),
                     unread = true,
                     unreadCount = 120,
                     muted = true,
@@ -601,7 +603,7 @@ private fun DiscussionListItemPreview() {
                     title = AnnotatedString("Discussion Title"),
                     body = AnnotatedString(""),
                     date = AnnotatedString(StringUtils.getCompactDateString(LocalContext.current, 1724654987654)),
-                    initialViewSetup = {},
+                    avatar = AvatarSource.unknown(),
                     unread = false,
                     unreadCount = 2,
                     muted = false,

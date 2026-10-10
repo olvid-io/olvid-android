@@ -66,6 +66,7 @@ import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding.Companion.
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
@@ -207,7 +208,7 @@ fun StaticSoundWave(
         LaunchedEffect(sampledAmplitudes) {
             animations.forEachIndexed { index, animatable ->
                 launch {
-                    delay(index * 10L)
+                    delay((index * 10L).milliseconds)
                     animatable.animateTo(
                         targetValue = 1f,
                         animationSpec = spring(

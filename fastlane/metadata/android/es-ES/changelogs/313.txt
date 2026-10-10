@@ -1,0 +1,5 @@
+- Muestra solo las primeras 4 imágenes de un mensaje y agrega una vista de álbum para verlas todas.
+- Se agregó un escáner de documentos.
+- Toca dos veces un mensaje recibido para reaccionar con un emoji predeterminado.
+- Nuevos avatares para contactos y grupos sin foto de perfil.
+- Se agregó un botón para enviar una foto directamente desde la pantalla principal.

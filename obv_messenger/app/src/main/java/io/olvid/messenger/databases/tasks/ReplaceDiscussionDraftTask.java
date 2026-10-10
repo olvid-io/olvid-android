@@ -63,9 +63,7 @@ public class ReplaceDiscussionDraftTask implements Runnable {
             newDraft.id = db.messageDao().insert(newDraft);
         });
         if (draftFiles != null) {
-            for (Uri draftFile : draftFiles) {
-                new AddFyleToDraftFromUriTask(draftFile, discussionId).run();
-            }
+            new AddMultipleFylesToDraftFromUrisTask(draftFiles, discussionId).run();
         }
     }
 }

@@ -19,17 +19,21 @@
 package io.olvid.messenger.gallery
 
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.annotation.OptIn
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -47,7 +51,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -59,12 +65,16 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
-import androidx.media3.ui.R as Media3UiR
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
+import io.olvid.messenger.databases.tasks.StartAttachmentDownloadTask
+import io.olvid.messenger.databases.tasks.StopAttachmentDownloadTask
+import io.olvid.messenger.discussion.message.attachments.AttachmentDownloadProgress
+import io.olvid.messenger.discussion.message.attachments.rememberAttachmentProgress
 import kotlin.math.min
+import androidx.media3.ui.R as Media3UiR
 
 private const val DOUBLE_TAP_ZOOM_SCALE = 3f
 
@@ -102,9 +112,18 @@ fun GalleryVideoPlayer(
     initialScrollDone: Boolean,
     onSingleTap: () -> Unit = {},
     onZoomedChanged: (Boolean) -> Unit = {},
+    overlayBottomPadding: Dp = 0.dp,
 ) {
-    val isFailed = fyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_FAILED
-            || fyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_UNTRANSFERRED
+    val join = fyleAndStatus.fyleMessageJoinWithStatus
+    val isFailed = join.status == FyleMessageJoinWithStatus.STATUS_FAILED
+            || join.status == FyleMessageJoinWithStatus.STATUS_UNTRANSFERRED
+
+    // Live download progress (only observed while the attachment is not yet complete)
+    val attachmentProgress = if (!fyleAndStatus.fyle.isComplete) {
+        rememberAttachmentProgress(join).value
+    } else {
+        null
+    }
 
     val currentOnSingleTap by rememberUpdatedState(onSingleTap)
     val currentOnZoomedChanged by rememberUpdatedState(onZoomedChanged)
@@ -273,7 +292,7 @@ fun GalleryVideoPlayer(
                     }
             )
 
-            LaunchedEffect(isCurrentPage, fyleAndStatus, playerView) {
+            LaunchedEffect(isCurrentPage, fyleAndStatus, join.status, playerView) {
                 val pv = playerView ?: return@LaunchedEffect
                 if (isCurrentPage && mediaPlayer != null) {
                     mediaPlayer.stop()
@@ -281,7 +300,7 @@ fun GalleryVideoPlayer(
                     pv.player = mediaPlayer
                     var filePath = App.absolutePathFromRelative(fyleAndStatus.fyle.filePath)
                     if (filePath == null) {
-                        filePath = fyleAndStatus.fyleMessageJoinWithStatus.absoluteFilePath
+                        filePath = join.absoluteFilePath
                     }
                     val mediaItem = MediaItem.Builder()
                         .setUri(filePath)
@@ -292,6 +311,48 @@ fun GalleryVideoPlayer(
                 } else {
                     pv.player = null
                 }
+            }
+        }
+
+        // Download overlay for images that are not yet downloaded. Composed after the
+        // gesture surface so it is topmost in hit-testing and taps reliably trigger /
+        // cancel the download instead of being consumed by the gesture surface.
+        when (join.status) {
+            FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE -> {
+                Image(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = overlayBottomPadding)
+                        .padding(8.dp)
+                        .size(64.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(bounded = false),
+                        ) {
+                            App.runThread(StartAttachmentDownloadTask(join))
+                        },
+                    painter = painterResource(id = R.drawable.ic_file_download),
+                    contentDescription = stringResource(R.string.label_download)
+                )
+            }
+
+            FyleMessageJoinWithStatus.STATUS_DOWNLOADING -> {
+                AttachmentDownloadProgress(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = overlayBottomPadding)
+                        .padding(16.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(bounded = false),
+                        ) {
+                            App.runThread(StopAttachmentDownloadTask(join))
+                        },
+                    speed = attachmentProgress?.speed,
+                    eta = attachmentProgress?.eta,
+                    progress = attachmentProgress?.progress ?: 0f,
+                    large = true
+                )
             }
         }
     }

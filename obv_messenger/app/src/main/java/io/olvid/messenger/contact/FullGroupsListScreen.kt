@@ -129,9 +129,7 @@ fun FullGroupsListScreen(
                                     group.discussion.bytesDiscussionIdentifier
                                 )
                             },
-                            initialViewSetup = { initialView ->
-                                initialView.setDiscussion(group.discussion)
-                            }
+                            avatar = group.discussion,
                         )
                     }
                 }

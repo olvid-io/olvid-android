@@ -48,16 +48,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.webrtc.WebrtcCallService.PeerState
 import io.olvid.messenger.webrtc.WebrtcCallService.PeerState.CONNECTED
 
 @Composable
 fun AudioCallParticipant(
     modifier: Modifier = Modifier,
-    initialViewSetup: (initialView: InitialView) -> Unit,
+    avatar: AvatarTarget?,
     name: String,
     isMute: Boolean,
     state: PeerState,
@@ -82,9 +83,9 @@ fun AudioCallParticipant(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        InitialView(
+        Avatar(
             modifier = Modifier.requiredSize(56.dp),
-            initialViewSetup = initialViewSetup
+            target = avatar
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(
@@ -130,7 +131,7 @@ fun AudioCallParticipant(
 @Composable
 fun AudioCallParticipantPreview() {
     AudioCallParticipant(
-        initialViewSetup = { it.setInitial(byteArrayOf(0, 12, 24), "A") },
+        avatar = AvatarSource.initial(byteArrayOf(0, 12, 24), "A"),
         name = "Alic B.",
         isMute = false,
         state = CONNECTED,

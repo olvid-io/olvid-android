@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.databases
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.App
@@ -39,6 +40,14 @@ object ContactCacheSingleton {
     private val contactPhotoUrlsCache: MutableLiveData<MutableMap<BytesKey, String>> = MutableLiveData()
     private val contactInfoCache: MutableLiveData<MutableMap<BytesKey, ContactCacheInfo>> = MutableLiveData()
 
+    // the cache maps are mutated in place and re-posted as the same instance, which
+    // Compose cannot observe; this version counter is bumped on every mutation instead
+    private val mutableCacheVersion = MutableLiveData(0L)
+    val cacheVersion: LiveData<Long> = mutableCacheVersion
+
+    private fun bumpCacheVersion() {
+        mutableCacheVersion.postValue((mutableCacheVersion.value ?: 0L) + 1)
+    }
 
     fun reloadCachedDisplayNamesAndHues() {
         reloadCachedDisplayNamesAndHues(AppSingleton.getCurrentIdentityLiveData().value)
@@ -50,6 +59,7 @@ object ContactCacheSingleton {
             contactHuesCache.postValue(mutableMapOf())
             contactPhotoUrlsCache.postValue(mutableMapOf())
             contactInfoCache.postValue(mutableMapOf())
+            bumpCacheVersion()
             return
         }
 
@@ -118,6 +128,7 @@ object ContactCacheSingleton {
         contactHuesCache.postValue(contactHuesHashMap)
         contactPhotoUrlsCache.postValue(contactPhotoUrlsHashMap)
         contactInfoCache.postValue(contactCacheInfoHashMap)
+        bumpCacheVersion()
     }
 
     fun getContactCustomDisplayName(bytesContactIdentity: ByteArray?): String? {
@@ -163,6 +174,7 @@ object ContactCacheSingleton {
                 identityDetails = contact.getIdentityDetails(),
             )
             contactNamesCache.postValue(mutableMap)
+            bumpCacheVersion()
         }
     }
 
@@ -177,6 +189,7 @@ object ContactCacheSingleton {
                 identityDetails = kotlin.runCatching { AppSingleton.getJsonObjectMapper().readValue(pendingMember.identityDetails, JsonIdentityDetails::class.java) }.getOrNull(),
             )
             contactNamesCache.postValue(mutableMap)
+            bumpCacheVersion()
         }
     }
 
@@ -188,6 +201,7 @@ object ContactCacheSingleton {
                 mutableMap[BytesKey(bytesContactIdentity)] = customHue
             }
             contactHuesCache.postValue(mutableMap)
+            bumpCacheVersion()
         }
     }
 
@@ -199,6 +213,7 @@ object ContactCacheSingleton {
                 mutableMap[BytesKey(bytesContactIdentity)] = photoUrl
             }
             contactPhotoUrlsCache.postValue(mutableMap)
+            bumpCacheVersion()
         }
     }
 
@@ -212,6 +227,7 @@ object ContactCacheSingleton {
                 trustLevel = contact.trustLevel
             )
             contactInfoCache.postValue(mutableMap)
+            bumpCacheVersion()
         }
     }
 
@@ -225,6 +241,7 @@ object ContactCacheSingleton {
                 trustLevel = 0
             )
             contactInfoCache.postValue(mutableMap)
+            bumpCacheVersion()
         }
     }
 
@@ -246,6 +263,7 @@ object ContactCacheSingleton {
             it.remove(key)
             contactInfoCache.postValue(it)
         }
+        bumpCacheVersion()
     }
 }
 

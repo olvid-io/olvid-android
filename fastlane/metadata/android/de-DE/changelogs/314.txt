@@ -1,0 +1,5 @@
+- Es werden nur die ersten 4 Bilder einer Nachricht angezeigt, und es wurde eine Albumansicht hinzugefügt, um alle Bilder anzuzeigen.
+- Ein Dokumentenscanner wurde hinzugefügt.
+- Tippen Sie doppelt auf eine empfangene Nachricht, um mit einem Standard-Emoji zu reagieren.
+- Neue Avatare für Kontakte und Gruppen ohne Profilbild.
+- Es wurde eine Schaltfläche hinzugefügt, um ein Foto direkt vom Hauptbildschirm aus zu senden.

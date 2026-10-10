@@ -77,10 +77,10 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.linkify
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.OlvidActionRow
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.contacts.ContactListItem
 import io.olvid.messenger.main.discussions.getAnnotatedTitle
 import io.olvid.messenger.settings.SettingsActivity
@@ -137,17 +137,13 @@ fun ContactDetailsScreen(
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {
-                    InitialView(
+                    Avatar(
                         modifier = Modifier
                             .sharedElement(
                                 sharedContentState = rememberSharedContentState(key = "profile-photo"),
                                 animatedVisibilityScope = this
                             ),
-                        initialViewSetup = { initialView ->
-                            contact?.let {
-                                initialView.setContact(it)
-                            }
-                        }
+                        target = contact,
                     )
                 }
             }
@@ -460,9 +456,7 @@ fun ContactDetailsScreen(
                                 group.discussion.bytesDiscussionIdentifier
                             )
                         },
-                        initialViewSetup = { initialView ->
-                            initialView.setDiscussion(group.discussion)
-                        }
+                        avatar = group.discussion,
                     )
                 }
                 if (groups.size > 5) {

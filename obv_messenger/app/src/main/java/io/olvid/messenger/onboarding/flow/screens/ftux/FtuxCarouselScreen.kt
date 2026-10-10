@@ -60,6 +60,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -167,7 +168,8 @@ private val ftuxPages: List<FtuxPageDef> = listOf(
         titleRes = R.string.ftux_page_protect_title,
         bodyRes = R.string.ftux_page_protect_body,
         mockupRes = R.drawable.ftux_image_protect,
-        alignment = Alignment.BottomEnd,
+        // raster with a checkmark that must not be mirrored: stay pinned to the right edge in RTL
+        alignment = AbsoluteAlignment.BottomRight,
     ),
     FtuxPageDef.Standard(
         titleRes = R.string.ftux_page_pricing_title,
@@ -369,7 +371,7 @@ private fun ftuxTitleFor(@StringRes titleRes: Int): FtuxTitle {
         // matching the single-range gradient in GradientHighlightedTitle.
         val span = (styled as? Spanned)
             ?.getSpans(0, styled.length, StyleSpan::class.java)
-            ?.firstOrNull()
+            ?.firstOrNull { styled.getSpanStart(it) < styled.getSpanEnd(it) }
         FtuxTitle(
             text = text,
             highlightStart = span?.let { styled.getSpanStart(it) } ?: -1,

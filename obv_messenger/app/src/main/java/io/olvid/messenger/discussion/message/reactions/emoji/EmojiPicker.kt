@@ -37,15 +37,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -56,12 +59,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -78,10 +84,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.EmojiList
 import io.olvid.messenger.designsystem.components.AnimatedEmoji
+import io.olvid.messenger.designsystem.components.SearchBar
 import io.olvid.messenger.designsystem.constantSp
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.settings.SettingsActivity
@@ -115,6 +123,7 @@ fun EmojiPicker(
     onToggleFavorite: (String) -> Unit = {},
     isSearch: Boolean = false,
     recentEmojis: List<String> = emptyList(),
+    recentsAsColumn: Boolean = false,
     emojis: List<List<String>> = EmojiList.EMOJIS,
     onBackSpace: (() -> Unit)? = null,
     shownEmojiVariants: MutableState<List<String>?> = remember { mutableStateOf(null) },
@@ -199,7 +208,7 @@ fun EmojiPicker(
                 )
             } else {
                 val itemWidth = 40.dp
-                AnimatedVisibility(recentEmojis.isNotEmpty() && !isSearch && !WindowInsets.isImeVisible) {
+                AnimatedVisibility(!recentsAsColumn && recentEmojis.isNotEmpty() && !isSearch) {
                     Column {
                         Text(
                             modifier = Modifier.padding(start = 8.dp),
@@ -212,6 +221,72 @@ fun EmojiPicker(
                             contentPadding = PaddingValues(horizontal = 4.dp)
                         ) {
                             items(items = recentEmojis, key = { it }) { recentEmoji ->
+                                RecentEmojiItem(
+                                    modifier = Modifier.animateItem(),
+                                    emoji = recentEmoji,
+                                    itemWidth = itemWidth,
+                                    useAnimatedEmojis = useAnimatedEmojis,
+                                    loopAnimatedEmojis = loopAnimatedEmojis,
+                                    onClick = { onReact(recentEmoji) },
+                                    onLongClick = { onToggleFavorite(recentEmoji) }
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    AnimatedVisibility(recentsAsColumn && recentEmojis.isNotEmpty() && !isSearch) {
+                        Row(modifier = Modifier.fillMaxHeight()) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    modifier = Modifier
+                                        .padding(top = 4.dp, bottom = 8.dp)
+                                        .size(20.dp),
+                                    painter = painterResource(R.drawable.ic_time),
+                                    tint = colorResource(R.color.greyTint),
+                                    contentDescription = stringResource(R.string.label_emoji_recents)
+                                )
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .width(itemWidth + 8.dp)
+                                        .weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    contentPadding = PaddingValues(bottom = 4.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    items(items = recentEmojis, key = { it }) { recentEmoji ->
+                                        RecentEmojiItem(
+                                            modifier = Modifier.animateItem(),
+                                            emoji = recentEmoji,
+                                            itemWidth = itemWidth,
+                                            useAnimatedEmojis = useAnimatedEmojis,
+                                            loopAnimatedEmojis = loopAnimatedEmojis,
+                                            onClick = { onReact(recentEmoji) },
+                                            onLongClick = { onToggleFavorite(recentEmoji) }
+                                        )
+                                    }
+                                }
+                            }
+                            VerticalDivider(
+                                modifier = Modifier.padding(vertical = 4.dp),
+                                color = colorResource(R.color.lightGrey)
+                            )
+                        }
+                    }
+                    BoxWithConstraints(modifier = Modifier.weight(1f)) {
+                        val maxItemsInRow = if (itemWidth > 0.dp) (maxWidth / itemWidth).toInt() else 0
+                        val filteredEmojis = remember(emojis) { emojis.filter { it.isNotEmpty() } }
+                        LazyHorizontalGrid(
+                            modifier = Modifier.wrapContentHeight(),
+                            state = gridState,
+                            rows = if (isSearch && filteredEmojis.isNotEmpty() && filteredEmojis.size <= maxItemsInRow) GridCells.Fixed(
+                                1
+                            ) else GridCells.Adaptive(itemWidth)
+                        ) {
+                            items(
+                                items = filteredEmojis,
+                                key = { it.first() }) { emoji ->
                                 Box(
                                     modifier = Modifier
                                         .combinedClickable(
@@ -222,94 +297,43 @@ fun EmojiPicker(
                                                 radius = itemWidth
                                             ),
                                             onClick = {
-                                                onReact(recentEmoji)
+                                                onReact(emoji.first())
                                             },
                                             onLongClick = {
-                                                onToggleFavorite(recentEmoji)
+                                                if (emoji.size > 1) {
+                                                    shownEmojiVariants.value = emoji
+                                                } else {
+                                                    onToggleFavorite(emoji.first())
+                                                }
                                             }
                                         )
                                         .padding(horizontal = 4.dp)
                                         .animateItem()
                                 ) {
-                                    if (useAnimatedEmojis) {
-                                        AnimatedEmoji(
-                                            size = 32f,
-                                            scaleFont = false,
-                                            shortEmoji = recentEmoji,
-                                            loop = loopAnimatedEmojis,
-                                            ignoreClicks = true
-                                        )
-                                    } else {
-                                        Text(
-                                            text = recentEmoji,
-                                            fontSize = constantSp(32)
+                                    // we never animate the full picker, this makes the app lag too much
+    //                                if (useAnimatedEmojis) {
+    //                                    AnimatedEmoji(
+    //                                        size = 32f,
+    //                                        scaleFont = false,
+    //                                        shortEmoji = emoji.first(),
+    //                                        loop = loopAnimatedEmojis,
+    //                                        ignoreClicks = true
+    //                                    )
+    //                                } else {
+                                    Text(
+                                        text = emoji.first(),
+                                        fontSize = constantSp(32)
+                                    )
+    //                                }
+                                    if (emoji.size > 1) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.emoji_variants_corner),
+                                            contentDescription = null,
+                                            modifier = Modifier.align(
+                                                Alignment.TopEnd
+                                            )
                                         )
                                     }
-                                }
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-                }
-                BoxWithConstraints {
-                    val maxItemsInRow = if (itemWidth > 0.dp) (maxWidth / itemWidth).toInt() else 0
-                    val filteredEmojis = remember(emojis) { emojis.filter { it.isNotEmpty() } }
-                    LazyHorizontalGrid(
-                        modifier = Modifier.wrapContentHeight(),
-                        state = gridState,
-                        rows = if (isSearch && filteredEmojis.isNotEmpty() && filteredEmojis.size <= maxItemsInRow) GridCells.Fixed(
-                            1
-                        ) else GridCells.Adaptive(itemWidth)
-                    ) {
-                        items(
-                            items = filteredEmojis,
-                            key = { it.first() }) { emoji ->
-                            Box(
-                                modifier = Modifier
-                                    .combinedClickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = ripple(
-                                            bounded = false,
-                                            color = colorResource(R.color.almostBlack),
-                                            radius = itemWidth
-                                        ),
-                                        onClick = {
-                                            onReact(emoji.first())
-                                        },
-                                        onLongClick = {
-                                            if (emoji.size > 1) {
-                                                shownEmojiVariants.value = emoji
-                                            } else {
-                                                onToggleFavorite(emoji.first())
-                                            }
-                                        }
-                                    )
-                                    .padding(horizontal = 4.dp)
-                                    .animateItem()
-                            ) {
-                                // we never animate the full picker, this makes the app lag too much
-//                                if (useAnimatedEmojis) {
-//                                    AnimatedEmoji(
-//                                        size = 32f,
-//                                        scaleFont = false,
-//                                        shortEmoji = emoji.first(),
-//                                        loop = loopAnimatedEmojis,
-//                                        ignoreClicks = true
-//                                    )
-//                                } else {
-                                Text(
-                                    text = emoji.first(),
-                                    fontSize = constantSp(32)
-                                )
-//                                }
-                                if (emoji.size > 1) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.emoji_variants_corner),
-                                        contentDescription = null,
-                                        modifier = Modifier.align(
-                                            Alignment.TopEnd
-                                        )
-                                    )
                                 }
                             }
                         }
@@ -401,6 +425,100 @@ fun EmojiPicker(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RecentEmojiItem(
+    modifier: Modifier = Modifier,
+    emoji: String,
+    itemWidth: Dp,
+    useAnimatedEmojis: Boolean,
+    loopAnimatedEmojis: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(
+                    bounded = false,
+                    color = colorResource(R.color.almostBlack),
+                    radius = itemWidth
+                ),
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
+            .padding(horizontal = 4.dp)
+    ) {
+        if (useAnimatedEmojis) {
+            AnimatedEmoji(
+                size = 32f,
+                scaleFont = false,
+                shortEmoji = emoji,
+                loop = loopAnimatedEmojis,
+                ignoreClicks = true
+            )
+        } else {
+            Text(
+                text = emoji,
+                fontSize = constantSp(32)
+            )
+        }
+    }
+}
+
+@Composable
+fun SearchableEmojiPicker(
+    modifier: Modifier = Modifier,
+    emojiSearchState: EmojiSearchState,
+    focusState: MutableState<Boolean> = remember { mutableStateOf(false) },
+    searchBarModifier: Modifier = Modifier
+        .padding(8.dp)
+        .height(40.dp),
+    fillRemainingHeight: Boolean = false, // picker takes the remaining height instead of a fixed 280.dp
+    searchOnFocus: Boolean = true, // switch to search results as soon as the search bar gains focus
+    currentReaction: String? = null,
+    recentEmojis: List<String> = emptyList(),
+    recentsAsColumn: Boolean = false,
+    onReact: (String) -> Unit,
+    onToggleFavorite: (String) -> Unit = {},
+    onBackSpace: (() -> Unit)? = null,
+) {
+    LaunchedEffect(focusState.value) {
+        if (focusState.value) {
+            emojiSearchState.shownEmojiVariants.value = null
+        }
+    }
+    Column(modifier = modifier) {
+        SearchBar(
+            modifier = searchBarModifier,
+            placeholderText = stringResource(R.string.hint_search_emoji),
+            searchText = emojiSearchState.searchText,
+            onSearchTextChanged = {
+                emojiSearchState.onSearchTextChanged(it)
+            },
+            focusState = focusState,
+            onClearClick = { emojiSearchState.reset() },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = colorResource(R.color.olvid_gradient_light),
+                unfocusedBorderColor = colorResource(R.color.mediumGrey),
+                cursorColor = colorResource(R.color.olvid_gradient_light)
+            )
+        )
+        EmojiPicker(
+            modifier = if (fillRemainingHeight) Modifier.weight(1f, true) else Modifier.height(280.dp),
+            currentReaction = currentReaction,
+            onReact = onReact,
+            onToggleFavorite = onToggleFavorite,
+            isSearch = emojiSearchState.searchText.isNotEmpty() || (searchOnFocus && focusState.value),
+            recentEmojis = recentEmojis,
+            recentsAsColumn = recentsAsColumn,
+            emojis = emojiSearchState.emojis,
+            onBackSpace = onBackSpace,
+            shownEmojiVariants = emojiSearchState.shownEmojiVariants
+        )
     }
 }
 

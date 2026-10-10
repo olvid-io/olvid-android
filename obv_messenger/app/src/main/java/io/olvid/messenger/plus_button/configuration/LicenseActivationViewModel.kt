@@ -40,6 +40,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
+import kotlin.time.Duration.Companion.milliseconds
 
 class LicenseActivationViewModel : ViewModel() {
     var errorText by mutableStateOf<String?>(null)
@@ -146,7 +147,7 @@ class LicenseActivationViewModel : ViewModel() {
             .queryApiKeyStatus(ownedIdentity.bytesOwnedIdentity, configurationApiKeyUuid)
 
         viewModelScope.launch {
-            delay(5000)
+            delay(5000.milliseconds)
             if (!callbackCalled) {
                 queryFailed = true
             }

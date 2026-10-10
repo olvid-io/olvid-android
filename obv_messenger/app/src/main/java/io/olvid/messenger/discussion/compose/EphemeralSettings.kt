@@ -22,6 +22,7 @@ package io.olvid.messenger.discussion.compose
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -540,7 +541,8 @@ fun EphemeralSettingsPopupLayout(
             .padding(horizontal = 8.dp)
             .widthIn(max = 340.dp),
         shadowElevation = 8.dp,
-        color = colorResource(R.color.dialogBackground),
+        color = colorResource(R.color.newDialogBackground),
+        border = BorderStroke(width = 1.dp, color = colorResource(R.color.newDialogBorder)),
         contentColor = colorResource(R.color.almostBlack),
         shape = RoundedCornerShape(12.dp)
     ) {

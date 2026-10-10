@@ -47,6 +47,8 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.fragments.dialog.DefaultReactionPickerDialogFragment;
+import kotlin.Unit;
 
 public class SendReceiveMessagesPreferenceFragment extends PreferenceFragmentCompat {
 
@@ -85,6 +87,28 @@ public class SendReceiveMessagesPreferenceFragment extends PreferenceFragmentCom
                         e.printStackTrace();
                     }
                 }
+                return true;
+            });
+        }
+
+        Preference defaultReactionPreference = screen.findPreference(SettingsActivity.PREF_KEY_DEFAULT_REACTION);
+        if (defaultReactionPreference != null) {
+            defaultReactionPreference.setSummary(getString(R.string.pref_default_reaction_summary, SettingsActivity.getDefaultReaction()));
+            defaultReactionPreference.setOnPreferenceClickListener((Preference preference) -> {
+                DefaultReactionPickerDialogFragment dialogFragment = new DefaultReactionPickerDialogFragment();
+                dialogFragment.setCurrentReaction(SettingsActivity.getDefaultReaction());
+                dialogFragment.setOnEmojiSelected((String emoji) -> {
+                    SettingsActivity.setDefaultReaction(emoji);
+                    preference.setSummary(getString(R.string.pref_default_reaction_summary, emoji));
+                    try {
+                        AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createPreferredReaction(null, emoji));
+                    } catch (Exception e) {
+                        Logger.w("Failed to propagate preferred reaction setting change to other devices");
+                        e.printStackTrace();
+                    }
+                    return Unit.INSTANCE;
+                });
+                dialogFragment.show(getChildFragmentManager(), "DefaultReactionPickerDialogFragment");
                 return true;
             });
         }

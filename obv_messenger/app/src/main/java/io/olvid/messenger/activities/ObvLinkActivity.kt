@@ -60,18 +60,9 @@ class ObvLinkActivity : AppCompatActivity() {
                             AppDatabase.getInstance().ownedIdentityDao().countAll() == 0
                         val linkIntent: Intent
                         if (firstIdentity) {
-                            val configurationLink = CONFIGURATION_PATTERN.matcher(uri.toString())
-                            if (configurationLink.find()) {
-                                // only forward to the old onboarding if it is a configuration link
-                                linkIntent = Intent(App.getContext(), OnboardingFlowActivity::class.java)
-                                    .putExtra(OnboardingFlowActivity.FIRST_ID_INTENT_EXTRA, true)
-                                    .putExtra(OnboardingFlowActivity.LINK_URI_INTENT_EXTRA, uri.toString())
-                            } else {
-                                // otherwise start an onboarding, forwarding the link so an
-                                // invitation can be processed once the profile is created
-                                linkIntent = Intent(App.getContext(), OnboardingFlowActivity::class.java)
-                                    .putExtra(OnboardingFlowActivity.LINK_URI_INTENT_EXTRA, uri.toString())
-                            }
+                            linkIntent = Intent(App.getContext(), OnboardingFlowActivity::class.java)
+                                .putExtra(OnboardingFlowActivity.FIRST_ID_INTENT_EXTRA, true)
+                                .putExtra(OnboardingFlowActivity.LINK_URI_INTENT_EXTRA, uri.toString())
                         } else {
                             linkIntent = Intent(App.getContext(), MainActivity::class.java)
                             linkIntent.action = MainActivity.LINK_ACTION

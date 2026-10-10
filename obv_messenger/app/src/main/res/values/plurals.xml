@@ -32,6 +32,10 @@
         <item quantity="one">One of your devices will expire and get deactivated in **less than %1$d day**.\nYou may purchase an **Olvid+** subscription to keep it active.</item>
         <item quantity="other">One of your devices will expire and get deactivated in **less than %1$d days**.\nYou may purchase an **Olvid+** subscription to keep it active.</item>
     </plurals>
+    <plurals name="tip_expiring_current_device_message">
+        <item quantity="one">This device will expire and get deactivated in **less than %1$d day**.\nYou may purchase an **Olvid+** subscription to keep it active.</item>
+        <item quantity="other">This device will expire and get deactivated in **less than %1$d days**.\nYou may purchase an **Olvid+** subscription to keep it active.</item>
+    </plurals>
     <plurals name="text_joined_the_group">
         <item quantity="one">%1$s joined the group</item>
         <item quantity="other">%1$s joined the group</item>
@@ -298,5 +302,9 @@
     <plurals name="button_label_add_to_groups">
         <item quantity="one">Add to %1$d group</item>
         <item quantity="other">Add to %1$d groups</item>
+    </plurals>
+    <plurals name="explanation_existing_discussions">
+        <item quantity="one">You already have a discussion with these participants.</item>
+        <item quantity="other">You already have %1$d discussions with these participants.</item>
     </plurals>
 </resources>

@@ -194,7 +194,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun emojiDao(): EmojiDao
 
     companion object {
-        const val DB_SCHEMA_VERSION: Int = 87
+        const val DB_SCHEMA_VERSION: Int = 89
         const val DB_FTS_GLOBAL_SEARCH_VERSION: Int = 1
         const val DB_FILE_NAME: String = "app_database"
         const val TMP_ENCRYPTED_DB_FILE_NAME: String = "encrypted_app_database"
@@ -202,7 +202,7 @@ abstract class AppDatabase : RoomDatabase() {
         private val roomDatabaseOpenCallback: Callback = object : Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
-                SettingsActivity.PREF_KEY_PREFERRED_REACTIONS_DEFAULT.forEachIndexed { index, reaction ->
+                SettingsActivity.PREF_KEY_PREFERRED_REACTIONS_DEFAULT.forEach { reaction ->
                     val values = android.content.ContentValues()
                     values.put(Emoji.EMOJI, reaction)
                     values.put(Emoji.IS_FAVORITE, true)

@@ -102,7 +102,6 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStat
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
 import io.olvid.messenger.databases.tasks.DeleteAttachmentFromAllMessagesTask
 import io.olvid.messenger.databases.tasks.StartAttachmentDownloadTask
-import io.olvid.messenger.databases.tasks.StopAttachmentDownloadTask
 import io.olvid.messenger.designsystem.components.BaseDialogContent
 import io.olvid.messenger.designsystem.components.DialogSecure
 import io.olvid.messenger.designsystem.components.OlvidActionButton
@@ -119,6 +118,7 @@ import io.olvid.messenger.discussion.gallery.FyleListItem
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.linkpreview.OpenGraph
 import io.olvid.messenger.discussion.message.attachments.AttachmentDownloadProgress
+import io.olvid.messenger.discussion.message.attachments.downloadAwareClick
 import io.olvid.messenger.discussion.message.attachments.getProgressLabel
 import io.olvid.messenger.main.contacts.CustomTab
 import io.olvid.messenger.onboarding.flow.animations.shimmer
@@ -529,10 +529,13 @@ private fun openInInternalGallery(
 // Mirror FyleMessageJoinWithStatusDao.MEDIA_TYPE_CONDITION exactly so a fyle opened in the internal
 // gallery is guaranteed to be in the gallery's own list (otherwise the pager silently lands on the
 // wrong item). imageResolution is "" for attachments the decoder cannot display (unsupported image
-// formats, videos with no extractable thumbnail) and null while not yet computed; svg is special-cased.
+// formats, videos with no extractable thumbnail) and null while not yet computed; image and video
+// mime types are kept regardless, the gallery shows an "unsupported format" page for them.
 private fun FyleAndStatus.canOpenInInternalGallery(): Boolean {
-    val mimeType = fyleMessageJoinWithStatus.nonNullMimeType
-    return (fyleMessageJoinWithStatus.imageResolution != "" || mimeType == "image/svg+xml")
+    val mimeType = fyleMessageJoinWithStatus.mimeType.orEmpty()
+    return (fyleMessageJoinWithStatus.imageResolution != ""
+            || mimeType.startsWith("image/")
+            || mimeType.startsWith("video/"))
             && !mimeType.startsWith("audio/")
 }
 
@@ -654,7 +657,7 @@ private fun MediaGridRow(
                             if (viewModel.isSelecting()) {
                                 viewModel.selectFyle(fyleAndStatus)
                             } else {
-                                downloadAwareClick(fyleAndStatus) {
+                                fyleAndStatus.downloadAwareClick {
                                     openInInternalGallery(context, destination, sortOrder, fyleAndStatus)
                                 }
                             }
@@ -785,7 +788,7 @@ private fun DocumentListPage(
     val context = LocalContext.current
     val linkPreviewViewModel = viewModel<LinkPreviewViewModel>()
     val openFyleAndStatus: (FyleAndStatus) -> Unit = { fyleAndStatus ->
-        downloadAwareClick(fyleAndStatus) {
+        fyleAndStatus.downloadAwareClick {
             when {
                 fyleAndStatus.fyleMessageJoinWithStatus.nonNullMimeType == OpenGraph.MIME_TYPE ->
                     linkPreviewViewModel.linkPreviewLoader(
@@ -1019,22 +1022,6 @@ private fun NoContentFound() {
             modifier = Modifier.align(Alignment.Center),
             text = stringResource(R.string.label_gallery_no_content)
         )
-    }
-}
-
-private fun downloadAwareClick(
-    fyleAndStatus: FyleAndStatus,
-    completeClick: () -> Unit
-) {
-    when (fyleAndStatus.fyleMessageJoinWithStatus.status) {
-        FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE ->
-            App.runThread(StartAttachmentDownloadTask(fyleAndStatus.fyleMessageJoinWithStatus))
-        FyleMessageJoinWithStatus.STATUS_DOWNLOADING ->
-            App.runThread(StopAttachmentDownloadTask(fyleAndStatus.fyleMessageJoinWithStatus))
-        FyleMessageJoinWithStatus.STATUS_DRAFT,
-        FyleMessageJoinWithStatus.STATUS_UPLOADING,
-        FyleMessageJoinWithStatus.STATUS_COMPLETE -> completeClick()
-        // STATUS_FAILED, STATUS_UNTRANSFERRED, STATUS_COPYING: no-op
     }
 }
 

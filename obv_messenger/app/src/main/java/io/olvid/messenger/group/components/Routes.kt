@@ -86,6 +86,7 @@ object Routes {
     const val EDIT_ADMINS = "edit_group_admins"
     const val CHOOSE_NEW_GROUP_ADMINS = "choose_new_group_admins"
     const val GROUP_TYPE = "group_type"
+    const val EXISTING_DISCUSSIONS = "existing_discussions"
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -151,7 +152,7 @@ fun NavGraphBuilder.inviteGroupMembers(
                     (contact.hasChannelOrPreKey() || contact.keycloakManaged) && contact.active && contact.oneToOne.not()
                 } ?: false
             }
-            invitationMembers?.let {
+            invitationMembers?.let { invitationMember ->
                 val nonAdminsReadOnly =
                     remember(groupV2DetailsViewModel.groupType) { groupV2DetailsViewModel.groupType.areNonAdminsReadOnly() }
                 LazyColumn(
@@ -169,17 +170,17 @@ fun NavGraphBuilder.inviteGroupMembers(
                             color = colorResource(R.color.almostBlack)
                         )
                     }
-                    itemsIndexed(items = it, key = {index, member -> member.bytesContactIdentity }) { index, member ->
+                    itemsIndexed(items = invitationMember, key = {index, member -> member.bytesContactIdentity }) { index, member ->
                         GroupMemberItem(
                             modifier = Modifier
                                 .then(
                                     if (index == 0) {
-                                        if (it.size == 1) {
+                                        if (invitationMember.size == 1) {
                                             Modifier.clip(RoundedCornerShape(16.dp))
                                         } else {
                                             Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                                         }
-                                    } else if (index == it.size - 1) {
+                                    } else if (index == invitationMember.size - 1) {
                                         Modifier.clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
                                     } else {
                                         Modifier
@@ -189,6 +190,7 @@ fun NavGraphBuilder.inviteGroupMembers(
                             member = member.toGroupMember(),
                             keycloakManaged = group?.keycloakManaged == true,
                             nonAdminsReadOnly = nonAdminsReadOnly,
+                            keycloakGroup = group?.keycloakManaged == true,
                             onInvite = { App.runThread { groupV2DetailsViewModel.invite(it) } }
                         )
                     }
@@ -230,7 +232,7 @@ fun NavGraphBuilder.fullGroupMembers(
         BackHandler {
             onBack()
         }
-        members?.let {
+        members?.let { members ->
             val nonAdminsReadOnly =
                 remember(groupV2DetailsViewModel.groupType) { groupV2DetailsViewModel.groupType.areNonAdminsReadOnly() }
             LazyColumn(
@@ -247,8 +249,8 @@ fun NavGraphBuilder.fullGroupMembers(
                                     RoundedCornerShape(
                                         topStart = 16.dp,
                                         topEnd = 16.dp,
-                                        bottomStart = if (it.isEmpty()) 16.dp else 0.dp,
-                                        bottomEnd = if (it.isEmpty()) 16.dp else 0.dp,
+                                        bottomStart = if (members.isEmpty()) 16.dp else 0.dp,
+                                        bottomEnd = if (members.isEmpty()) 16.dp else 0.dp,
                                     )
                                 )
                                 .background(colorResource(R.color.lighterGrey)),
@@ -259,20 +261,22 @@ fun NavGraphBuilder.fullGroupMembers(
                                 fullSearchDisplayName = "",
                                 isAdmin = group?.ownPermissionAdmin == true,
                                 permissionSendMessage = group?.ownPermissionSendMessage != false,
+                                permissionRemoteDeleteAnything = group?.ownPermissionRemoteDeleteAnything == true,
                                 isYou = true,
                                 pending = false,
                                 selected = false
                             ),
                             keycloakManaged = ownIdentity.keycloakManaged,
-                            nonAdminsReadOnly = nonAdminsReadOnly
+                            nonAdminsReadOnly = nonAdminsReadOnly,
+                            keycloakGroup = group?.keycloakManaged == true,
                         )
                     }
                 }
-                items(items = it, key = { it.bytesContactIdentity }) { member ->
+                items(items = members, key = { it.bytesContactIdentity }) { member ->
                     GroupMemberItem(
                         modifier = Modifier
                             .then(
-                                if (member.bytesContactIdentity.contentEquals(it.lastOrNull()?.bytesContactIdentity)) {
+                                if (member.bytesContactIdentity.contentEquals(members.lastOrNull()?.bytesContactIdentity)) {
                                     Modifier
                                         .padding(bottom = 16.dp)
                                         .clip(
@@ -290,7 +294,8 @@ fun NavGraphBuilder.fullGroupMembers(
                             .background(colorResource(R.color.lighterGrey)),
                         member = member.toGroupMember(),
                         keycloakManaged = group?.keycloakManaged == true,
-                        nonAdminsReadOnly = nonAdminsReadOnly
+                        nonAdminsReadOnly = nonAdminsReadOnly,
+                        keycloakGroup = group?.keycloakManaged == true,
                     )
                 }
             }
@@ -302,6 +307,7 @@ fun NavGraphBuilder.fullGroupMembers(
 fun NavGraphBuilder.editGroupDetails(
     groupV2DetailsViewModel: GroupV2DetailsViewModel,
     editGroupDetailsViewModel: OwnedGroupDetailsViewModel,
+    groupCreationViewModel: GroupCreationViewModel?,
     onTakePicture: () -> Unit,
     content: (@Composable () -> Unit)? = null,
     isGroupCreation: Boolean = false,
@@ -340,6 +346,7 @@ fun NavGraphBuilder.editGroupDetails(
         }
         EditGroupDetailsScreen(
             editGroupDetailsViewModel = editGroupDetailsViewModel,
+            groupCreationViewModel = groupCreationViewModel,
             onTakePicture = onTakePicture,
             content = content,
             isGroupCreation = isGroupCreation,

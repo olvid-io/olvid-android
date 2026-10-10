@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">En av enhetene dine vil utløpe og bli deaktivert om **mindre enn %1$d dag**.\nDu kan kjøpe et **Olvid+**-abonnement for å holde det aktivt.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">En av enhetene dine vil utløpe og bli deaktivert om **mindre enn %1$d dager**.\nDu kan kjøpe et **Olvid+**-abonnement for å holde det aktivt.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Denne enheten vil utløpe og bli deaktivert om **mindre enn %1$d dag**.\nDu kan kjøpe et **Olvid+**-abonnement for å holde den aktiv.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Denne enheten vil utløpe og bli deaktivert om **mindre enn %1$d dager**.\nDu kan kjøpe et **Olvid+**-abonnement for å holde den aktiv.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s har blitt med i gruppen.</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s har blitt med i gruppen.</item>
@@ -123,12 +127,12 @@
 		<item quantity="other" state="needs_review" hash="-1558931055">Du er i ferd med å **permanent** slette %1$d samtaler og meldingene de inneholder for **alle** i disse samtalene. Vær sikker på at dette er det du ønsker å gjøre.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">Du er i ferd med å invitere hvert gruppemedlem du har en kanal med (for øyeblikket 1 medlem) til en privat diskusjon.\nVil du fortsette?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">Du er i ferd med å invitere hvert gruppemedlem du har en kanal med (for øyeblikket %1$d medlemmer) til en privat diskusjon.\nØnsker du å fortsette?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">Du er i ferd med å invitere hvert gruppemedlem du har en kanal med (for øyeblikket 1 medlem) til en privat samtale.\nVil du fortsette?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Du er i ferd med å invitere hvert gruppemedlem du har en kanal med (for øyeblikket %1$d medlemmer) til en privat samtale.\nØnsker du å fortsette?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">1 gruppemedlem kan inviteres til en privat diskusjon.</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d gruppemedlemmer kan inviteres til en privat diskusjon.</item>
+		<item quantity="one" state="needs_review" hash="-127723614">1 gruppemedlem kan inviteres til en privat samtale.</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d gruppemedlemmer kan inviteres til en privat samtale.</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">felles gruppe</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Legg til i %1$d-gruppen</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Legg til i %1$d-grupper</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Du har allerede en samtale med disse deltakerne.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Du har allerede %1$d samtaler med disse deltakerne.</item>
 	</plurals>
 </resources>

@@ -61,6 +61,8 @@ import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 
 @Composable
 fun SharingLocationList(
@@ -96,11 +98,9 @@ private fun SharingLocationItem(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        io.olvid.messenger.main.InitialView(
+        Avatar(
             modifier = Modifier.size(48.dp),
-            initialViewSetup = {
-                it.setFromCache(message.senderIdentifier)
-            })
+            target = AvatarSource.fromCache(message.senderIdentifier))
 
         Column(
             modifier = Modifier

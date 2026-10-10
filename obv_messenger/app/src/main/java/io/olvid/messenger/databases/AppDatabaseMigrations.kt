@@ -38,6 +38,20 @@ import java.util.regex.Pattern
 
 internal object AppDatabaseMigrations {
     val MIGRATIONS: Array<Migration> = arrayOf(
+        object : Migration(88, 89) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                Logger.w("ROOM MIGRATING FROM VERSION 88 TO 89")
+                db.execSQL("ALTER TABLE `emojis` ADD COLUMN `last_used_keyboard` INTEGER NOT NULL DEFAULT 0")
+            }
+        },
+
+        object : Migration(87, 88) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                Logger.w("ROOM MIGRATING FROM VERSION 87 TO 88")
+                db.execSQL("ALTER TABLE `discussion_customization_table` ADD COLUMN `pref_default_reaction` TEXT DEFAULT NULL")
+            }
+        },
+
         object : Migration(86, 87) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 Logger.w("ROOM MIGRATING FROM VERSION 86 TO 87")
@@ -104,7 +118,7 @@ internal object AppDatabaseMigrations {
                             }
 
                             @Suppress("DEPRECATION")
-                            SettingsActivity.preferredReactions.forEachIndexed { index, reaction ->
+                            SettingsActivity.preferredReactions.forEachIndexed { _, reaction ->
                                 val values = ContentValues()
                                 values.put(Emoji.EMOJI, reaction)
                                 values.put(Emoji.IS_FAVORITE, true)

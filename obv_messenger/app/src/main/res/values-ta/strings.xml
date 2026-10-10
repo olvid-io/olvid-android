@@ -79,11 +79,10 @@
 	<string name="dialog_title_rename_discussion" state="needs_review" hash="1413472286">உரையாடலுக்குப் புதிய பெயர் கொடு</string>
 	<string name="dialog_title_rename_group" state="needs_review" hash="1461324427">குழுவின் பெயரை மாற்றுக</string>
 	<string name="dialog_title_restart_channel_establishment" state="needs_review" hash="-645769680">சேனல் அமைப்பை மீண்டும் தொடங்கவா?</string>
-	<string name="dialog_title_share_with" state="needs_review" hash="854107768">இதனுடன் பகிரவும்…</string>
-	<string name="dialog_title_share_recipients" state="needs_review" hash="1157053138">பெறுநர்களைத் தேர்ந்தெடுக்கவும்</string>
+	<string name="dialog_title_share_recipients" state="needs_review" hash="463614560">உரையாடல்களைத் தேர்ந்தெடுக்கவும்</string>
 	<string name="share_label_from" state="needs_review" hash="2049052075">இருந்து:</string>
 	<string name="share_label_to" state="needs_review" hash="-1785690373">க்கு:</string>
-	<string name="share_label_choose_recipients" state="needs_review" hash="1157053138">பெறுநர்களைத் தேர்ந்தெடுக்கவும்</string>
+	<string name="share_label_choose_recipients" state="needs_review" hash="463614560">உரையாடல்களைத் தேர்ந்தெடுக்கவும்</string>
 	<string name="hint_share_message" state="needs_review" hash="-763169957">ஒரு செய்தியைச் சேர்...</string>
 	<string name="content_description_delete_attachment" state="needs_review" hash="-220348329">இணைப்பைப் பிரிக்கவும்</string>
 	<string name="dialog_title_shortcut_to" state="needs_review" hash="-1193591200">…க்கு குறுக்குவழியை உருவாக்கு</string>
@@ -104,14 +103,14 @@
 	<string name="explanation_unpublished_owned_card_name" state="needs_review" hash="1358741056">உங்கள் பெயர் என மாற்றப்பட்டது:</string>
 	<string name="explanation_unpublished_owned_card_position" state="needs_review" hash="1270243950">உங்கள் பதவி/நிறுவனம் புதுப்பிக்கப்பட்டது:</string>
 	<string name="explanation_unpublished_owned_card_photo" state="needs_review" hash="-1245438367">உங்கள் புகைப்படம் புதுப்பிக்கப்பட்டது.</string>
-	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">பாதுகாப்பான கலந்துரையாடல் தளம் தற்போது நிறுவப்பட்டு வருகிறது. இந்த செயல்முறை முடியும் வரை இந்தத் தொடர்புடன் நீங்கள் எந்த கலந்துரையாடலையும் தொடங்க முடியாது. நீங்கள் மற்றும் உங்கள் தொடர்பு இருவரும் ஆன்லைனில் இருந்தால், இந்த செயல்முறை சில வினாடிகள் மட்டுமே எடுக்கும்.\n\nஏதாவது தவறு நடந்ததாக நீங்கள் நினைத்தால், நீங்கள் தளத்தை மீண்டும் நிறுவலாம்.</string>
+	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">பாதுகாப்பான உரையாடல் தளம் தற்போது நிறுவப்பட்டு வருகிறது. இந்த செயல்முறை முடியும் வரை இந்தத் தொடர்புடன் நீங்கள் எந்த உரையாடலையும் தொடங்க முடியாது. நீங்கள் மற்றும் உங்கள் தொடர்பு இருவரும் ஆன்லைனில் இருந்தால், இந்த செயல்முறை சில வினாடிகள் மட்டுமே எடுக்கும்.\n\nஏதாவது தவறு நடந்ததாக நீங்கள் நினைத்தால், நீங்கள் தளத்தை மீண்டும் நிறுவலாம்.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">தொடர்பு எதுவும் கிடைக்கவில்லை</string>
 	<string name="explanation_no_group_match_filter" state="needs_review" hash="-1633823785">எந்த குழுவும் கிடைக்கவில்லை</string>
 	<string name="explanation_no_message_found" state="needs_review" hash="-1329622990">எந்த செய்தியும் கிடைக்கவில்லை</string>
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">இணைப்பு எதுவும் கிடைக்கவில்லை</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">இணைப்பு எதுவும் கிடைக்கவில்லை</string>
 	<string name="hint_company" state="needs_review" hash="988571519">நிறுவனம்</string>
-	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">செய்தியை எழுதுங்கள்</string>
+	<string name="hint_compose_your_message" state="needs_review" hash="809999904">செய்தி</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">தற்காலிக செய்தி</string>
 	<string name="label_edit_your_message" state="needs_review" hash="1091877412">உங்கள் செய்தியைத் திருத்துங்கள்</string>
 	<string name="label_reply_to_x" state="needs_review" hash="1941377665">%s-க்கு பதில்</string>
@@ -168,7 +167,7 @@
 	<string name="label_copy" state="needs_review" hash="-811327733">நகல்</string>
 	<string name="label_creating_channel" state="needs_review" hash="1375229137">சேனலை உருவாக்குதல்</string>
 	<string name="label_download" state="needs_review" hash="2567692">பதிவிறக்கம்</string>
-	<string name="label_establishing_secure_connection" state="needs_review" hash="-1534656273">பாதுகாப்பான கலந்துரையாடல் சேனலை உருவாக்குதல்</string>
+	<string name="label_establishing_secure_connection" state="needs_review" hash="-1534656273">பாதுகாப்பான உரையாடல் சேனலை உருவாக்குதல்</string>
 	<string name="label_group_card" state="needs_review" hash="-1430550686">குழு அட்டை</string>
 	<string name="label_group_card_published" state="needs_review" hash="-58328192">குழு அட்டை - வெளியிடப்பட்டது</string>
 	<string name="label_group_card_published_update" state="needs_review" hash="-1889428058">குழு அட்டை - புதியது</string>
@@ -208,9 +207,19 @@
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">தொடர்பு பெயரை மாற்றவும்</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">சேமி</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">அமைப்புகள்</string>
+	<string name="menu_action_send_photo" state="needs_review" hash="13932391">ஒரு புகைப்படத்தை அனுப்பவும்</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">பகிர்</string>
 	<string name="menu_action_bookmark" state="needs_review" hash="1146136289">புக்மார்க்</string>
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">புக்மார்க்கை நீக்கு</string>
+	<string name="menu_action_view_message" state="needs_review" hash="-211312046">செய்தியைப் பார்</string>
+	<string name="label_see_more" state="needs_review" hash="-1206298538">மேலும் பார்க்கவும்</string>
+	<string name="label_formatted_text" state="needs_review" hash="664283030">வடிவமைக்கப்பட்டது</string>
+	<string name="label_raw_text" state="needs_review" hash="-1645103337">மூல</string>
+	<string name="pref_truncate_long_messages_title" state="needs_review" hash="576500375">நீண்ட செய்திகளை சுருக்கவும்</string>
+	<string name="pref_truncate_long_messages_full_screen" state="needs_review" hash="1513604976">முழுத் திரையைத் திறக்க கிளிக் செய்யவும்</string>
+	<string name="pref_truncate_long_messages_inline" state="needs_review" hash="1658956871">விரிவுபடுத்த கிளிக் செய்யவும்</string>
+	<string name="pref_truncate_long_messages_never" state="needs_review" hash="1348404810">எப்போதும் சுருக்க வேண்டாம்</string>
+	<string name="label_select_message_to_copy" state="needs_review" hash="1560698970">செய்தியின் ஒரு பகுதியைத் தேர்ந்தெடுத்து நகலெடுக்கவும்.</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">காப்பகப்படுத்தவும்</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">காப்பகத்திலிருந்து நீக்கு</string>
 	<string name="menu_check_update" state="needs_review" hash="1635875089">புதுப்பிப்பைச் சரிபார்க்கவும்</string>
@@ -228,7 +237,7 @@
 	<string name="notification_channel_message_description" state="needs_review" hash="-780386348">புதிய செய்திகளுக்கான அறிவிப்புகள்</string>
 	<string name="notification_channel_message_name" state="needs_review" hash="-1639407912">செய்திகள்</string>
 	<string name="notification_content_exchange_sas" state="needs_review" hash="-1014025516">%1$s உடன் உங்கள் குறியீடுகளைப் பரிமாறிக் கொள்ளுங்கள்</string>
-	<string name="notification_content_group_invite" state="needs_review" hash="-947588285">%1$s உங்களை குழு கலந்துரையாடலுக்கு அழைக்கிறார்</string>
+	<string name="notification_content_group_invite" state="needs_review" hash="-947588285">%1$s உங்களை குழு உரையாடலுக்கு அழைக்கிறார்</string>
 	<string name="notification_content_mediator_invite" state="needs_review" hash="439791783">%1$s என்பவரால் அறிமுகப்படுத்தப்பட்டது</string>
 	<string name="notification_public_title_exchange_sas" state="needs_review" hash="786512983">உங்கள் குறியீடுகளைப் பரிமாறிக் கொள்ளுங்கள்</string>
 	<string name="notification_public_title_group_invitation" state="needs_review" hash="-366531705">புதிய குழு அழைப்பு பெறப்பட்டது</string>
@@ -248,6 +257,8 @@
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">மிகவும் அதிகம்</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">நீங்கள் குழுவிலிருந்து வெளியேறினீர்கள்</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">நீங்கள் குழுவில் மீண்டும் சேர்ந்தீர்கள்</string>
+	<string name="label_groups_administered" state="needs_review" hash="353496672">நீங்கள் நிர்வகிக்கும் குழுக்கள்</string>
+	<string name="label_groups_joined" state="needs_review" hash="-1353689862">சேர்ந்த குழுக்கள்</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">நீங்கள் குழுவில் சேர்ந்தீர்கள்</string>
 	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s உங்களை இந்த குழுவில் சேர்த்துள்ளார்</string>
 	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s உங்களை மீண்டும் இந்த குழுவில் சேர்த்துள்ளார்</string>
@@ -324,7 +335,7 @@
 	<string name="text_user_added_to_contacts" state="needs_review" hash="-792506872">உங்களுடைய தொடர்புகளில் பயனர் சேர்க்கப்பட்டார்</string>
 	<string name="toast_message_user_deleted" state="needs_review" hash="-1664642954">பயனர் நீக்கப்பட்டார்</string>
 	<string name="text_original_message_not_found" state="needs_review" hash="2014071006">அசல் செய்தி கிடைக்கவில்லை</string>
-	<string name="text_discussion_end2end_disclaimer" state="needs_review" hash="165389435">இந்த கலந்துரையாடலில் வெளியிடப்படும் செய்திகள், இறுதி முதல் இறுதி வரை குறியாக்கம் மூலம் பாதுகாக்கப்படுகின்றன.\nஅவற்றின் ரகசியத்தன்மை, நம்பகத்தன்மை மற்றும் அவற்றின் அனுப்புநரின் அடையாளம் ஆகியவை கிரிப்டோகிராஃபி மூலம் உறுதி செய்யப்படுகின்றன.</string>
+	<string name="text_discussion_end2end_disclaimer" state="needs_review" hash="165389435">இந்த உரையாடலில் வெளியிடப்படும் செய்திகள், இறுதி முதல் இறுதி வரை குறியாக்கம் மூலம் பாதுகாக்கப்படுகின்றன.\nஅவற்றின் ரகசியத்தன்மை, நம்பகத்தன்மை மற்றும் அவற்றின் அனுப்புநரின் அடையாளம் ஆகியவை கிரிப்டோகிராஃபி மூலம் உறுதி செய்யப்படுகின்றன.</string>
 	<string name="text_unknown_member_joined_the_group" state="needs_review" hash="1051900858">ஒரு அறிமுகமில்லாத உறுப்பினர் குழுவில் சேர்ந்தார்</string>
 	<string name="text_unknown_member_left_the_group" state="needs_review" hash="183620441">தெரியாத உறுப்பினர் குழுவிலிருந்து வெளியேறினார்</string>
 	<string name="pref_reset_dialogs_title" state="needs_review" hash="-1377245223">அனைத்து உரையாடல் எச்சரிக்கைகளையும் மீட்டமை</string>
@@ -509,6 +520,8 @@
 	<string name="pref_text_dark_mode_on" state="needs_review" hash="794872984">எப்போதும் டார்க் தீமைப் பயன்படுத்துங்கள்</string>
 	<string name="pref_text_dark_mode_off" state="needs_review" hash="1031187033">எப்போதும் வெளிர் நிற தீமைப் பயன்படுத்துங்கள்</string>
 	<string name="pref_text_dark_mode_auto" state="needs_review" hash="-1140013121">சாதன அமைப்பைப் பின்பற்று</string>
+	<string name="pref_use_pattern_avatars_title" state="needs_review" hash="-184462474">உருவாக்கப்படும் அவதாரங்கள்</string>
+	<string name="pref_use_pattern_avatars_summary" state="needs_review" hash="-1895366464">புகைப்படம் இல்லாத தொடர்புகளுக்கு, அவர்களின் முதலெழுத்துக்கு பதிலாக தனித்துவமான வண்ண வடிவத்தைக் காண்பிக்கவும்.</string>
 	<string name="menu_action_help_faq" state="needs_review" hash="971329012">உதவி / அடிக்கடி கேட்கப்படும் கேள்விகள்</string>
 	<string name="menu_action_call_contact" state="needs_review" hash="546297186">தொடர்புக்கு அழைக்கவும்</string>
 	<string name="notification_title_incoming_webrtc_call" state="needs_review" hash="-2109880396">%1$s இலிருந்து உள்வரும் Olvid அழைப்பு</string>
@@ -692,7 +705,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">உரிம சேவையகம்:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">உங்கள் சேவையகம்:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">தவறான உரிமச் செயல்படுத்தும் இணைப்பு.\n\nஇந்த இணைப்பை உங்களுக்கு அனுப்பிய நபரைத் தொடர்பு கொள்ளவும்.</string>
-	<string name="label_checking_license" state="needs_review" hash="-777109669">உரிமம் சரிபார்க்கப்படுகிறது…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">உரிம நிலையைச் சரிபார்க்க முடியவில்லை</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">தெரியாத உரிமம்</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">செல்லுபடியாகும் உரிமம்</string>
@@ -740,6 +752,16 @@
 	<string name="text_message_content_wiped" state="needs_review" hash="1781783786">(செய்தி உள்ளடக்கம் நீக்கப்பட்டது)</string>
 	<string name="text_ephemeral_message_explanation" state="needs_review" hash="612413232">கிளிக் செய்து செய்தியின் உள்ளடக்கத்தைப் பார்க்கவும்</string>
 	<string name="text_visible_once" state="needs_review" hash="962464352">ஒரு முறை மட்டுமே தெரியும்</string>
+	<string name="dialog_title_ephemeral_message" state="needs_review" hash="-1527208333">தற்காலிக செய்தி</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave" state="needs_review" hash="1852111882">நீங்கள் இந்த உரையாடலை விட்டு வெளியேறும்போது இந்த செய்தி நீக்கப்படும்.</string>
+	<string name="text_ephemeral_read_once_erased_on_leave" state="needs_review" hash="-1031412379">இந்த உரையாடலை நீங்கள் விட்டு வெளியேறும்போது, இந்த செய்தியின் உள்ளடக்கம் அழிக்கப்படும்.</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave_once_opened" state="needs_review" hash="-1827602456">இது திறக்கப்பட்டவுடன், நீங்கள் இந்த உரையாடலை விட்டு வெளியேறும்போது இந்த செய்தி நீக்கப்படும்.</string>
+	<string name="text_ephemeral_deleted_at_time" state="needs_review" hash="831937049">%1$s இல் நீக்கப்படும்</string>
+	<string name="text_ephemeral_deleted_on_date_at_time" state="needs_review" hash="667854133">%1$s அன்று %2$s மணிக்கு நீக்கப்படும்</string>
+	<string name="text_ephemeral_content_erased_at_time" state="needs_review" hash="1038815627">%1$s இல் உள்ளடக்கங்கள் அழிக்கப்படும்</string>
+	<string name="text_ephemeral_content_erased_on_date_at_time" state="needs_review" hash="848079053">%1$s அன்று %2$s மணிக்கு உள்ளடக்கம் அழிக்கப்படும்</string>
+	<string name="text_ephemeral_countdown_starts_when_sent" state="needs_review" hash="-1010200489">செய்தி அனுப்பப்பட்டவுடன், எண்ணும் நேரம் தொடங்குகிறது.</string>
+	<string name="text_ephemeral_countdown_starts_when_opened" state="needs_review" hash="1194691757">நீங்கள் செய்தியைத் திறக்கும்போது, ​​கணக்கிடுதல் தொடங்குகிறது.</string>
 	<string name="text_timer_s" state="needs_review" hash="-1146250144">%1$dகள்</string>
 	<string name="text_timer_m" state="needs_review" hash="-1318025056">%1$dமீ</string>
 	<string name="text_timer_h" state="needs_review" hash="-1461170816">%1$dh</string>
@@ -777,6 +799,8 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">செய்திகளை அனுப்புதல் மற்றும் பெறுதல்</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">செயல்படுத்தப்பட்டதும், ஒருமுறை மட்டும் படிக்கக்கூடிய செய்திகள் மற்றும் இயல்புநிலை வரையறுக்கப்பட்ட தெரிவுநிலை கால அளவு கொண்ட செய்திகள், நீங்கள் உரையாடலுக்குள் நுழையும்போது உடனடியாகத் திறக்கப்படும். இல்லையெனில், ஒரு கிளிக் தேவைப்படும்.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">செயல்படுத்தப்பட்டதும், நீக்கப்பட்ட செய்திகள் சேமிக்கப்படும், இதனால் அவை எப்போது அனுப்பப்பட்டன அல்லது படிக்கப்பட்டன என்பதை நீங்கள் பார்க்கலாம். இல்லையெனில், அவை நீக்கப்படும்.</string>
+	<string name="pref_default_reaction_title" state="needs_review" hash="1457188713">இயல்புநிலை எதிர்வினை</string>
+	<string name="pref_default_reaction_summary" state="needs_review" hash="-1065900793">பெறப்பட்ட செய்தியில் இருமுறை தட்டினால், %1$s மூலம் நீங்கள் பதிலளிக்கலாம். உங்கள் பதிலை நீக்க மீண்டும் இருமுறை தட்டவும்.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">வலை கிளையன்ட்</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">அமைப்புகளின் புதுப்பிப்பு இணைப்பை பகுப்பாய்வு செய்வதில் பிழை</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">செய்திகளை அனுப்புதல் மற்றும் பெறுதல்</string>
@@ -816,7 +840,7 @@
 	<string name="dialog_message_shared_ephemeral_settings_modified" state="needs_review" hash="715864223">இந்த உரையாடலுக்கான இயல்புநிலை, தற்காலிக செய்தி அமைப்புகளை நீங்கள் மாற்றியமைத்துள்ளீர்கள்.\n\nஇந்த அமைப்புகளை உங்களுக்கும், மற்ற அனைத்து உரையாடல் பங்கேற்பாளர்களுக்கும் புதுப்பிக்க விரும்புகிறீர்களா, அல்லது உங்கள் மாற்றங்களை நிராகரிக்க விரும்புகிறீர்களா?</string>
 	<string name="text_discussion_shared_settings_updated" state="needs_review" hash="-151974912">பொதுவான உரையாடல் அமைப்புகள் புதுப்பிக்கப்பட்டன</string>
 	<string name="text_updated_shared_settings" state="needs_review" hash="1457023446">%1$s பகிரப்பட்ட உரையாடல் அமைப்புகளைப் புதுப்பித்தது</string>
-	<string name="text_updated_shared_settings_you" state="needs_review" hash="40728921">நீங்கள் பகிரப்பட்ட கலந்துரையாடல் அமைப்புகளைப் புதுப்பித்தீர்கள்</string>
+	<string name="text_updated_shared_settings_you" state="needs_review" hash="40728921">நீங்கள் பகிரப்பட்ட உரையாடல் அமைப்புகளைப் புதுப்பித்தீர்கள்</string>
 	<string name="text_non_ephemeral_messages" state="needs_review" hash="402305240">தற்காலிகமற்ற செய்திகள்</string>
 	<string name="pref_category_default_retention_policy_title" state="needs_review" hash="925391440">செய்தி சேமிப்புக் கொள்கை</string>
 	<string name="pref_category_default_retention_policy_summary" state="needs_review" hash="-1071833812">கீழே உள்ள அமைப்புகள், உங்கள் உரையாடல்களில் பழைய செய்திகளை தானாகவே நீக்க அனுமதிக்கின்றன. ஒவ்வொரு உரையாடலுக்கும் இந்த அமைப்புகளை மாற்றியமைக்கலாம்.</string>
@@ -896,7 +920,8 @@
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">உரிமம்: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">அடையாள வழங்குநர்</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">அடையாள வழங்குநர் சேவையகம்</string>
-	<string name="explanation_identity_provider" state="needs_review" hash="-964456322">இந்தத் திரை, ஓல்விட்-இல் உங்கள் நிறுவனத்தின் அடையாள வழங்குநரை கட்டமைக்க உதவுகிறது. கட்டமைத்த பிறகு, இந்த சேவையகத்துடன் நீங்கள் அங்கீகரிக்க முடியும், மேலும் ஓல்விட் மற்ற ஊழியர்களை உங்கள் தொடர்புகளுக்கு எளிதாக சேர்க்க அனுமதிக்கும்.\nமேலும் விவரங்களுக்கு உங்கள் நிர்வாகியைத் தொடர்பு கொள்ளவும்.</string>
+	<string name="explanation_identity_provider" state="needs_review" hash="-1014276138">இந்தத் திரை, ஓல்விட்-இல் உங்கள் நிறுவனத்தின் அடையாள வழங்குநரை கட்டமைக்க உதவுகிறது. கட்டமைத்த பிறகு, நீங்கள் அங்கீகரிக்க முடியும், மேலும் ஓல்விட் மற்ற பயனர்களை உங்கள் தொடர்புகளுக்கு எளிதாக சேர்க்க அனுமதிக்கும்.\nமேலும் விவரங்களுக்கு உங்கள் நிர்வாகியைத் தொடர்பு கொள்ளவும்.</string>
+	<string name="explanation_identity_provider_mdm" state="needs_review" hash="-1274626281">இந்த நிறுவல் உங்கள் நிறுவனத்தால் நிர்வகிக்கப்படுகிறது, மேலும் ஒரு அடையாள வழங்குநரைப் பயன்படுத்தும்படி கட்டமைக்கப்பட்டுள்ளது. கீழே உள்ள அமைப்புகள் முன்பே கட்டமைக்கப்பட்டுள்ளன, அவற்றை மாற்ற முடியாது.\nமேலும் விவரங்களுக்கு உங்கள் நிர்வாகியைத் தொடர்பு கொள்ளவும்.</string>
 	<string name="button_label_authenticate" state="needs_review" hash="272245375">அங்கீகரிக்கவும்</string>
 	<string name="button_label_check_identity_provider" state="needs_review" hash="508428497">அடையாள வழங்குநரைச் சரிபார்க்கவும்</string>
 	<string name="menu_action_use_identity_provider" state="needs_review" hash="1305090894">ஒரு அடையாள வழங்குநரைப் பயன்படுத்தவும்</string>
@@ -980,8 +1005,6 @@
 	<string name="text_failed_call" state="needs_review" hash="-1934816919">தொலைபேசி அழைப்பு தோல்வியடைந்தது</string>
 	<string name="text_busy_call" state="needs_review" hash="-310279946">பிஸியாக இருக்கும்போது உள்வரும் அழைப்பு</string>
 	<string name="text_busy_outgoing_call" state="needs_review" hash="92373387">பிஸியாக இருக்கும் தொடர்புக்கு தொலைபேசி அழைப்பு</string>
-	<string name="content_description_profile_picture" state="needs_review" hash="-1074340378">சுயவிவரப் படம்</string>
-	<string name="ime_action_rename" state="needs_review" hash="-1795678977">பெயரை மாற்று</string>
 	<string name="pref_storage_explorer_title" state="needs_review" hash="735816049">உள் சேமிப்பகத்தை ஆராயும் கருவி</string>
 	<string name="pref_storage_explorer_summary" state="needs_review" hash="-1991214388">உங்கள் Olvid பயன்பாட்டின் உள் சேமிப்பகத்தை ஆராயுங்கள்!</string>
 	<string name="activity_title_storage_explorer" state="needs_review" hash="735816049">உள் சேமிப்பகத்தை ஆராயும் கருவி</string>
@@ -1052,6 +1075,8 @@
 	<string name="pref_image_text_recognition_title" state="needs_review" hash="1877261687">படங்களில் உள்ள உரையை அடையாளம் கண்டு அட்டவணைப்படுத்து</string>
 	<string name="pref_image_text_recognition_summary" state="needs_review" hash="1217699919">பட இணைப்புகளில் உள்ள உரையைத் தேடவும், நகலெடுக்கவும் இது அனுமதிக்கிறது. குறைந்த திறன் கொண்ட சாதனங்களில் இது அதிக வளங்களைப் பயன்படுத்தக்கூடும்: உங்களுக்குத் தேவை இல்லையென்றால், அதை முடக்கவும்.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">படத்தைக் காட்ட முடியவில்லை</string>
+	<string name="label_unsupported_image_format" state="needs_review" hash="-1487560676">ஆதரிக்கப்படாத பட வடிவம்</string>
+	<string name="label_unsupported_video_format" state="needs_review" hash="2131303733">ஆதரவற்ற வீடியோ வடிவம்</string>
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">கிளவுட் வழங்குநருடன் உள்நுழைவது அவசியம்</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">நீங்கள் Olvid-ஐ கிளவுட் வழங்குநருக்கு தானியங்கி காப்புப்பிரதிகளைப் பயன்படுத்தும்படி அமைத்துள்ளீர்கள், ஆனால் உங்கள் அமர்வு காலாவதியானது. நீங்கள் மீண்டும் அந்த வழங்குநரிடம் உள்நுழைய வேண்டும்.\n\nநீங்கள் இனி தானியங்கி காப்புப்பிரதிகளைப் பயன்படுத்த விரும்பவில்லை என்றால், பயன்பாட்டு அமைப்புகளில் அவற்றை முடக்கலாம். உங்கள் சாதனம் தொலைந்துவிட்டாலோ அல்லது சேதமடைந்தாலோ, உங்கள் தொடர்புகளை இழக்காமல் இருக்க தானியங்கி காப்புப்பிரதிகள் மட்டுமே ஒரே வழி என்பதை நினைவில் கொள்ளுங்கள்.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">உள்நுழையவும்</string>
@@ -1180,9 +1205,9 @@
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">பதிலளிக்கப்பட்ட செய்தியை நீக்கு</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">இந்த சுயவிவரத்திற்கான அறிவிப்புகள் முடக்கப்பட்டுள்ளன என்பதைக் காட்டும் அடையாளம்</string>
 	<string name="button_label_create_a_profile" state="needs_review" hash="-1568207484">ஒரு சுயவிவரத்தை உருவாக்கவும்</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="1428471064">உங்கள் நிறுவனத்தின் அடையாள வழங்குநர் வெற்றிகரமாக கட்டமைக்கப்பட்டது. அதனுடன் அங்கீகரிக்க, கீழே உள்ள \"அங்கீகரி\" பொத்தானை அழுத்தவும், இதன் மூலம் உங்கள் தனிப்பட்ட தகவல்களைப் பெறலாம்.</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="1823898406">உங்கள் நிறுவனத்தின் அடையாள வழங்குநர் வெற்றிகரமாக கட்டமைக்கப்பட்டது. உங்கள் தனிப்பட்ட தகவல்களைப் பெற கீழே உள்ள \"மேஜிக் இணைப்பைப் பயன்படுத்து\" பொத்தானை அழுத்தவும்.</string>
-	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="1340457300">ஒல்விட்-க்கு வருக!\n\nஇந்த நிறுவல் உங்கள் நிறுவனத்தால் நிர்வகிக்கப்படுகிறது, மேலும் ஒரு அடையாள வழங்குநரைப் பயன்படுத்தும்படி கட்டமைக்கப்பட்டுள்ளது. அதனுடன் அங்கீகரிக்கவும், உங்கள் தனிப்பட்ட தகவல்களைப் பெறவும் கீழே உள்ள \"அங்கீகரி\" பொத்தானை அழுத்தவும்.\n\nநீங்கள் ஏற்கனவே ஒல்விட்டைப் பயன்படுத்தியிருந்தால், காப்புப் பிரதியிலிருந்து உங்கள் விசைகள் மற்றும் தொடர்புகளை மீட்டெடுக்க விரும்பினால், \"காப்புப் பிரதியை மீட்டெடு\" என்பதை அழுத்தவும்.</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="-2030851622">உங்கள் நிறுவனத்தின் அடையாள வழங்குநர் வெற்றிகரமாக கட்டமைக்கப்பட்டது. அதனுடன் அங்கீகாரம் செய்து உங்கள் தனிப்பட்ட தகவல்களைப் பெற கீழே உள்ள \"அங்கீகரி\" பொத்தானை அழுத்தவும்.</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="903193568">உங்கள் நிறுவனத்தின் அடையாள வழங்குநர் வெற்றிகரமாக கட்டமைக்கப்பட்டது. உங்கள் தனிப்பட்ட தகவல்களைப் பெற கீழே உள்ள \"மேஜிக் இணைப்பைப் பயன்படுத்து\" பொத்தானை அழுத்தவும்.</string>
+	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="-5109440">இந்த நிறுவல் உங்கள் நிறுவனத்தால் நிர்வகிக்கப்படுகிறது, மேலும் ஒரு அடையாள வழங்குநரைப் பயன்படுத்தும்படி கட்டமைக்கப்பட்டுள்ளது. அதனுடன் அங்கீகரிக்கவும், உங்கள் தனிப்பட்ட தகவல்களைப் பெறவும் கீழே உள்ள \"%1$s\" பொத்தானை அழுத்தவும்.</string>
 	<string name="button_label_see_details" state="needs_review" hash="238834473">விவரங்களைக் காண்க</string>
 	<string name="link_label_invitation_url" state="needs_review" hash="744905192">தொடர்பை சேர்</string>
 	<string name="link_label_configuration_url" state="needs_review" hash="-441435162">அமைவு அல்லது உரிமத்தை இறக்குமதி செய்க</string>
@@ -1223,6 +1248,33 @@
 	<string name="label_attach_timer" state="needs_review" hash="-1527208333">தற்காலிக செய்தி</string>
 	<string name="label_attach_camera" state="needs_review" hash="-1123080444">புகைப்படம் எடு</string>
 	<string name="label_attach_video" state="needs_review" hash="1626268086">வீடியோவைப் பதிவு செய்</string>
+	<string name="label_attach_scan" state="needs_review" hash="1128596739">ஒரு ஆவணத்தை ஸ்கேன் செய்க</string>
+	<string name="label_scan_page_count" state="needs_review" hash="1987610035">பக்கம் %1$d, மொத்தம் %2$d</string>
+	<string name="button_label_scan_add_page" state="needs_review" hash="1724653886">ஒரு பக்கத்தைச் சேர்</string>
+	<string name="button_label_scan_crop" state="needs_review" hash="-292939300">வெட்டு</string>
+	<string name="button_label_scan_rotate" state="needs_review" hash="807341684">சுழற்று</string>
+	<string name="button_label_scan_auto_crop" state="needs_review" hash="1502815262">தானியங்கி</string>
+	<string name="button_label_scan_full_image" state="needs_review" hash="1366902062">முழு படம்</string>
+	<string name="label_scan_filter_original" state="needs_review" hash="-817276190">மூல</string>
+	<string name="label_scan_filter_enhanced" state="needs_review" hash="851648098">மேம்படுத்தப்பட்டது</string>
+	<string name="label_scan_filter_grayscale" state="needs_review" hash="-695463257">சாம்பல் நிறம்</string>
+	<string name="label_scan_filter_black_and_white" state="needs_review" hash="1668578691">கருப்பு மற்றும் வெள்ளை</string>
+	<string name="dialog_title_discard_scan" state="needs_review" hash="-94972780">இந்த ஸ்கேனை கைவிடுவதுண்டா?</string>
+	<string name="dialog_message_discard_scan" state="needs_review" hash="-1145223011">ஸ்கேன் செய்யப்பட்ட பக்கங்கள் தொலைந்துவிடும்.</string>
+	<string name="toast_message_scan_failed" state="needs_review" hash="512858351">PDF உருவாக்க முடியவில்லை</string>
+	<string name="button_label_scan_retake" state="needs_review" hash="-439420481">மீண்டும் எடுக்கவும்</string>
+	<string name="button_label_scan_enhance" state="needs_review" hash="-1842671012">மேம்படுத்து</string>
+	<string name="button_label_scan_filters" state="needs_review" hash="-1898368294">வடிகட்டிகள்</string>
+	<string name="button_label_scan_crop_rotate" state="needs_review" hash="-1750423698">வெட்டி சுழற்று</string>
+	<string name="button_label_scan_discard" state="needs_review" hash="-248729677">ஸ்கேன் நீக்கு</string>
+	<string name="label_scan_mode_manual" state="needs_review" hash="-751509695">கைமுறை</string>
+	<string name="label_scan_mode_auto" state="needs_review" hash="315272314">தானியங்கிப் பதிவு</string>
+	<string name="label_scan_hint" state="needs_review" hash="289920901">அந்த ஆவணத்தை சட்டத்தில் வைக்கவும்</string>
+	<string name="label_scan_hint_hold_still" state="needs_review" hash="584896298">அசையாமல் இருங்கள்…</string>
+	<string name="button_label_scan_flash" state="needs_review" hash="775381504">ஃபிளாஷ்</string>
+	<string name="label_scan_camera_permission" state="needs_review" hash="-1855763825">ஆவணங்களை ஸ்கேன் செய்ய கேமராவைப் பயன்படுத்த Olvid-க்கு அனுமதியுங்கள். உங்கள் கேலரியில் இருந்து படங்களை இறக்குமதி செய்யலாம்.</string>
+	<string name="button_label_scan_file_name" state="needs_review" hash="2098556706">கோப்பு பெயர்</string>
+	<string name="dialog_title_scan_file_name" state="needs_review" hash="1332508838">PDF கோப்பின் பெயர்</string>
 	<string name="pref_font_scale" state="needs_review" hash="1773040591">எழுத்துரு அளவு</string>
 	<string name="pref_text_font_scale_0_75" state="needs_review" hash="-1963894407">மிகச் சிறியது (75%)</string>
 	<string name="pref_text_font_scale_0_9" state="needs_review" hash="-708054676">சிறியது (90%)</string>
@@ -1274,6 +1326,9 @@
 	<string name="your_message" state="needs_review" hash="1739533147">உங்கள் செய்தி</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d அவர்களுக்கு %2$s மீதுள்ள எதிர்வினைகள்</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s என்பவர் %2$sக்கு எதிர்வினை தெரிவித்தார்</string>
+	<string name="menu_action_remove_your_reaction" state="needs_review" hash="-1609298248">உங்கள் எதிர்வினையை நீக்கு</string>
+	<string name="menu_action_add_to_favorites" state="needs_review" hash="-1933720211">பிடித்தவைகளில் சேர்</string>
+	<string name="menu_action_remove_from_favorites" state="needs_review" hash="1796304724">பிடித்தவற்றிலிருந்து நீக்கு</string>
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">ஒரு ஈமோஜியைச் செருகவும்</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">பிழைத்திருத்தத் தகவல்</string>
 	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">சாதனங்களின் எண்ணிக்கை:</string>
@@ -1312,15 +1367,15 @@
 	<string name="button_label_invite" state="needs_review" hash="673251104">அழைப்பு</string>
 	<string name="explanation_contact_not_one_to_one" state="needs_review" hash="1278467180">%1$s உடன் தனிப்பட்ட உரையாடலைத் தொடங்கவும், அவர்களை உங்கள் தொடர்புகளில் சேர்க்கவும், \"அழைப்பு\" என்பதைக் கிளிக் செய்யவும்.</string>
 	<string name="label_contact_not_one_to_one" state="needs_review" hash="1358875748">இந்த பயனர் இன்னும் உங்கள் தொடர்புகள் பட்டியலில் இல்லை</string>
-	<string name="invitation_status_description_one_to_one_invitation_sent" state="needs_review" hash="1820750107">நீங்கள் %1$s அவர்களை ஒரு தனிப்பட்ட கலந்துரையாடலுக்கு அழைத்தீர்கள். அவர்கள் ஒப்புக்கொள்ளும் வரை காத்திருக்கவும் அல்லது இந்த அழைப்பை ரத்து செய்ய \"ரத்து செய்\" என்பதை அழுத்தவும்.</string>
-	<string name="invitation_status_description_one_to_one_invitation_sent_deleted" state="needs_review" hash="-1464532571">நீங்கள் ஒரு தனிப்பட்ட கலந்துரையாடலுக்கு அழைத்த பயனர், உங்கள் தெரிந்த பயனர்கள் பட்டியலில் இருந்து நீக்கப்பட்டார். இந்த அழைப்பை ரத்து செய்ய, \"ரத்து செய்\" என்பதை அழுத்தவும்.</string>
-	<string name="invitation_status_one_to_one_invitation" state="needs_review" hash="1121224764">தனிப்பட்ட கலந்துரையாடல் அழைப்பு</string>
-	<string name="invitation_status_description_one_to_one_invitation" state="needs_review" hash="-1110963247">%1$s உங்களை ஒரு தனிப்பட்ட கலந்துரையாடலுக்கு அழைக்கிறார்.</string>
+	<string name="invitation_status_description_one_to_one_invitation_sent" state="needs_review" hash="1820750107">நீங்கள் %1$s அவர்களை ஒரு தனிப்பட்ட உரையாடலுக்கு அழைத்தீர்கள். அவர்கள் ஒப்புக்கொள்ளும் வரை காத்திருக்கவும் அல்லது இந்த அழைப்பை ரத்து செய்ய \"ரத்து செய்\" என்பதை அழுத்தவும்.</string>
+	<string name="invitation_status_description_one_to_one_invitation_sent_deleted" state="needs_review" hash="-1464532571">நீங்கள் ஒரு தனிப்பட்ட உரையாடலுக்கு அழைத்த பயனர், உங்கள் தெரிந்த பயனர்கள் பட்டியலில் இருந்து நீக்கப்பட்டார். இந்த அழைப்பை ரத்து செய்ய, \"ரத்து செய்\" என்பதை அழுத்தவும்.</string>
+	<string name="invitation_status_one_to_one_invitation" state="needs_review" hash="1121224764">தனிப்பட்ட உரையாடல் அழைப்பு</string>
+	<string name="invitation_status_description_one_to_one_invitation" state="needs_review" hash="-1110963247">%1$s உங்களை ஒரு தனிப்பட்ட உரையாடலுக்கு அழைக்கிறார்.</string>
 	<string name="toast_message_contact_removed" state="needs_review" hash="1769880831">தொடர்பு நீக்கப்பட்டது</string>
 	<string name="dialog_title_remove_contact" state="needs_review" hash="967879802">தொடர்பை நீக்கவா?</string>
 	<string name="dialog_message_remove_contact" state="needs_review" hash="-85916850">உங்கள் தொடர்புகளிலிருந்து %1$s ஐ நீக்குவது, அவர்களுடன் நீங்கள் வைத்திருக்கும் தனிப்பட்ட உரையாடலை முடிவுக்குக் கொண்டுவரும். இருப்பினும், நீங்கள் இருவரும் சேர்ந்து இருக்கும் குழு உரையாடல்களில் செய்திகளைப் பரிமாறிக் கொள்ள முடியும்.</string>
-	<string name="notification_content_one_to_one_invitation" state="needs_review" hash="-1518952630">தனிப்பட்ட கலந்துரையாடலுக்கான அழைப்பு</string>
-	<string name="notification_public_title_one_to_one_invitation" state="needs_review" hash="-1518952630">தனிப்பட்ட கலந்துரையாடலுக்கான அழைப்பு</string>
+	<string name="notification_content_one_to_one_invitation" state="needs_review" hash="-1518952630">தனிப்பட்ட உரையாடலுக்கான அழைப்பு</string>
+	<string name="notification_public_title_one_to_one_invitation" state="needs_review" hash="-1518952630">தனிப்பட்ட உரையாடலுக்கான அழைப்பு</string>
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">தொடர்புகளுக்கான \"நம்பகமான மூலம்\" என்பதைக் காட்டு</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">செயல்படுத்தப்பட்டதும், அவர்களின் சுயவிவரப் படத்தில் உள்ள வண்ணப் புள்ளி, நீங்கள் ஒரு தொடர்பின் அடையாளத்தை தனிப்பட்ட முறையில் சரிபார்த்தீர்களா அல்லது அவர்கள் உங்களுக்கு அறிமுகப்படுத்தப்பட்டார்களா என்பதைக் குறிக்கிறது.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">ஒல்விட் செய்தியை அனுப்புதல்</string>
@@ -1389,6 +1444,14 @@
 	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">நிலுவையில் உள்ளது\nபடிக்க மட்டும்</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">நிர்வாகி</string>
 	<string name="label_pending_admin" state="needs_review" hash="-2032202913">நிலுவையில் உள்ள நிர்வாகி</string>
+	<string name="label_moderator" state="needs_review" hash="767421225">நிர்வாகி</string>
+	<string name="label_pending_moderator" state="needs_review" hash="1955900662">நிலுவையில் உள்ள\nநிர்வாகி</string>
+	<string name="dialog_title_group_roles" state="needs_review" hash="1155086227">குழுவில் உள்ளவர்களின் பங்கு</string>
+	<string name="content_description_group_roles" state="needs_review" hash="-449063250">குழுவில் உள்ளவர்களின் பொறுப்புகள் விளக்கம்</string>
+	<string name="explanation_group_role_admin" state="needs_review" hash="731519662">குழு உறுப்பினர்களைச் சேர்க்கவும் நீக்கவும் முடியும்.</string>
+	<string name="explanation_group_role_moderator" state="needs_review" hash="2037600722">எந்தவரிடமிருந்தும் செய்திகளை \"எல்லா இடங்களிலும் நீக்க\" முடியும்.</string>
+	<string name="explanation_group_role_read_only" state="needs_review" hash="1017523379">உரையாடலைப் பார்க்கலாம், செய்திகளுக்குப் பதிலளிக்கலாம் மற்றும் கருத்துக்கணிப்புகளில் பதிலளிக்கலாம், ஆனால் செய்திகளைப் பதிவிட முடியாது.</string>
+	<string name="explanation_group_role_pending" state="needs_review" hash="-843291456">குழுவில் சேர அழைப்பு விடுக்கப்பட்டது, ஆனால் அவர்கள் இன்னும் அந்த அழைப்பை ஏற்கவில்லை. அவர்கள் அழைப்பை ஏற்றுக்கொண்ட பிறகு, அதற்குள் அனுப்பப்பட்ட செய்திகள் அவர்களுக்கு அனுப்பப்படும்.</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">இந்த பயனரின் பெயரை காண்பிக்க முடியவில்லை</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">பெயர் குறிப்பிடப்படாத குழு</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">உரையாடல் அறிவிப்புகள்</string>
@@ -1518,6 +1581,10 @@
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">குழு உருவாக்கப்பட்டு வருகிறது</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">புதிய குழு</string>
 	<string name="label_group_type" state="needs_review" hash="498463258">குழு வகை</string>
+	<string name="label_existing_discussions" state="needs_review" hash="-2089160663">ஏற்கனவே உள்ள உரையாடல்கள்</string>
+	<string name="label_last_message_date" state="needs_review" hash="1218222521">கடைசி செய்தி %1$s</string>
+	<string name="button_label_open" state="needs_review" hash="-2066377003">திற</string>
+	<string name="button_label_create_a_new_group" state="needs_review" hash="-1073202815">புதிய குழுவை உருவாக்கு</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">தரநிலை</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">குழுவில் உள்ள அனைத்து உறுப்பினர்களும் புதிய உறுப்பினர்களை அழைக்கலாம்</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">கட்டுப்படுத்தப்பட்டது</string>
@@ -1531,6 +1598,8 @@
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">நீங்கள் இனி குழுவின் நிர்வாகி அல்ல</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">நீங்கள் இப்போது செய்திகளை அனுப்பலாம்</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-930933808">இங்கே நீங்கள் செய்திகளை அனுப்ப முடியாது</string>
+	<string name="text_you_became_moderator" state="needs_review" hash="-609725743">நீங்கள் இப்போது குழுவின் நிர்வாகி</string>
+	<string name="text_you_are_no_longer_moderator" state="needs_review" hash="1396461107">நீங்கள் இனி குழுவின் நிர்வாகி அல்ல</string>
 	<string name="label_pending" state="needs_review" hash="1975294811">நிலுவையில் உள்ளது</string>
 	<string name="pref_app_language_title" state="needs_review" hash="-1748962099">செயலியின் மொழி</string>
 	<string name="pref_text_default_device_language" state="needs_review" hash="-1062620207">இயல்புநிலை சாதன மொழி</string>
@@ -1627,10 +1696,12 @@
 	<string name="label_zoom_in_for_address" state="needs_review" hash="902696925">முகவரியைக் கண்டுபிடிக்க பெரிதாக்கவும்</string>
 	<string name="label_address_lookup_disabled" state="needs_review" hash="-2140124686">முகவரி தேடல் முடக்கப்பட்டது</string>
 	<string name="dialog_title_introducing_mentions" state="needs_review" hash="-1741341288">பயனர் குறிப்புகளை அறிமுகப்படுத்துகிறோம்!</string>
-	<string name="dialog_message_introducing_mentions" state="needs_review" hash="622739087">ஒல்விட் இப்போது ஒரு கலந்துரையாடலில் ஒரு பயனரை குறிப்பிடுவதை அனுமதிக்கிறது 🫵! @ ஐத் தொடர்ந்து ஒரு எழுத்து அல்லது அவர்களின் பெயரை டைப் செய்வதன் மூலம் யாரை குறிப்பிடலாம் என்பதைப் பார்க்கவும்.\nமேலும், ஒரு கலந்துரையாடல் அல்லது சுயவிவரத்தை முடக்கும்போது 💤, ஒரு செய்தியில் நீங்கள் வெளிப்படையாகக் குறிப்பிடப்படும்போது மட்டுமே உங்களுக்கு அறிவிப்பு வரும்படி நீங்கள் இப்போது தேர்வு செய்யலாம்.\n\nஉங்கள் தொடர்புகள் நீங்கள் அவர்களைக் குறிப்பிட்டதை உண்மையில் பார்க்க, அவர்கள் ஒல்விட்டின் சமீபத்திய பதிப்பிற்கு மேம்படுத்த வேண்டும் என்பதை நினைவில் கொள்ளவும்.</string>
+	<string name="dialog_message_introducing_mentions" state="needs_review" hash="622739087">ஒல்விட் இப்போது ஒரு உரையாடலில் ஒரு பயனரை குறிப்பிடுவதை அனுமதிக்கிறது 🫵! @ ஐத் தொடர்ந்து ஒரு எழுத்து அல்லது அவர்களின் பெயரை டைப் செய்வதன் மூலம் யாரை குறிப்பிடலாம் என்பதைப் பார்க்கவும்.\nமேலும், ஒரு உரையாடல் அல்லது சுயவிவரத்தை முடக்கும்போது 💤, ஒரு செய்தியில் நீங்கள் வெளிப்படையாகக் குறிப்பிடப்படும்போது மட்டுமே உங்களுக்கு அறிவிப்பு வரும்படி நீங்கள் இப்போது தேர்வு செய்யலாம்.\n\nஉங்கள் தொடர்புகள் நீங்கள் அவர்களைக் குறிப்பிட்டதை உண்மையில் பார்க்க, அவர்கள் ஒல்விட்டின் சமீபத்திய பதிப்பிற்கு மேம்படுத்த வேண்டும் என்பதை நினைவில் கொள்ளவும்.</string>
 	<string name="pref_no_notify_certificate_change_for_previews_title" state="needs_review" hash="-434788963">இணைப்பு முன்னோட்டங்களுக்கான சான்றிதழ் மாற்ற அறிவிப்பை முடக்கு</string>
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">இணைப்பு முன்னோட்டத்தைப் பெறும்போது சான்றிதழ் மாற்றத்தைக் கண்டறிவதை முடக்க இந்த விருப்பத்தை இயக்கவும். சில இணையதளங்கள் ஒவ்வொரு இணைப்புக்கும் வெவ்வேறு சான்றிதழைக் காட்டலாம், மேலும் இந்த விருப்பத்தை முடக்கும்போது அடிக்கடி அறிவிப்புகளைப் பெறலாம்.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">QR குறியீடு ஸ்கேனிங்கிற்காக பழைய ZXing நூலகத்தைப் பயன்படுத்தவும்</string>
+	<string name="pref_use_in_house_document_scanner_title" state="needs_review" hash="1552486206">Olvid ஆவண ஸ்கேனரைப் பயன்படுத்தவும்</string>
+	<string name="pref_use_in_house_document_scanner_summary" state="needs_review" hash="-2092532938">இயல்பாக, ஆவணங்கள் கூகிள் பிளே சேவைகளின் ஒரு பகுதியாக ML கிட் மூலம் ஸ்கேன் செய்யப்படுகின்றன. Olvid-இன் உள்ளமைக்கப்பட்ட ஸ்கேனரைப் பயன்படுத்த இந்த விருப்பத்தை இயக்கவும்.</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">இயல்பாக, QR குறியீடு ஸ்கேனிங்கிற்கு ML கிட் பயன்படுத்தப்படுகிறது. Olvid-க்குள் QR குறியீடுகளை ஸ்கேன் செய்வதில் சிக்கல் இருந்தால், இந்த விருப்பத்தை இயக்கவும்.</string>
 	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">உள்ளமைக்கப்பட்ட PDF பார்வையாளரைப் பயன்படுத்தவும்</string>
 	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">இயல்பாக, PDF இணைப்புகள் ஒரு (எளிய) உள்ளமைந்த பார்வையாளரில் திறக்கப்படும். அதற்கு பதிலாக, வெளிப்புற பார்வையாளரைப் பயன்படுத்த இந்த விருப்பத்தை முடக்குங்கள்.</string>
@@ -1638,7 +1709,7 @@
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">சாதனம் %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">இந்த சாதனம்</string>
 	<string name="menu_action_rename_device" state="needs_review" hash="43131083">சாதனத்தின் பெயரை மாற்றவும்</string>
-	<string name="menu_action_trust_device" state="needs_review" hash="360435227">சாதனத்தை அங்கீகரிக்கவும்</string>
+	<string name="menu_action_trust_device" state="needs_review" hash="105728494">இந்த சாதனத்தை நான் அடையாளம் காண்கிறேன்</string>
 	<string name="menu_action_remove_device" state="needs_review" hash="-1485256427">சாதனத்தை நீக்கு</string>
 	<string name="menu_action_refresh_device_list" state="needs_review" hash="1430227802">சாதனங்களின் பட்டியலைப் புதுப்பிக்கவும்</string>
 	<string name="menu_action_recreate_channel" state="needs_review" hash="837900266">பாதுகாப்பான இணைப்பை மீண்டும் உருவாக்கு</string>
@@ -1706,8 +1777,9 @@
 	<string name="button_label_add_device_xxx" state="needs_review" hash="-1479212354">சாதனம் \"%1$s\" ஐச் சேர்க்கவும்</string>
 	<string name="notification_title_device_trust" state="needs_review" hash="-1568042777">புதிய சாதனம்: \"%1$s\"</string>
 	<string name="notification_title_unnamed_device_trust" state="needs_review" hash="1704207127">புதிய சாதனம்</string>
-	<string name="notification_message_device_trust" state="needs_review" hash="753501294">உங்கள் Olvid சுயவிவரங்களில் ஒன்றுக்கு ஒரு புதிய சாதனம் சேர்க்கப்பட்டது</string>
-	<string name="notification_action_device_trust" state="needs_review" hash="1450001608">இந்த சாதனத்தை நம்பகமானது எனக் குறிக்கவும்</string>
+	<string name="notification_message_device_trust" state="needs_review" hash="-1646747013">உங்கள் Olvid சுயவிவரங்களில் ஒன்றுக்கு ஒரு புதிய சாதனம் சேர்க்கப்பட்டது. நீங்கள் அதைச் சேர்க்கவில்லை என்றால், உங்கள் சாதனங்களிலிருந்து அதை நீக்கவும்.</string>
+	<string name="notification_action_device_trust" state="needs_review" hash="936727529">ஆமாம், நான்தான்</string>
+	<string name="notification_action_device_see_devices" state="needs_review" hash="-1832505809">எனது சாதனங்கள்</string>
 	<string name="notification_channel_device_name" state="needs_review" hash="1347557771">சாதன மேலாண்மை</string>
 	<string name="notification_channel_device_description" state="needs_review" hash="-36703170">உங்கள் சாதனங்கள் தொடர்பான அறிவிப்புகள்</string>
 	<string name="notification_title_device_expiration" state="needs_review" hash="202400638">\"%1$s\" முடக்கப்பட்டது</string>
@@ -1796,8 +1868,8 @@
 	<string name="contact_list_tab_contact" state="needs_review" hash="-859216410">தொடர்புகள்</string>
 	<string name="contact_list_tab_directory" state="needs_review" hash="351731324">அடையாளம்</string>
 	<string name="contact_list_tab_others" state="needs_review" hash="260936515">மற்றவை</string>
-	<string name="dialog_title_invite_contact" state="needs_review" hash="1121224764">தனிப்பட்ட கலந்துரையாடல் அழைப்பு</string>
-	<string name="dialog_message_invite_contact" state="needs_review" hash="883261663">%1$s ஐ ஒரு தனிப்பட்ட கலந்துரையாடலுக்கு அழைக்க விரும்புகிறீர்களா?</string>
+	<string name="dialog_title_invite_contact" state="needs_review" hash="1121224764">தனிப்பட்ட உரையாடல் அழைப்பு</string>
+	<string name="dialog_message_invite_contact" state="needs_review" hash="883261663">%1$s ஐ ஒரு தனிப்பட்ட உரையாடலுக்கு அழைக்க விரும்புகிறீர்களா?</string>
 	<string name="explanation_empty_other_contact_list" state="needs_review" hash="-121261312">இப்போது இங்கே யாரும் இல்லை</string>
 	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="1669386057">இன்னும் தொடர்புகளாக சேர்க்கப்படாத குழு உறுப்பினர்கள் இங்கு தோன்றுவார்கள்.</string>
 	<string name="explanation_empty_directory" state="needs_review" hash="298073547">வெற்று அடைவு</string>
@@ -2080,6 +2152,8 @@
 	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">இந்த PDF கோப்பைத் திறக்க கடவுச்சொல் தேவை.</string>
 	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">கடவுச்சொல்</string>
 	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">தவறான கடவுச்சொல்</string>
+	<string name="content_description_previous_match" state="needs_review" hash="-124264476">முந்தைய முடிவு</string>
+	<string name="content_description_next_match" state="needs_review" hash="-405381756">அடுத்த முடிவு</string>
 	<string name="label_poll_create" state="needs_review" hash="-1677246175">வாக்கெடுப்பை உருவாக்கு</string>
 	<string name="label_poll_question" state="needs_review" hash="-1615603188">கேள்வி</string>
 	<string name="hint_poll_question" state="needs_review" hash="1961289317">ஒரு கேள்வியைக் கேளுங்கள்</string>
@@ -2110,6 +2184,7 @@
 	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">இதுவரை எந்த பதிலும் இல்லை</string>
 	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">விரைவில் செயலிழக்கப்படவுள்ள சாதனம்</string>
 	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">எனது சாதனங்களை நிர்வகி</string>
+	<string name="tip_expiring_current_device_title" state="needs_review" hash="-2044212270">இந்த சாதனம் விரைவில் செயலிழக்கச் செய்யப்படும்</string>
 	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">இணைய இணைப்பு இல்லாத சாதனம்</string>
 	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">உங்களுடைய சாதனங்களில் ஒன்று **30 நாட்களுக்கு மேலாக** ஆஃப்லைனில் உள்ளது.\nநீங்கள் அதை இனி பயன்படுத்தவில்லை என்றால், ஒத்திசைவு சிக்கல்களைத் தவிர்க்க அதை **நீக்குமாறு** பரிந்துரைக்கிறோம்.</string>
 	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">எனது சாதனங்களை நிர்வகி</string>
@@ -2185,8 +2260,15 @@
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">\"மேஜிக் லிங்க்\" பயன்படுத்தவும்</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">தவறான மேஜிக் இணைப்பு</string>
 	<string name="label_hanged_up" state="needs_review" hash="-1516413384">அழைப்பு துண்டிக்கப்பட்டது</string>
-	<string name="store_link_need_licenses" state="needs_review" hash="-1212508527">உங்கள் குழுவிற்கு சந்தாக்கள் தேவையா?</string>
 	<string name="store_link_olvid_store" state="needs_review" hash="-1825630369">ஒலிவிட் ஸ்டோரை பார்வையிடவும்</string>
+	<string name="store_link_need_more_options" state="needs_review" hash="-839181230">மேலும் விருப்பங்கள் வேண்டுமா?</string>
+	<string name="button_label_check_all_offers_olvid_store" state="needs_review" hash="361882901">ஒலிவிட் ஸ்டோரில் எங்களுடைய அனைத்து சலுகைகளையும் பாருங்கள்</string>
+	<string name="label_store_offer_individual" state="needs_review" hash="-1969313106">தனிநபர்</string>
+	<string name="label_store_offer_individual_description" state="needs_review" hash="368977236">உங்களுக்காக மட்டுமே ஒரு தனிப்பட்ட உரிமம்.</string>
+	<string name="label_store_offer_family" state="needs_review" hash="-2103729206">குடும்பம்</string>
+	<string name="label_store_offer_family_description" state="needs_review" hash="-1487232440">உங்களுக்கும் உங்கள் குடும்பத்தினருக்கும் சேர்த்து 6 உரிமங்கள் அடங்கிய தொகுப்பு.</string>
+	<string name="label_store_offer_team" state="needs_review" hash="-421568242">குழு</string>
+	<string name="label_store_offer_team_description" state="needs_review" hash="687093077">உங்கள் குழுவிற்கு விநியோகிக்க பல உரிமங்கள்.</string>
 	<string name="toast_message_reminder_set" state="needs_review" hash="-961055414">நினைவூட்டல் அமைக்கப்பட்டது</string>
 	<string name="dialog_title_keycloak_authentication_impossible" state="needs_review" hash="325273853">அங்கீகாரம் சாத்தியமில்லை</string>
 	<string name="dialog_message_keycloak_authentication_impossible" state="needs_review" hash="-2031322232">உங்கள் சுயவிவரம் தற்போது உங்கள் நிறுவனத்தால் நிர்வகிக்கப்படுகிறது, மேலும் மீண்டும் அங்கீகாரம் தேவை. இருப்பினும், எந்தவொரு ஆதரவுள்ள அங்கீகார முறையும் கிடைக்கவில்லை.\n\nமேலும் விவரங்களுக்கு உங்கள் நிர்வாகியைத் தொடர்பு கொள்ளவும்.</string>
@@ -2242,7 +2324,7 @@
 	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">முழுமையான பரிமாற்றம். அனைத்து செய்திகள் மற்றும் இணைப்புகளையும் உள்ளடக்கியது.</string>
 	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">உங்கள் உரையாடல் வரலாற்றை .zip கோப்பாக ஏற்றுமதி செய்யுங்கள். பின்னர், உங்கள் சுயவிவரத்தில் உள்ள மற்றொரு சாதனத்தில் அதை இறக்குமதி செய்யலாம் **%1$s**.\n\nமேலும், இந்த கோப்பை அன்சிப் செய்து, உங்கள் உரையாடல் வரலாற்றை ஒரு வலைப்பக்கத்தில் பார்க்கலாம்.</string>
 	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">\".zip\" கோப்பை உருவாக்கு</string>
-	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d கலந்துரையாடல்கள் மற்றும் %2$d செய்திகள்</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d உரையாடல்கள் மற்றும் %2$d செய்திகள்</string>
 	<string name="label_computing" state="needs_review" hash="1393495921">கணக்கிட்டு வருகிறது…</string>
 	<string name="label_total_size" state="needs_review" hash="-788411929">மொத்த அளவு: %1$s</string>
 	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">உங்கள் ஏற்றுமதியைப் பாதுகாக்கவும்</string>
@@ -2298,8 +2380,6 @@
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">உள்ளடக்கத்தை பகுப்பாய்வு செய்கிறது</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">ஏற்றுமதி செய்யப்பட்ட உரையாடல்களை பகுப்பாய்வு செய்கிறது</string>
 	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">OpenStreetMap பாணி கோப்பை ஏற்றும் போது பிழை ஏற்பட்டது</string>
-	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">பயன்பாட்டில் சந்தாக்கள் கிடைக்கவில்லை</string>
-	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">நீங்கள் நிறுவிய Olvid பதிப்பில் கூகிள் பில்லிங் நூலகம் இல்லை, மேலும் இது பயன்பாட்டு கொள்முதல் வசதியை ஆதரிக்காது.\n\nமேலும் தகவலுக்கு, தயவுசெய்து **feedback@olvid.io** என்ற முகவரிக்கு எங்களை தொடர்பு கொள்ளவும்.</string>
 	<string name="ftux_next" state="needs_review" hash="1158639077">அடுத்தது</string>
 	<string name="ftux_start" state="needs_review" hash="646298532">தொடங்கு</string>
 	<string name="ftux_page_indicator" state="needs_review" hash="1987610035">%1$d வது பக்கம், மொத்தம் %2$d பக்கங்கள்</string>
@@ -2309,11 +2389,11 @@
 	<string name="ftux_page_private_body" state="needs_review" hash="-590644231">%1$s-இல், நீங்கள் யாருடன் அரட்டை அடிக்க விரும்புகிறீர்களோ அவர்களைத் தேர்ந்தெடுக்கலாம். ஸ்பேம் செய்திகள், பரிந்துரைகள், தேவையற்ற அறிவிப்புகள் அல்லது அறிமுகமில்லாதவர்களிடமிருந்து வரும் செய்திகள் எதுவும் இருக்காது.\n\nஉங்கள் அனுமதியின்றி யாரும் உங்களைத் தொடர்பு கொள்ள முடியாது.\n%1$s என்பது உங்களுடைய டிஜிட்டல் உலகம்.</string>
 	<string name="ftux_page_everyone_title" state="needs_review" hash="1506796386"><b>எல்லோருக்கும்</b> செய்தியிடல்</string>
 	<string name="ftux_page_everyone_body" state="needs_review" hash="-586100377">நீங்கள் யார் என்பதைப் பொருட்படுத்தாமல், %1$s உங்களுக்கு சிறந்த பாதுகாப்பை வழங்குகிறது. மின்னஞ்சல் அல்லது தொலைபேசி எண் தேவையில்லை.\n\n%1$s உங்களிடம் எதையும் கேட்காது, அது எல்லாவற்றையும் மாற்றும்.</string>
-	<string name="ftux_page_protect_title" state="needs_review" hash="1969120191">ஒல்விட் உங்களைப் பாதுகாக்கிறது. ஒல்விட் உங்களுக்கு முக்கியமானவர்களைப் பாதுகாக்கிறது.</string>
+	<string name="ftux_page_protect_title" state="needs_review" hash="1969120191">ஒல்விட் உங்களைப் <b>பாதுகாக்கிறது</b>. ஒல்விட் உங்களுக்கு முக்கியமானவர்களைப் பாதுகாக்கிறது.</string>
 	<string name="ftux_page_protect_body" state="needs_review" hash="881847930">இது வெறும் வாக்குறுதி மட்டுமல்ல - %1$s கிரிப்டோகிராஃபிக் ஆதாரத்தை வழங்குகிறது.\n\nநீங்கள் தொடர்புகளை தொலைவிலிருந்து அல்லது நேருக்கு நேர் சேர்த்தாலும், உங்கள் உரையாடல்கள் முறையானதாகவும், முழுமையாக என்க்ரிப்ட் செய்யப்பட்டும் இருக்கும்.</string>
 	<string name="ftux_page_pricing_title" state="needs_review" hash="-1948277889"><b>வெளிப்படையான</b> வணிக மாதிரி</string>
 	<string name="ftux_page_pricing_body" state="needs_review" hash="-1064278870">%1$s உங்கள் தனிப்பட்ட தரவைப் பயன்படுத்தி நிதி திரட்டாது - ஏனெனில் அது எதையும் கேட்கவில்லை!\n\nஇலவசமானது இலவசம். பணம் செலுத்துவது விலை கொண்டது.</string>
-	<string name="ftux_page_media_title" state="needs_review" hash="558110518">ஒல்விட் எல்லாவற்றையும் வைத்திருக்கிறார்</string>
+	<string name="ftux_page_media_title" state="needs_review" hash="558110518">ஒல்விட் <b>எல்லாவற்றையும்</b> வைத்திருக்கிறது</string>
 	<string name="ftux_page_media_body" state="needs_review" hash="1807247240">இணைப்புகளுக்கு அளவு வரம்பு இல்லை, உயர் தெளிவுத்திறன் கொண்ட புகைப்படங்களைப் பகிரலாம், கருத்துக்கணிப்புகளை உருவாக்கலாம், ஆடியோ மற்றும் வீடியோ அழைப்புகளை மேற்கொள்ளலாம், பல சாதனங்களில் பயன்படுத்தலாம், புவியியல் இருப்பிடத்தைப் பகிரலாம் - இவை அனைத்தும் இதில் உள்ளன!</string>
 	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">பதிவேற்றத்தை ரத்து செய்</string>
 	<string name="label_suggested_contacts" state="needs_review" hash="816810770">பரிந்துரைக்கப்பட்ட தொடர்புகள்</string>

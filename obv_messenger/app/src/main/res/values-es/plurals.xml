@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Uno de sus dispositivos caducará y se desactivará en **menos de %1$d día**.\nPuede adquirir una suscripción **Olvid+** para mantenerlo activo.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Uno de sus dispositivos caducará y se desactivará en **menos de %1$d días**.\nPuede adquirir una suscripción **Olvid+** para mantenerlo activo.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Este dispositivo dejará de funcionar y se desactivará en **menos de %1$d día**.\nPuede adquirir una suscripción a **Olvid+** para mantenerlo activo.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Este dispositivo dejará de funcionar y se desactivará en **menos de %1$d días**.\nPuede adquirir una suscripción a **Olvid+** para mantenerlo activo.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s se unió al grupo</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s se unió al grupo</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Añadir al grupo %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Añadir a los grupos %1$d</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Ya tienes una conversación con estos participantes.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Ya tienes %1$d conversaciones con estos participantes.</item>
 	</plurals>
 </resources>

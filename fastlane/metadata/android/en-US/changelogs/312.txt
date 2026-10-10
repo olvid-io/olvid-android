@@ -1,0 +1,5 @@
+- Only display the first 4 images of a message, and add an album view to see them all.
+- Added a document scanner.
+- Double-tap a received message to react with a default emoji.
+- New avatars for contacts and groups without a profile picture.
+- Add a button to send a photo directly from the main screen.

@@ -37,3 +37,10 @@ val Message.isReplyable: Boolean
     get() = (messageType == Message.TYPE_OUTBOUND_MESSAGE || messageType == Message.TYPE_INBOUND_MESSAGE) &&
             wipeStatus != Message.WIPE_STATUS_WIPED &&
             wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
+
+val Message.isBodyViewable: Boolean
+    get() = (messageType == Message.TYPE_INBOUND_MESSAGE || messageType == Message.TYPE_OUTBOUND_MESSAGE)
+            && !contentBody.isNullOrEmpty()
+            && !isLocationMessage
+            && wipeStatus != Message.WIPE_STATUS_WIPED
+            && wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED

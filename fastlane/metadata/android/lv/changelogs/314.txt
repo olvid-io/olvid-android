@@ -1,0 +1,5 @@
+- Ziņojumā tiek rādītas tikai pirmās 4 bildes, un pievienota albuma skatā, lai redzētu visas.
+- Pievienots dokumentu skeneris.
+- Divreiz pieskarieties saņemtajai ziņai, lai reaģētu ar noklusējuma emocijzīmi.
+- Jauni avatari kontaktiem un grupām, kurām nav profila attēla.
+- Pievienota poga, lai tieši no galvenā ekrāna sūtītu fotoattēlu.

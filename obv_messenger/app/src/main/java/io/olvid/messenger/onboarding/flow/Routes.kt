@@ -27,14 +27,14 @@ object OnboardingRoutes {
     const val NEW_PROFILE_SCREEN = "new_profile_screen"
 
     const val EXISTING_PROFILE = "existing_profile"
-    const val IDENTITY_CREATION = "identity_creation"
+    const val FIRST_IDENTITY_CREATION = "first_identity_creation"
     const val PROFILE_PICTURE = "profile_picture"
 
     // managed/configured profile creation (migrated from the legacy OnboardingActivity flow)
     const val ONBOARDING_SCAN = "onboarding_scan"
     const val IDENTITY_CREATION_OPTIONS = "identity_creation_options"
     const val KEYCLOAK_SELECTION = "keycloak_selection"
-    const val MANAGED_IDENTITY_CREATION = "managed_identity_creation"
+    const val ADDITIONAL_IDENTITY_CREATION = "additional_identity_creation"
 
     const val TRANSFER_RESTRICTED_WARNING = "transfer_restricted_warning"
     const val TRANSFER_SOURCE_SESSION = "transfer_source_session"

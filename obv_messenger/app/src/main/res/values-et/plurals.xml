@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Üks teie seadmetest aegub ja deaktiveeritakse **vähem kui %1$d päeva** jooksul.\nSaate osta **Olvid+** tellimuse, et see aktiivsena hoida.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Üks teie seadmetest aegub ja deaktiveeritakse **vähem kui %1$d päeva** jooksul.\nSaate osta **Olvid+** tellimuse, et see aktiivsena hoida.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">See seade aegub ja deaktiveeritakse **vähem kui %1$d päeva** jooksul.\nSaate osta **Olvid+** tellimuse, et see aktiivsena hoida.</item>
+		<item quantity="other" state="needs_review" hash="993103846">See seade aegub ja deaktiveeritakse **vähem kui %1$d päeva** jooksul.\nSaate osta **Olvid+** tellimuse, et see aktiivsena hoida.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s liitus grupiga</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s liitus grupiga</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Lisa rühma %1$d-sse</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Lisa %1$d gruppi</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Sul on juba vestlus nende osalejatega.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Teil on juba %1$d vestlust nendega osalejatega.</item>
 	</plurals>
 </resources>

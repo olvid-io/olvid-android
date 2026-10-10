@@ -77,6 +77,7 @@ import io.olvid.messenger.customClasses.CustomSSLSocketFactory;
 import io.olvid.messenger.customClasses.DatabaseKey;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.ContactCacheSingleton;
+import io.olvid.messenger.databases.GroupAvatarCacheSingleton;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
@@ -127,7 +128,8 @@ public class AppSingleton {
     private final Observer<List<OwnedIdentity>> firstIdentitySelector;
     private final MutableLiveData<Integer> websocketConnectivityStateLiveData;
 
-    @NonNull private final SharedPreferences sharedPreferences;
+    @NonNull
+    private final SharedPreferences sharedPreferences;
 
     private AppSingleton() {
         this.bytesCurrentIdentity = null;
@@ -208,7 +210,7 @@ public class AppSingleton {
             // if this is an upgrade. show the new translations tooltip
             SettingsActivity.setMuteNewTranslationsTip(false);
 
-            SharedPreferences.Editor editor =  PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
             editor.remove("pref_key_use_system_emojis");
             editor.apply();
         }
@@ -345,12 +347,14 @@ public class AppSingleton {
         aNonHiddenIdentityHasCallsPermission.addSource(availableIdentities, ownedIdentities -> {
             try {
                 aNonHiddenIdentityHasCallsPermission.setValue(computeOtherIdentityHasCallsPermission.call());
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         });
         aNonHiddenIdentityHasCallsPermission.addSource(bytesCurrentIdentityLiveData, ownedIdentities -> {
             try {
                 aNonHiddenIdentityHasCallsPermission.setValue(computeOtherIdentityHasCallsPermission.call());
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         });
 
         // add a dummy observer to this liveData, so that it is indeed computed
@@ -382,10 +386,16 @@ public class AppSingleton {
             public void onChanged(OwnedIdentity ownedIdentity) {
                 if (ownedIdentity == null) {
                     bytesPreviousOwnedIdentity = null;
-                    App.runThread(() -> ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues(null));
+                    App.runThread(() -> {
+                        ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues(null);
+                        GroupAvatarCacheSingleton.INSTANCE.reload(null);
+                    });
                 } else if (!Arrays.equals(bytesPreviousOwnedIdentity, ownedIdentity.bytesOwnedIdentity)) {
                     bytesPreviousOwnedIdentity = ownedIdentity.bytesOwnedIdentity;
-                    App.runThread(() -> ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues(ownedIdentity));
+                    App.runThread(() -> {
+                        ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues(ownedIdentity);
+                        GroupAvatarCacheSingleton.INSTANCE.reload(ownedIdentity);
+                    });
                 }
             }
         };
@@ -446,12 +456,17 @@ public class AppSingleton {
     // region Owned identity list and current management
 
     private final NoExceptionSingleThreadExecutor executor = new NoExceptionSingleThreadExecutor("AppSingleton-currentIdentitySelector-Executor");
-    @Nullable private byte[] bytesCurrentIdentity;
+    @Nullable
+    private byte[] bytesCurrentIdentity;
     private boolean currentIdentityIsHidden;
-    @NonNull private final MutableLiveData<byte[]> bytesCurrentIdentityLiveData;
-    @NonNull private final LiveData<OwnedIdentity> currentIdentityLiveData;
-    @NonNull private final LiveData<List<OwnedIdentity>> availableIdentities;
-    @NonNull private final MediatorLiveData<Boolean> aNonHiddenIdentityHasCallsPermission;
+    @NonNull
+    private final MutableLiveData<byte[]> bytesCurrentIdentityLiveData;
+    @NonNull
+    private final LiveData<OwnedIdentity> currentIdentityLiveData;
+    @NonNull
+    private final LiveData<List<OwnedIdentity>> availableIdentities;
+    @NonNull
+    private final MediatorLiveData<Boolean> aNonHiddenIdentityHasCallsPermission;
 
     public interface IdentitySelectedCallback {
 
@@ -593,7 +608,8 @@ public class AppSingleton {
 
     // region Identity creation and restore (and active status)
 
-    @NonNull private final HashSet<BytesKey> deactivatedIdentities;
+    @NonNull
+    private final HashSet<BytesKey> deactivatedIdentities;
 
     public static void markIdentityActive(@NonNull OwnedIdentity ownedIdentity, boolean active) {
         synchronized (instance) {
@@ -622,7 +638,8 @@ public class AppSingleton {
                                             false
                                     );
                                 }
-                            } catch (Exception ignored) {}
+                            } catch (Exception ignored) {
+                            }
                         }
                     }
                 }
@@ -658,7 +675,7 @@ public class AppSingleton {
         App.runThread(() -> {
             ObvKeycloakState keycloakState = null;
             if (keycloakServer != null && serializedKeycloakState != null && (supportedAuthenticationMethods != null && !supportedAuthenticationMethods.isEmpty()) && signatureKey != null) {
-                keycloakState = new ObvKeycloakState(keycloakServer, supportedAuthenticationMethods, jwks, signatureKey, serializedKeycloakState, keycloakTransferRestricted, null,0, 0);
+                keycloakState = new ObvKeycloakState(keycloakServer, supportedAuthenticationMethods, jwks, signatureKey, serializedKeycloakState, keycloakTransferRestricted, null, 0, 0);
             }
             ObvIdentity obvOwnedIdentity = engine.generateOwnedIdentity(server, identityDetails, keycloakState, DEFAULT_DEVICE_DISPLAY_NAME);
 
@@ -696,7 +713,8 @@ public class AppSingleton {
                             try {
                                 // sleep 5s before retrying to register --> this leaves some time for the engine to create the first server session
                                 Thread.sleep(5_000);
-                            } catch (InterruptedException ignored) { }
+                            } catch (InterruptedException ignored) {
+                            }
                         } while (result == RegisterApiKeyResult.WAIT_FOR_SERVER_SESSION);
                     });
                 } else if (BuildConfig.USE_BILLING_LIB) {
@@ -1001,12 +1019,12 @@ public class AppSingleton {
                 long migrationStartTime = System.currentTimeMillis();
                 AppDatabase db = AppDatabase.getInstance();
                 List<Message> messages = db.messageDao().getAllWithImages();
-                for (Message message: messages) {
+                for (Message message : messages) {
                     if (message.recomputeAttachmentCount(db)) {
                         db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageAndVideoCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
                     }
                 }
-                Logger.i("Build 126/127 image migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
+                Logger.i("Build 126/127 image migration performed in " + (System.currentTimeMillis() - migrationStartTime) + "ms");
             }
             if (lastBuildExecuted != 0 && lastBuildExecuted < 145) {
                 App.openAppDialogIntroducingMultiProfile();
@@ -1024,17 +1042,17 @@ public class AppSingleton {
             if (lastBuildExecuted != 0 && lastBuildExecuted < 183) {
                 App.openAppDialogIntroducingGroupsV2();
             }
-            if (lastBuildExecuted != 0 &&lastBuildExecuted < 193) {
+            if (lastBuildExecuted != 0 && lastBuildExecuted < 193) {
                 // recompute the number of images in all messages as the filtering method was changed
                 long migrationStartTime = System.currentTimeMillis();
                 AppDatabase db = AppDatabase.getInstance();
                 List<Message> messages = db.messageDao().getAllWithLinkPreview();
-                for (Message message: messages) {
+                for (Message message : messages) {
                     if (message.recomputeAttachmentCount(db)) {
                         db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageAndVideoCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
                     }
                 }
-                Logger.i("Build 193 link-preview migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
+                Logger.i("Build 193 link-preview migration performed in " + (System.currentTimeMillis() - migrationStartTime) + "ms");
             }
             if (lastBuildExecuted != 0 && lastBuildExecuted < 197) {
                 App.openAppDialogIntroducingMentions();
@@ -1062,12 +1080,12 @@ public class AppSingleton {
                 long migrationStartTime = System.currentTimeMillis();
                 AppDatabase db = AppDatabase.getInstance();
                 List<Message> messages = db.messageDao().getAllWithAttachments();
-                for (Message message: messages) {
+                for (Message message : messages) {
                     if (message.recomputeAttachmentCount(db)) {
                         db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageAndVideoCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
                     }
                 }
-                Logger.i("🔫🔫 Build 277->278 attachment count migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
+                Logger.i("🔫🔫 Build 277->278 attachment count migration performed in " + (System.currentTimeMillis() - migrationStartTime) + "ms");
             }
 
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());
@@ -1085,7 +1103,7 @@ public class AppSingleton {
         File noBackupFilesDir = App.getContext().getNoBackupFilesDir();
         //noinspection ResultOfMethodCallIgnored
         noBackupFilesDir.mkdirs();
-        for (String fileToMigrate: filesToMigrate) {
+        for (String fileToMigrate : filesToMigrate) {
             File oldFile = new File(filesDir, fileToMigrate);
             File newFile = new File(noBackupFilesDir, fileToMigrate);
             if (oldFile.exists()) {
@@ -1097,7 +1115,7 @@ public class AppSingleton {
 
         File databaseDir = App.getContext().getDatabasePath("app_database").getParentFile();
         String[] dbFilesToMigrate = new String[]{"app_database", "app_database-wal", "app_database-shm"};
-        for (String dbFileToMigrate: dbFilesToMigrate) {
+        for (String dbFileToMigrate : dbFilesToMigrate) {
             File oldFile = new File(databaseDir, dbFileToMigrate);
             File newFile = new File(noBackupFilesDir, dbFileToMigrate);
             if (oldFile.exists()) {

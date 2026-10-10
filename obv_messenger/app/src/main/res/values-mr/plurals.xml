@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">तुमच्या उपकरणांपैकी एक %1$d दिवसांच्या आत निष्क्रिय होईल.\nते सक्रिय ठेवण्यासाठी तुम्ही **Olvid+** सदस्यता खरेदी करू शकता.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">तुमच्या उपकरणांपैकी एक %1$d दिवसांच्या आत निष्क्रिय होईल.\nते सक्रिय ठेवण्यासाठी तुम्ही **Olvid+** सदस्यता खरेदी करू शकता.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">हे उपकरण **%1$d दिवसांपेक्षा** कमी वेळेत निष्क्रिय होईल आणि अक्षम केले जाईल.\nआपण ते सक्रिय ठेवण्यासाठी **Olvid+** सदस्यता खरेदी करू शकता.</item>
+		<item quantity="other" state="needs_review" hash="993103846">हे उपकरण **%1$d दिवसांपेक्षा कमी** वेळेत निष्क्रिय होईल आणि अक्षम केले जाईल.\nते सक्रिय ठेवण्यासाठी आपण **Olvid+** सदस्यता खरेदी करू शकता.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s ग्रुपमध्ये सामील झाला</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s या व्यक्तीने ग्रुपमध्ये सामील झाले.</item>
@@ -79,11 +83,11 @@
 		<item quantity="other" state="needs_review" hash="1022571360">%1$d संपर्क</item>
 	</plurals>
 	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="1772966333">चर्चा संग्रहित केली</item>
+		<item quantity="one" state="needs_review" hash="1772966333">संभाषण संग्रहित केले</item>
 		<item quantity="other" state="needs_review" hash="1402495414">%1$d संभाषण संग्रहित केले</item>
 	</plurals>
 	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1312483800">चर्चा पुन्हा सुरू केली</item>
+		<item quantity="one" state="needs_review" hash="-1312483800">संभाषण पुन्हा सुरू केले</item>
 		<item quantity="other" state="needs_review" hash="-2093736213">%1$d संभाषणे पुन्हा सुरू केली</item>
 	</plurals>
 	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -123,12 +127,12 @@
 		<item quantity="other" state="needs_review" hash="-1558931055">तुम्ही %1$d संभाषणे आणि त्यातील संदेश **कायमचे** हटवणार आहात, आणि हे बदल **सर्वांसाठी** लागू होतील. कृपया खात्री करा की तुम्हाला हेच करायचे आहे.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">तुम्ही या ग्रुपमधील प्रत्येक सदस्याला, ज्यांच्यासोबत तुमचे चॅनेल आहे (सध्या 1 सदस्य), एका खाजगी चर्चेसाठी आमंत्रित करणार आहात.\nतुम्ही पुढेProceed करू इच्छिता का?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">तुम्ही या ग्रुपमधील प्रत्येक सदस्याला (सध्या %1$d सदस्य आहेत), ज्यांच्यासोबत तुमचे चॅनेल आहे, त्यांना एका खाजगी चर्चेसाठी आमंत्रित करणार आहात.\nतुम्ही पुढेProceed करू इच्छिता?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">तुम्ही या ग्रुपमधील प्रत्येक सदस्याला, ज्यांच्यासोबत तुमचे चॅनेल आहे (सध्या 1 सदस्य), एका खाजगी संभाषणासाठी आमंत्रित करणार आहात.\nतुम्ही पुढेProceed करू इच्छिता का?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">तुम्ही या ग्रुपमधील प्रत्येक सदस्याला (सध्या %1$d सदस्य आहेत), ज्यांच्यासोबत तुमचे चॅनेल आहे, त्यांना एका खाजगी संभाषणासाठी आमंत्रित करणार आहात.\nतुम्ही पुढेProceed करू इच्छिता?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">एका ग्रुपमधील सदस्याला एका खाजगी चर्चेत आमंत्रित केले जाऊ शकते</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d ग्रुपमधील सदस्यांना एका खाजगी चर्चेत आमंत्रित केले जाऊ शकते</item>
+		<item quantity="one" state="needs_review" hash="-127723614">एका ग्रुपमधील सदस्याला एका खाजगी संभाषणात आमंत्रित केले जाऊ शकते</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d ग्रुपमधील सदस्यांना एका खाजगी संभाषणात आमंत्रित केले जाऊ शकते</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 सामान्य गट</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">%1$d गटात जोडा</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">%1$d गटांमध्ये जोडा</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">तुमच्याकडे या सहभागींसोबत आधीपासूनच संभाषण सुरू आहे.</item>
+		<item quantity="other" state="needs_review" hash="809550612">या सहभागींसोबत तुमचे आधीपासूनच %1$d संभाषण आहेत.</item>
 	</plurals>
 </resources>

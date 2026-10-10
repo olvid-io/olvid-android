@@ -48,7 +48,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,7 +69,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -80,7 +78,6 @@ import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.tasks.UpdateReactionsTask
-import io.olvid.messenger.designsystem.components.SearchBar
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.discussion.DiscussionViewModel
@@ -88,11 +85,12 @@ import io.olvid.messenger.discussion.compose.MessageEditHandler
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.message.reactions.ReactionBar
 import io.olvid.messenger.discussion.message.reactions.ReactionViewModel
-import io.olvid.messenger.discussion.message.reactions.emoji.EmojiPicker
-import io.olvid.messenger.discussion.message.reactions.emoji.EmojiSearchViewModel
+import io.olvid.messenger.discussion.message.reactions.emoji.rememberEmojiSearchState
+import io.olvid.messenger.discussion.message.reactions.emoji.SearchableEmojiPicker
 import io.olvid.messenger.settings.SettingsActivity.Companion.loopAnimatedEmojis
 import io.olvid.messenger.settings.SettingsActivity.Companion.useAnimatedEmojis
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalSharedTransitionApi::class)
@@ -111,7 +109,7 @@ fun MessageActionMenu(
     var currentReaction by remember { mutableStateOf<String?>(null) }
     var canEdit by remember { mutableStateOf(false) }
 
-    val emojiSearchViewModel: EmojiSearchViewModel = viewModel()
+    val emojiSearchState = rememberEmojiSearchState()
     val reactionViewModel: ReactionViewModel = viewModel()
     val preferredReactions by reactionViewModel.preferredReactions.observeAsState(emptyList())
     val recentReactions by reactionViewModel.recentReactions.observeAsState(emptyList())
@@ -119,7 +117,7 @@ fun MessageActionMenu(
 
     var showEmojiPicker: Boolean? by remember { mutableStateOf(null) }
     LaunchedEffect(message.id) {
-        delay(100)
+        delay(100.milliseconds)
         showEmojiPicker = false
     }
 
@@ -172,8 +170,8 @@ fun MessageActionMenu(
                     interactionSource = null,
                     indication = null,
                     onClick = {
-                        emojiSearchViewModel.shownEmojiVariants.value?.let {
-                            emojiSearchViewModel.shownEmojiVariants.value = null
+                        emojiSearchState.shownEmojiVariants.value?.let {
+                            emojiSearchState.shownEmojiVariants.value = null
                         } ?: run {
                             onDismiss()
                         }
@@ -300,7 +298,6 @@ fun MessageActionMenu(
                                         contentColor = colorResource(R.color.almostBlack)
                                     ),
                                 ) {
-                                    val focusState = remember { mutableStateOf(false) }
                                     Card(
                                         colors = CardDefaults.cardColors(
                                             containerColor = colorResource(
@@ -308,38 +305,11 @@ fun MessageActionMenu(
                                             ), contentColor = colorResource(R.color.almostBlack)
                                         )
                                     ) {
-                                        SearchBar(
-                                            modifier = Modifier.padding(8.dp).height(40.dp),
-                                            placeholderText = stringResource(R.string.hint_search_emoji),
-                                            searchText = emojiSearchViewModel.searchText,
-                                            onSearchTextChanged = {
-                                                emojiSearchViewModel.onSearchTextChanged(
-                                                    it
-                                                )
-                                            },
-                                            focusState = focusState,
-                                            onClearClick = { emojiSearchViewModel.reset() },
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                focusedBorderColor = colorResource(R.color.olvid_gradient_light),
-                                                unfocusedBorderColor = colorResource(R.color.mediumGrey),
-                                                cursorColor = colorResource(R.color.olvid_gradient_light)
-                                            )
-                                        )
-                                        LaunchedEffect(focusState.value) {
-                                            if (focusState.value) {
-                                                emojiSearchViewModel.shownEmojiVariants.value =
-                                                    null
-                                            }
-                                        }
-                                        EmojiPicker(
-                                            modifier = Modifier
-                                                .height(280.dp),
-                                            onReact = onReact,
-                                            onToggleFavorite = onToggleFavorite,
-                                            isSearch = emojiSearchViewModel.searchText.isNotEmpty() || focusState.value,
+                                        SearchableEmojiPicker(
+                                            emojiSearchState = emojiSearchState,
                                             recentEmojis = recentReactions,
-                                            emojis = emojiSearchViewModel.emojis,
-                                            shownEmojiVariants = emojiSearchViewModel.shownEmojiVariants
+                                            onReact = onReact,
+                                            onToggleFavorite = onToggleFavorite
                                         )
                                     }
                                 }
@@ -351,7 +321,7 @@ fun MessageActionMenu(
                                 enter = enterAnim,
                                 exit = fadeOut()
                             ) {
-                                emojiSearchViewModel.reset()
+                                emojiSearchState.reset()
                                 Card(
                                     modifier = Modifier
                                         .onGloballyPositioned { layoutCoordinates ->
@@ -381,7 +351,7 @@ fun MessageActionMenu(
                                 }
                             }
                             LaunchedEffect(Unit) {
-                                delay(500)
+                                delay(500.milliseconds)
                                 enterAnim = fadeIn()
                             }
                         }

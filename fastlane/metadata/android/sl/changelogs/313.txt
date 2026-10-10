@@ -1,0 +1,5 @@
+- Prikaže samo prvih 4 slike v sporočilu, dodana pa je tudi možnost ogleda vseh slik v albumu.
+- Dodan skener dokumentov.
+- Dvokliknite na prejeto sporočilo, da se odzovete z privzetim emojijem.
+- Nove ikone za stike in skupine brez profilne slike.
+- Dodano gumb za neposredno pošiljanje fotografij iz glavnega zaslona.

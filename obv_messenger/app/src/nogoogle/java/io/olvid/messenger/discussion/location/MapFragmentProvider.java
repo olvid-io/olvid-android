@@ -24,14 +24,14 @@ import org.jetbrains.annotations.Nullable;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class MapFragmentProvider {
-    public static MapViewAbstractFragment getMapFragmentForProvider(@Nullable SettingsActivity.LocationIntegrationEnum integration) {
+    public static Class<? extends MapViewAbstractFragment> getMapFragmentClassForProvider(@Nullable SettingsActivity.LocationIntegrationEnum integration) {
         if (integration == null) {
             return null;
         }
         switch (integration) {
             case OSM:
             case CUSTOM_OSM:
-                return new MapViewMapLibreFragment();
+                return MapViewMapLibreFragment.class;
             case MAPS:
             case BASIC:
             case NONE:

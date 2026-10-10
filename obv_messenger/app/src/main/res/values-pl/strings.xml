@@ -64,7 +64,7 @@
 	<string name="dialog_title_delete_attachment" state="needs_review" hash="-1133507106">Usuń załącznik</string>
 	<string name="dialog_title_confirm_deletion" state="needs_review" hash="1379899502">Potwierdź usunięcie?</string>
 	<string name="dialog_title_disband_group" state="needs_review" hash="-1969676773">Rozwiązać grupę?</string>
-	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">Wyszukaj konwersację…</string>
+	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">Wyszukaj rozmowę…</string>
 	<string name="dialog_title_go_to_date" state="needs_review" hash="-571974927">Wprowadź datę.</string>
 	<string name="dialog_title_edit_group_details" state="needs_review" hash="310205135">Edytuj szczegóły grupy</string>
 	<string name="dialog_title_edit_identity_details" state="needs_review" hash="1515554822">Edytuj swoje dane</string>
@@ -76,21 +76,20 @@
 	<string name="dialog_title_recreate_channels" state="needs_review" hash="65265340">Ponownie utworzyć bezpieczne kanały?</string>
 	<string name="dialog_title_remove_group_members" state="needs_review" hash="1574412714">Usuń członków grupy</string>
 	<string name="dialog_title_rename_contact" state="needs_review" hash="15923258">Zmień nazwę kontaktu</string>
-	<string name="dialog_title_rename_discussion" state="needs_review" hash="1413472286">Zmień nazwę konwersacji</string>
+	<string name="dialog_title_rename_discussion" state="needs_review" hash="1413472286">Zmień nazwę rozmowy</string>
 	<string name="dialog_title_rename_group" state="needs_review" hash="1461324427">Zmień nazwę grupy</string>
 	<string name="dialog_title_restart_channel_establishment" state="needs_review" hash="-645769680">Uruchomić ponownie tworzenie kanału?</string>
-	<string name="dialog_title_share_with" state="needs_review" hash="854107768">Udostępnij z…</string>
-	<string name="dialog_title_share_recipients" state="needs_review" hash="1157053138">Wybierz odbiorców</string>
+	<string name="dialog_title_share_recipients" state="needs_review" hash="463614560">Wybierz rozmowy</string>
 	<string name="share_label_from" state="needs_review" hash="2049052075">Od:</string>
 	<string name="share_label_to" state="needs_review" hash="-1785690373">Do:</string>
-	<string name="share_label_choose_recipients" state="needs_review" hash="1157053138">Wybierz odbiorców</string>
+	<string name="share_label_choose_recipients" state="needs_review" hash="463614560">Wybierz konwersacje</string>
 	<string name="hint_share_message" state="needs_review" hash="-763169957">Dodaj wiadomość…</string>
 	<string name="content_description_delete_attachment" state="needs_review" hash="-220348329">Usuń załącznik</string>
 	<string name="dialog_title_shortcut_to" state="needs_review" hash="-1193591200">Utwórz skrót do…</string>
 	<string name="explanation_choose_display_name" state="needs_review" hash="1162066686">Wprowadź nazwę, która będzie wyświetlana Twoim kontaktom. Te dane nigdy nie zostaną wysłane na serwery Olvid.</string>
 	<string name="explanation_empty_contact_list" state="needs_review" hash="1240778508">Brak kontaktów na razie</string>
 	<string name="explanation_empty_contact_list_sub" state="needs_review" hash="-1711767375">Naciśnij niebieski + poniżej, aby dodać swój pierwszy kontakt.</string>
-	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">Brak dyskusji na razie</string>
+	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">Brak rozmów na razie</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">Twoje kontakty i rozmowy grupowe będą wyświetlane tutaj.</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">Brak grup na razie</string>
 	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">Naciśnij niebieski + poniżej, aby utworzyć swoją pierwszą grupę.</string>
@@ -111,7 +110,7 @@
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">Nie znaleziono załącznika</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">Nie znaleziono linku</string>
 	<string name="hint_company" state="needs_review" hash="988571519">Firma</string>
-	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Napisz wiadomość</string>
+	<string name="hint_compose_your_message" state="needs_review" hash="809999904">Wiadomość</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Wiadomość tymczasowa</string>
 	<string name="label_edit_your_message" state="needs_review" hash="1091877412">Edytuj wiadomość</string>
 	<string name="label_reply_to_x" state="needs_review" hash="1941377665">Odpowiedz do %s</string>
@@ -168,7 +167,7 @@
 	<string name="label_copy" state="needs_review" hash="-811327733">Kopiuj</string>
 	<string name="label_creating_channel" state="needs_review" hash="1375229137">Tworzenie\nKanału</string>
 	<string name="label_download" state="needs_review" hash="2567692">Pobierz</string>
-	<string name="label_establishing_secure_connection" state="needs_review" hash="-1534656273">Ustanawianie bezpiecznego kanału dyskusji</string>
+	<string name="label_establishing_secure_connection" state="needs_review" hash="-1534656273">Ustanawianie bezpiecznego kanału rozmowy</string>
 	<string name="label_group_card" state="needs_review" hash="-1430550686">Karta grupy</string>
 	<string name="label_group_card_published" state="needs_review" hash="-58328192">Karta grupy - Opublikowana</string>
 	<string name="label_group_card_published_update" state="needs_review" hash="-1889428058">Karta grupy - Nowy</string>
@@ -194,7 +193,7 @@
 	<string name="menu_action_create_shortcut" state="needs_review" hash="-1949455873">Utwórz skrót</string>
 	<string name="menu_action_delete" state="needs_review" hash="-232100842">Usuń</string>
 	<string name="menu_action_delete_discussion" state="needs_review" hash="2059656471">Usuń rozmowę</string>
-	<string name="menu_action_export_discussion" state="needs_review" hash="1736692296">Eksportuj konwersację</string>
+	<string name="menu_action_export_discussion" state="needs_review" hash="1736692296">Eksportuj rozmowę</string>
 	<string name="label_swipe_details" state="needs_review" hash="171468732">Szczegóły</string>
 	<string name="menu_action_disband_group" state="needs_review" hash="-1767089289">Rozwiąż grupę</string>
 	<string name="menu_action_edit_group_details" state="needs_review" hash="310205135">Edytuj szczegóły grupy</string>
@@ -208,14 +207,24 @@
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">Zmień nazwę kontaktu</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">Zapisz</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">Ustawienia</string>
+	<string name="menu_action_send_photo" state="needs_review" hash="13932391">Wyślij zdjęcie</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">Udostępnij</string>
 	<string name="menu_action_bookmark" state="needs_review" hash="1146136289">Zakładka</string>
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Usuń z zakładek</string>
+	<string name="menu_action_view_message" state="needs_review" hash="-211312046">Wyświetl wiadomość</string>
+	<string name="label_see_more" state="needs_review" hash="-1206298538">Zobacz więcej</string>
+	<string name="label_formatted_text" state="needs_review" hash="664283030">Sformatowany</string>
+	<string name="label_raw_text" state="needs_review" hash="-1645103337">Niesformatowany</string>
+	<string name="pref_truncate_long_messages_title" state="needs_review" hash="576500375">Skracaj długie wiadomości</string>
+	<string name="pref_truncate_long_messages_full_screen" state="needs_review" hash="1513604976">Kliknij, aby otworzyć w trybie pełnoekranowym</string>
+	<string name="pref_truncate_long_messages_inline" state="needs_review" hash="1658956871">Kliknij, aby rozwinąć</string>
+	<string name="pref_truncate_long_messages_never" state="needs_review" hash="1348404810">Nigdy nie obcinać</string>
+	<string name="label_select_message_to_copy" state="needs_review" hash="1560698970">Zaznacz fragment wiadomości, aby go skopiować.</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Archiwizuj</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Odrzuć archiwizację</string>
 	<string name="menu_check_update" state="needs_review" hash="1635875089">Sprawdź dostępność aktualizacji</string>
-	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Ta dyskusja jest zablokowana</string>
-	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Ta dyskusja jest tylko do odczytu</string>
+	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Ta rozmowa jest zablokowana</string>
+	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Ta rozmowa jest tylko do odczytu</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Twoje wiadomości zostaną automatycznie wysłane, gdy tylko zostanie ustanowiony bezpieczny kanał dla tej rozmowy. Do tego czasu pozostaną wstrzymane.</string>
 	<string name="message_error_first_or_last_name_needed" state="needs_review" hash="-1907938730">Wprowadź imię lub nazwisko.</string>
 	<string name="message_error_trust_origin" state="needs_review" hash="51944132">Błąd podczas pobierania źródła zaufania kontaktu</string>
@@ -228,7 +237,7 @@
 	<string name="notification_channel_message_description" state="needs_review" hash="-780386348">Powiadomienia o nowych wiadomościach</string>
 	<string name="notification_channel_message_name" state="needs_review" hash="-1639407912">Wiadomości</string>
 	<string name="notification_content_exchange_sas" state="needs_review" hash="-1014025516">Wymień swoje kody z %1$s</string>
-	<string name="notification_content_group_invite" state="needs_review" hash="-947588285">%1$s zaprasza cię do dyskusji grupowej</string>
+	<string name="notification_content_group_invite" state="needs_review" hash="-947588285">%1$s zaprasza cię do rozmowy grupowej</string>
 	<string name="notification_content_mediator_invite" state="needs_review" hash="439791783">Przedstawiony przez %1$s</string>
 	<string name="notification_public_title_exchange_sas" state="needs_review" hash="786512983">Wymień swoje kody</string>
 	<string name="notification_public_title_group_invitation" state="needs_review" hash="-366531705">Otrzymano zaproszenie do nowej grupy</string>
@@ -248,6 +257,8 @@
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">Bardzo wysoki</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Opuściłeś grupę</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Ponownie dołączyłeś do grupy</string>
+	<string name="label_groups_administered" state="needs_review" hash="353496672">Grupy, którymi zarządzasz</string>
+	<string name="label_groups_joined" state="needs_review" hash="-1353689862">Dołączone grupy</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Dołączyłeś do grupy</string>
 	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s dodał(a) cię do tej grupy.</string>
 	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s ponownie dodał(a) cię do tej grupy.</string>
@@ -324,7 +335,7 @@
 	<string name="text_user_added_to_contacts" state="needs_review" hash="-792506872">Użytkownik dodany do kontaktów</string>
 	<string name="toast_message_user_deleted" state="needs_review" hash="-1664642954">Użytkownik usunięty</string>
 	<string name="text_original_message_not_found" state="needs_review" hash="2014071006">Oryginalna wiadomość nie została znaleziona</string>
-	<string name="text_discussion_end2end_disclaimer" state="needs_review" hash="165389435">Wiadomości opublikowane w tej dyskusji są chronione szyfrowaniem end-to-end.\nIch poufność, autentyczność i tożsamość nadawcy są gwarantowane dzięki kryptografii.</string>
+	<string name="text_discussion_end2end_disclaimer" state="needs_review" hash="165389435">Wiadomości opublikowane w tej rozmowie są chronione szyfrowaniem end-to-end.\nIch poufność, autentyczność i tożsamość nadawcy są gwarantowane dzięki kryptografii.</string>
 	<string name="text_unknown_member_joined_the_group" state="needs_review" hash="1051900858">Nieznany członek dołączył do grupy</string>
 	<string name="text_unknown_member_left_the_group" state="needs_review" hash="183620441">Nieznany członek opuścił grupę</string>
 	<string name="pref_reset_dialogs_title" state="needs_review" hash="-1377245223">Zresetuj wszystkie ostrzeżenia</string>
@@ -456,11 +467,11 @@
 	<string name="button_label_generate_new_backup_key" state="needs_review" hash="2125865513">Wygeneruj nowy klucz</string>
 	<string name="toast_message_backup_failed" state="needs_review" hash="-138183706">Nie udało się utworzyć pliku kopii zapasowej. Spróbuj ponownie.</string>
 	<string name="dialog_title_identity_deactivated" state="needs_review" hash="1998160098">Profil dezaktywowany na tym urządzeniu</string>
-	<string name="dialog_message_identity_deactivated" state="needs_review" hash="2063920395">Twój profil został dezaktywowany na tym urządzeniu.\n\nOlvid nie był w stanie pobrać listy urządzeń, na których jest obecnie aktywny. Ponowne aktywowanie profilu na tym urządzeniu może dezaktywować go na innym.\n\nJeśli chcesz kontynuować, naciśnij \"aktywuj mój profil na tym urządzeniu\" poniżej. Pamiętaj, że korzystanie z Olvid do wysyłania i odbierania wiadomości na dwóch urządzeniach jednocześnie wymaga licencji.\n\nNaciśnij \"anuluj\", aby zamknąć to okno dialogowe i pozostawić to urządzenie nieaktywne: nie będziesz mógł wysyłać ani odbierać wiadomości na tym urządzeniu, ale nadal będziesz mógł przeglądać swoje stare dyskusje.</string>
-	<string name="dialog_message_identity_deactivated_multi_device" state="needs_review" hash="713165097">Twój profil został dezaktywowany na tym urządzeniu.\n\nWygląda na to, że masz licencję na korzystanie z Olvid na wielu urządzeniach jednocześnie, więc możesz ponownie aktywować swój profil w dowolnym momencie. Poniżej znajduje się lista Twoich aktualnie aktywnych urządzeń.\n\nJeśli chcesz kontynuować, naciśnij \"ponownie aktywuj mój profil na tym urządzeniu\" poniżej. To urządzenie zostanie wtedy zsynchronizowane z innymi aktywnymi urządzeniami, aby zaktualizować Twoje kontakty i grupy.\n\nNaciśnij \"anuluj\", aby zamknąć to okno dialogowe i pozostawić to urządzenie nieaktywne: nie będziesz mógł wysyłać ani odbierać wiadomości na tym urządzeniu, ale nadal będziesz mógł przeglądać stare dyskusje.</string>
-	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">Twój profil został dezaktywowany na tym urządzeniu.\n\nWygląda na to, że nie masz obecnie żadnego aktywnego urządzenia, więc możesz ponownie aktywować swój profil w dowolnym momencie.\n\nJeśli chcesz kontynuować, naciśnij \"ponownie aktywuj mój profil na tym urządzeniu\" poniżej.\n\nNaciśnij \"anuluj\", aby zamknąć to okno dialogowe i pozostawić to urządzenie nieaktywne: nie będziesz mógł wysyłać ani odbierać wiadomości na tym urządzeniu, ale nadal będziesz mógł przeglądać swoje stare dyskusje.</string>
-	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">Twój profil został dezaktywowany na tym urządzeniu.\n\nWygląda na to, że nie masz licencji na korzystanie z Olvid na wielu urządzeniach jednocześnie. Ponowne aktywowanie tego urządzenia wymaga dezaktywacji innego urządzenia.\n\nJeśli chcesz kontynuować, wybierz urządzenie, które chcesz dezaktywować z listy poniżej, a następnie naciśnij \"aktywuj mój profil na tym urządzeniu\".\n\nWciśnij \"anuluj\", aby zamknąć to okno dialogowe i pozostawić to urządzenie nieaktywne: nie będziesz mógł wysyłać ani odbierać wiadomości na tym urządzeniu, ale nadal będziesz mógł przeglądać swoje stare dyskusje.</string>
-	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">Twój profil został dezaktywowany na tym urządzeniu.\n\nWygląda na to, że wszystkie Twoje pozostałe urządzenia zostaną wkrótce dezaktywowane, więc możesz ponownie aktywować swój profil na tym urządzeniu w dowolnym momencie. Poniżej znajduje się lista Twoich aktualnie aktywnych urządzeń.\n\nJeśli chcesz kontynuować, naciśnij \"ponownie aktywuj mój profil na tym urządzeniu\" poniżej.\n\nNaciśnij \"anuluj\", aby zamknąć to okno dialogowe i pozostawić to urządzenie nieaktywne: nie będziesz mógł wysyłać ani odbierać wiadomości na tym urządzeniu, ale nadal będziesz mógł przeglądać swoje stare dyskusje.</string>
+	<string name="dialog_message_identity_deactivated" state="needs_review" hash="2063920395">Twój profil został dezaktywowany na tym urządzeniu.\n\nOlvid nie był w stanie pobrać listy urządzeń, na których jest obecnie aktywny. Ponowne aktywowanie profilu na tym urządzeniu może dezaktywować go na innym.\n\nJeśli chcesz kontynuować, naciśnij \"aktywuj mój profil na tym urządzeniu\" poniżej. Pamiętaj, że korzystanie z Olvid do wysyłania i odbierania wiadomości na dwóch urządzeniach jednocześnie wymaga licencji.\n\nNaciśnij \"anuluj\", aby zamknąć to okno dialogowe i pozostawić to urządzenie nieaktywne: nie będziesz mógł wysyłać ani odbierać wiadomości na tym urządzeniu, ale nadal będziesz mógł przeglądać swoje stare rozmowy.</string>
+	<string name="dialog_message_identity_deactivated_multi_device" state="needs_review" hash="713165097">Twój profil został dezaktywowany na tym urządzeniu.\n\nWygląda na to, że masz licencję na korzystanie z Olvid na wielu urządzeniach jednocześnie, więc możesz ponownie aktywować swój profil w dowolnym momencie. Poniżej znajduje się lista Twoich aktualnie aktywnych urządzeń.\n\nJeśli chcesz kontynuować, naciśnij \"ponownie aktywuj mój profil na tym urządzeniu\" poniżej. To urządzenie zostanie wtedy zsynchronizowane z innymi aktywnymi urządzeniami, aby zaktualizować Twoje kontakty i grupy.\n\nNaciśnij \"anuluj\", aby zamknąć to okno dialogowe i pozostawić to urządzenie nieaktywne: nie będziesz mógł wysyłać ani odbierać wiadomości na tym urządzeniu, ale nadal będziesz mógł przeglądać stare rozmowy.</string>
+	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">Twój profil został dezaktywowany na tym urządzeniu.\n\nWygląda na to, że nie masz obecnie żadnego aktywnego urządzenia, więc możesz ponownie aktywować swój profil w dowolnym momencie.\n\nJeśli chcesz kontynuować, naciśnij \"ponownie aktywuj mój profil na tym urządzeniu\" poniżej.\n\nNaciśnij \"anuluj\", aby zamknąć to okno dialogowe i pozostawić to urządzenie nieaktywne: nie będziesz mógł wysyłać ani odbierać wiadomości na tym urządzeniu, ale nadal będziesz mógł przeglądać swoje stare rozmowy.</string>
+	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">Twój profil został dezaktywowany na tym urządzeniu.\n\nWygląda na to, że nie masz licencji na korzystanie z Olvid na wielu urządzeniach jednocześnie. Ponowne aktywowanie tego urządzenia wymaga dezaktywacji innego urządzenia.\n\nJeśli chcesz kontynuować, wybierz urządzenie, które chcesz dezaktywować z listy poniżej, a następnie naciśnij \"aktywuj mój profil na tym urządzeniu\".\n\nWciśnij \"anuluj\", aby zamknąć to okno dialogowe i pozostawić to urządzenie nieaktywne: nie będziesz mógł wysyłać ani odbierać wiadomości na tym urządzeniu, ale nadal będziesz mógł przeglądać swoje stare rozmowy.</string>
+	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">Twój profil został dezaktywowany na tym urządzeniu.\n\nWygląda na to, że wszystkie Twoje pozostałe urządzenia zostaną wkrótce dezaktywowane, więc możesz ponownie aktywować swój profil na tym urządzeniu w dowolnym momencie. Poniżej znajduje się lista Twoich aktualnie aktywnych urządzeń.\n\nJeśli chcesz kontynuować, naciśnij \"ponownie aktywuj mój profil na tym urządzeniu\" poniżej.\n\nNaciśnij \"anuluj\", aby zamknąć to okno dialogowe i pozostawić to urządzenie nieaktywne: nie będziesz mógł wysyłać ani odbierać wiadomości na tym urządzeniu, ale nadal będziesz mógł przeglądać swoje stare rozmowy.</string>
 	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">Twój profil został dezaktywowany na tym urządzeniu.\n\nNie będziesz mógł wysyłać ani odbierać wiadomości, chyba że go ponownie aktywujesz.</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">Reaktywuj mój profil na tym urządzeniu</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">Wystąpił błąd. Spróbuj ponownie.</string>
@@ -509,6 +520,8 @@
 	<string name="pref_text_dark_mode_on" state="needs_review" hash="794872984">Zawsze używaj ciemnego motywu</string>
 	<string name="pref_text_dark_mode_off" state="needs_review" hash="1031187033">Zawsze używaj jasnego motywu</string>
 	<string name="pref_text_dark_mode_auto" state="needs_review" hash="-1140013121">Użyj ustawień systemowych</string>
+	<string name="pref_use_pattern_avatars_title" state="needs_review" hash="-184462474">Awatarzy generowane przez sztuczną inteligencję</string>
+	<string name="pref_use_pattern_avatars_summary" state="needs_review" hash="-1895366464">Dla kontaktów, które nie mają zdjęcia profilowego, wyświetlaj unikalny, kolorowy wzór zamiast ich inicjałów.</string>
 	<string name="menu_action_help_faq" state="needs_review" hash="971329012">Pomoc / FAQ</string>
 	<string name="menu_action_call_contact" state="needs_review" hash="546297186">Zadzwoń do kontaktu</string>
 	<string name="notification_title_incoming_webrtc_call" state="needs_review" hash="-2109880396">Przychodzące połączenie Olvid od %1$s</string>
@@ -692,7 +705,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">Serwer licencji:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">Twój serwer:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">Nieprawidłowy link aktywacyjny licencji.\n\nSkontaktuj się z osobą, która przesłała Ci ten link.</string>
-	<string name="label_checking_license" state="needs_review" hash="-777109669">Sprawdzanie licencji…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">Nie można sprawdzić statusu licencji</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Nieznana licencja</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Ważna licencja</string>
@@ -740,6 +752,16 @@
 	<string name="text_message_content_wiped" state="needs_review" hash="1781783786">(treść wiadomości usunięta)</string>
 	<string name="text_ephemeral_message_explanation" state="needs_review" hash="612413232">Kliknij, aby wyświetlić\n treść wiadomości</string>
 	<string name="text_visible_once" state="needs_review" hash="962464352">Widoczne tylko raz</string>
+	<string name="dialog_title_ephemeral_message" state="needs_review" hash="-1527208333">wiadomość tymczasowa</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave" state="needs_review" hash="1852111882">Ta wiadomość zostanie usunięta, gdy opuścisz tę rozmowę.</string>
+	<string name="text_ephemeral_read_once_erased_on_leave" state="needs_review" hash="-1031412379">Treść tej wiadomości zostanie usunięta, gdy opuścisz tę rozmowę.</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave_once_opened" state="needs_review" hash="-1827602456">Po otwarciu wiadomość zostanie usunięta, gdy opuścisz tę rozmowę.</string>
+	<string name="text_ephemeral_deleted_at_time" state="needs_review" hash="831937049">Zostanie usunięte o %1$s</string>
+	<string name="text_ephemeral_deleted_on_date_at_time" state="needs_review" hash="667854133">Zostanie usunięte %1$s o %2$s</string>
+	<string name="text_ephemeral_content_erased_at_time" state="needs_review" hash="1038815627">Zawartość zostanie usunięta w dniu %1$s</string>
+	<string name="text_ephemeral_content_erased_on_date_at_time" state="needs_review" hash="848079053">Zawartość zostanie usunięta %1$s o godzinie %2$s</string>
+	<string name="text_ephemeral_countdown_starts_when_sent" state="needs_review" hash="-1010200489">Odliczanie rozpoczyna się po wysłaniu wiadomości.</string>
+	<string name="text_ephemeral_countdown_starts_when_opened" state="needs_review" hash="1194691757">Odliczanie rozpoczyna się, gdy otworzysz wiadomość.</string>
 	<string name="text_timer_s" state="needs_review" hash="-1146250144">%1$ds</string>
 	<string name="text_timer_m" state="needs_review" hash="-1318025056">%1$dm</string>
 	<string name="text_timer_h" state="needs_review" hash="-1461170816">%1$dh</string>
@@ -769,14 +791,16 @@
 	<string name="pref_mute_notifications_one_week" state="needs_review" hash="-658098755">Przez tydzień</string>
 	<string name="pref_mute_notifications_indefinitely" state="needs_review" hash="-2047552216">Nieokreślony czas</string>
 	<string name="pref_text_discussion_auto_open_limited_visibility_inbound_off" state="needs_review" hash="625795906">Wyłączone, kliknij, aby wyświetlić wiadomości</string>
-	<string name="pref_text_discussion_auto_open_limited_visibility_inbound_on" state="needs_review" hash="1549131633">Włączone, wyświetlaj wiadomości po otwarciu konwersacji</string>
+	<string name="pref_text_discussion_auto_open_limited_visibility_inbound_on" state="needs_review" hash="1549131633">Włączone, wyświetlaj wiadomości po otwarciu rozmowy</string>
 	<string name="pref_text_discussion_retain_wiped_outbound_off" state="needs_review" hash="399616391">Wyłączone, nie przechowuj usuniętych wiadomości, usuń je</string>
 	<string name="pref_text_discussion_retain_wiped_outbound_on" state="needs_review" hash="-2008642124">Włączone, zachowaj usunięte wiadomości, aby zobaczyć, kiedy zostały dostarczone lub odczytane</string>
 	<string name="pref_auto_open_limited_visibility_inbound_title" state="needs_review" hash="-1870189996">Automatycznie otwieraj wiadomości efemeryczne</string>
 	<string name="pref_retain_wiped_outbound_messages_title" state="needs_review" hash="-342021313">Zachowaj usunięte wiadomości wychodzące</string>
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Wysyłanie i odbieranie wiadomości</string>
-	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Po włączeniu wiadomości jednorazowe i wiadomości z domyślnym ograniczonym czasem widoczności są otwierane zaraz po wejściu do dyskusji. W przeciwnym razie wymagane jest kliknięcie.</string>
+	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Po włączeniu wiadomości jednorazowe i wiadomości z domyślnym ograniczonym czasem widoczności są otwierane zaraz po wejściu do rozmowy. W przeciwnym razie wymagane jest kliknięcie.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Po włączeniu usunięte wiadomości wychodzące są zachowywane, aby można było sprawdzić, kiedy zostały dostarczone lub odczytane. W przeciwnym razie zostaną usunięte.</string>
+	<string name="pref_default_reaction_title" state="needs_review" hash="1457188713">Domyślna reakcja</string>
+	<string name="pref_default_reaction_summary" state="needs_review" hash="-1065900793">Dotknij dwukrotnie odebraną wiadomość, aby wyrazić reakcję za pomocą %1$s. Dotknij ponownie, aby usunąć swoją reakcję.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Klient webowy</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Błąd podczas analizowania linku do aktualizacji ustawień</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Wysyłanie i odbieranie wiadomości</string>
@@ -784,7 +808,7 @@
 	<string name="pref_discussion_category_shared_ephemeral_settings_summary" state="needs_review" hash="-1511387101">Poniższe ustawienia są współdzielone przez wszystkich uczestników tej rozmowy. Zmiana ich wpłynie na domyślną widoczność i czas trwania wiadomości wysyłanych przez wszystkich uczestników.</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_summary_only_owner" state="needs_review" hash="507098821">Poniższe ustawienia są współdzielone przez wszystkich uczestników tej rozmowy. Zmiana ich wpłynie na domyślną widoczność i czas trwania wiadomości wysyłanych przez wszystkich uczestników.\n\nNie masz uprawnień do modyfikowania tych ustawień.</string>
 	<string name="pref_discussion_read_once_title" state="needs_review" hash="1347493911">Wiadomości jednorazowe</string>
-	<string name="pref_discussion_read_once_summary" state="needs_review" hash="-126623825">Po włączeniu wiadomości i załączniki są wyświetlane tylko raz i usuwane po opuszczeniu dyskusji.</string>
+	<string name="pref_discussion_read_once_summary" state="needs_review" hash="-126623825">Po włączeniu wiadomości i załączniki są wyświetlane tylko raz i usuwane po opuszczeniu rozmowy.</string>
 	<string name="pref_discussion_visibility_duration_title" state="needs_review" hash="-640499771">Czas widoczności wiadomości</string>
 	<string name="pref_discussion_existence_duration_title" state="needs_review" hash="530735129">Czas trwania wiadomości</string>
 	<string name="pref_discussion_remote_delete_title" state="needs_review" hash="1812520789">Kto może \"usunąć wszędzie\" wiadomości od innych użytkowników?</string>
@@ -814,9 +838,9 @@
 	<string name="pref_discussion_existence_duration_summary" state="needs_review" hash="1593195523">Wiadomości są automatycznie usuwane po: %1$s</string>
 	<string name="dialog_title_shared_ephemeral_settings_modified" state="needs_review" hash="-710464596">Zmodyfikowano ustawienia współdzielonych wiadomości efemerycznych</string>
 	<string name="dialog_message_shared_ephemeral_settings_modified" state="needs_review" hash="715864223">Zmieniłeś domyślne ustawienia efemerycznych wiadomości dla tej rozmowy.\n\nCzy chcesz zaktualizować te ustawienia dla siebie i wszystkich pozostałych uczestników rozmowy, czy chcesz odrzucić swoje zmiany?</string>
-	<string name="text_discussion_shared_settings_updated" state="needs_review" hash="-151974912">Zaktualizowano wspólne ustawienia czatu</string>
-	<string name="text_updated_shared_settings" state="needs_review" hash="1457023446">%1$s zaktualizował wspólne ustawienia dyskusji</string>
-	<string name="text_updated_shared_settings_you" state="needs_review" hash="40728921">Zaktualizowałeś/zaktualizowałaś wspólne ustawienia czatu</string>
+	<string name="text_discussion_shared_settings_updated" state="needs_review" hash="-151974912">Zaktualizowano wspólne ustawienia rozmowy</string>
+	<string name="text_updated_shared_settings" state="needs_review" hash="1457023446">%1$s zaktualizował wspólne ustawienia rozmowy</string>
+	<string name="text_updated_shared_settings_you" state="needs_review" hash="40728921">Zaktualizowałeś/zaktualizowałaś wspólne ustawienia rozmowy</string>
 	<string name="text_non_ephemeral_messages" state="needs_review" hash="402305240">Wiadomości nieulotne</string>
 	<string name="pref_category_default_retention_policy_title" state="needs_review" hash="925391440">Polityka przechowywania wiadomości</string>
 	<string name="pref_category_default_retention_policy_summary" state="needs_review" hash="-1071833812">Poniższe ustawienia pozwalają na automatyczne usuwanie starych wiadomości w twoich rozmowach. Można je nadpisać w każdej rozmowie.</string>
@@ -830,10 +854,10 @@
 	<string name="pref_discussion_retention_count_hint" state="needs_review" hash="-1516581060">Liczba wiadomości do zachowania</string>
 	<string name="pref_discussion_retention_duration_summary_null" state="needs_review" hash="1734971768">Zachowaj wszystkie wiadomości</string>
 	<string name="pref_discussion_default_retention_count_dialog_message" state="needs_review" hash="113844640">Wprowadź liczbę wiadomości, które mają być przechowywane w każdej rozmowie. Zostaw puste, aby zachować wszystkie wiadomości.\n\nWiadomości nieprzeczytane nigdy nie są usuwane.</string>
-	<string name="pref_discussion_retention_count_dialog_message_default_null" state="needs_review" hash="-86538410">Wprowadź liczbę wiadomości, które chcesz zachować w tej konwersacji.\nZostaw puste, aby użyć domyślnej polityki (zachowaj wszystkie wiadomości).\n\nWiadomości nieprzeczytane nigdy nie są usuwane.</string>
-	<string name="pref_discussion_retention_count_dialog_message_default_number" state="needs_review" hash="-2144782876">Wprowadź liczbę wiadomości, które chcesz zachować w tej konwersacji.\nZostaw puste, aby użyć domyślnej polityki (zachowaj %1$d najnowszych wiadomości).\nWprowadź 0, aby zachować wszystkie wiadomości.\n\nWiadomości nieprzeczytane nigdy nie są usuwane.</string>
-	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">Polityka przechowywania wiadomości w konwersacji</string>
-	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">Poniższe ustawienia pozwalają na automatyczne usuwanie starych wiadomości w tej konwersacji. Mają one priorytet nad domyślną polityką retencji.</string>
+	<string name="pref_discussion_retention_count_dialog_message_default_null" state="needs_review" hash="-86538410">Wprowadź liczbę wiadomości, które chcesz zachować w tej rozmowie.\nZostaw puste, aby użyć domyślnej polityki (zachowaj wszystkie wiadomości).\n\nWiadomości nieprzeczytane nigdy nie są usuwane.</string>
+	<string name="pref_discussion_retention_count_dialog_message_default_number" state="needs_review" hash="-2144782876">Wprowadź liczbę wiadomości, które chcesz zachować w tej rozmowie.\nZostaw puste, aby użyć domyślnej polityki (zachowaj %1$d najnowszych wiadomości).\nWprowadź 0, aby zachować wszystkie wiadomości.\n\nWiadomości nieprzeczytane nigdy nie są usuwane.</string>
+	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">Polityka przechowywania wiadomości w rozmowie</string>
+	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">Poniższe ustawienia pozwalają na automatyczne usuwanie starych wiadomości w tej rozmowie. Mają one priorytet nad domyślną polityką retencji.</string>
 	<string name="pref_text_app_default_string" state="needs_review" hash="-1921282000">Użyj domyślnego ustawienia (%1$s)</string>
 	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1349151852">Nagraj wiadomość głosową</string>
 	<string name="dialog_title_voice_message_explanation" state="needs_review" hash="943269997">Wiadomości głosowe Olvid</string>
@@ -896,7 +920,8 @@
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Licencja: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Dostawca tożsamości</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Serwer dostawcy tożsamości</string>
-	<string name="explanation_identity_provider" state="needs_review" hash="-964456322">Ten ekran umożliwia skonfigurowanie dostawcy tożsamości Twojej firmy w Olvid. Po skonfigurowaniu będziesz mógł uwierzytelnić się za pomocą tego serwera, a Olvid umożliwi Ci bezproblemowe dodawanie innych pracowników do kontaktów.\nSkontaktuj się z administratorem, aby uzyskać więcej informacji.</string>
+	<string name="explanation_identity_provider" state="needs_review" hash="-1014276138">Na tym ekranie możesz skonfigurować dostawcę tożsamości dla swojej organizacji w Olvid. Po skonfigurowaniu będziesz mógł się uwierzytelnić, a Olvid umożliwi Ci łatwe dodawanie innych użytkowników do kontaktów.\nSkontaktuj się z administratorem, aby uzyskać więcej informacji.</string>
+	<string name="explanation_identity_provider_mdm" state="needs_review" hash="-1274626281">Ta instalacja jest zarządzana przez Twoją organizację i skonfigurowana do korzystania z dostawcy tożsamości. Poniższe ustawienia są wstępnie skonfigurowane i nie można ich zmieniać.\nW celu uzyskania dodatkowych informacji prosimy o kontakt z administratorem.</string>
 	<string name="button_label_authenticate" state="needs_review" hash="272245375">Uwierzytelnić</string>
 	<string name="button_label_check_identity_provider" state="needs_review" hash="508428497">Sprawdź dostawcę tożsamości</string>
 	<string name="menu_action_use_identity_provider" state="needs_review" hash="1305090894">Użyj dostawcy tożsamości</string>
@@ -980,8 +1005,6 @@
 	<string name="text_failed_call" state="needs_review" hash="-1934816919">Nieudane połączenie telefoniczne</string>
 	<string name="text_busy_call" state="needs_review" hash="-310279946">Połączenie przychodzące podczas rozmowy</string>
 	<string name="text_busy_outgoing_call" state="needs_review" hash="92373387">Połączenie z zajętym kontaktem</string>
-	<string name="content_description_profile_picture" state="needs_review" hash="-1074340378">Zdjęcie profilowe</string>
-	<string name="ime_action_rename" state="needs_review" hash="-1795678977">Zmień nazwę</string>
 	<string name="pref_storage_explorer_title" state="needs_review" hash="735816049">Eksplorator pamięci wewnętrznej</string>
 	<string name="pref_storage_explorer_summary" state="needs_review" hash="-1991214388">Poznaj wewnętrzną pamięć aplikacji Olvid!</string>
 	<string name="activity_title_storage_explorer" state="needs_review" hash="735816049">Eksplorator pamięci wewnętrznej</string>
@@ -1052,6 +1075,8 @@
 	<string name="pref_image_text_recognition_title" state="needs_review" hash="1877261687">Rozpoznawanie i indeksowanie tekstu na obrazach</string>
 	<string name="pref_image_text_recognition_summary" state="needs_review" hash="1217699919">Umożliwia wyszukiwanie i kopiowanie tekstu znajdującego się w załączonych obrazach. Ta funkcja może obciążać mniej wydajne urządzenia, dlatego w przypadku braku potrzeby można ją wyłączyć.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">Nie można wyświetlić obrazu</string>
+	<string name="label_unsupported_image_format" state="needs_review" hash="-1487560676">Nieobsługiwany format obrazu</string>
+	<string name="label_unsupported_video_format" state="needs_review" hash="2131303733">Nieobsługiwany format wideo</string>
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">Wymagane zalogowanie do dostawcy chmury</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Skonfigurowano Olvid do korzystania z automatycznych kopii zapasowych w chmurze, ale Twoja sesja wygasła. Musisz ponownie zalogować się do tego dostawcy.\n\nJeśli nie chcesz już korzystać z automatycznych kopii zapasowych, możesz je wyłączyć w Ustawieniach aplikacji. Pamiętaj, że automatyczne kopie zapasowe są jedynym sposobem na uniknięcie utraty kontaktów w przypadku zgubienia lub uszkodzenia urządzenia.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Zaloguj się</string>
@@ -1180,9 +1205,9 @@
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">Usuń odpowiedź do wiadomości</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">Wskaźnik, że powiadomienia są wyciszone dla tego profilu</string>
 	<string name="button_label_create_a_profile" state="needs_review" hash="-1568207484">Utwórz profil</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="1428471064">Dostawca tożsamości Twojej firmy został pomyślnie skonfigurowany. Naciśnij przycisk \"autoryzuj\" poniżej, aby uwierzytelnić się za jego pomocą i pobrać swoje dane osobowe.</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="1823898406">Dostawca tożsamości Twojej firmy został pomyślnie skonfigurowany. Naciśnij przycisk „użyj magicznego linku” poniżej, aby pobrać swoje dane osobowe.</string>
-	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="1340457300">Witamy w Olvid.\n\nTa instalacja jest zarządzana przez Twoją firmę i została skonfigurowana do korzystania z dostawcy tożsamości. Naciśnij przycisk \"autoryzuj\" poniżej, aby uwierzytelnić się z nim i pobrać swoje dane osobowe.\n\nJeśli już korzystałeś z Olvid i chcesz przywrócić klucze i kontakty z kopii zapasowej, naciśnij \"przywróć kopię zapasową\".</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="-2030851622">Dostawca tożsamości Twojej organizacji został pomyślnie skonfigurowany. Naciśnij przycisk „autoryzuj” poniżej, aby uwierzytelnić się i pobrać swoje dane osobowe.</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="903193568">Dostawca tożsamości Twojej organizacji został pomyślnie skonfigurowany. Naciśnij przycisk „Użyj linku magicznego” poniżej, aby pobrać swoje dane osobowe.</string>
+	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="-5109440">Ta instalacja jest zarządzana przez Twoją organizację i skonfigurowana do korzystania z dostawcy tożsamości. Naciśnij przycisk „%1$s” poniżej, aby uwierzytelnić się i pobrać swoje dane osobowe.</string>
 	<string name="button_label_see_details" state="needs_review" hash="238834473">Zobacz szczegóły</string>
 	<string name="link_label_invitation_url" state="needs_review" hash="744905192">Dodaj kontakt</string>
 	<string name="link_label_configuration_url" state="needs_review" hash="-441435162">Importuj konfigurację lub licencję</string>
@@ -1199,7 +1224,7 @@
 	<string name="dialog_title_delete_profile" state="needs_review" hash="658803224">Usunąć bieżący profil?</string>
 	<string name="dialog_message_delete_profile" state="needs_review" hash="-329228509">Usunięcie profilu spowoduje usunięcie wszystkich informacji związanych z tym profilem na Twoim urządzeniu. Obejmuje to Twoje kontakty, grupy oraz zawartość wszystkich Twoich rozmów (wiadomości i załączniki) dla tego profilu. Pozostałe profile nie zostaną dotknięte tą operacją.\nJeśli włączyłeś kopie zapasowe w Olvid, przyszłe kopie zapasowe nie będą zawierać żadnych śladów tego profilu i możesz nie być w stanie go przywrócić.\n\nNaciśnij \"dalej\", aby wybrać sposób usunięcia tego profilu.</string>
 	<string name="dialog_message_delete_last_profile" state="needs_review" hash="-2123774331">Usunięcie profilu spowoduje usunięcie wszystkich informacji związanych z tym profilem z twojego urządzenia. Obejmuje to kontakty, grupy oraz treść wszystkich twoich rozmów (wiadomości i załączniki) dla tego profilu.\n\n<b>To jest twój jedyny widoczny profil i jeśli masz jakieś ukryte profile, zostaną one usunięte jednocześnie.</b>\n\nJeśli w Olvid włączyłeś tworzenie kopii zapasowych, przyszłe kopie zapasowe nie będą zawierały żadnych śladów tego profilu i możesz nie być w stanie go odzyskać.\n\nNaciśnij \"dalej\", aby wybrać sposób usunięcia tego profilu.</string>
-	<string name="dialog_message_delete_profile_multi" state="needs_review" hash="-2003495595">Usunięcie profilu spowoduje usunięcie wszystkich informacji związanych z tym profilem na Twoim urządzeniu. Obejmuje to Twoje kontakty, grupy oraz zawartość wszystkich Twoich dyskusji (wiadomości i załączniki) dla tego profilu. Twoje pozostałe profile nie zostaną dotknięte tą operacją.\n\nNaciśnij \"dalej\", aby wybrać sposób usunięcia tego profilu.</string>
+	<string name="dialog_message_delete_profile_multi" state="needs_review" hash="-2003495595">Usunięcie profilu spowoduje usunięcie wszystkich informacji związanych z tym profilem na Twoim urządzeniu. Obejmuje to Twoje kontakty, grupy oraz zawartość wszystkich Twoich rozmów (wiadomości i załączniki) dla tego profilu. Twoje pozostałe profile nie zostaną dotknięte tą operacją.\n\nNaciśnij \"dalej\", aby wybrać sposób usunięcia tego profilu.</string>
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">Usuwanie profilu spowoduje usunięcie wszystkich informacji związanych z tym profilem z twojego urządzenia. Obejmuje to kontakty, grupy oraz treść wszystkich twoich rozmów (wiadomości i załączniki) dla tego profilu.\n\n<b>To jest twój jedyny widoczny profil i jeśli masz jakieś ukryte profile, zostaną one usunięte jednocześnie.</b>\n\nNaciśnij \"dalej\", aby wybrać sposób usunięcia tego profilu.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">Usuń profil <b>wszędzie</b></string>
 	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1622625725">Wpisz \"%1$s\" tutaj, aby kontynuować</string>
@@ -1212,7 +1237,7 @@
 	<string name="label_owned_identity_inactive" state="needs_review" hash="-2137342917">Twój profil jest nieaktywny</string>
 	<string name="explanation_owned_identity_inactive" state="needs_review" hash="-181670645">Twój profil został dezaktywowany na tym urządzeniu. Prawdopodobnie dlatego, że używasz go na innym urządzeniu.\n\nNaciśnij \"ponownie aktywuj mój profil na tym urządzeniu\", aby zobaczyć, które urządzenia są obecnie aktywne i jak możesz ponownie aktywować swój profil na tym urządzeniu.</string>
 	<string name="dialog_title_introducing_multi_profile" state="needs_review" hash="1990815677">Przedstawiamy multi-profil!</string>
-	<string name="dialog_message_introducing_multi_profile" state="needs_review" hash="402428554">Olvid teraz obsługuje wiele całkowicie niezależnych profili w ramach jednej aplikacji. Każdy profil może używać innego imienia i zdjęcia profilowego i posiada własny zestaw kontaktów, grup i dyskusji. Możesz również mieć ukryte profile, które wymagają dodatkowego hasła, aby uzyskać do nich dostęp.\n\nChcesz tego spróbować? Dotknij swojego zdjęcia profilowego w lewym górnym rogu ekranu głównego i po prostu naciśnij \"dodaj profil\", aby rozpocząć.</string>
+	<string name="dialog_message_introducing_multi_profile" state="needs_review" hash="402428554">Olvid teraz obsługuje wiele całkowicie niezależnych profili w ramach jednej aplikacji. Każdy profil może używać innego imienia i zdjęcia profilowego i posiada własny zestaw kontaktów, grup i rozmów. Możesz również mieć ukryte profile, które wymagają dodatkowego hasła, aby uzyskać do nich dostęp.\n\nChcesz tego spróbować? Dotknij swojego zdjęcia profilowego w lewym górnym rogu ekranu głównego i po prostu naciśnij \"dodaj profil\", aby rozpocząć.</string>
 	<string name="menu_action_neutral_notifications_when_hidden" state="needs_review" hash="47001577">Neutralne powiadomienie po ukryciu</string>
 	<string name="button_label_activate" state="needs_review" hash="-557386343">Aktywuj</string>
 	<string name="dialog_title_neutral_notification_when_hidden" state="needs_review" hash="2013281962">Wyświetl neutralne powiadomienie, gdy profil jest ukryty</string>
@@ -1223,6 +1248,33 @@
 	<string name="label_attach_timer" state="needs_review" hash="-1527208333">Wiadomość tymczasowa</string>
 	<string name="label_attach_camera" state="needs_review" hash="-1123080444">Zrób zdjęcie</string>
 	<string name="label_attach_video" state="needs_review" hash="1626268086">Nagraj wideo</string>
+	<string name="label_attach_scan" state="needs_review" hash="1128596739">Zeskanuj dokument</string>
+	<string name="label_scan_page_count" state="needs_review" hash="1987610035">Strona %1$d z %2$d</string>
+	<string name="button_label_scan_add_page" state="needs_review" hash="1724653886">Dodaj stronę</string>
+	<string name="button_label_scan_crop" state="needs_review" hash="-292939300">Przytnij</string>
+	<string name="button_label_scan_rotate" state="needs_review" hash="807341684">Obróć</string>
+	<string name="button_label_scan_auto_crop" state="needs_review" hash="1502815262">Automatycznie</string>
+	<string name="button_label_scan_full_image" state="needs_review" hash="1366902062">Pełny obraz</string>
+	<string name="label_scan_filter_original" state="needs_review" hash="-817276190">Oryginał</string>
+	<string name="label_scan_filter_enhanced" state="needs_review" hash="851648098">Ulepszony</string>
+	<string name="label_scan_filter_grayscale" state="needs_review" hash="-695463257">Skala szarości</string>
+	<string name="label_scan_filter_black_and_white" state="needs_review" hash="1668578691">Czarno-biały</string>
+	<string name="dialog_title_discard_scan" state="needs_review" hash="-94972780">Czy chcesz usunąć ten skan?</string>
+	<string name="dialog_message_discard_scan" state="needs_review" hash="-1145223011">Zeskanowane strony zostaną utracone.</string>
+	<string name="toast_message_scan_failed" state="needs_review" hash="512858351">Nie można utworzyć pliku PDF</string>
+	<string name="button_label_scan_retake" state="needs_review" hash="-439420481">Powtórz</string>
+	<string name="button_label_scan_enhance" state="needs_review" hash="-1842671012">Popraw</string>
+	<string name="button_label_scan_filters" state="needs_review" hash="-1898368294">Filtry</string>
+	<string name="button_label_scan_crop_rotate" state="needs_review" hash="-1750423698">Przycinanie i obracanie</string>
+	<string name="button_label_scan_discard" state="needs_review" hash="-248729677">Usuń skan</string>
+	<string name="label_scan_mode_manual" state="needs_review" hash="-751509695">Ręczny</string>
+	<string name="label_scan_mode_auto" state="needs_review" hash="315272314">Automatyczne przechwytywanie</string>
+	<string name="label_scan_hint" state="needs_review" hash="289920901">Umieść dokument w ramce</string>
+	<string name="label_scan_hint_hold_still" state="needs_review" hash="584896298">Proszę, nie ruszaj się…</string>
+	<string name="button_label_scan_flash" state="needs_review" hash="775381504">Lampa błyskowa</string>
+	<string name="label_scan_camera_permission" state="needs_review" hash="-1855763825">Zezwól aplikacji Olvid na korzystanie z aparatu do skanowania dokumentów. Możesz również importować zdjęcia z galerii.</string>
+	<string name="button_label_scan_file_name" state="needs_review" hash="2098556706">Nazwa pliku</string>
+	<string name="dialog_title_scan_file_name" state="needs_review" hash="1332508838">Nazwa pliku PDF</string>
 	<string name="pref_font_scale" state="needs_review" hash="1773040591">Rozmiar czcionki</string>
 	<string name="pref_text_font_scale_0_75" state="needs_review" hash="-1963894407">Malutki (75%)</string>
 	<string name="pref_text_font_scale_0_9" state="needs_review" hash="-708054676">Mała (90%)</string>
@@ -1247,7 +1299,7 @@
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">Wiadomość została skopiowana do schowka</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">Skrót akcji umożliwiający wysłanie zdefiniowanej wiadomości do kontaktu lub grupy jednym kliknięciem</string>
 	<string name="label_action_shortcut_preview_text" state="needs_review" hash="-356415">Hej!</string>
-	<string name="label_discussion_shortcut" state="needs_review" hash="550393383">Skrót do dyskusji Olvid</string>
+	<string name="label_discussion_shortcut" state="needs_review" hash="550393383">Skrót do rozmowy Olvid</string>
 	<string name="label_action_shortcut_invalid_text" state="needs_review" hash="57245784">Nieprawidłowa konfiguracja widżetu</string>
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Skonfiguruj widget…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Wygląd widgetu</string>
@@ -1261,7 +1313,7 @@
 	<string name="label_color" state="needs_review" hash="-907776484">Kolor</string>
 	<string name="hint_widget_label" state="needs_review" hash="-298521469">Etykieta widgetu</string>
 	<string name="label_show_olvid_badge" state="needs_review" hash="732863458">Pokaż odznakę Olvid</string>
-	<string name="label_tap_to_choose_discussion" state="needs_review" hash="-1162539627">Dotknij, aby wybrać konwersację</string>
+	<string name="label_tap_to_choose_discussion" state="needs_review" hash="-1162539627">Dotknij, aby wybrać rozmowę</string>
 	<string name="dialog_title_send_predefined_message" state="needs_review" hash="1737830167">Wysłać gotową wiadomość?</string>
 	<string name="pref_title_widgets" state="needs_review" hash="1824870688">Widgety</string>
 	<string name="explanation_no_widget" state="needs_review" hash="-2143370910">Jeszcze nie utworzyłeś/aś żadnej skrzynki</string>
@@ -1274,6 +1326,9 @@
 	<string name="your_message" state="needs_review" hash="1739533147">twoja wiadomość</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d reakcji na: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s zareagował na %2$s</string>
+	<string name="menu_action_remove_your_reaction" state="needs_review" hash="-1609298248">Usuń swoją reakcję</string>
+	<string name="menu_action_add_to_favorites" state="needs_review" hash="-1933720211">Dodaj do ulubionych</string>
+	<string name="menu_action_remove_from_favorites" state="needs_review" hash="1796304724">Usuń z ulubionych</string>
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Wstaw emotikonę</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Informacje debugowania</string>
 	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">Liczba urządzeń:</string>
@@ -1384,14 +1439,22 @@
 	<string name="pref_discussion_pin_title" state="needs_review" hash="554322472">Przypnij tę rozmowę</string>
 	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">Przypięte rozmowy zawsze pozostają na górze listy rozmów</string>
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Rozmiar wyświetlania</string>
-	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Rozpocznij dyskusję</string>
+	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Rozpocznij rozmowę</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">Tylko do odczytu</string>
 	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Tylko do odczytu\noczekuje</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Administrator</string>
 	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Oczekujący\nadministrator</string>
+	<string name="label_moderator" state="needs_review" hash="767421225">Moderator</string>
+	<string name="label_pending_moderator" state="needs_review" hash="1955900662">Oczekujący\nmoderator</string>
+	<string name="dialog_title_group_roles" state="needs_review" hash="1155086227">Role w grupie</string>
+	<string name="content_description_group_roles" state="needs_review" hash="-449063250">Wyjaśnienie ról w grupie</string>
+	<string name="explanation_group_role_admin" state="needs_review" hash="731519662">Można dodawać i usuwać członków grupy.</string>
+	<string name="explanation_group_role_moderator" state="needs_review" hash="2037600722">Może usuwać wiadomości od dowolnego użytkownika, w tym z jego urządzenia.</string>
+	<string name="explanation_group_role_read_only" state="needs_review" hash="1017523379">Może przeglądać dyskusję, reagować na wiadomości i odpowiadać na ankiety, ale nie może wysyłać wiadomości.</string>
+	<string name="explanation_group_role_pending" state="needs_review" hash="-843291456">Został zaproszony do grupy, ale jeszcze nie przyjął zaproszenia. Wiadomości wysłane w tym czasie zostaną dostarczone po zaakceptowaniu zaproszenia.</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Nie można wyświetlić imienia tego użytkownika</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Grupa bez nazwy</string>
-	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Powiadomienia o dyskusjach</string>
+	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Powiadomienia o rozmowach</string>
 	<string name="pref_discussion_category_customization_title" state="needs_review" hash="1629040651">Personalizacja</string>
 	<string name="pref_discussion_category_message_notifications_title" state="needs_review" hash="-466271953">Powiadomienia o wiadomościach</string>
 	<string name="pref_discussion_category_call_notifications_title" state="needs_review" hash="-1776813002">Powiadomienia o połączeniach przychodzących</string>
@@ -1400,9 +1463,9 @@
 	<string name="pref_discussion_category_locked_explanation_summary" state="needs_review" hash="-2027915932">Niektóre ustawienia nie są dostępne dla zablokowanych rozmów.</string>
 	<string name="pref_discussion_message_custom_notification_title" state="needs_review" hash="-625696878">Niestandardowe powiadomienia o wiadomościach dla tej rozmowy</string>
 	<string name="pref_discussion_call_custom_notification_title" state="needs_review" hash="2074412984">Niestandardowe powiadomienia o połączeniach dla tej rozmowy</string>
-	<string name="notification_channel_discussion_name" state="needs_review" hash="588648320">Dyskusja %1$d</string>
+	<string name="notification_channel_discussion_name" state="needs_review" hash="588648320">Rozmowa %1$d</string>
 	<string name="notification_channel_discussion_group_name" state="needs_review" hash="491497248">Rozmowy</string>
-	<string name="notification_channel_discussion_group_description" state="needs_review" hash="-1448542719">Spersonalizowane powiadomienia dla konkretnych dyskusji w Olvid.</string>
+	<string name="notification_channel_discussion_group_description" state="needs_review" hash="-1448542719">Spersonalizowane powiadomienia dla konkretnych rozmów w Olvid.</string>
 	<string name="button_label_edit_group_members" state="needs_review" hash="1855939143">Edytuj członków</string>
 	<string name="button_label_add_members" state="needs_review" hash="-203515331">Dodaj uczestników</string>
 	<string name="label_group_update_in_progress_title" state="needs_review" hash="-2019791170">Synchronizacja grupy w toku</string>
@@ -1518,6 +1581,10 @@
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">Grupa jest tworzona</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">Nowa grupa</string>
 	<string name="label_group_type" state="needs_review" hash="498463258">Typ grupy</string>
+	<string name="label_existing_discussions" state="needs_review" hash="-2089160663">Istniejące rozmowy</string>
+	<string name="label_last_message_date" state="needs_review" hash="1218222521">Ostatnia wiadomość %1$s</string>
+	<string name="button_label_open" state="needs_review" hash="-2066377003">Otwórz</string>
+	<string name="button_label_create_a_new_group" state="needs_review" hash="-1073202815">Utwórz nową grupę</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">Standardowy</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">Wszyscy członkowie grupy mogą zapraszać nowych członków</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">Kontrolowany</string>
@@ -1531,6 +1598,8 @@
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Nie jesteś już administratorem grupy</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Możesz teraz wysyłać wiadomości</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-930933808">Nie możesz wysyłać wiadomości w tym miejscu.</string>
+	<string name="text_you_became_moderator" state="needs_review" hash="-609725743">Jesteś teraz moderatorem grupy</string>
+	<string name="text_you_are_no_longer_moderator" state="needs_review" hash="1396461107">Nie jesteś już moderatorem grupy</string>
 	<string name="label_pending" state="needs_review" hash="1975294811">Oczekujące</string>
 	<string name="pref_app_language_title" state="needs_review" hash="-1748962099">Język aplikacji</string>
 	<string name="pref_text_default_device_language" state="needs_review" hash="-1062620207">Domyślny język urządzenia</string>
@@ -1627,10 +1696,12 @@
 	<string name="label_zoom_in_for_address" state="needs_review" hash="902696925">Powiększ, aby znaleźć adres</string>
 	<string name="label_address_lookup_disabled" state="needs_review" hash="-2140124686">Wyłączono wyszukiwanie adresów</string>
 	<string name="dialog_title_introducing_mentions" state="needs_review" hash="-1741341288">Przedstawiamy wzmianki o użytkownikach!</string>
-	<string name="dialog_message_introducing_mentions" state="needs_review" hash="622739087">Olvid teraz umożliwia oznaczanie użytkownika w dyskusji 🫵! Wystarczy wpisać @, a następnie literę lub jego imię, aby zobaczyć, kogo można oznaczyć.\nPonadto, wyciszając 💤 dyskusję lub profil, możesz teraz wybrać, aby otrzymywać powiadomienia tylko wtedy, gdy zostaniesz wyraźnie oznaczony w wiadomości.\n\nPamiętaj, że Twoi kontakty będą musieli zaktualizować się do najnowszej wersji Olvid, aby zobaczyć, że ich oznaczyłeś.</string>
+	<string name="dialog_message_introducing_mentions" state="needs_review" hash="622739087">Olvid teraz umożliwia oznaczanie użytkownika w rozmowie 🫵! Wystarczy wpisać @, a następnie literę lub jego imię, aby zobaczyć, kogo można oznaczyć.\nPonadto, wyciszając 💤 rozmowę lub profil, możesz teraz wybrać, aby otrzymywać powiadomienia tylko wtedy, gdy zostaniesz wyraźnie oznaczony w wiadomości.\n\nPamiętaj, że Twoi kontakty będą musieli zaktualizować się do najnowszej wersji Olvid, aby zobaczyć, że ich oznaczyłeś.</string>
 	<string name="pref_no_notify_certificate_change_for_previews_title" state="needs_review" hash="-434788963">Wyłącz powiadomienia o zmianie certyfikatu dla podglądów linków</string>
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Włącz tę opcję, aby wyłączyć wykrywanie zmian w certyfikacie podczas pobierania podglądu linku. Niektóre strony internetowe mogą prezentować inny certyfikat przy każdym połączeniu i możesz otrzymywać częste powiadomienia, jeśli wyłączysz tę opcję.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Użyj starszej biblioteki ZXing do skanowania kodów QR</string>
+	<string name="pref_use_in_house_document_scanner_title" state="needs_review" hash="1552486206">Użyj skanera dokumentów Olvid</string>
+	<string name="pref_use_in_house_document_scanner_summary" state="needs_review" hash="-2092532938">Domyślnie dokumenty są skanowane za pomocą ML Kit, który jest częścią usług Google Play. Włącz tę opcję, aby użyć wbudowanego skanera Olvid.</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">Domyślnie Olvid używa ML Kit do skanowania kodów QR. Włącz tę opcję, jeśli masz problemy ze skanowaniem kodów QR w Olvid.</string>
 	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Użyj wbudowanego czytnika PDF</string>
 	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">Domyślnie pliki PDF są otwierane w (podstawowym) wewnętrznym przeglądarce. Wyłącz tę opcję, aby użyć zewnętrznej przeglądarki zamiast niej.</string>
@@ -1638,7 +1709,7 @@
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Urządzenie %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">To urządzenie</string>
 	<string name="menu_action_rename_device" state="needs_review" hash="43131083">Zmień nazwę urządzenia</string>
-	<string name="menu_action_trust_device" state="needs_review" hash="360435227">Ufać urządzeniu</string>
+	<string name="menu_action_trust_device" state="needs_review" hash="105728494">Rozpoznaję to urządzenie</string>
 	<string name="menu_action_remove_device" state="needs_review" hash="-1485256427">Usuń urządzenie</string>
 	<string name="menu_action_refresh_device_list" state="needs_review" hash="1430227802">Odśwież listę urządzeń</string>
 	<string name="menu_action_recreate_channel" state="needs_review" hash="837900266">Ponownie utwórz bezpieczny kanał</string>
@@ -1706,8 +1777,9 @@
 	<string name="button_label_add_device_xxx" state="needs_review" hash="-1479212354">Dodaj urządzenie \"%1$s\"</string>
 	<string name="notification_title_device_trust" state="needs_review" hash="-1568042777">Nowe urządzenie: \"%1$s\"</string>
 	<string name="notification_title_unnamed_device_trust" state="needs_review" hash="1704207127">Nowe urządzenie</string>
-	<string name="notification_message_device_trust" state="needs_review" hash="753501294">Dodano nowe urządzenie do jednego z Twoich profili Olvid</string>
-	<string name="notification_action_device_trust" state="needs_review" hash="1450001608">Ufać temu urządzeniu</string>
+	<string name="notification_message_device_trust" state="needs_review" hash="-1646747013">Dodano nowe urządzenie do jednego z Twoich profili Olvid. Jeśli to nie Ty, usuń je z listy urządzeń.</string>
+	<string name="notification_action_device_trust" state="needs_review" hash="936727529">Tak, to ja</string>
+	<string name="notification_action_device_see_devices" state="needs_review" hash="-1832505809">Moje urządzenia</string>
 	<string name="notification_channel_device_name" state="needs_review" hash="1347557771">Zarządzanie urządzeniami</string>
 	<string name="notification_channel_device_description" state="needs_review" hash="-36703170">Powiadomienia dotyczące Twoich urządzeń</string>
 	<string name="notification_title_device_expiration" state="needs_review" hash="202400638">Dezaktywacja «%1$s»</string>
@@ -1805,7 +1877,7 @@
 	<string name="dialog_title_invite_all_group_members" state="needs_review" hash="2130589049">Zaprosić wszystkich członków grupy?</string>
 	<string name="toast_message_no_member_can_be_invited" state="needs_review" hash="-297427783">Brak członków grupy do zaproszenia</string>
 	<string name="pref_retain_remote_deleted_messages_title" state="needs_review" hash="-1838732805">Śledź zdalnie usunięte wiadomości</string>
-	<string name="pref_retain_remote_deleted_messages_summary" state="needs_review" hash="1999984049">Po włączeniu wiadomości „usunięte dla wszystkich” przez kogoś innego pozostawiają znacznik w dyskusji.</string>
+	<string name="pref_retain_remote_deleted_messages_summary" state="needs_review" hash="1999984049">Po włączeniu wiadomości „usunięte dla wszystkich” przez kogoś innego pozostawiają znacznik w rozmowie.</string>
 	<string name="dialog_title_delete_remote_deleted_messages" state="needs_review" hash="1587856321">Czy usunąć wszystkie znaczniki usuniętych zdalnie wiadomości?</string>
 	<string name="button_label_do_nothing" state="needs_review" hash="112132690">Nic nie rób</string>
 	<string name="menu_action_go_to_message" state="needs_review" hash="215195399">Przejdź do wiadomości</string>
@@ -1813,7 +1885,7 @@
 	<string name="preset_ephemeral_read_once" state="needs_review" hash="-2058606108">Otwórz raz</string>
 	<string name="preset_ephemeral_visibility_duration" state="needs_review" hash="670535132">Czas widoczności</string>
 	<string name="preset_ephemeral_existence_duration" state="needs_review" hash="-1767785784">Czas trwania</string>
-	<string name="preset_ephemeral_read_once_explanation" state="needs_review" hash="-1210246751">Wiadomości i załączniki do jednorazowego przeczytania są wyświetlane tylko raz i są usuwane po zamknięciu konwersacji.</string>
+	<string name="preset_ephemeral_read_once_explanation" state="needs_review" hash="-1210246751">Wiadomości i załączniki do jednorazowego przeczytania są wyświetlane tylko raz i są usuwane po zamknięciu rozmowy.</string>
 	<string name="preset_ephemeral_visibility_duration_explanation" state="needs_review" hash="-788761972">Określa, jak długo wiadomość będzie wyświetlana, gdy użytkownik ją przeczyta.</string>
 	<string name="preset_ephemeral_existence_duration_explanation" state="needs_review" hash="310879510">Czas po którym wiadomość zostanie usunięta, niezależnie od tego, czy została przeczytana, czy nie.</string>
 	<string name="ephemeral_settings_invalid" state="needs_review" hash="-215763241">Możesz używać tylko ustawień bardziej restrykcyjnych niż domyślne ustawienia rozmowy.</string>
@@ -1874,7 +1946,7 @@
 	<string name="pref_app_icon_fragment_title" state="needs_review" hash="-639159435">Zmień ikonę aplikacji</string>
 	<string name="pref_app_icon_fragment_summary" state="needs_review" hash="655175894">Nazwa i ikona aplikacji zostaną zmienione na ekranie głównym. Nie dotyczy to ikony powiadomień.</string>
 	<string name="pref_app_icon_apply" state="needs_review" hash="509380077">Zastosuj (może zamknąć aplikację)</string>
-	<string name="pref_app_icon_shortcut_warning_title" state="needs_review" hash="472834764">Skróty do czatu</string>
+	<string name="pref_app_icon_shortcut_warning_title" state="needs_review" hash="472834764">Skróty do rozmowy</string>
 	<string name="pref_app_icon_shortcut_warning_text" state="needs_review" hash="648578102">Zwróć uwagę, że zmiana ikony aplikacji usunie utworzone przez Ciebie skróty do rozmów. Będziesz musiał je ponownie utworzyć.</string>
 	<string name="app_name_weather" state="needs_review" hash="-202325750">Pogoda</string>
 	<string name="app_name_bricks" state="needs_review" hash="-2084998503">Klocki</string>
@@ -1989,7 +2061,7 @@ Jeśli Twój profil nie jest aktywny na innym urządzeniu, nie będziesz mógł 
 	<string name="dialog_unarchive_setting_button_notified" state="needs_review" hash="1859399328">Przy następnej powiadomieniu</string>
 	<string name="dialog_unarchive_setting_button_never" state="needs_review" hash="610329857">Nigdy</string>
 	<string name="dialog_unarchive_setting_explain" state="needs_review" hash="1798267293">Możesz modyfikować zachowanie powiadomień w ustawieniach każdej rozmowy</string>
-	<string name="pref_archived_attachments_title" state="needs_review" hash="-159125479">Automatycznie pobieraj załączniki zarchiwizowanych dyskusji</string>
+	<string name="pref_archived_attachments_title" state="needs_review" hash="-159125479">Automatycznie pobieraj załączniki zarchiwizowanych rozmów</string>
 	<string name="pref_archived_attachments_summary" state="needs_review" hash="1596754073">Gdy ta opcja jest włączona, załączniki zarchiwizowanych rozmów będą automatycznie pobierane zgodnie z powyższym ustawieniem.</string>
 	<string name="pref_unarchive_on_notification_title" state="needs_review" hash="-1146947153">Odszyfruj rozmowy w powiadomieniu</string>
 	<string name="pref_unarchive_on_notification_summary" state="needs_review" hash="778062251">Gdy ta opcja jest włączona, zarchiwizowane rozmowy zostaną automatycznie odarchiwizowane po otrzymaniu powiadomienia o nowej wiadomości.</string>
@@ -2109,6 +2181,8 @@ Jeśli jest to klucz kopii zapasowej starszej generacji, możesz spróbować prz
 	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">Do otwarcia tego pliku PDF wymagane jest hasło.</string>
 	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">Hasło</string>
 	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">Nieprawidłowe hasło</string>
+	<string name="content_description_previous_match" state="needs_review" hash="-124264476">Poprzedni wynik</string>
+	<string name="content_description_next_match" state="needs_review" hash="-405381756">Następny wynik</string>
 	<string name="label_poll_create" state="needs_review" hash="-1677246175">Utwórz ankietę</string>
 	<string name="label_poll_question" state="needs_review" hash="-1615603188">Pytanie</string>
 	<string name="hint_poll_question" state="needs_review" hash="1961289317">Zadaj pytanie</string>
@@ -2139,6 +2213,7 @@ Jeśli jest to klucz kopii zapasowej starszej generacji, możesz spróbować prz
 	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">Brak odpowiedzi na razie</string>
 	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">Nadchodząca dezaktywacja urządzenia</string>
 	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">Zarządzaj moimi urządzeniami</string>
+	<string name="tip_expiring_current_device_title" state="needs_review" hash="-2044212270">To urządzenie wkrótce zostanie dezaktywowane</string>
 	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">Urządzenie offline</string>
 	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">Jedno z Twoich urządzeń jest offline od **ponad 30 dni**.\nJeśli nie używasz go już, zalecamy **usunięcie go**, aby uniknąć problemów z synchronizacją.</string>
 	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">Zarządzaj moimi urządzeniami</string>
@@ -2214,8 +2289,15 @@ Jeśli jest to klucz kopii zapasowej starszej generacji, możesz spróbować prz
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Użyj \"magicznego linku\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Nieprawidłowy link magiczny.</string>
 	<string name="label_hanged_up" state="needs_review" hash="-1516413384">Połączenie zostało zakończone.</string>
-	<string name="store_link_need_licenses" state="needs_review" hash="-1212508527">Czy Twój zespół potrzebuje subskrypcji?</string>
 	<string name="store_link_olvid_store" state="needs_review" hash="-1825630369">Odwiedź sklep Olvid</string>
+	<string name="store_link_need_more_options" state="needs_review" hash="-839181230">Potrzebujesz więcej opcji?</string>
+	<string name="button_label_check_all_offers_olvid_store" state="needs_review" hash="361882901">Sprawdź wszystkie nasze oferty w sklepie Olvid</string>
+	<string name="label_store_offer_individual" state="needs_review" hash="-1969313106">Osobisty</string>
+	<string name="label_store_offer_individual_description" state="needs_review" hash="368977236">Pojedyncza licencja osobista, przeznaczona tylko dla Ciebie.</string>
+	<string name="label_store_offer_family" state="needs_review" hash="-2103729206">Rodzina</string>
+	<string name="label_store_offer_family_description" state="needs_review" hash="-1487232440">Pakiet 6 licencji dla Ciebie i Twojej rodziny.</string>
+	<string name="label_store_offer_team" state="needs_review" hash="-421568242">Zespół</string>
+	<string name="label_store_offer_team_description" state="needs_review" hash="687093077">Wiele licencji do dystrybucji wśród członków zespołu.</string>
 	<string name="toast_message_reminder_set" state="needs_review" hash="-961055414">Ustawiono przypomnienie</string>
 	<string name="dialog_title_keycloak_authentication_impossible" state="needs_review" hash="325273853">Uwierzytelnianie nie powiodło się</string>
 	<string name="dialog_message_keycloak_authentication_impossible" state="needs_review" hash="-2031322232">Obecnie Twoje konto jest zarządzane przez organizację i wymagana jest ponowna autoryzacja. Niestety, nie znaleziono żadnej obsługiwanej metody uwierzytelniania.\n\nW celu uzyskania dalszych informacji prosimy o kontakt z administratorem.</string>
@@ -2225,7 +2307,7 @@ Jeśli jest to klucz kopii zapasowej starszej generacji, możesz spróbować prz
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Przerwać aktualne przesyłanie?</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Aktualnie trwa przesyłanie historii wiadomości. Czy chcesz to przerwać?</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Anuluj transfer</string>
-	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Oczekiwanie na dołączenie do tej dyskusji.</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Oczekiwanie na dołączenie do tej rozmowy.</string>
 	<string name="label_your_other_device" state="needs_review" hash="-339632056">Twoje inne urządzenie</string>
 	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">chce przenieść historię czatu na to urządzenie.</string>
 	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">\"%1$s\" chce przenieść historię Twoich rozmów na to urządzenie.</string>
@@ -2271,7 +2353,7 @@ Jeśli jest to klucz kopii zapasowej starszej generacji, możesz spróbować prz
 	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Transfer zakończony. Zawiera wszystkie wiadomości i załączniki.</string>
 	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">Wyeksportuj historię czatu do pliku .zip. Możesz później zaimportować go na inne urządzenie w swoim profilu **%1$s**.\n\nMożesz również rozpakować ten plik, aby **wyświetlić historię czatu na stronie internetowej**.</string>
 	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Utwórz plik .zip</string>
-	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d dyskusje i %2$d wiadomości</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d rozmowy i %2$d wiadomości</string>
 	<string name="label_computing" state="needs_review" hash="1393495921">Obliczam…</string>
 	<string name="label_total_size" state="needs_review" hash="-788411929">Całkowity rozmiar: %1$s</string>
 	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Chroń swoje dane.</string>
@@ -2325,10 +2407,8 @@ Jeśli jest to klucz kopii zapasowej starszej generacji, możesz spróbować prz
 	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">Eksportowanie</string>
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Importowanie</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analiza treści</string>
-	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Analiza eksportowanych konwersacji</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Analiza eksportowanych rozmów</string>
 	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">Wystąpił błąd podczas ładowania pliku stylów OpenStreetMap.</string>
-	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Subskrypcje w aplikacji są niedostępne.</string>
-	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Zainstalowana wersja Olvid nie zawiera biblioteki Google Billing i nie obsługuje zakupów w aplikacji.\n\nWięcej informacji można uzyskać, kontaktując się z nami pod adresem **feedback@olvid.io**.</string>
 	<string name="ftux_next" state="needs_review" hash="1158639077">Następny</string>
 	<string name="ftux_start" state="needs_review" hash="646298532">Zacznij</string>
 	<string name="ftux_page_indicator" state="needs_review" hash="1987610035">Strona %1$d z %2$d</string>

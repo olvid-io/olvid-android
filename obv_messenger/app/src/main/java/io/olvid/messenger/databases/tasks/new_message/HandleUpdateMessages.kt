@@ -80,6 +80,10 @@ fun handleUpdateMessage(
 
                         // normal updateMessage message
                         if (jsonUpdateMessage.jsonLocation == null) {
+                            if (message.isPollMessage) {
+                                Logger.w("HandleNewMessageTask: trying to edit a poll message")
+                                return HandleMessageOutput.DELETE_MESSAGE_AND_ATTACHMENTS
+                            }
                             val mentions: MutableList<JsonUserMention?>? = message.mentions
                             val mentionSet = mentions?.toHashSet()
                             val newMentionSet: HashSet<JsonUserMention>? = jsonUpdateMessage.jsonUserMentions?.toHashSet()

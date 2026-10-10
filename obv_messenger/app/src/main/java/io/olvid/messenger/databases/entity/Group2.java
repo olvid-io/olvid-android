@@ -33,6 +33,7 @@ import java.util.Objects;
 
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.messenger.App;
+import io.olvid.messenger.designsystem.avatar.AvatarTarget;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.StringUtils;
 
@@ -48,7 +49,7 @@ import io.olvid.messenger.customClasses.StringUtils;
                 @Index(Group2.BYTES_OWNED_IDENTITY),
         }
 )
-public class Group2 {
+public class Group2 implements AvatarTarget {
     public static final String TABLE_NAME = "group2_table";
 
     public static final String BYTES_OWNED_IDENTITY = "bytes_owned_identity";

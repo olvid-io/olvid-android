@@ -96,7 +96,8 @@ import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.gallery.FyleListItem
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.message.OutboundMessageStatus
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.contacts.CustomTab
 import io.olvid.messenger.main.discussions.getAnnotatedBody
@@ -338,13 +339,11 @@ fun GlobalSearchScreen(
                                                 modifier = Modifier.padding(horizontal = 12.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                InitialView(
+                                                Avatar(
                                                     modifier = Modifier
                                                         .padding(end = 8.dp)
                                                         .requiredSize(20.dp),
-                                                    initialViewSetup = { view ->
-                                                        view.setFromCache(fyle.message.senderIdentifier)
-                                                    },
+                                                    target = AvatarSource.fromCache(fyle.message.senderIdentifier),
                                                 )
                                                 Text(
                                                     modifier = Modifier.weight(1f),
@@ -436,13 +435,11 @@ fun GlobalSearchScreen(
                                                 modifier = Modifier.padding(horizontal = 12.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                InitialView(
+                                                Avatar(
                                                     modifier = Modifier
                                                         .padding(end = 8.dp)
                                                         .requiredSize(20.dp),
-                                                    initialViewSetup = { view ->
-                                                        view.setFromCache(fyle.message.senderIdentifier)
-                                                    },
+                                                    target = AvatarSource.fromCache(fyle.message.senderIdentifier),
                                                 )
                                                 Text(
                                                     modifier = Modifier.weight(1f),
@@ -616,7 +613,7 @@ fun SearchResult(
         }
 
         // InitialView
-        InitialView(
+        Avatar(
             modifier = Modifier
                 .padding(
                     top = 8.dp,
@@ -625,21 +622,10 @@ fun SearchResult(
                 )
                 .requiredSize(48.dp),
             selected = selected,
-            initialViewSetup = { view ->
-                searchableDiscussion?.let {
-                    view.setDiscussion(searchableDiscussion)
-                }
-                contact?.let {
-                    view.setContact(contact)
-                }
-                discussionAndMessage?.discussion?.let {
-                    view.setDiscussion(it)
-                } ifNull {
-                    discussionAndMessage?.message?.senderIdentifier?.let {
-                        view.setFromCache(it)
-                    }
-                }
-            },
+            target = discussionAndMessage?.discussion
+                ?: discussionAndMessage?.message?.senderIdentifier?.let { AvatarSource.fromCache(it) }
+                ?: contact
+                ?: searchableDiscussion,
         )
 
         // content

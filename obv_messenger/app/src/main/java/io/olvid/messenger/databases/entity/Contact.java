@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.olvid.engine.Logger;
+import io.olvid.messenger.designsystem.avatar.AvatarTarget;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.customClasses.StringUtils;
@@ -56,7 +57,7 @@ import io.olvid.messenger.settings.SettingsActivity;
                 @Index(value = {Contact.SORT_DISPLAY_NAME}),
         }
 )
-public class Contact {
+public class Contact implements AvatarTarget {
     public static final String TABLE_NAME = "contact_table";
 
     public static final String BYTES_OWNED_IDENTITY = "bytes_owned_identity";

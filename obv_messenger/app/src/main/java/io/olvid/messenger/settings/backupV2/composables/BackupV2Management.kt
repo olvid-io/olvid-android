@@ -101,7 +101,8 @@ import io.olvid.engine.engine.types.sync.ObvSyncSnapshot
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.DeviceBackupProfile
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.avatarDarkColorArgb
+import io.olvid.messenger.designsystem.avatar.avatarLightColorArgb
 import io.olvid.messenger.customClasses.ProfileBackupSnapshot
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.designsystem.components.CustomDialogContent
@@ -410,7 +411,7 @@ fun NavGraphBuilder.deviceProfiles(
                                         .clip(RoundedCornerShape(12.dp))
                                         .background(
                                             Color(
-                                                InitialView.getLightColor(
+                                                avatarLightColorArgb(
                                                     context = context,
                                                     bytes = deviceBackupProfile.bytesProfileIdentity
                                                 )
@@ -424,7 +425,7 @@ fun NavGraphBuilder.deviceProfiles(
                                             )
                                     ),
                                     color = Color(
-                                        InitialView.getDarkColor(
+                                        avatarDarkColorArgb(
                                             context = context,
                                             bytes = deviceBackupProfile.bytesProfileIdentity
                                         )

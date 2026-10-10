@@ -72,14 +72,14 @@ import java.util.UUID
  * [EditOwnedIdentityDetailsScreen] on the shared [OwnedIdentityDetailsViewModel]. Handles keycloak-locked
  * details (prefilled + non-editable), and the actual identity generation including keycloak upload.
  */
-fun NavGraphBuilder.managedIdentityCreation(
+fun NavGraphBuilder.additionalIdentityCreation(
     onboardingViewModel: OnboardingViewModel,
     detailsViewModel: OwnedIdentityDetailsViewModel,
     onBack: () -> Unit,
     onClose: () -> Unit,
 ) {
     composable(
-        OnboardingRoutes.MANAGED_IDENTITY_CREATION,
+        OnboardingRoutes.ADDITIONAL_IDENTITY_CREATION,
         enterTransition = { slideIntoContainer(SlideDirection.Start) },
         exitTransition = { slideOutOfContainer(SlideDirection.Start) },
         popEnterTransition = { slideIntoContainer(SlideDirection.End) },
@@ -303,6 +303,7 @@ fun NavGraphBuilder.managedIdentityCreation(
                         showPasswordCreation = true
                     }
                 },
+                focusFirstName = !keycloakManaged,
             )
 
             if (keycloakManaged && onboardingViewModel.keycloakUserDetails?.identity != null) {

@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Eén van uw apparaten verloopt en wordt binnen **minder dan %1$d dag** gedeactiveerd.\nU kunt een **Olvid+** abonnement aanschaffen om het actief te houden.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Eén van uw apparaten verloopt en wordt over **minder dan %1$d dagen** gedeactiveerd.\nU kunt een **Olvid+** abonnement aanschaffen om het actief te houden.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Dit apparaat verloopt en wordt over **minder dan %1$d dag** uitgeschakeld.\nU kunt een **Olvid+** abonnement aanschaffen om het actief te houden.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Dit apparaat verloopt en wordt over **minder dan %1$d dagen** uitgeschakeld.\nU kunt een **Olvid+** abonnement aanschaffen om het actief te houden.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s is toegevoegd aan de groep.</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s is toegevoegd aan de groep.</item>
@@ -99,7 +103,7 @@
 		<item quantity="other" state="needs_review" hash="-2020248805">Geselecteerde berichten verwijderen?</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-931157230">Wilt u de geselecteerde chat en alle berichten daarin echt verwijderen?\nDeze actie kan niet ongedaan worden gemaakt.</item>
+		<item quantity="one" state="needs_review" hash="-931157230">Wilt u de geselecteerde gespreken en alle berichten daarin echt verwijderen?\nDeze actie kan niet ongedaan worden gemaakt.</item>
 		<item quantity="other" state="needs_review" hash="-1815739098">Wil je echt de %1$d geselecteerde gesprekken en alle berichten die ze bevatten verwijderen?\nDeze actie kan niet ongedaan worden gemaakt.</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -116,7 +120,7 @@
 	</plurals>
 	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-606769319">Je staat op het punt een bericht **permanent** voor **iedereen** in dit gesprek te verwijderen. Zorg ervoor dat dit is wat je wilt doen.</item>
-		<item quantity="other" state="needs_review" hash="-1284393519">Je staat op het punt om %1$d berichten **permanent** te verwijderen voor **iedereen** in deze chat. Zorg ervoor dat dit is wat je wilt doen.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">Je staat op het punt om %1$d berichten **permanent** te verwijderen voor **iedereen** in dit gesprek. Zorg ervoor dat dit is wat je wilt doen.</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="2118446236">Je staat op het punt om een gesprek en de bijbehorende berichten **permanent** voor **iedereen** in dit gesprek te verwijderen. Zorg ervoor dat dit is wat je wilt doen.</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Toevoegen aan de %1$d-groep</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Toevoegen aan %1$d groepen</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Je hebt al een gesprek met deze deelnemers.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Je hebt al %1$d gesprekken met deze deelnemers.</item>
 	</plurals>
 </resources>

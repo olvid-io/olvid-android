@@ -61,6 +61,7 @@ import androidx.preference.PreferenceManager;
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -212,14 +213,20 @@ public class App extends Application implements DefaultLifecycleObserver {
 
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
 
+        // Prefer startService(): it has no startForeground() deadline, which a slow cold start (main
+        // thread busy with activity and engine init) can miss. The service promotes itself in onCreate.
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && UnifiedForegroundService.willUnifiedForegroundServiceStartForeground()) {
-                startForegroundService(new Intent(this, UnifiedForegroundService.class));
-            } else {
-                startService(new Intent(this, UnifiedForegroundService.class));
-            }
+            startService(new Intent(this, UnifiedForegroundService.class));
         } catch (IllegalStateException e) {
-            Logger.i("App was started in the background, unable to start UnifiedForegroundService.");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && UnifiedForegroundService.willUnifiedForegroundServiceStartForeground()) {
+                try {
+                    startForegroundService(new Intent(this, UnifiedForegroundService.class).putExtra(UnifiedForegroundService.STARTED_AS_FOREGROUND_SERVICE_INTENT_EXTRA, true));
+                } catch (IllegalStateException ex) {
+                    Logger.i("App was started in the background, unable to start UnifiedForegroundService.");
+                }
+            } else {
+                Logger.i("App was started in the background, unable to start UnifiedForegroundService.");
+            }
         }
 
         runThread(new AppStartupTasks());
@@ -348,17 +355,8 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openDraftGalleryActivity(Context activityContext, long draftMessageId, long fyleId) {
-        Intent intent = new Intent(getContext(), GalleryActivity.class);
-        intent.putExtra(GalleryActivity.DRAFT_INTENT_EXTRA, true);
-        intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, draftMessageId);
-        intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
-        activityContext.startActivity(intent);
-    }
-
     public static void openMessageGalleryActivity(Context activityContext, long messageId, long fyleId, boolean showTextBlocks) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
-        intent.putExtra(GalleryActivity.DRAFT_INTENT_EXTRA, false);
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
         intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
         intent.putExtra(GalleryActivity.SHOW_TEXT_BLOCKS_INTENT_EXTRA, showTextBlocks);
@@ -463,6 +461,20 @@ public class App extends Application implements DefaultLifecycleObserver {
         intent.putExtra(ContactDetailsActivity.CONTACT_BYTES_CONTACT_IDENTITY_INTENT_EXTRA, bytesContactIdentity);
         intent.putExtra(ContactDetailsActivity.CONTACT_BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
         activityContext.startActivity(intent);
+    }
+
+    // opens the owned identity details if userIdentifier is the current identity, or the contact details if it is a contact
+    public static void openProfileActivity(@NonNull Context activityContext, @NonNull byte[] userIdentifier) {
+        if (Arrays.equals(AppSingleton.getBytesCurrentIdentity(), userIdentifier)) {
+            activityContext.startActivity(new Intent(getContext(), OwnedIdentityDetailsActivity.class));
+        } else {
+            runThread(() -> {
+                byte[] bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity();
+                if (bytesOwnedIdentity != null && AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, userIdentifier) != null) {
+                    openContactDetailsActivity(activityContext, bytesOwnedIdentity, userIdentifier);
+                }
+            });
+        }
     }
 
     public static void startWebrtcCall(@NonNull Context context, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity) {
@@ -657,7 +669,7 @@ public class App extends Application implements DefaultLifecycleObserver {
             if (onOpenCallback != null) {
                 onOpenCallback.run();
             }
-            new PdfViewerDialog(fyleAndStatus).show(((AppCompatActivity) context).getSupportFragmentManager(), null);
+            PdfViewerDialog.newInstance(fyleAndStatus).show(((AppCompatActivity) context).getSupportFragmentManager(), null);
         } else {
             openFyleInExternalViewer(context, fyleAndStatus, () -> {
                 if (onOpenCallback != null) {

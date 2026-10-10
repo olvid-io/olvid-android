@@ -21,7 +21,6 @@ package io.olvid.messenger.main.archived
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,9 +40,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
-import io.olvid.messenger.designsystem.components.BaseDialogContent
 import io.olvid.messenger.designsystem.components.CustomDialogContent
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography

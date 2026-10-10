@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Un dels teus dispositius caducarà i es desactivarà en **menys de %1$d dia**.\nPots adquirir una subscripció **Olvid+** per mantenir-lo actiu.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Un dels teus dispositius caducarà i es desactivarà en **menys de %1$d dies**.\nPots adquirir una subscripció **Olvid+** per mantenir-lo actiu.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Aquest dispositiu caducarà i es desactivarà en **menys de %1$d dia**.\nPodeu adquirir una subscripció **Olvid+** per mantenir-lo actiu.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Aquest dispositiu caducarà i es desactivarà en **menys de %1$d dies**.\nPodeu adquirir una subscripció **Olvid+** per mantenir-lo actiu.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s s\'ha unit al grup</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s s\'ha unit al grup</item>
@@ -123,8 +127,8 @@
 		<item quantity="other" state="needs_review" hash="-1558931055">Estàs a punt de suprimir **permanentment** %1$d converses i els missatges que contenen per a **tothom** en aquestes converses. Assegura\'t que això és exactament el que vols fer.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">Estàs a punt d\'invitar cada membre del grup amb qui tens un canal (actualment 1 membre) a una discussió privada.\nVols continuar?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">Estàs a punt d\'invitar cada membre del grup amb qui tens un canal (actualment %1$d membres) a una discussió privada.\nVols continuar?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">Estàs a punt d\'invitar cada membre del grup amb qui tens un canal (actualment 1 membre) a una conversa privada.\nVols continuar?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Estàs a punt d\'invitar cada membre del grup amb qui tens un canal (actualment %1$d membres) a una conversa privada.\nVols continuar?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-127723614">Es pot convidar 1 membre del grup a una conversa privada</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Afegeix al grup %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Afegeix a %1$d grups</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Ja teniu una conversa amb aquests participants.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Ja teniu %1$d converses amb aquests participants.</item>
 	</plurals>
 </resources>

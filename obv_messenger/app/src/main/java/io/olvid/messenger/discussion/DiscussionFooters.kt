@@ -27,10 +27,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -47,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.components.DotAnimation
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.stableSystemBars
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 
@@ -82,7 +85,7 @@ fun DiscussionLocked(modifier: Modifier = Modifier, state: DiscussionActivity.Lo
             .fillMaxWidth()
             .cutoutHorizontalPadding()
             .systemBarsHorizontalPadding()
-            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)),
+            .windowInsetsPadding(WindowInsets.stableSystemBars.union(WindowInsets.ime).only(WindowInsetsSides.Bottom)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {

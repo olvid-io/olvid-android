@@ -48,6 +48,7 @@ import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.ContactCacheSingleton;
+import io.olvid.messenger.databases.GroupAvatarCacheSingleton;
 import io.olvid.messenger.databases.dao.Group2MemberDao;
 import io.olvid.messenger.databases.dao.MessageRecipientInfoDao;
 import io.olvid.messenger.databases.entity.Contact;
@@ -136,8 +137,12 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                 boolean insertDetailsUpdatedMessage = false;
                 boolean insertGainedAdminMessage = false;
                 boolean insertLostAdminMessage = false;
+                // send message = no in read only mode in the group
                 boolean insertGainedSendMessage = false;
                 boolean insertLostSendMessage = false;
+                // moderator = remote delete anything, only surfaced for keycloak groups
+                boolean insertGainedModeratorMessage = false;
+                boolean insertLostModeratorMessage = false;
                 Group2 group = db.group2Dao().get(groupV2.bytesOwnedIdentity, bytesGroupIdentifier);
                 if (group == null) {
                     // if the group does not exist yet, create it
@@ -155,6 +160,9 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     }
                     if (!groupWasJustCreatedByMe && !groupV2.ownPermissions.contains(GroupV2.Permission.SEND_MESSAGE)) {
                         insertLostSendMessage = true;
+                    }
+                    if (group.keycloakManaged && groupV2.ownPermissions.contains(GroupV2.Permission.REMOTE_DELETE_ANYTHING)) {
+                        insertGainedModeratorMessage = true;
                     }
                     if (groupV2.ownPermissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
                         bytesIdentitiesOfNewMembersWithChangeSettingsPermission.add(groupV2.bytesOwnedIdentity);
@@ -175,6 +183,13 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         }
                     }
                     group.ownPermissionAdmin = groupV2.ownPermissions.contains(GroupV2.Permission.GROUP_ADMIN);
+                    if (group.keycloakManaged && group.ownPermissionRemoteDeleteAnything != groupV2.ownPermissions.contains(GroupV2.Permission.REMOTE_DELETE_ANYTHING)) {
+                        if (groupV2.ownPermissions.contains(GroupV2.Permission.REMOTE_DELETE_ANYTHING)) {
+                            insertGainedModeratorMessage = true;
+                        } else {
+                            insertLostModeratorMessage = true;
+                        }
+                    }
                     group.ownPermissionRemoteDeleteAnything = groupV2.ownPermissions.contains(GroupV2.Permission.REMOTE_DELETE_ANYTHING);
                     group.ownPermissionEditOrRemoteDeleteOwnMessages = groupV2.ownPermissions.contains(GroupV2.Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES);
                     if (!group.ownPermissionChangeSettings && groupV2.ownPermissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
@@ -209,6 +224,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     if (db.messageDao().countMessagesInDiscussion(discussion.id) == 0) {
                         // never insert a "lost write" message in an empty discussion
                         insertLostSendMessage = false;
+                        insertLostModeratorMessage = false;
                     }
                 } else {
                     // update the corresponding group discussion
@@ -267,6 +283,17 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     db.messageDao().insert(lostSendMessage);
                     Long timestamp = db.discussionDao().getMaxLastMessageTimestamp(discussion.bytesOwnedIdentity);
                     if (discussion.updateLastMessageTimestamp((timestamp!= null && timestamp < lostSendMessage.timestamp) ? timestamp + 10 : lostSendMessage.timestamp)) {
+                        db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                    }
+                }
+
+                if (!insertGainedAdminMessage && !insertLostAdminMessage && (insertGainedModeratorMessage || insertLostModeratorMessage)) {
+                    Message moderatorMessage = insertGainedModeratorMessage ?
+                            Message.createGainedGroupModeratorMessage(db, discussion.id, discussion.bytesOwnedIdentity, groupUpdateTimestamp + 2)
+                            : Message.createLostGroupModeratorMessage(db, discussion.id, discussion.bytesOwnedIdentity, groupUpdateTimestamp + 2);
+                    db.messageDao().insert(moderatorMessage);
+                    Long timestamp = db.discussionDao().getMaxLastMessageTimestamp(discussion.bytesOwnedIdentity);
+                    if (discussion.updateLastMessageTimestamp((timestamp!= null && timestamp < moderatorMessage.timestamp) ? timestamp + 10 : moderatorMessage.timestamp)) {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                     }
                 }
@@ -668,6 +695,8 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     App.runThread(runnable);
                 }
             }
+
+            GroupAvatarCacheSingleton.INSTANCE.updateGroup(groupV2.bytesOwnedIdentity, groupV2.groupIdentifier.getBytes());
         } catch (Exception e) {
             e.printStackTrace();
         }

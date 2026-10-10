@@ -1,0 +1,5 @@
+- Zobrazuje pouze prvních 4 obrázky zprávy a přidává zobrazení alba pro zobrazení všech.
+- Přidán skener dokumentů.
+- Dvojitým klepnutím na přijatou zprávu reagujete výchozí emotikonou.
+- Nové avatary pro kontakty a skupiny bez profilové fotky.
+- Přidáno tlačítko pro odeslání fotografie přímo z hlavní obrazovky.

@@ -51,7 +51,7 @@ import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
-import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.designsystem.avatar.AvatarColorsKt;
 import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils2Kt;
@@ -176,7 +176,7 @@ public class Utils {
                         // Unknown contact
                         result.setSpan(new MentionUrlSpan(mention.getUserIdentifier(), mention.getLength(), context.getResources().getColor(R.color.darkGrey), null), mention.getRangeStart(), mention.getRangeEnd(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     } else {
-                        int color = InitialView.getTextColor(context, mention.getUserIdentifier(), ContactCacheSingleton.INSTANCE.getContactCustomHue(mention.getUserIdentifier()));
+                        int color = AvatarColorsKt.avatarTextColorArgb(context, mention.getUserIdentifier(), ContactCacheSingleton.INSTANCE.getContactCustomHue(mention.getUserIdentifier()));
                          result.setSpan(new MentionUrlSpan(mention.getUserIdentifier(), mention.getLength(), color, () -> {
                             if (Arrays.equals(bytesOwnedIdentity, mention.getUserIdentifier())) {
                                 context.startActivity(new Intent(context, OwnedIdentityDetailsActivity.class));

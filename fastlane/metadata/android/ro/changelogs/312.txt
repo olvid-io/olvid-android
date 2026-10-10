@@ -1,0 +1,5 @@
+- Afișează doar primele 4 imagini dintr-un mesaj și adaugă o vizualizare de album pentru a le vedea pe toate.
+- Adăugat un scaner de documente.
+- Atinge de două ori un mesaj primit pentru a reacționa cu un emoji implicit.
+- Avatare noi pentru contacte și grupuri fără poză de profil.
+- Adăugat un buton pentru a trimite o fotografie direct de pe ecranul principal.

@@ -66,12 +66,16 @@ import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.theme.olvidDefaultTextFieldColors
 import io.olvid.messenger.group.GroupV2DetailsActivity
 import io.olvid.messenger.group.OwnedGroupDetailsViewModel
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
+import io.olvid.messenger.group.GroupCreationViewModel
+import io.olvid.messenger.group.GroupV2DetailsViewModel
 import io.olvid.messenger.owneddetails.ImagePickerActivity
 
 @Composable
 fun EditGroupDetailsScreen(
     editGroupDetailsViewModel: OwnedGroupDetailsViewModel,
+    groupCreationViewModel: GroupCreationViewModel?,
     isGroupCreation: Boolean = false,
     content: (@Composable () -> Unit)? = null,
     onTakePicture: () -> Unit,
@@ -95,7 +99,7 @@ fun EditGroupDetailsScreen(
             Spacer(modifier = Modifier.height(24.dp))
             var photoMenuExpanded by remember { mutableStateOf(false) }
             Column {
-                InitialView(
+                Avatar(
                     modifier = Modifier
                         .size(112.dp)
                         .clickable(
@@ -106,16 +110,12 @@ fun EditGroupDetailsScreen(
                             ),
                         ) { photoMenuExpanded = true },
                     editable = true,
-                    initialViewSetup = { initialView ->
-                        initialViewContent?.absolutePhotoUrl?.let {
-                            initialView.setAbsolutePhotoUrl(
-                                initialViewContent?.bytesGroupOwnerAndUid,
-                                it
-                            )
-                        } ?: run {
-                            initialView.setGroup(initialViewContent?.bytesGroupOwnerAndUid)
-                        }
-                    })
+                    showMemberCount = true,
+                    target = initialViewContent?.absolutePhotoUrl?.let {
+                        AvatarSource.absolutePhoto(initialViewContent?.bytesGroupOwnerAndUid, it)
+                    } ?: groupCreationViewModel?.selectedContacts?.value?.takeIf { it.isNotEmpty() }?.let {
+                        AvatarSource.of(it)
+                    }  ?: AvatarSource.group(initialViewContent?.bytesGroupOwnerAndUid))
                 OlvidDropdownMenu(
                     expanded = photoMenuExpanded,
                     onDismissRequest = { photoMenuExpanded = false }

@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">آپ کے آلات میں سے ایک **%1$d دن** سے کم عرصے میں ایکسپائر ہو جائے گا اور اسے غیر فعال کر دیا جائے گا۔\nآپ اسے فعال رکھنے کے لیے **Olvid+** سبسکرپشن خرید سکتے ہیں۔</item>
 		<item quantity="other" state="needs_review" hash="-574658149">آپ کے آلات میں سے ایک **%1$d دنوں** میں غیر فعال ہو جائے گا۔\nآپ اسے فعال رکھنے کے لیے **Olvid+** سبسکرپشن خرید سکتے ہیں۔</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">یہ ڈیوائس **%1$d دن** سے کم عرصے میں ایکسپائر ہو جائے گی اور اسے غیر فعال کر دیا جائے گا۔\nآپ اسے فعال رکھنے کے لیے **Olvid+** کی سبسکرپشن خرید سکتے ہیں۔</item>
+		<item quantity="other" state="needs_review" hash="993103846">یہ ڈیوائس **%1$d دنوں** سے کم عرصے میں ایکسپائر ہو جائے گی اور اسے غیر فعال کر دیا جائے گا۔\nآپ اسے فعال رکھنے کے لیے **Olvid+** کی سبسکرپشن خرید سکتے ہیں۔</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s نے گروپ میں شامل ہو گئے</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s گروپ میں شامل ہو گیا</item>
@@ -79,12 +83,12 @@
 		<item quantity="other" state="needs_review" hash="1022571360">%1$d رابط</item>
 	</plurals>
 	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="1772966333">بات چیت محفوظ کر دی گئی</item>
+		<item quantity="one" state="needs_review" hash="1772966333">گفتگو محفوظ کر دی گئی</item>
 		<item quantity="other" state="needs_review" hash="1402495414">%1$d کی گفتگو محفوظ کر دی گئی</item>
 	</plurals>
 	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1312483800">بات چیت بحال کر دی گئی</item>
-		<item quantity="other" state="needs_review" hash="-2093736213">%1$d مباحثات کو آرکائیو سے ہٹا دیا گیا</item>
+		<item quantity="one" state="needs_review" hash="-1312483800">گفتگو بحال کر دی گئی</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d گفتگوؤں کو آرکائیو سے ہٹا دیا گیا</item>
 	</plurals>
 	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-2045500103">پیغام کو بُک مارک سے ہٹا دیا گیا۔</item>
@@ -120,7 +124,7 @@
 	</plurals>
 	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="2118446236">آپ ایک گفتگو اور اس میں موجود پیغامات کو **ہمیشہ کے لیے** حذف کرنے والے ہیں۔ اس بات کو یقینی بنائیں کہ آپ واقعی یہ کرنا چاہتے ہیں۔</item>
-		<item quantity="other" state="needs_review" hash="-1558931055">آپ %1$d مباحثوں اور ان میں موجود پیغامات کو **ہمیشہ کے لیے** حذف کرنے والے ہیں۔ اس سے ان مباحثوں میں شامل **ہر شخص** کے لیے یہ مواد حذف ہو جائے گا۔ براہ کرم یقینی بنائیں کہ یہ وہی ہے جو آپ کرنا چاہتے ہیں۔</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">آپ %1$dگفتگوؤں اور ان میں موجود پیغامات کو **ہمیشہ کے لیے** حذف کرنے والے ہیں۔ اس سے ان گفتگوؤں میں شامل **ہر شخص** کے لیے یہ مواد حذف ہو جائے گا۔ براہ کرم یقینی بنائیں کہ یہ وہی ہے جو آپ کرنا چاہتے ہیں۔</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">آپ ہر گروپ کے رکن کو مدعو کرنے والے ہیں جس کے ساتھ آپ کا ایک چینل ہے (اس وقت 1 رکن) ایک نجی گفتگو میں۔\nکیا آپ آگے بڑھنا چاہتے ہیں؟</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">%1$d گروپ میں شامل کریں</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">%1$d گروپس میں شامل کریں</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">آپ پہلے ہی ان شرکاء کے ساتھ ایک گفتگو کر چکے ہیں۔</item>
+		<item quantity="other" state="needs_review" hash="809550612">آپ پہلے سے ہی ان شرکاء کے ساتھ %1$d گفتگو کر چکے ہیں۔</item>
 	</plurals>
 </resources>

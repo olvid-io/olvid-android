@@ -41,16 +41,19 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.StringUtils2
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.databases.ContactCacheSingleton
+import io.olvid.messenger.databases.dao.Group2Dao.GroupOrGroup2
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Invitation
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.avatar.AvatarSource
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDetails
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
+import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.GROUP
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_MORE_RESULTS
 import io.olvid.messenger.main.contacts.suggested.SuggestedContactItem
@@ -62,6 +65,7 @@ import java.util.regex.Pattern
 
 enum class ContactListPage(val labelResId: Int) {
     CONTACTS(R.string.contact_list_tab_contact),
+    GROUPS(R.string.tab_title_groups),
     OTHERS(R.string.contact_list_tab_others),
     DIRECTORY(R.string.contact_list_tab_directory)
 }
@@ -69,6 +73,7 @@ enum class ContactListPage(val labelResId: Int) {
 class ContactListViewModel : ViewModel() {
     private var unfilteredContacts: List<Contact> = emptyList()
     private var unfilteredNotOneToOneContacts: List<Contact> = emptyList()
+    private var unfilteredGroups: List<GroupOrGroup2> = emptyList()
     // received invitations (any category); the surfaced ones feed the suggested stack
     private var receivedInvitations: List<Invitation> = emptyList()
     internal val filteredContacts = MutableLiveData<List<ContactOrKeycloakDetails>>()
@@ -102,6 +107,11 @@ class ContactListViewModel : ViewModel() {
         setFilter(_filter)
     }
 
+    fun setUnfilteredGroups(unfilteredGroups: List<GroupOrGroup2>?) {
+        this.unfilteredGroups = unfilteredGroups.orEmpty()
+        setFilter(_filter)
+    }
+
     fun setReceivedInvitations(invitations: List<Invitation>?) {
         receivedInvitations = invitations.orEmpty()
         recomputeSuggestedContacts()
@@ -112,9 +122,9 @@ class ContactListViewModel : ViewModel() {
             it.categoryId == ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY && it.bytesContactIdentity != null
         }.associateBy { BytesKey(it.bytesContactIdentity!!) }
 
-        // existing group-only contacts: keep active ones, and always surface anyone who invited us
+        // existing group-only contacts: keep active ones, omit those not recently online, and always surface anyone who invited us
         val contactItems = unfilteredNotOneToOneContacts
-            .filter { it.active && it.hasChannelOrPreKey() }
+            .filter { it.active && it.hasChannelOrPreKey() && it.recentlyOnline }
             .map { SuggestedContactItem(it, receivedInvitations.contains(BytesKey(it.bytesContactIdentity))) }
             .filter { it.receivedOneToOneInvitation || !it.contact.stopSuggesting } // never suggest contacts that were already suggested, unless they invited us
 
@@ -213,6 +223,7 @@ class ContactListViewModel : ViewModel() {
                 val list: MutableList<ContactOrKeycloakDetails> = ArrayList()
                 list.addAll(unfilteredContacts.map { ContactOrKeycloakDetails(it) })
                 list.addAll(unfilteredNotOneToOneContacts.map { ContactOrKeycloakDetails(it) })
+                list.addAll(unfilteredGroups.map { ContactOrKeycloakDetails(it) })
                 filteredContacts.postValue(list)
             } else {
                 val list: MutableList<ContactOrKeycloakDetails> = ArrayList()
@@ -244,11 +255,26 @@ class ContactListViewModel : ViewModel() {
                         list.add(ContactOrKeycloakDetails(contact))
                     }
                 }
-                // rank contacts whose name words start with the filter first (each tab
+
+                for (group in unfilteredGroups) {
+                    var matches = true
+                    for (pattern in filterPatterns!!) {
+                        val matcher = pattern.matcher(group.fullSearchField())
+                        if (!matcher.find()) {
+                            matches = false
+                            break
+                        }
+                    }
+                    if (matches) {
+                        list.add(ContactOrKeycloakDetails(group))
+                    }
+                }
+                // rank contacts/groups whose name words start with the filter first (each tab
                 // displays its own subset of the list, so sorting them together is fine)
                 list.sortBy {
                     StringUtils2.searchMatchRank(
-                        it.contact?.fullSearchDisplayName.orEmpty(),
+                        it.contact?.fullSearchDisplayName
+                            ?: it.groupOrGroup2?.fullSearchField().orEmpty(),
                         filter
                     )
                 }
@@ -335,18 +361,28 @@ class ContactListViewModel : ViewModel() {
     }
 
     enum class ContactType {
-        CONTACT, KEYCLOAK, KEYCLOAK_MORE_RESULTS
+        CONTACT, GROUP, KEYCLOAK, KEYCLOAK_MORE_RESULTS
     }
 
     class ContactOrKeycloakDetails {
         val contactType: ContactType
         val contact: Contact?
+        val groupOrGroup2: GroupOrGroup2?
         val keycloakUserDetails: JsonKeycloakUserDetails?
         val additionalSearchResults: Int?
 
         constructor(contact: Contact) {
             contactType = CONTACT
             this.contact = contact
+            groupOrGroup2 = null
+            keycloakUserDetails = null
+            additionalSearchResults = null
+        }
+
+        constructor(groupOrGroup2: GroupOrGroup2) {
+            contactType = GROUP
+            contact = null
+            this.groupOrGroup2 = groupOrGroup2
             keycloakUserDetails = null
             additionalSearchResults = null
         }
@@ -354,6 +390,7 @@ class ContactListViewModel : ViewModel() {
         constructor(keycloakUserDetails: JsonKeycloakUserDetails) {
             contactType = KEYCLOAK
             contact = null
+            groupOrGroup2 = null
             this.keycloakUserDetails = keycloakUserDetails
             additionalSearchResults = null
         }
@@ -361,6 +398,7 @@ class ContactListViewModel : ViewModel() {
         constructor(additionalSearchResults: Int) {
             contactType = KEYCLOAK_MORE_RESULTS
             contact = null
+            groupOrGroup2 = null
             keycloakUserDetails = null
             this.additionalSearchResults = additionalSearchResults
         }
@@ -369,6 +407,10 @@ class ContactListViewModel : ViewModel() {
     companion object {
         const val KEYCLOAK_SEARCH_DELAY_MILLIS = 300L
     }
+}
+
+fun GroupOrGroup2.fullSearchField(): String {
+    return group?.fullSearchField ?: group2?.fullSearchField ?: ""
 }
 
 fun ContactOrKeycloakDetails.getAnnotatedName(): AnnotatedString {
@@ -391,6 +433,12 @@ fun ContactOrKeycloakDetails.getAnnotatedName(): AnnotatedString {
                 } else {
                     append(contact.getCustomDisplayName())
                 }
+            }
+
+            GROUP -> {
+                val groupOrGroup2 = groupOrGroup2 ?: return toAnnotatedString()
+                groupOrGroup2.group?.let { append(it.getCustomName()) }
+                groupOrGroup2.group2?.let { append(it.getCustomName()) }
             }
 
             KEYCLOAK -> {
@@ -431,6 +479,12 @@ fun ContactOrKeycloakDetails.getAnnotatedDescription(): AnnotatedString? {
                 }
             }
 
+            GROUP -> {
+                groupOrGroup2?.let {
+                    append(it.group?.groupMembersNames ?: it.group2?.groupMembersNames ?: "")
+                }
+            }
+
             KEYCLOAK -> {
                 keycloakUserDetails?.getIdentityDetails(null)
                     ?.formatPositionAndCompany(SettingsActivity.contactDisplayNameFormat)
@@ -444,38 +498,30 @@ fun ContactOrKeycloakDetails.getAnnotatedDescription(): AnnotatedString? {
     }.takeIf { it.isNotEmpty() }
 }
 
-fun ContactOrKeycloakDetails.getInitialViewSetup(): (InitialView) -> Unit =
-    { initialView ->
-        when (contactType) {
-            CONTACT -> contact?.let {
-                initialView.setContact(
-                    it
-                )
-            }
+/** Avatar derivation for the Avatar composable. */
+fun ContactOrKeycloakDetails.avatar(): AvatarTarget? = when (contactType) {
+    CONTACT -> contact
 
-            KEYCLOAK -> keycloakUserDetails?.let { keycloakUserDetails ->
-                val identityDetails =
-                    keycloakUserDetails.getIdentityDetails(
-                        null
-                    )
-                val name =
-                    identityDetails.formatFirstAndLastName(
-                        SettingsActivity.contactDisplayNameFormat,
-                        SettingsActivity.uppercaseLastName
-                    )
-                ContactCacheSingleton.getContactPhotoUrl(keycloakUserDetails.identity)?.let {
-                    initialView.setPhotoUrl(keycloakUserDetails.identity, it)
-                } ?: initialView.setInitial(
-                    keycloakUserDetails.identity,
-                    StringUtils.getInitial(
-                        name
-                    )
-                )
-                initialView.setKeycloakCertified(true)
-            }
-            else -> {}
-        }
+    GROUP -> groupOrGroup2?.let {
+        it.group ?: it.group2
     }
+
+    KEYCLOAK -> keycloakUserDetails?.let { keycloakUserDetails ->
+        val name = keycloakUserDetails.getIdentityDetails(null).formatFirstAndLastName(
+            SettingsActivity.contactDisplayNameFormat,
+            SettingsActivity.uppercaseLastName
+        )
+        ContactCacheSingleton.getContactPhotoUrl(keycloakUserDetails.identity)?.let {
+            AvatarSource.photo(keycloakUserDetails.identity, it, keycloakCertified = true)
+        } ?: AvatarSource.initial(
+            keycloakUserDetails.identity,
+            StringUtils.getInitial(name),
+            keycloakCertified = true,
+        )
+    }
+
+    else -> null
+}
 
 
 fun AnnotatedString.highlight(

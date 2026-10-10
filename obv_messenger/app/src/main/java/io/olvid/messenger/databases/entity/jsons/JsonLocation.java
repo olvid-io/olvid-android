@@ -243,7 +243,8 @@ public class JsonLocation {
 
     @JsonProperty("prec")
     public void setPrecision(Float accuracy) {
-        this.precision = accuracy;
+        // other clients may send a negative accuracy (e.g. -1 on iOS) to mean "unknown"
+        this.precision = (accuracy == null || !Float.isFinite(accuracy) || accuracy < 0) ? null : accuracy;
     }
 
     @JsonProperty("add")

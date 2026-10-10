@@ -58,10 +58,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.designsystem.components.DarkGradientBackground
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.settings.SettingsActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,13 +127,11 @@ fun ShareScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         // Profile Info
-                        InitialView(modifier = Modifier
+                        Avatar(modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f, false)
                             .height(160.dp),
-                            initialViewSetup = {
-                                ownedIdentity?.let { identity -> it.setOwnedIdentity(identity) }
-                            }
+                            target = ownedIdentity
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(

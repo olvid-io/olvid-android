@@ -79,11 +79,10 @@
 	<string name="dialog_title_rename_discussion" state="needs_review" hash="1413472286">Преименувайте разговора</string>
 	<string name="dialog_title_rename_group" state="needs_review" hash="1461324427">Преименувайте групата</string>
 	<string name="dialog_title_restart_channel_establishment" state="needs_review" hash="-645769680">Да се рестартира създаването на канал?</string>
-	<string name="dialog_title_share_with" state="needs_review" hash="854107768">Споделете с…</string>
-	<string name="dialog_title_share_recipients" state="needs_review" hash="1157053138">Изберете получатели</string>
+	<string name="dialog_title_share_recipients" state="needs_review" hash="463614560">Изберете разговорите</string>
 	<string name="share_label_from" state="needs_review" hash="2049052075">От:</string>
 	<string name="share_label_to" state="needs_review" hash="-1785690373">До:</string>
-	<string name="share_label_choose_recipients" state="needs_review" hash="1157053138">Изберете получатели</string>
+	<string name="share_label_choose_recipients" state="needs_review" hash="463614560">Изберете разговорите</string>
 	<string name="hint_share_message" state="needs_review" hash="-763169957">Добавете съобщение…</string>
 	<string name="content_description_delete_attachment" state="needs_review" hash="-220348329">Премахни прикачения файл</string>
 	<string name="dialog_title_shortcut_to" state="needs_review" hash="-1193591200">Създаване на пряк път към…</string>
@@ -111,7 +110,7 @@
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">Не са намерени прикачени файлове</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">Не е намерен линк</string>
 	<string name="hint_company" state="needs_review" hash="988571519">Компания</string>
-	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Напишете съобщение</string>
+	<string name="hint_compose_your_message" state="needs_review" hash="809999904">Съобщение</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Временно съобщение</string>
 	<string name="label_edit_your_message" state="needs_review" hash="1091877412">Редактирайте вашето съобщение</string>
 	<string name="label_reply_to_x" state="needs_review" hash="1941377665">Отговор на %s</string>
@@ -194,7 +193,7 @@
 	<string name="menu_action_create_shortcut" state="needs_review" hash="-1949455873">Създаване на пряк път</string>
 	<string name="menu_action_delete" state="needs_review" hash="-232100842">Изтриване</string>
 	<string name="menu_action_delete_discussion" state="needs_review" hash="2059656471">Изтриване на разговора</string>
-	<string name="menu_action_export_discussion" state="needs_review" hash="1736692296">Експортиране на дискусията</string>
+	<string name="menu_action_export_discussion" state="needs_review" hash="1736692296">Експортиране на разговора</string>
 	<string name="label_swipe_details" state="needs_review" hash="171468732">Подробности</string>
 	<string name="menu_action_disband_group" state="needs_review" hash="-1767089289">Разформироване на групата</string>
 	<string name="menu_action_edit_group_details" state="needs_review" hash="310205135">Редактиране на информацията за групата</string>
@@ -208,15 +207,25 @@
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">Преименувайте контакта</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">Запази</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">Настройки</string>
+	<string name="menu_action_send_photo" state="needs_review" hash="13932391">Изпратете снимка</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">Споделяне</string>
 	<string name="menu_action_bookmark" state="needs_review" hash="1146136289">Отметка</string>
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Премахни от отметките</string>
+	<string name="menu_action_view_message" state="needs_review" hash="-211312046">Прегледай съобщението</string>
+	<string name="label_see_more" state="needs_review" hash="-1206298538">Вижте повече</string>
+	<string name="label_formatted_text" state="needs_review" hash="664283030">Форматиран</string>
+	<string name="label_raw_text" state="needs_review" hash="-1645103337">Необработен</string>
+	<string name="pref_truncate_long_messages_title" state="needs_review" hash="576500375">Съкращаване на дългите съобщения</string>
+	<string name="pref_truncate_long_messages_full_screen" state="needs_review" hash="1513604976">Докоснете, за да отворите в пълен екран</string>
+	<string name="pref_truncate_long_messages_inline" state="needs_review" hash="1658956871">Кликнете, за да разгънете</string>
+	<string name="pref_truncate_long_messages_never" state="needs_review" hash="1348404810">Никога не съкращавай</string>
+	<string name="label_select_message_to_copy" state="needs_review" hash="1560698970">Изберете част от съобщението, за да я копирате.</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Архивиране</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Възстанови от архива</string>
 	<string name="menu_check_update" state="needs_review" hash="1635875089">Проверка за актуализации</string>
-	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Тази дискусия е заключена</string>
-	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Тази дискусия е само за четене</string>
-	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Вашите съобщения ще бъдат изпратени автоматично, след като бъде установен защитен канал за тази дискусия. Дотогава те ще останат в режим на изчакване.</string>
+	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Този разговор е заключен</string>
+	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Този разговор е само за четене</string>
+	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Вашите съобщения ще бъдат изпратени автоматично, след като бъде установен защитен канал за този разговор. Дотогава те ще останат в режим на изчакване.</string>
 	<string name="message_error_first_or_last_name_needed" state="needs_review" hash="-1907938730">Моля, въведете първо или фамилно име.</string>
 	<string name="message_error_trust_origin" state="needs_review" hash="51944132">Грешка при извличане на информация за надеждността на контакта</string>
 	<string name="message_user_invitation" state="needs_review" hash="609322254">%1$s иска да обсъди нещо с вас в Olvid. За да приемете, използвайте връзката по-долу:\n\n%2$s</string>
@@ -228,7 +237,7 @@
 	<string name="notification_channel_message_description" state="needs_review" hash="-780386348">Известия за нови съобщения</string>
 	<string name="notification_channel_message_name" state="needs_review" hash="-1639407912">Съобщения</string>
 	<string name="notification_content_exchange_sas" state="needs_review" hash="-1014025516">Разменете вашите кодове с %1$s</string>
-	<string name="notification_content_group_invite" state="needs_review" hash="-947588285">%1$s ви кани в групова дискусия</string>
+	<string name="notification_content_group_invite" state="needs_review" hash="-947588285">%1$s ви кани в групов разговор</string>
 	<string name="notification_content_mediator_invite" state="needs_review" hash="439791783">Представен от %1$s</string>
 	<string name="notification_public_title_exchange_sas" state="needs_review" hash="786512983">Разменете вашите кодове</string>
 	<string name="notification_public_title_group_invitation" state="needs_review" hash="-366531705">Получена нова покана за група</string>
@@ -248,6 +257,8 @@
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">Много високо</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Напуснахте групата</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Присъединихте се отново към групата</string>
+	<string name="label_groups_administered" state="needs_review" hash="353496672">Групи, които управлявате</string>
+	<string name="label_groups_joined" state="needs_review" hash="-1353689862">Присъединени групи</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Присъединихте се към групата</string>
 	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s ви добави в тази група</string>
 	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s отново ви добави в тази група</string>
@@ -277,7 +288,7 @@
 	<string name="toast_message_channel_restart_sucessful" state="needs_review" hash="-875805428">Протоколът за установяване на връзката беше успешно рестартиран.</string>
 	<string name="toast_message_contacts_introduction_started" state="needs_review" hash="180261136">Инициирано свързване на контакти</string>
 	<string name="toast_message_device_has_no_camera" state="needs_review" hash="295879751">Вашето устройство няма камера.</string>
-	<string name="toast_message_discussion_not_found" state="needs_review" hash="-1760957588">Дискусията не беше намерена</string>
+	<string name="toast_message_discussion_not_found" state="needs_review" hash="-1760957588">Разговорът не беше намерен</string>
 	<string name="toast_message_error_publishing_details" state="needs_review" hash="-1480521820">Грешка при публикуването на вашите данни за самоличност</string>
 	<string name="toast_message_error_publishing_group_details" state="needs_review" hash="104841414">Грешка при публикуването на информацията за групата</string>
 	<string name="toast_message_established_channel_required_for_introduction" state="needs_review" hash="-155958817">За да се свържете с нов контакт, е необходим установен защитен канал.</string>
@@ -324,13 +335,13 @@
 	<string name="text_user_added_to_contacts" state="needs_review" hash="-792506872">Потребителят е добавен към вашите контакти</string>
 	<string name="toast_message_user_deleted" state="needs_review" hash="-1664642954">Потребителят е изтрит</string>
 	<string name="text_original_message_not_found" state="needs_review" hash="2014071006">Оригиналното съобщение не беше намерено</string>
-	<string name="text_discussion_end2end_disclaimer" state="needs_review" hash="165389435">Съобщенията, публикувани в тази дискусия, са защитени чрез криптиране от край до край.\nТяхната поверителност, тяхната автентичност и самоличността на техния изпращач са гарантирани чрез криптография.</string>
+	<string name="text_discussion_end2end_disclaimer" state="needs_review" hash="165389435">Съобщенията, публикувани в този разговор, са защитени чрез криптиране от край до край.\nТяхната поверителност, тяхната автентичност и самоличността на техния изпращач са гарантирани чрез криптография.</string>
 	<string name="text_unknown_member_joined_the_group" state="needs_review" hash="1051900858">Непознат потребител се присъедини към групата</string>
 	<string name="text_unknown_member_left_the_group" state="needs_review" hash="183620441">Неизвестен потребител напусна групата</string>
 	<string name="pref_reset_dialogs_title" state="needs_review" hash="-1377245223">Нулиране на всички предупреждения за диалози</string>
 	<string name="pref_reset_dialogs_summary" state="needs_review" hash="-1434802206">Възстановете скритите диалози, които са били скрити чрез опцията \"не показвай това съобщение отново\"</string>
 	<string name="toast_message_dialogs_restored" state="needs_review" hash="-753737530">Предупрежденията за диалога са нулирани</string>
-	<string name="menu_action_discussion_settings" state="needs_review" hash="-480622798">Настройки за дискусията</string>
+	<string name="menu_action_discussion_settings" state="needs_review" hash="-480622798">Настройки за разговора</string>
 	<string name="menu_action_discussion_mark_as_read" state="needs_review" hash="-805086989">Маркирай като прочетено</string>
 	<string name="menu_action_discussion_mark_as_unread" state="needs_review" hash="2143711418">Маркирай като непрочетено</string>
 	<string name="dialog_title_pick_discussion_color" state="needs_review" hash="922181510">Изберете цвят за разговора</string>
@@ -349,13 +360,13 @@
 	<string name="dialog_message_recipient_details" state="needs_review" hash="2055824637">**Качено:** %1$s\n**Доставено:** %2$s\n**Прочетено:** %3$s</string>
 	<string name="text_null_timestamp" state="needs_review" hash="1440">-</string>
 	<string name="text_no_recipient_details" state="needs_review" hash="-196217368">Няма налични подробности за съобщението</string>
-	<string name="activity_title_discussion_settings" state="needs_review" hash="138563346">Настройки за дискусията</string>
+	<string name="activity_title_discussion_settings" state="needs_review" hash="138563346">Настройки за разговора</string>
 	<string name="pref_discussion_color_title" state="needs_review" hash="922181510">Изберете цвят за разговора</string>
 	<string name="pref_discussion_background_image_title" state="needs_review" hash="-1798270953">Фоново изображение</string>
 	<string name="pref_discussion_background_image_click_to_remove_summary" state="needs_review" hash="-1148277484">Кликнете, за да премахнете изображението</string>
 	<string name="pref_discussion_background_image_click_to_choose_summary" state="needs_review" hash="459765195">Кликнете, за да изберете изображение</string>
 	<string name="pref_read_receipt_title" state="needs_review" hash="-652307837">Изпращане на потвърждения за прочитане</string>
-	<string name="pref_read_receipt_summary" state="needs_review" hash="283940327">Когато тази функция е активирана, вашите контакти ще знаят кога сте прочели техните съобщения. Това може да бъде променено за всяка отделна дискусия.</string>
+	<string name="pref_read_receipt_summary" state="needs_review" hash="283940327">Когато тази функция е активирана, вашите контакти ще знаят кога сте прочели техните съобщения. Това може да бъде променено за всеки отделен разговор.</string>
 	<string name="pref_link_preview_outbound_title" state="needs_review" hash="1085647991">Прикачете преглед на линковете, които изпращате</string>
 	<string name="pref_link_preview_summary_outbound" state="needs_review" hash="759185205">След като бъде активирана, Olvid ще извлече преглед на връзките, които изпращате, и ще го прикачи към съобщението.</string>
 	<string name="pref_link_preview_inbound_title" state="needs_review" hash="1165732154">Извличане на предварителни версии на получените връзки</string>
@@ -509,6 +520,8 @@
 	<string name="pref_text_dark_mode_on" state="needs_review" hash="794872984">Винаги използвайте тъмна тема</string>
 	<string name="pref_text_dark_mode_off" state="needs_review" hash="1031187033">Винаги използвайте светла тема</string>
 	<string name="pref_text_dark_mode_auto" state="needs_review" hash="-1140013121">Използвайте системните настройки</string>
+	<string name="pref_use_pattern_avatars_title" state="needs_review" hash="-184462474">Генерирани аватари</string>
+	<string name="pref_use_pattern_avatars_summary" state="needs_review" hash="-1895366464">За контактите, които нямат снимка, покажете уникален цветен модел вместо първата им буква.</string>
 	<string name="menu_action_help_faq" state="needs_review" hash="971329012">Помощ / Често задавани въпроси</string>
 	<string name="menu_action_call_contact" state="needs_review" hash="546297186">Обадете се на контакта</string>
 	<string name="notification_title_incoming_webrtc_call" state="needs_review" hash="-2109880396">Входящо обаждане от Olvid от %1$s</string>
@@ -536,7 +549,7 @@
 	<string name="pref_text_vibration_pattern_three_long" state="needs_review" hash="1282701901">3 дълги вибрации</string>
 	<string name="pref_message_led_color_title" state="needs_review" hash="659767003">Цвят на светодиода</string>
 	<string name="pref_discussion_mute_notifications_title" state="needs_review" hash="676556801">Изключване на известията</string>
-	<string name="pref_discussion_mute_notifications_summary" state="needs_review" hash="-1153944445">Когато е активирана, няма да получавате известия за нови съобщения в тази дискусия.</string>
+	<string name="pref_discussion_mute_notifications_summary" state="needs_review" hash="-1153944445">Когато е активирана, няма да получавате известия за нови съобщения в този разговор.</string>
 	<string name="pref_discussion_mute_notifications_on_summary" state="needs_review" hash="-1889261525">Известията за нови съобщения са изключени за неопределено време.</string>
 	<string name="pref_discussion_mute_notifications_on_until_summary" state="needs_review" hash="-1740468420">Новите известия за съобщения са заглушени до: %1$s</string>
 	<string name="pref_call_ringtone_title" state="needs_review" hash="29019015">Звън</string>
@@ -692,7 +705,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">Сървър за лицензи:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">Вашият сървър:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">Невалидна връзка за активиране на лиценза.\n\nМоля, свържете се с човека, който ви е изпратил тази връзка.</string>
-	<string name="label_checking_license" state="needs_review" hash="-777109669">Проверява се лицензът…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">Не може да се провери статуса на лиценза</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Неизвестен лиценз</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Валиден лиценз</string>
@@ -740,6 +752,16 @@
 	<string name="text_message_content_wiped" state="needs_review" hash="1781783786">(съдържанието на съобщението е изтрито)</string>
 	<string name="text_ephemeral_message_explanation" state="needs_review" hash="612413232">Натиснете, за да видите\nсъдържанието на съобщението</string>
 	<string name="text_visible_once" state="needs_review" hash="962464352">Видимо само веднъж</string>
+	<string name="dialog_title_ephemeral_message" state="needs_review" hash="-1527208333">Временно съобщение</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave" state="needs_review" hash="1852111882">Това съобщение ще бъде изтрито, когато напуснете този разговор.</string>
+	<string name="text_ephemeral_read_once_erased_on_leave" state="needs_review" hash="-1031412379">Съдържанието на това съобщение ще бъде изтрито, когато напуснете този разговор.</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave_once_opened" state="needs_review" hash="-1827602456">След като бъде отворен, това съобщение ще бъде изтрито, когато напуснете този разговор.</string>
+	<string name="text_ephemeral_deleted_at_time" state="needs_review" hash="831937049">Ще бъде изтрито на %1$s</string>
+	<string name="text_ephemeral_deleted_on_date_at_time" state="needs_review" hash="667854133">Ще бъде изтрито на %1$s в %2$s</string>
+	<string name="text_ephemeral_content_erased_at_time" state="needs_review" hash="1038815627">Съдържанието ще бъде изтрито на %1$s</string>
+	<string name="text_ephemeral_content_erased_on_date_at_time" state="needs_review" hash="848079053">Съдържанието ще бъде изтрито на %1$s в %2$s</string>
+	<string name="text_ephemeral_countdown_starts_when_sent" state="needs_review" hash="-1010200489">Обратното броене започва, след като съобщението бъде изпратено.</string>
+	<string name="text_ephemeral_countdown_starts_when_opened" state="needs_review" hash="1194691757">Обратното броене започва, когато отворите съобщението.</string>
 	<string name="text_timer_s" state="needs_review" hash="-1146250144">%1$d секунди</string>
 	<string name="text_timer_m" state="needs_review" hash="-1318025056">%1$dм</string>
 	<string name="text_timer_h" state="needs_review" hash="-1461170816">%1$dч</string>
@@ -761,7 +783,7 @@
 	<string name="text_visible_timer_d_once" state="needs_review" hash="-537746754">Видимо за %1$d дни и само веднъж</string>
 	<string name="text_visible_timer_y_once" state="needs_review" hash="1522314748">Видимо за %1$d години,\nи само веднъж</string>
 	<string name="text_no_messages" state="needs_review" hash="-376673625">Все още няма съобщения</string>
-	<string name="dialog_title_mute_discussion_notification_duration" state="needs_review" hash="1413313163">Заглушете известията за тази дискусия…</string>
+	<string name="dialog_title_mute_discussion_notification_duration" state="needs_review" hash="1413313163">Заглушете известията за този разговор…</string>
 	<string name="dialog_title_mute_discussions_notification_duration" state="needs_review" hash="-1583179204">Заглушете известията за тези разговори…</string>
 	<string name="dialog_title_mute_profile_notification_duration" state="needs_review" hash="-1145328455">Заглушете известията за този профил…</string>
 	<string name="pref_mute_notifications_one_hour" state="needs_review" hash="2004932382">За един час</string>
@@ -777,12 +799,14 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Изпращане и получаване на съобщения</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Когато тази опция е активирана, съобщенията, които се четат веднъж, и съобщенията с ограничено време на видимост, се отварят веднага след като влезете в разговора. В противен случай е необходимо да кликнете.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Когато тази функция е активирана, изтритите изходящи съобщения се запазват, за да можете да видите кога са доставени или прочетени. В противен случай те се изтриват.</string>
+	<string name="pref_default_reaction_title" state="needs_review" hash="1457188713">Стандартна реакция</string>
+	<string name="pref_default_reaction_summary" state="needs_review" hash="-1065900793">Докоснете два пъти получено съобщение, за да реагирате с %1$s. Докоснете отново, за да премахнете реакцията си.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Уеб клиент</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Грешка при обработката на връзката за актуализация на настройките</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Изпращане и получаване на съобщения</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">Споделени настройки за временни съобщения</string>
-	<string name="pref_discussion_category_shared_ephemeral_settings_summary" state="needs_review" hash="-1511387101">Настройките по-долу се споделят между всички участници в тази дискусия. Промяната им ще повлияе на настройките за видимост и продължителността на съхранение на съобщенията, изпратени от всички участници.</string>
-	<string name="pref_discussion_category_shared_ephemeral_settings_summary_only_owner" state="needs_review" hash="507098821">Настройките по-долу се споделят между всички участници в тази дискусия. Промяната им ще повлияе на настройките по подразбиране за видимост и продължителност на съхранение на съобщенията, изпратени от всички участници.\n\nНямате разрешение да променяте тези настройки.</string>
+	<string name="pref_discussion_category_shared_ephemeral_settings_summary" state="needs_review" hash="-1511387101">Настройките по-долу се споделят между всички участници в този разговор. Промяната им ще повлияе на настройките за видимост и продължителността на съхранение на съобщенията, изпратени от всички участници.</string>
+	<string name="pref_discussion_category_shared_ephemeral_settings_summary_only_owner" state="needs_review" hash="507098821">Настройките по-долу се споделят между всички участници в този разговор. Промяната им ще повлияе на настройките по подразбиране за видимост и продължителност на съхранение на съобщенията, изпратени от всички участници.\n\nНямате разрешение да променяте тези настройки.</string>
 	<string name="pref_discussion_read_once_title" state="needs_review" hash="1347493911">Съобщения, които се виждат само веднъж</string>
 	<string name="pref_discussion_read_once_summary" state="needs_review" hash="-126623825">Когато тази опция е активирана, съобщенията и прикачените файлове се показват само веднъж и се изтриват, когато напуснете разговора.</string>
 	<string name="pref_discussion_visibility_duration_title" state="needs_review" hash="-640499771">Продължителност на видимостта на съобщенията</string>
@@ -813,15 +837,15 @@
 	<string name="pref_discussion_existence_duration_summary_null" state="needs_review" hash="774232772">Без ограничение за съществуване</string>
 	<string name="pref_discussion_existence_duration_summary" state="needs_review" hash="1593195523">Съобщенията се изтриват автоматично след: %1$s</string>
 	<string name="dialog_title_shared_ephemeral_settings_modified" state="needs_review" hash="-710464596">Променени са настройките за споделени временни съобщения</string>
-	<string name="dialog_message_shared_ephemeral_settings_modified" state="needs_review" hash="715864223">Променили сте настройките по подразбиране за изчезващите съобщения в тази дискусия.\n\nИскате ли да актуализирате тези настройки за вас и всички останали участници в дискусията, или искате да отмените промените си?</string>
-	<string name="text_discussion_shared_settings_updated" state="needs_review" hash="-151974912">Общите настройки за дискусията са актуализирани</string>
-	<string name="text_updated_shared_settings" state="needs_review" hash="1457023446">%1$s актуализира общите настройки за дискусията</string>
-	<string name="text_updated_shared_settings_you" state="needs_review" hash="40728921">Обновихте настройките за споделена дискусия.</string>
+	<string name="dialog_message_shared_ephemeral_settings_modified" state="needs_review" hash="715864223">Променили сте настройките по подразбиране за изчезващите съобщения в този разговор.\n\nИскате ли да актуализирате тези настройки за вас и всички останали участници в разговора, или искате да отмените промените си?</string>
+	<string name="text_discussion_shared_settings_updated" state="needs_review" hash="-151974912">Общите настройки за разговора са актуализирани</string>
+	<string name="text_updated_shared_settings" state="needs_review" hash="1457023446">%1$s актуализира общите настройки за разговора</string>
+	<string name="text_updated_shared_settings_you" state="needs_review" hash="40728921">Обновихте настройките за споделен разговор.</string>
 	<string name="text_non_ephemeral_messages" state="needs_review" hash="402305240">Неизчезващи съобщения</string>
 	<string name="pref_category_default_retention_policy_title" state="needs_review" hash="925391440">Политика за съхранение на съобщения</string>
 	<string name="pref_category_default_retention_policy_summary" state="needs_review" hash="-1071833812">Настройките по-долу ви позволяват автоматично да изтривате стари съобщения във вашите разговори. Те могат да бъдат променяни за всеки отделен разговор.</string>
 	<string name="pref_category_default_ephemeral_settings_title" state="needs_review" hash="745077800">Настройки по подразбиране за изчезващи съобщения</string>
-	<string name="pref_category_default_ephemeral_settings_summary" state="needs_review" hash="1187796008">Настройките по-долу се прилагат по подразбиране към всяка нова дискусия, която създавате. Те ще бъдат споделени с другите участници в тази дискусия.</string>
+	<string name="pref_category_default_ephemeral_settings_summary" state="needs_review" hash="1187796008">Настройките по-долу се прилагат по подразбиране към всеки нов разговор, който създавате. Те ще бъдат споделени с другите участници в този разговор.</string>
 	<string name="pref_discussion_retention_count_title" state="needs_review" hash="347866597">Политика за съхранение, базирана на броя съобщения</string>
 	<string name="pref_discussion_retention_count_summary" state="needs_review" hash="1625700173">Запазете само последните %1$d съобщения</string>
 	<string name="pref_discussion_retention_duration_title" state="needs_review" hash="1541646210">Политика за запазване на съобщенията, базирана на времето</string>
@@ -829,11 +853,11 @@
 	<string name="pref_discussion_retention_count_summary_null" state="needs_review" hash="1734971768">Запазете всички съобщения</string>
 	<string name="pref_discussion_retention_count_hint" state="needs_review" hash="-1516581060">Брой съобщения, които да се запазят</string>
 	<string name="pref_discussion_retention_duration_summary_null" state="needs_review" hash="1734971768">Запазете всички съобщения</string>
-	<string name="pref_discussion_default_retention_count_dialog_message" state="needs_review" hash="113844640">Въведете броя на съобщенията, които да се запазват във всяка дискусия. Оставете полето празно, за да запазите всички съобщения.\n\nНепрочетените съобщения никога не се изтриват.</string>
-	<string name="pref_discussion_retention_count_dialog_message_default_null" state="needs_review" hash="-86538410">Въведете броя на съобщенията, които да бъдат запазени в тази дискусия.\nОставете полето празно, за да използвате вашата настройка по подразбиране (запазване на всички съобщения).\nНепрочетените съобщения никога не се изтриват.</string>
-	<string name="pref_discussion_retention_count_dialog_message_default_number" state="needs_review" hash="-2144782876">Въведете броя на съобщенията, които да бъдат запазени в тази дискусия.\nОставете полето празно, за да използвате вашата настройка по подразбиране (запазване на последните %1$d съобщения).\nВъведете 0, за да запазите всички съобщения.\n\nНепрочетените съобщения никога не се изтриват.</string>
-	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">Правила за съхранение на съобщенията в чата</string>
-	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">Настройките по-долу ви позволяват автоматично да изтривате стари съобщения в тази дискусия. Те имат приоритет пред вашата настройка по подразбиране за запазване на съобщенията.</string>
+	<string name="pref_discussion_default_retention_count_dialog_message" state="needs_review" hash="113844640">Въведете броя на съобщенията, които да се запазват във всеки разговор. Оставете полето празно, за да запазите всички съобщения.\n\nНепрочетените съобщения никога не се изтриват.</string>
+	<string name="pref_discussion_retention_count_dialog_message_default_null" state="needs_review" hash="-86538410">Въведете броя на съобщенията, които да бъдат запазени в този разговор.\nОставете полето празно, за да използвате вашата настройка по подразбиране (запазване на всички съобщения).\nНепрочетените съобщения никога не се изтриват.</string>
+	<string name="pref_discussion_retention_count_dialog_message_default_number" state="needs_review" hash="-2144782876">Въведете броя на съобщенията, които да бъдат запазени в този разговор.\nОставете полето празно, за да използвате вашата настройка по подразбиране (запазване на последните %1$d съобщения).\nВъведете 0, за да запазите всички съобщения.\n\nНепрочетените съобщения никога не се изтриват.</string>
+	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">Правила за съхранение на съобщенията в разговора</string>
+	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">Настройките по-долу ви позволяват автоматично да изтривате стари съобщения в този разговор. Те имат приоритет пред вашата настройка по подразбиране за запазване на съобщенията.</string>
 	<string name="pref_text_app_default_string" state="needs_review" hash="-1921282000">Използвайте вашата настройка по подразбиране (%1$s)</string>
 	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1349151852">Запишете гласово съобщение</string>
 	<string name="dialog_title_voice_message_explanation" state="needs_review" hash="943269997">Гласови съобщения на Olvid</string>
@@ -866,8 +890,8 @@
 	<string name="label_metadata_kind_uploaded" state="needs_review" hash="1997774857">Съобщението е качено</string>
 	<string name="text_message_timeline" state="needs_review" hash="1756817909">Хронология на съобщенията</string>
 	<string name="text_message_recipients_status" state="needs_review" hash="787471611">Статус на получателите</string>
-	<string name="text_discussion_remotely_deleted" state="needs_review" hash="-1501958906">Дискусията е изтрита дистанционно</string>
-	<string name="text_discussion_remotely_deleted_by" state="needs_review" hash="-747992584">Дискусията беше изтрита дистанционно от %1$s</string>
+	<string name="text_discussion_remotely_deleted" state="needs_review" hash="-1501958906">Разговорът е изтрит дистанционно</string>
+	<string name="text_discussion_remotely_deleted_by" state="needs_review" hash="-747992584">Разговорът беше изтрит дистанционно от %1$s</string>
 	<string name="toast_message_unable_to_update_message" state="needs_review" hash="-624831163">Не може да се актуализира съобщението</string>
 	<string name="text_edited" state="needs_review" hash="-853838602">Редактирано</string>
 	<string name="menu_action_mute_notifications" state="needs_review" hash="676556801">Изключване на известията</string>
@@ -896,7 +920,8 @@
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Лиценз: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Доставчик на идентичност</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">сървър за удостоверяване на самоличността</string>
-	<string name="explanation_identity_provider" state="needs_review" hash="-964456322">Този екран ви позволява да конфигурирате доставчика на идентичност на вашата компания в Olvid. След като бъде конфигуриран, можете да се удостоверявате към този сървър и Olvid ще ви позволи безпроблемно да добавяте други служители към вашите контакти.\nМоля, свържете се с вашия администратор за повече информация.</string>
+	<string name="explanation_identity_provider" state="needs_review" hash="-1014276138">Този екран ви позволява да конфигурирате доставчика на идентичност на вашата организация в Olvid. След като бъде конфигуриран, можете да се удостоверите и Olvid ще ви позволи безпроблемно да добавяте други потребители към вашите контакти.\nМоля, свържете се с вашия администратор за повече информация.</string>
+	<string name="explanation_identity_provider_mdm" state="needs_review" hash="-1274626281">Тази инсталация се управлява от вашата организация и е конфигурирана да използва доставчик на идентичности. Настройките по-долу са предварително конфигурирани и не могат да бъдат променяни.\nМоля, свържете се с вашия администратор за повече информация.</string>
 	<string name="button_label_authenticate" state="needs_review" hash="272245375">Удостоверете се</string>
 	<string name="button_label_check_identity_provider" state="needs_review" hash="508428497">Проверете доставчика на идентичност</string>
 	<string name="menu_action_use_identity_provider" state="needs_review" hash="1305090894">Използвайте доставчик на идентичности</string>
@@ -980,8 +1005,6 @@
 	<string name="text_failed_call" state="needs_review" hash="-1934816919">Неуспешен телефонен разговор</string>
 	<string name="text_busy_call" state="needs_review" hash="-310279946">Постъпващо обаждане, докато сте ангажирани</string>
 	<string name="text_busy_outgoing_call" state="needs_review" hash="92373387">Обаждане към зает контакт</string>
-	<string name="content_description_profile_picture" state="needs_review" hash="-1074340378">Профилна снимка</string>
-	<string name="ime_action_rename" state="needs_review" hash="-1795678977">Преименувай</string>
 	<string name="pref_storage_explorer_title" state="needs_review" hash="735816049">Изследовател на вътрешната памет</string>
 	<string name="pref_storage_explorer_summary" state="needs_review" hash="-1991214388">Разгледайте вътрешната памет на вашето приложение Olvid!</string>
 	<string name="activity_title_storage_explorer" state="needs_review" hash="735816049">Изследовател на вътрешната памет</string>
@@ -1052,6 +1075,8 @@
 	<string name="pref_image_text_recognition_title" state="needs_review" hash="1877261687">Разпознаване и индексиране на текст в изображения</string>
 	<string name="pref_image_text_recognition_summary" state="needs_review" hash="1217699919">Позволява да се търси и копира текст, намерен в прикачени изображения. Това може да изисква значителни ресурси на устройства от нисък клас: деактивирайте тази функция, ако не ви е необходима.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">Не може да се покаже изображението.</string>
+	<string name="label_unsupported_image_format" state="needs_review" hash="-1487560676">Неподдържан формат на изображението</string>
+	<string name="label_unsupported_video_format" state="needs_review" hash="2131303733">Неподдържан видео формат</string>
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">Необходимо е да влезете в акаунта си в облачния доставчик.</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Конфигурирахте Olvid да използва автоматични архивни копия към облачен доставчик, но сесията ви е изтекла. Трябва да влезете отново в този доставчик.\n\nАко вече не желаете автоматични архивни копия, можете да ги деактивирате в настройките на приложението. Имайте предвид, че автоматичните архивни копия са единственият начин да предотвратите загубата на вашите контакти, ако устройството ви бъде изгубено или повредено.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Вход</string>
@@ -1146,7 +1171,7 @@
 	<string name="dialog_title_hide_profile" state="needs_review" hash="-1488467848">Скрий профила?</string>
 	<string name="dialog_message_hide_profile" state="needs_review" hash="472022286">Ще скриете профил на Olvid. Ако забравите паролата, която сте избрали за този профил, ще загубите достъп до него завинаги.\nСигурни ли сте, че искате да продължите?</string>
 	<string name="menu_action_mute_profile_notifications" state="needs_review" hash="676556801">Изключване на известията</string>
-	<string name="dialog_message_mute_all_profile_switch_label" state="needs_review" hash="1172300745">Заглушете всички известия за профила, вместо само за тази дискусия.</string>
+	<string name="dialog_message_mute_all_profile_switch_label" state="needs_review" hash="1172300745">Заглушете всички известия за профила, вместо само за този разговор.</string>
 	<string name="dialog_message_mute_except_mentioned" state="needs_review" hash="635884418">Уведомявайте ме, когато името ми бъде споменато</string>
 	<string name="pref_hidden_profile_close_policy_title" state="needs_review" hash="-279332062">Политика за закриване на скрити профили</string>
 	<string name="text_close_profile_instantly" state="needs_review" hash="-710679740">затворете профила незабавно</string>
@@ -1180,9 +1205,9 @@
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">Изтриване на отговора към съобщението</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">Индикатор, показващ, че известията са заглушени за този профил</string>
 	<string name="button_label_create_a_profile" state="needs_review" hash="-1568207484">Създайте профил</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="1428471064">Идентифициращият доставчик на вашата компания беше конфигуриран успешно. Натиснете бутона „\"потвърждаване\"“, за да се удостоверите и да получите личната си информация.</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="1823898406">Идентифициращият доставчик на вашата компания беше конфигуриран успешно. Натиснете бутона „Използвайте магическа връзка“ по-долу, за да получите личната си информация.</string>
-	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="1340457300">Добре дошли в Olvid.\n\nТази инсталация се управлява от вашата компания и е конфигурирана да използва доставчик на идентичности. Натиснете бутона „Удостоверяване“, за да се удостоверите и да извлечете личната си информация.\n\nАко вече сте използвали Olvid и искате да възстановите ключовете и контактите си от резервно копие, натиснете „Възстановяване от резервно копие“.</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="-2030851622">Идентифициращият доставчик на вашата организация беше конфигуриран успешно. Натиснете бутона „Удостоверяване“ по-долу, за да се удостоверите и да извлечете личната си информация.</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="903193568">Идентифициращият доставчик на вашата организация беше конфигуриран успешно. Натиснете бутона „Използвайте магическа връзка“ по-долу, за да получите личната си информация.</string>
+	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="-5109440">Тази инсталация се управлява от вашата организация и е конфигурирана да използва доставчик на идентичности. Натиснете бутона „%1$s“, за да се удостоверите и да получите личната си информация.</string>
 	<string name="button_label_see_details" state="needs_review" hash="238834473">Вижте подробности</string>
 	<string name="link_label_invitation_url" state="needs_review" hash="744905192">Добави контакт</string>
 	<string name="link_label_configuration_url" state="needs_review" hash="-441435162">Импортиране на конфигурация или лиценз</string>
@@ -1223,6 +1248,33 @@
 	<string name="label_attach_timer" state="needs_review" hash="-1527208333">Временно съобщение</string>
 	<string name="label_attach_camera" state="needs_review" hash="-1123080444">Направете снимка</string>
 	<string name="label_attach_video" state="needs_review" hash="1626268086">Запишете видео</string>
+	<string name="label_attach_scan" state="needs_review" hash="1128596739">Сканирайте документ</string>
+	<string name="label_scan_page_count" state="needs_review" hash="1987610035">Страница %1$d от %2$d</string>
+	<string name="button_label_scan_add_page" state="needs_review" hash="1724653886">Добавете страница</string>
+	<string name="button_label_scan_crop" state="needs_review" hash="-292939300">Изрязване</string>
+	<string name="button_label_scan_rotate" state="needs_review" hash="807341684">Завъртете</string>
+	<string name="button_label_scan_auto_crop" state="needs_review" hash="1502815262">Автоматично</string>
+	<string name="button_label_scan_full_image" state="needs_review" hash="1366902062">Цяло изображение</string>
+	<string name="label_scan_filter_original" state="needs_review" hash="-817276190">Оригинал</string>
+	<string name="label_scan_filter_enhanced" state="needs_review" hash="851648098">подобрен</string>
+	<string name="label_scan_filter_grayscale" state="needs_review" hash="-695463257">Сиви тонове</string>
+	<string name="label_scan_filter_black_and_white" state="needs_review" hash="1668578691">Черно и бяло</string>
+	<string name="dialog_title_discard_scan" state="needs_review" hash="-94972780">Искате ли да изтриете този резултат от сканирането?</string>
+	<string name="dialog_message_discard_scan" state="needs_review" hash="-1145223011">Сканираните страници ще бъдат изтрити.</string>
+	<string name="toast_message_scan_failed" state="needs_review" hash="512858351">Не може да се създаде PDF файлът.</string>
+	<string name="button_label_scan_retake" state="needs_review" hash="-439420481">Повторете</string>
+	<string name="button_label_scan_enhance" state="needs_review" hash="-1842671012">Подобрете</string>
+	<string name="button_label_scan_filters" state="needs_review" hash="-1898368294">Филтри</string>
+	<string name="button_label_scan_crop_rotate" state="needs_review" hash="-1750423698">Изрязване и завъртане</string>
+	<string name="button_label_scan_discard" state="needs_review" hash="-248729677">Изтриване на сканирането</string>
+	<string name="label_scan_mode_manual" state="needs_review" hash="-751509695">Ръчно</string>
+	<string name="label_scan_mode_auto" state="needs_review" hash="315272314">Автоматично заснемане</string>
+	<string name="label_scan_hint" state="needs_review" hash="289920901">Поставете документа в рамката.</string>
+	<string name="label_scan_hint_hold_still" state="needs_review" hash="584896298">Задръжте…</string>
+	<string name="button_label_scan_flash" state="needs_review" hash="775381504">Светкавица</string>
+	<string name="label_scan_camera_permission" state="needs_review" hash="-1855763825">Разрешете на Olvid да използва камерата за сканиране на документи. Все пак можете да импортирате снимки от галерията си.</string>
+	<string name="button_label_scan_file_name" state="needs_review" hash="2098556706">Име на файла</string>
+	<string name="dialog_title_scan_file_name" state="needs_review" hash="1332508838">Име на PDF файла</string>
 	<string name="pref_font_scale" state="needs_review" hash="1773040591">Размер на шрифта</string>
 	<string name="pref_text_font_scale_0_75" state="needs_review" hash="-1963894407">Малък (75%)</string>
 	<string name="pref_text_font_scale_0_9" state="needs_review" hash="-708054676">Малък (90%)</string>
@@ -1247,7 +1299,7 @@
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">Цялото съобщение е копирано в буфера за обмен</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">Бърз бутон за изпращане на предварително зададено съобщение до контакт или група с едно кликване.</string>
 	<string name="label_action_shortcut_preview_text" state="needs_review" hash="-356415">Здравей!</string>
-	<string name="label_discussion_shortcut" state="needs_review" hash="550393383">Пряк път към дискусия в Olvid</string>
+	<string name="label_discussion_shortcut" state="needs_review" hash="550393383">Пряк път към разговор в Olvid</string>
 	<string name="label_action_shortcut_invalid_text" state="needs_review" hash="57245784">Невалидна конфигурация на уиджет</string>
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Конфигуриране на уиджет…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Външен вид на уиджета</string>
@@ -1274,6 +1326,9 @@
 	<string name="your_message" state="needs_review" hash="1739533147">вашето съобщение</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d реакции към: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s реагира на %2$s</string>
+	<string name="menu_action_remove_your_reaction" state="needs_review" hash="-1609298248">Премахнете вашата реакция</string>
+	<string name="menu_action_add_to_favorites" state="needs_review" hash="-1933720211">Добави към любими</string>
+	<string name="menu_action_remove_from_favorites" state="needs_review" hash="1796304724">Премахнете от любими</string>
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Вмъкнете емотикон</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Информация за отстраняване на грешки</string>
 	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">Брой устройства:</string>
@@ -1312,15 +1367,15 @@
 	<string name="button_label_invite" state="needs_review" hash="673251104">Покани</string>
 	<string name="explanation_contact_not_one_to_one" state="needs_review" hash="1278467180">За да започнете личен разговор с %1$s и да го добавите към контактите си, натиснете „Покани“.</string>
 	<string name="label_contact_not_one_to_one" state="needs_review" hash="1358875748">Този потребител все още не е в списъка ви с контакти.</string>
-	<string name="invitation_status_description_one_to_one_invitation_sent" state="needs_review" hash="1820750107">Поканихте %1$s в лична дискусия. Моля, изчакайте, докато приемат поканата, или натиснете „Отмени“, за да прекратите тази покана.</string>
-	<string name="invitation_status_description_one_to_one_invitation_sent_deleted" state="needs_review" hash="-1464532571">Потребителят, когото поканихте в лична дискусия, е премахнат от списъка ви с познати потребители. Можете да натиснете „Отмени“, за да прекратите тази покана.</string>
-	<string name="invitation_status_one_to_one_invitation" state="needs_review" hash="1121224764">Покана за лична дискусия</string>
-	<string name="invitation_status_description_one_to_one_invitation" state="needs_review" hash="-1110963247">%1$s ви кани в лична дискусия.</string>
+	<string name="invitation_status_description_one_to_one_invitation_sent" state="needs_review" hash="1820750107">Поканихте %1$s в личен разговор. Моля, изчакайте, докато приемат поканата, или натиснете „Отмени“, за да прекратите тази покана.</string>
+	<string name="invitation_status_description_one_to_one_invitation_sent_deleted" state="needs_review" hash="-1464532571">Потребителят, когото поканихте в личен разговор, е премахнат от списъка ви с познати потребители. Можете да натиснете „Отмени“, за да прекратите тази покана.</string>
+	<string name="invitation_status_one_to_one_invitation" state="needs_review" hash="1121224764">Покана за личен разговор</string>
+	<string name="invitation_status_description_one_to_one_invitation" state="needs_review" hash="-1110963247">%1$s ви кани в личен разговор.</string>
 	<string name="toast_message_contact_removed" state="needs_review" hash="1769880831">Контактът е премахнат</string>
 	<string name="dialog_title_remove_contact" state="needs_review" hash="967879802">Премахване на контакт?</string>
 	<string name="dialog_message_remove_contact" state="needs_review" hash="-85916850">Премахването на %1$s от вашите контакти ще прекрати личната ви кореспонденция с него/нея. Все пак ще можете да продължите да обменяте съобщения в общите ви групови разговори.</string>
-	<string name="notification_content_one_to_one_invitation" state="needs_review" hash="-1518952630">Покана за лична дискусия</string>
-	<string name="notification_public_title_one_to_one_invitation" state="needs_review" hash="-1518952630">Покана за лична дискусия</string>
+	<string name="notification_content_one_to_one_invitation" state="needs_review" hash="-1518952630">Покана за личен разговор</string>
+	<string name="notification_public_title_one_to_one_invitation" state="needs_review" hash="-1518952630">Покана за личен разговор</string>
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Покажи индикатор „източник на доверие“ за контактите</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Когато функцията е активирана, цветна точка върху снимката на профила показва дали лично сте потвърдили самоличността на даден контакт, или той ви е бил представен от друг потребител.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Изпращане на съобщение Olvid</string>
@@ -1379,16 +1434,24 @@
 	<string name="menu_action_select_all" state="needs_review" hash="346006780">Избери всички</string>
 	<string name="label_swipe_reply" state="needs_review" hash="-410287287">Отговор</string>
 	<string name="label_swipe_select" state="needs_review" hash="103682895">Изберете</string>
-	<string name="menu_action_discussion_pin" state="needs_review" hash="554322472">Закачете тази дискусия</string>
-	<string name="menu_action_discussion_unpin" state="needs_review" hash="1464070527">Премахнете тази дискусия от списъка с важни</string>
-	<string name="pref_discussion_pin_title" state="needs_review" hash="554322472">Закачете тази дискусия</string>
+	<string name="menu_action_discussion_pin" state="needs_review" hash="554322472">Закачете този разговор</string>
+	<string name="menu_action_discussion_unpin" state="needs_review" hash="1464070527">Премахнете този разговор от списъка с важни</string>
+	<string name="pref_discussion_pin_title" state="needs_review" hash="554322472">Закачете този разговор</string>
 	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">Закрепените разговори винаги остават в горната част на списъка ви с разговори.</string>
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Размер на дисплея</string>
-	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Започнете дискусия</string>
+	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Започнете разговор</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">Само за четене</string>
 	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Очаква се\nсамо за четене</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Администратор</string>
 	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Очакващ администратор</string>
+	<string name="label_moderator" state="needs_review" hash="767421225">Модератор</string>
+	<string name="label_pending_moderator" state="needs_review" hash="1955900662">Очакващ\nмодератор</string>
+	<string name="dialog_title_group_roles" state="needs_review" hash="1155086227">Групови роли</string>
+	<string name="content_description_group_roles" state="needs_review" hash="-449063250">Обяснение на ролите в групата</string>
+	<string name="explanation_group_role_admin" state="needs_review" hash="731519662">Може да добавя и премахва членове на групата.</string>
+	<string name="explanation_group_role_moderator" state="needs_review" hash="2037600722">Може да изтрива съобщения от всички устройства на потребителя.</string>
+	<string name="explanation_group_role_read_only" state="needs_review" hash="1017523379">Може да вижда дискусията, да реагира на съобщения и да отговаря на анкети, но не може да публикува съобщения.</string>
+	<string name="explanation_group_role_pending" state="needs_review" hash="-843291456">Беше поканен в групата, но все още не е приел поканата. Съобщенията, изпратени през това време, ще бъдат доставени до него, след като приеме поканата.</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Не може да се покаже името на този потребител.</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Група без име</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Известия за разговори</string>
@@ -1396,11 +1459,11 @@
 	<string name="pref_discussion_category_message_notifications_title" state="needs_review" hash="-466271953">Известия за съобщения</string>
 	<string name="pref_discussion_category_call_notifications_title" state="needs_review" hash="-1776813002">Известия за входящи повиквания</string>
 	<string name="dialog_title_pick_led_color" state="needs_review" hash="174987784">Изберете цвят на светодиода</string>
-	<string name="pref_discussion_category_locked_explanation_title" state="needs_review" hash="-661795104">Дискусията е заключена</string>
+	<string name="pref_discussion_category_locked_explanation_title" state="needs_review" hash="-661795104">Разговорът е заключен</string>
 	<string name="pref_discussion_category_locked_explanation_summary" state="needs_review" hash="-2027915932">Някои настройки не са достъпни за заключените разговори.</string>
-	<string name="pref_discussion_message_custom_notification_title" state="needs_review" hash="-625696878">Персонализирани известия за съобщения за тази дискусия</string>
-	<string name="pref_discussion_call_custom_notification_title" state="needs_review" hash="2074412984">Персонализирани известия за повиквания за тази дискусия</string>
-	<string name="notification_channel_discussion_name" state="needs_review" hash="588648320">Дискусия %1$d</string>
+	<string name="pref_discussion_message_custom_notification_title" state="needs_review" hash="-625696878">Персонализирани известия за съобщения за този разговор</string>
+	<string name="pref_discussion_call_custom_notification_title" state="needs_review" hash="2074412984">Персонализирани известия за повиквания за този разговор</string>
+	<string name="notification_channel_discussion_name" state="needs_review" hash="588648320">Разговор %1$d</string>
 	<string name="notification_channel_discussion_group_name" state="needs_review" hash="491497248">Разговори</string>
 	<string name="notification_channel_discussion_group_description" state="needs_review" hash="-1448542719">Персонализирани известия за конкретни разговори в Olvid.</string>
 	<string name="button_label_edit_group_members" state="needs_review" hash="1855939143">Редактиране на членовете</string>
@@ -1414,7 +1477,7 @@
 	<string name="toast_message_leaving_group_v2" state="needs_review" hash="-240458647">Заявката ви за напускане на групата се обработва.</string>
 	<string name="dialog_message_disband_non_empty_group_v2_confirmation" state="needs_review" hash="-1561301545">Ще разпуснете групата %1$s. Това ще премахне нейните %2$d членове.\n\nПродължавате ли с разпускането на тази група?</string>
 	<string name="menu_action_sync_group" state="needs_review" hash="67261165">Синхронизиране на групата</string>
-	<string name="text_unnamed_discussion" state="needs_review" hash="-170463889">Неназована дискусия</string>
+	<string name="text_unnamed_discussion" state="needs_review" hash="-170463889">Неназован разговор</string>
 	<string name="dialog_message_delete_user_impossible_start" state="needs_review" hash="-644289574">Не можете да премахнете %1$s от списъка си с други потребители, тъй като и двамата сте част от</string>
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">Членове на групата/общо поканени:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">Версия на групата:</string>
@@ -1518,6 +1581,10 @@
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">Групата се създава</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">Нова група</string>
 	<string name="label_group_type" state="needs_review" hash="498463258">Тип група</string>
+	<string name="label_existing_discussions" state="needs_review" hash="-2089160663">Съществуващи разговори</string>
+	<string name="label_last_message_date" state="needs_review" hash="1218222521">Последно съобщение %1$s</string>
+	<string name="button_label_open" state="needs_review" hash="-2066377003">Отвори</string>
+	<string name="button_label_create_a_new_group" state="needs_review" hash="-1073202815">Създаване на нова група</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">Стандартен</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">Всички членове на групата могат да канят нови членове.</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">Контролиран</string>
@@ -1531,6 +1598,8 @@
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Вече не сте администратор на групата.</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Вече имате право да публикувате съобщения.</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-930933808">Не можете да публикувате съобщения тук.</string>
+	<string name="text_you_became_moderator" state="needs_review" hash="-609725743">Вече сте модератор на групата.</string>
+	<string name="text_you_are_no_longer_moderator" state="needs_review" hash="1396461107">Вече не сте модератор на групата.</string>
 	<string name="label_pending" state="needs_review" hash="1975294811">В очакване</string>
 	<string name="pref_app_language_title" state="needs_review" hash="-1748962099">Език на приложението</string>
 	<string name="pref_text_default_device_language" state="needs_review" hash="-1062620207">Език по подразбиране на устройството</string>
@@ -1627,10 +1696,12 @@
 	<string name="label_zoom_in_for_address" state="needs_review" hash="902696925">Увеличете, за да търсите адрес</string>
 	<string name="label_address_lookup_disabled" state="needs_review" hash="-2140124686">Търсенето на адрес е деактивирано</string>
 	<string name="dialog_title_introducing_mentions" state="needs_review" hash="-1741341288">Представяме ви функцията за споменаване на потребители!</string>
-	<string name="dialog_message_introducing_mentions" state="needs_review" hash="622739087">Olvid вече позволява да споменавате потребител в дискусия 🫵! Просто напишете @, последвано от буква или името му, за да видите кой може да бъде споменат.\nОсвен това, когато заглушавате 💤 дискусия или профил, сега можете да изберете да получавате известия само когато сте изрично споменати в съобщение.\nИмайте предвид, че вашите контакти ще трябва да актуализират до последната версия на Olvid, за да видят, че сте ги споменали.</string>
+	<string name="dialog_message_introducing_mentions" state="needs_review" hash="622739087">Olvid вече позволява да споменавате потребител в разговор 🫵! Просто напишете @, последвано от буква или името му, за да видите кой може да бъде споменат.\nОсвен това, когато заглушавате 💤 разговор или профил, сега можете да изберете да получавате известия само когато сте изрично споменати в съобщение.\nИмайте предвид, че вашите контакти ще трябва да актуализират до последната версия на Olvid, за да видят, че сте ги споменали.</string>
 	<string name="pref_no_notify_certificate_change_for_previews_title" state="needs_review" hash="-434788963">Деактивиране на известията за промяна на сертификата при преглед на връзки</string>
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Активирайте тази опция, за да деактивирате откриването на промени в сертификата при извличане на предварителния преглед на връзка. Някои сайтове може да показват различен сертификат при всяка връзка и може да получавате чести известия, ако тази опция е деактивирана.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Използвайте старата библиотека ZXing за сканиране на QR кодове</string>
+	<string name="pref_use_in_house_document_scanner_title" state="needs_review" hash="1552486206">Използвайте скенера за документи на Olvid</string>
+	<string name="pref_use_in_house_document_scanner_summary" state="needs_review" hash="-2092532938">По подразбиране документите се сканират с помощта на ML Kit като част от услугите на Google Play. Активирайте тази опция, за да използвате вградения скенер на Olvid.</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">По подразбиране, Olvid използва ML Kit за сканиране на QR кодове. Активирайте тази опция, ако имате проблеми със сканирането на QR кодове в Olvid.</string>
 	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Използвайте вградения PDF четец</string>
 	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">По подразбиране PDF файловете се отварят във вграден (основен) прегледач. Деактивирайте тази опция, за да използвате външен прегледач вместо това.</string>
@@ -1638,7 +1709,7 @@
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Устройство %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">Това устройство</string>
 	<string name="menu_action_rename_device" state="needs_review" hash="43131083">Преименувайте устройството</string>
-	<string name="menu_action_trust_device" state="needs_review" hash="360435227">Потвърждаване на устройството</string>
+	<string name="menu_action_trust_device" state="needs_review" hash="105728494">Разпознавам това устройство</string>
 	<string name="menu_action_remove_device" state="needs_review" hash="-1485256427">Премахване на устройството</string>
 	<string name="menu_action_refresh_device_list" state="needs_review" hash="1430227802">Обнови списъка с устройства</string>
 	<string name="menu_action_recreate_channel" state="needs_review" hash="837900266">Създаване на нов защитен канал</string>
@@ -1706,8 +1777,9 @@
 	<string name="button_label_add_device_xxx" state="needs_review" hash="-1479212354">Добавяне на устройство \"%1$s\"</string>
 	<string name="notification_title_device_trust" state="needs_review" hash="-1568042777">Ново устройство: \"%1$s\"</string>
 	<string name="notification_title_unnamed_device_trust" state="needs_review" hash="1704207127">Ново устройство</string>
-	<string name="notification_message_device_trust" state="needs_review" hash="753501294">Ново устройство беше добавено към един от вашите профили в Olvid.</string>
-	<string name="notification_action_device_trust" state="needs_review" hash="1450001608">Потвърдете това устройство</string>
+	<string name="notification_message_device_trust" state="needs_review" hash="-1646747013">Към един от вашите профили в Olvid беше добавено ново устройство. Ако не сте го добавили вие, премахнете го от списъка с вашите устройства.</string>
+	<string name="notification_action_device_trust" state="needs_review" hash="936727529">Да, това съм аз</string>
+	<string name="notification_action_device_see_devices" state="needs_review" hash="-1832505809">Моите устройства</string>
 	<string name="notification_channel_device_name" state="needs_review" hash="1347557771">Управление на устройствата</string>
 	<string name="notification_channel_device_description" state="needs_review" hash="-36703170">Известия относно вашите устройства</string>
 	<string name="notification_title_device_expiration" state="needs_review" hash="202400638">Деактивиране на „%1$s“</string>
@@ -1796,8 +1868,8 @@
 	<string name="contact_list_tab_contact" state="needs_review" hash="-859216410">Контакти</string>
 	<string name="contact_list_tab_directory" state="needs_review" hash="351731324">Справочник</string>
 	<string name="contact_list_tab_others" state="needs_review" hash="260936515">Други</string>
-	<string name="dialog_title_invite_contact" state="needs_review" hash="1121224764">Покана за лична дискусия</string>
-	<string name="dialog_message_invite_contact" state="needs_review" hash="883261663">Искате ли да поканите %1$s в лична дискусия?</string>
+	<string name="dialog_title_invite_contact" state="needs_review" hash="1121224764">Покана за личен разговор</string>
+	<string name="dialog_message_invite_contact" state="needs_review" hash="883261663">Искате ли да поканите %1$s в личен разговор?</string>
 	<string name="explanation_empty_other_contact_list" state="needs_review" hash="-121261312">В момента няма никой тук.</string>
 	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="1669386057">Членовете на групата, които все още не са във вашите контакти, ще се показват тук.</string>
 	<string name="explanation_empty_directory" state="needs_review" hash="298073547">Празна директория</string>
@@ -1874,7 +1946,7 @@
 	<string name="pref_app_icon_fragment_title" state="needs_review" hash="-639159435">Променете иконата на приложението</string>
 	<string name="pref_app_icon_fragment_summary" state="needs_review" hash="655175894">Името и иконата на приложението ще бъдат променени на началния ви екран. Това не се отнася за иконата на известията.</string>
 	<string name="pref_app_icon_apply" state="needs_review" hash="509380077">Приложи (може да затвори приложението)</string>
-	<string name="pref_app_icon_shortcut_warning_title" state="needs_review" hash="472834764">Бързи команди за чат</string>
+	<string name="pref_app_icon_shortcut_warning_title" state="needs_review" hash="472834764">Бързи команди за разговор</string>
 	<string name="pref_app_icon_shortcut_warning_text" state="needs_review" hash="648578102">Моля, обърнете внимание, че промяната на иконата на приложението ще изтрие създадените от вас бързи връзки към разговори. Ще трябва да ги създадете отново.</string>
 	<string name="app_name_weather" state="needs_review" hash="-202325750">Времето</string>
 	<string name="app_name_bricks" state="needs_review" hash="-2084998503">Тухли</string>
@@ -1971,7 +2043,7 @@
 	<string name="dialog_unarchive_setting_message" state="needs_review" hash="1567686550">Кога искате вашите разговори да бъдат възстановени от архива?</string>
 	<string name="dialog_unarchive_setting_button_notified" state="needs_review" hash="1859399328">При следващото известие за съобщение</string>
 	<string name="dialog_unarchive_setting_button_never" state="needs_review" hash="610329857">Никога</string>
-	<string name="dialog_unarchive_setting_explain" state="needs_review" hash="1798267293">Можете да промените поведението на известията в настройките на всяка дискусия.</string>
+	<string name="dialog_unarchive_setting_explain" state="needs_review" hash="1798267293">Можете да промените поведението на известията в настройките на всеки разговор.</string>
 	<string name="pref_archived_attachments_title" state="needs_review" hash="-159125479">Автоматично изтегляне на прикачени файлове от архивирани разговори</string>
 	<string name="pref_archived_attachments_summary" state="needs_review" hash="1596754073">Когато тази опция е активирана, прикачени файлове от архивирани разговори ще бъдат автоматично изтегляни според горната настройка.</string>
 	<string name="pref_unarchive_on_notification_title" state="needs_review" hash="-1146947153">Възстановете архивираните разговори при получаване на известие</string>
@@ -2080,6 +2152,8 @@
 	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">Необходима е парола, за да се отвори този PDF файл</string>
 	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">Парола</string>
 	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">Грешна парола</string>
+	<string name="content_description_previous_match" state="needs_review" hash="-124264476">Предишен резултат</string>
+	<string name="content_description_next_match" state="needs_review" hash="-405381756">Следващ резултат</string>
 	<string name="label_poll_create" state="needs_review" hash="-1677246175">Създаване на анкета</string>
 	<string name="label_poll_question" state="needs_review" hash="-1615603188">Въпрос</string>
 	<string name="hint_poll_question" state="needs_review" hash="1961289317">Задайте въпрос</string>
@@ -2110,6 +2184,7 @@
 	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">Все още няма отговор</string>
 	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">Предстояща деактивация на устройството</string>
 	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">Управлявайте моите устройства</string>
+	<string name="tip_expiring_current_device_title" state="needs_review" hash="-2044212270">Това устройство скоро ще бъде деактивирано.</string>
 	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">Устройство, което не е свързано с интернет</string>
 	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">Едно от вашите устройства е офлайн от **повече от 30 дни**.\nАко вече не го използвате, препоръчваме да го **премахнете**, за да избегнете проблеми със синхронизацията.</string>
 	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">Управлявайте моите устройства</string>
@@ -2137,7 +2212,7 @@
 	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">Копирано в буфера за обмен</string>
 	<string name="label_text_qr_code" state="needs_review" hash="284973699">Текст на QR кода</string>
 	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Добавете първия си контакт</string>
-	<string name="label_discussion" state="needs_review" hash="301166224">Дискусия</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">Разговор</string>
 	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Сменете камерата</string>
 	<string name="label_get_in_contact_with" state="needs_review" hash="2100646957">Свържете се дистанционно с %1$s?</string>
 	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Контактите, изброени по-долу, са част от тази група, но все още нямат лична кореспонденция с вас.</string>
@@ -2185,8 +2260,15 @@
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Използвайте „магическа връзка“</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Невалидна магическа връзка</string>
 	<string name="label_hanged_up" state="needs_review" hash="-1516413384">Разговорът беше прекратен.</string>
-	<string name="store_link_need_licenses" state="needs_review" hash="-1212508527">Нуждаете се от абонаменти за вашия екип?</string>
 	<string name="store_link_olvid_store" state="needs_review" hash="-1825630369">Посетете магазина на Olvid</string>
+	<string name="store_link_need_more_options" state="needs_review" hash="-839181230">Искате ли още опции?</string>
+	<string name="button_label_check_all_offers_olvid_store" state="needs_review" hash="361882901">Разгледайте всички наши предложения в магазина Olvid.</string>
+	<string name="label_store_offer_individual" state="needs_review" hash="-1969313106">Индивидуален</string>
+	<string name="label_store_offer_individual_description" state="needs_review" hash="368977236">Единствена лична лицензия, само за вас.</string>
+	<string name="label_store_offer_family" state="needs_review" hash="-2103729206">Семейство</string>
+	<string name="label_store_offer_family_description" state="needs_review" hash="-1487232440">Пакет от 6 лиценза за вас и вашето семейство.</string>
+	<string name="label_store_offer_team" state="needs_review" hash="-421568242">Екип</string>
+	<string name="label_store_offer_team_description" state="needs_review" hash="687093077">Възможност за разпределяне на множество лицензи към вашия екип.</string>
 	<string name="toast_message_reminder_set" state="needs_review" hash="-961055414">Напомнянето е зададено</string>
 	<string name="dialog_title_keycloak_authentication_impossible" state="needs_review" hash="325273853">Аутентификацията е невъзможна</string>
 	<string name="dialog_message_keycloak_authentication_impossible" state="needs_review" hash="-2031322232">В момента вашият профил се управлява от вашата организация и е необходима повторна автентификация. Въпреки това, изглежда, че няма налични поддържани методи за автентификация.\n\nМоля, свържете се с вашия администратор за повече информация.</string>
@@ -2196,7 +2278,7 @@
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Прекъсване на текущия трансфер?</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">В момента се извършва прехвърляне на историята на съобщенията. Искате ли да го прекратите?</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Прекъсни трансфера</string>
-	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Очаквам да се присъединя към тази дискусия</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Очаквам да се сеприсъединя към този разговор</string>
 	<string name="label_your_other_device" state="needs_review" hash="-339632056">Вашето друго устройство</string>
 	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">иска да прехвърли историята на вашите разговори на това устройство</string>
 	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">„%1$s“ иска да прехвърли историята на вашите разговори на това устройство</string>
@@ -2242,7 +2324,7 @@
 	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Пълно прехвърляне. Включва всички съобщения и прикачени файлове.</string>
 	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">Експортирайте историята на вашите разговори като .zip файл. По-късно можете да я импортирате на друго устройство във вашия профил **%1$s**.\n\nМожете също да разархивирате този файл, за да **виждате историята на разговорите си в уеб страница**.</string>
 	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Създаване на .zip файл</string>
-	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d дискусии и %2$d съобщения</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d разговори и %2$d съобщения</string>
 	<string name="label_computing" state="needs_review" hash="1393495921">Изчислява се…</string>
 	<string name="label_total_size" state="needs_review" hash="-788411929">Общ размер: %1$s</string>
 	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Защитете вашите експортирани данни</string>
@@ -2298,8 +2380,6 @@
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Анализиране на съдържанието</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Анализиране на експортираните разговори</string>
 	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">Възникна грешка при зареждането на файла със стилове на OpenStreetMap.</string>
-	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Вътрешно-приложните абонаменти не са налични</string>
-	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Инсталираната от вас версия на Olvid не включва библиотеката Google Billing и не поддържа покупки в приложението.\n\nЗа повече информация, моля, свържете се с нас на **feedback@olvid.io**.</string>
 	<string name="ftux_next" state="needs_review" hash="1158639077">Следващ</string>
 	<string name="ftux_start" state="needs_review" hash="646298532">Започнете</string>
 	<string name="ftux_page_indicator" state="needs_review" hash="1987610035">Страница %1$d от %2$d</string>

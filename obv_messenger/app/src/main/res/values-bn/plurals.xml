@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">আপনার ডিভাইসগুলোর মধ্যে একটি **%1$d দিনের** মধ্যে নিষ্ক্রিয় হয়ে যাবে এবং ডিঅ্যাক্টিভেট করা হবে।\nআপনি এটিকে সক্রিয় রাখতে একটি **Olvid+** সাবস্ক্রিপশন কিনতে পারেন।</item>
 		<item quantity="other" state="needs_review" hash="-574658149">আপনার ডিভাইসগুলোর মধ্যে একটি **%1$d দিনের** মধ্যে নিষ্ক্রিয় হয়ে যাবে এবং ডিঅ্যাক্টিভেট করা হবে।\nআপনি এটিকে সক্রিয় রাখতে একটি **Olvid+** সাবস্ক্রিপশন কিনতে পারেন।</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">এই ডিভাইসটি **%1$d দিনের** মধ্যে নিষ্ক্রিয় হয়ে যাবে এবং ডিঅ্যাক্টিভেট করা হবে।\nআপনি এটিকে সক্রিয় রাখতে একটি **Olvid+** সাবস্ক্রিপশন কিনতে পারেন।</item>
+		<item quantity="other" state="needs_review" hash="993103846">এই ডিভাইসটি **%1$d দিনের** মধ্যে নিষ্ক্রিয় হয়ে যাবে এবং ডিঅ্যাক্টিভেট করা হবে।\nআপনি এটিকে সক্রিয় রাখতে একটি **Olvid+** সাবস্ক্রিপশন কিনতে পারেন।</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s গ্রুপে যোগদান করেছে</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s গ্রুপে যোগদান করেছে</item>
@@ -100,11 +104,11 @@
 	</plurals>
 	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-931157230">আপনি কি সত্যিই নির্বাচিত আলোচনা এবং এর মধ্যে থাকা সমস্ত বার্তা মুছে ফেলতে চান?\nএই কাজটি আর পূর্বের অবস্থায় ফিরিয়ে আনা যাবে না।</item>
-		<item quantity="other" state="needs_review" hash="-1815739098">আপনি কি সত্যিই নির্বাচিত %1$d কথোপকথন এবং সেগুলোর মধ্যে থাকা সমস্ত বার্তা মুছে ফেলতে চান?\nএই কাজটি আর পূর্বের অবস্থায় ফিরিয়ে আনা যাবে না।</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">আপনি কি সত্যিই নির্বাচিত %1$d আলোচনা এবং সেগুলোর মধ্যে থাকা সমস্ত বার্তা মুছে ফেলতে চান?\nএই কাজটি আর পূর্বের অবস্থায় ফিরিয়ে আনা যাবে না।</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-2139168692">আপনি নির্বাচিত আলোচনা এবং এর মধ্যে থাকা সমস্ত বার্তা কীভাবে মুছতে চান?\nএই কাজটি আর পূর্বের অবস্থায় ফিরিয়ে আনা যাবে না।</item>
-		<item quantity="other" state="needs_review" hash="-1430564144">আপনি নির্বাচিত %1$d কথোপকথন এবং সেগুলোতে থাকা সমস্ত বার্তা কীভাবে মুছতে চান?\nএই কাজটি আর পূর্বের অবস্থায় ফিরিয়ে আনা যাবে না।</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">আপনি নির্বাচিত %1$d আলোচনা এবং সেগুলোতে থাকা সমস্ত বার্তা কীভাবে মুছতে চান?\nএই কাজটি আর পূর্বের অবস্থায় ফিরিয়ে আনা যাবে না।</item>
 	</plurals>
 	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-947341357">আপনি কি সত্যিই নির্বাচিত বার্তাটি মুছে ফেলতে চান?\nএই কাজটি আর পূর্বের অবস্থায় ফিরিয়ে আনা যাবে না।</item>
@@ -120,7 +124,7 @@
 	</plurals>
 	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="2118446236">আপনি একটি আলোচনা এবং এর মধ্যে থাকা বার্তাগুলি **স্থায়ীভাবে** মুছে ফেলতে যাচ্ছেন এবং এটি এই আলোচনায় **সবার** জন্য প্রযোজ্য হবে। অনুগ্রহ করে নিশ্চিত করুন যে আপনি এটিই করতে চান।</item>
-		<item quantity="other" state="needs_review" hash="-1558931055">আপনি %1$d সংখ্যক কথোপকথন এবং সেগুলোর মধ্যে থাকা বার্তাগুলো **চিরতরে** মুছে ফেলতে যাচ্ছেন, এবং এটি **প্রত্যেক** অংশগ্রহণকারীর জন্য প্রযোজ্য হবে। অনুগ্রহ করে নিশ্চিত করুন যে আপনি এটিই করতে চান।</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">আপনি %1$d সংখ্যক আলোচনা এবং সেগুলোর মধ্যে থাকা বার্তাগুলো **চিরতরে** মুছে ফেলতে যাচ্ছেন, এবং এটি **প্রত্যেক** অংশগ্রহণকারীর জন্য প্রযোজ্য হবে। অনুগ্রহ করে নিশ্চিত করুন যে আপনি এটিই করতে চান।</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">আপনি প্রতিটি গ্রুপের সদস্যকে, যাদের সাথে আপনার একটি চ্যানেল রয়েছে (বর্তমানে ১ জন সদস্য), একটি ব্যক্তিগত আলোচনায় আমন্ত্রণ জানাতে যাচ্ছেন। আপনি কি এটি করতে চান?</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">%1$d গ্রুপে যোগ করুন</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">%1$d গ্রুপে যোগ করুন</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">আপনার ইতিমধ্যে এই অংশগ্রহণকারীদের সাথে একটি আলোচনা রয়েছে।</item>
+		<item quantity="other" state="needs_review" hash="809550612">আপনার ইতিমধ্যে এই অংশগ্রহণকারীদের সাথে %1$d আলোচনা রয়েছে।</item>
 	</plurals>
 </resources>

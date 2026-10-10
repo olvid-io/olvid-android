@@ -88,7 +88,6 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.activities.ObvLinkActivity
-import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
@@ -100,9 +99,12 @@ import io.olvid.messenger.main.contacts.ContactInvitationPopup
 import io.olvid.messenger.main.contacts.ContactListScreen
 import io.olvid.messenger.main.contacts.ContactListViewModel
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
+import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.GROUP
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_MORE_RESULTS
+import io.olvid.messenger.main.groups.GroupListViewModel
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,6 +117,11 @@ fun NewMessageScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val keyboardController = LocalSoftwareKeyboardController.current
+    val groupListViewModel = viewModel<GroupListViewModel>()
+    val groups by groupListViewModel.groups.observeAsState()
+    LaunchedEffect(groups) {
+        contactListViewModel.setUnfilteredGroups(groups)
+    }
     val contacts by contactListViewModel.filteredContacts.observeAsState(emptyList())
     val context = LocalContext.current
     val showHeader = contacts.isNotEmpty() || contactListViewModel.keycloakManaged.value || contactListViewModel.isFiltering()
@@ -304,7 +311,7 @@ fun NewMessageScreen(
     ) { contentPadding ->
         if (Build.VERSION.SDK_INT < 28) {
             LaunchedEffect(Unit) {
-                delay(100)
+                delay(100.milliseconds)
                 keyboardController?.hide()
             }
         }
@@ -354,12 +361,31 @@ fun NewMessageScreen(
                             }
                         }
 
+                        GROUP -> contactOrKeycloakDetails.groupOrGroup2?.let { groupOrGroup2 ->
+                            groupOrGroup2.group?.let { group ->
+                                App.openGroupDiscussionActivity(
+                                    context,
+                                    group.bytesOwnedIdentity,
+                                    group.bytesGroupOwnerAndUid
+                                )
+                            }
+                            groupOrGroup2.group2?.let { group2 ->
+                                App.openGroupV2DiscussionActivity(
+                                    context,
+                                    group2.bytesOwnedIdentity,
+                                    group2.bytesGroupIdentifier
+                                )
+                            }
+                            dismissParent.invoke()
+                        }
+
                         KEYCLOAK_MORE_RESULTS -> {}
                     }
                 },
                 onInvite = null,
                 onScrollStart = { keyboardController?.hide() },
                 showOthers = false,
+                showGroups = true,
                 emptyContactTabContent = {
                     MainScreenEmptyList(
                         modifier = Modifier

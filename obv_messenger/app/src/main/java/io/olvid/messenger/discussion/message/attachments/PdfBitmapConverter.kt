@@ -22,6 +22,7 @@ package io.olvid.messenger.discussion.message.attachments
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.RectF
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.pdf.LoadParams
 import android.graphics.pdf.PdfRenderer
@@ -30,6 +31,7 @@ import android.graphics.pdf.content.PdfPageGotoLinkContent
 import android.graphics.pdf.content.PdfPageLinkContent
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import androidx.annotation.RequiresApi
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toDrawable
 import coil.ImageLoader
@@ -59,7 +61,9 @@ class PdfBitmapConverter {
         pdfPassword: String?
     ): List<RenderablePdfPage> {
         return withContext(Dispatchers.IO) {
-            renderer?.close()
+            synchronized(lock) {
+                renderer?.close()
+            }
             val fd = ParcelFileDescriptor.open(
                 File(App.absolutePathFromRelative(filePath)!!),
                 ParcelFileDescriptor.MODE_READ_ONLY
@@ -135,6 +139,17 @@ class PdfBitmapConverter {
             }
         }
     }
+
+    // rects are in original page-point coordinates, one List<RectF> per match (multi-line matches have several rects)
+    @RequiresApi(35)
+    fun searchPage(pageIndex: Int, query: String): List<List<RectF>> =
+        synchronized(lock) {
+            runCatching {
+                renderer?.openPage(pageIndex)?.use { page ->
+                    page.searchText(query).map { it.bounds }.toSet().toList() // convert to set to avoid duplicate entries
+                }
+            }.getOrNull() ?: emptyList()
+        }
 }
 
 data class RenderablePdfPage(

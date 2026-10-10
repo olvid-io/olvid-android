@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">あなたのデバイスのいずれかが**%1$d日以内**に期限切れとなり、無効になります。\n**Olvid+**サブスクリプションを購入して、アクティブ状態を維持できます。</item>
 		<item quantity="other" state="needs_review" hash="-574658149">あなたのデバイスのいずれかが**%1$d日以内**に期限切れとなり、無効になります。\n**Olvid+**サブスクリプションを購入して、アクティブ状態を維持できます。</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">このデバイスは、**%1$d日以内**で期限切れとなり、使用できなくなります。\nアクティブな状態を維持するには、**Olvid+**のサブスクリプションをご購入ください。</item>
+		<item quantity="other" state="needs_review" hash="993103846">このデバイスは、**%1$d日以内**で期限切れとなり、使用できなくなります。\nアクティブな状態を維持するには、**Olvid+**のサブスクリプションをご購入ください。</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$sがグループに参加しました</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$sがグループに参加しました</item>
@@ -79,32 +83,32 @@
 		<item quantity="other" state="needs_review" hash="1022571360">%1$d の連絡先</item>
 	</plurals>
 	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="1772966333">会話がアーカイブされました</item>
-		<item quantity="other" state="needs_review" hash="1402495414">%1$d のチャットがアーカイブされました</item>
+		<item quantity="one" state="needs_review" hash="1772966333">ディスカッションがアーカイブされました</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d のディスカッションがアーカイブされました</item>
 	</plurals>
 	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1312483800">会話がアーカイブ解除されました</item>
-		<item quantity="other" state="needs_review" hash="-2093736213">%1$d の議論がアーカイブ解除されました</item>
+		<item quantity="one" state="needs_review" hash="-1312483800">ディスカッションがアーカイブ解除されました</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d のディスカッションがアーカイブ解除されました</item>
 	</plurals>
 	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-2045500103">メッセージをお気に入りから削除しました</item>
 		<item quantity="other" state="needs_review" hash="204728896">%1$d メッセージをお気に入りから削除しました</item>
 	</plurals>
 	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-716893580">選択した会話を削除しますか？</item>
-		<item quantity="other" state="needs_review" hash="-15840526">選択した会話を削除しますか？</item>
+		<item quantity="one" state="needs_review" hash="-716893580">選択したディスカッションを削除しますか？</item>
+		<item quantity="other" state="needs_review" hash="-15840526">選択したディスカッションを削除しますか？</item>
 	</plurals>
 	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-862879351">選択したメッセージを削除しますか？</item>
 		<item quantity="other" state="needs_review" hash="-2020248805">選択したメッセージを削除しますか？</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-931157230">選択した会話と、そのすべてのメッセージを本当に削除しますか？\nこの操作は元に戻せません。</item>
-		<item quantity="other" state="needs_review" hash="-1815739098">選択した%1$dのチャットと、その中のすべてのメッセージを本当に削除しますか？\nこの操作は元に戻せません。</item>
+		<item quantity="one" state="needs_review" hash="-931157230">選択したディスカッションと、そのすべてのメッセージを本当に削除しますか？\nこの操作は元に戻せません。</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">選択した%1$dのディスカッションと、その中のすべてのメッセージを本当に削除しますか？\nこの操作は元に戻せません。</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-2139168692">選択した会話と、その中のすべてのメッセージをどのように削除しますか？\nこの操作は元に戻せません。</item>
-		<item quantity="other" state="needs_review" hash="-1430564144">選択した%1$dの会話と、その中のすべてのメッセージをどのように削除しますか？\nこの操作は元に戻せません。</item>
+		<item quantity="one" state="needs_review" hash="-2139168692">選択したディスカッションと、その中のすべてのメッセージをどのように削除しますか？\nこの操作は元に戻せません。</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">選択した%1$dのディスカッションと、その中のすべてのメッセージをどのように削除しますか？\nこの操作は元に戻せません。</item>
 	</plurals>
 	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-947341357">選択したメッセージを本当に削除しますか？\nこの操作は元に戻せません。</item>
@@ -115,19 +119,19 @@
 		<item quantity="other" state="needs_review" hash="-895867176">選択した%1$dメッセージをどのように削除しますか？\nこの操作は元に戻せません。</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-606769319">このメッセージを**完全に**、このチャットの**全員**に対して削除しようとしています。本当に削除してよろしいですか？</item>
-		<item quantity="other" state="needs_review" hash="-1284393519">このチャットで%1$dのメッセージを**完全に****全員**に対して削除しようとしています。本当に削除してよろしいですか？</item>
+		<item quantity="one" state="needs_review" hash="-606769319">このメッセージを**完全に**、このディスカッションの**全員**に対して削除しようとしています。本当に削除してよろしいですか？</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">このディスカッションで%1$dのメッセージを**完全に****全員**に対して削除しようとしています。本当に削除してよろしいですか？</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="2118446236">このチャットとその内容を**完全に**削除すると、**全員**に影響します。本当に削除してよろしいですか？</item>
-		<item quantity="other" state="needs_review" hash="-1558931055">%1$dのチャットと、その中のメッセージを**完全に**、このチャットの**全員**に対して削除しようとしています。本当に削除してもよろしいですか？</item>
+		<item quantity="one" state="needs_review" hash="2118446236">このディスカッションとその内容を**完全に**削除すると、**全員**に影響します。本当に削除してよろしいですか？</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">%1$dのディスカッションと、その中のメッセージを**完全に**、このディスカッションの**全員**に対して削除しようとしています。本当に削除してもよろですか？</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">チャンネルでやり取りしているグループメンバー（現在1名）全員を、プライベートなディスカッションに招待しようとしています。\n続行しますか？</item>
 		<item quantity="other" state="needs_review" hash="-994717142">現在、チャンネルでやり取りしているグループメンバー全員（現在%1$d人）を、プライベートなディスカッションに招待しようとしています。\n続行しますか？</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">グループのメンバー1人がプライベートな議論に招待できます</item>
+		<item quantity="one" state="needs_review" hash="-127723614">グループのメンバー1人がプライベートなディスカッションに招待できます</item>
 		<item quantity="other" state="needs_review" hash="-496794154">%1$d グループメンバーは、プライベートなディスカッションに招待できます</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -263,7 +267,7 @@
 		<item quantity="other" state="needs_review" hash="965402074">%1$dメンバー</item>
 	</plurals>
 	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1006155949">あなたの会話に、リモートで削除されたメッセージが1つあります。削除しますか？</item>
+		<item quantity="one" state="needs_review" hash="-1006155949">あなたのディスカッションに、リモートで削除されたメッセージが1つあります。削除しますか？</item>
 		<item quantity="other" state="needs_review" hash="-1716115044">あなたのディスカッションには現在、%1$d個の削除されたリモートメッセージがあります。これらのマーカーをすべて削除しますか？</item>
 	</plurals>
 	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">%1$dグループに追加</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">%1$d グループに追加</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">これらの参加者との間で、すでにディスカッションが行われています。</item>
+		<item quantity="other" state="needs_review" hash="809550612">これらの参加者との間で、すでに%1$d件のディスカッションがあります。</item>
 	</plurals>
 </resources>

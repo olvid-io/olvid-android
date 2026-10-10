@@ -76,11 +76,13 @@ fun <T> SelectionTopAppBar(
     redItems: List<Int> = emptyList(),
     disabledItems: List<Int> = emptyList(),
     transparent: Boolean = false,
+    windowInsets: WindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
     onBackPressed: (() -> Unit)? = null
 ) {
     OlvidTopAppBar(
         modifier = modifier,
         transparent = transparent,
+        windowInsets = windowInsets,
         title = {
             Crossfade(
                 targetState = selection.isEmpty(),
@@ -188,6 +190,7 @@ fun OlvidTopAppBar(
     transparent: Boolean = false,
     alwaysDark: Boolean = false,
     elevationShadow: Boolean = true,
+    windowInsets: WindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
     onBackPressed: (() -> Unit)? = null
 ) {
     TopAppBar(
@@ -230,7 +233,7 @@ fun OlvidTopAppBar(
             }
         },
         actions = actions,
-        windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+        windowInsets = windowInsets,
     )
 }
 

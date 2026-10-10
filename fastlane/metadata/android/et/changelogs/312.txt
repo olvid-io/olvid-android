@@ -1,0 +1,5 @@
+- Kuvab ainult esimesed 4 pilti sõnumis ja lisab albumivaate, et kõiki näha.
+- Lisatud dokumendiskanneerija.
+- Topeltpuudutage saadud sõnumit, et sellele reageerida vaikimisi emotikoniga.
+- Uued avatarid kontaktide ja gruppide jaoks, kellel pole profiilipilti.
+- Lisatud nupp, et saata foto otse pealehelt.

@@ -79,11 +79,10 @@
 	<string name="dialog_title_rename_discussion" state="needs_review" hash="1413472286">Gesprek hernoemen</string>
 	<string name="dialog_title_rename_group" state="needs_review" hash="1461324427">Groep hernoemen</string>
 	<string name="dialog_title_restart_channel_establishment" state="needs_review" hash="-645769680">Kanaalopbouw herstarten?</string>
-	<string name="dialog_title_share_with" state="needs_review" hash="854107768">Delen met…</string>
-	<string name="dialog_title_share_recipients" state="needs_review" hash="1157053138">Selecteer ontvangers</string>
+	<string name="dialog_title_share_recipients" state="needs_review" hash="463614560">Kies gesprekken</string>
 	<string name="share_label_from" state="needs_review" hash="2049052075">Van:</string>
 	<string name="share_label_to" state="needs_review" hash="-1785690373">Aan:</string>
-	<string name="share_label_choose_recipients" state="needs_review" hash="1157053138">Selecteer ontvangers</string>
+	<string name="share_label_choose_recipients" state="needs_review" hash="463614560">Kies gesprekken</string>
 	<string name="hint_share_message" state="needs_review" hash="-763169957">Voeg een bericht toe…</string>
 	<string name="content_description_delete_attachment" state="needs_review" hash="-220348329">Bijlage verwijderen</string>
 	<string name="dialog_title_shortcut_to" state="needs_review" hash="-1193591200">Snelkoppeling maken naar…</string>
@@ -111,7 +110,7 @@
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">Geen bijlage gevonden</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">Geen link gevonden</string>
 	<string name="hint_company" state="needs_review" hash="988571519">Bedrijf</string>
-	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Bericht schrijven</string>
+	<string name="hint_compose_your_message" state="needs_review" hash="809999904">Bericht</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Verwijdervolle bericht</string>
 	<string name="label_edit_your_message" state="needs_review" hash="1091877412">Bewerk je bericht</string>
 	<string name="label_reply_to_x" state="needs_review" hash="1941377665">Antwoord op %s</string>
@@ -168,7 +167,7 @@
 	<string name="label_copy" state="needs_review" hash="-811327733">Kopiëren</string>
 	<string name="label_creating_channel" state="needs_review" hash="1375229137">Kanaal\naanmaken</string>
 	<string name="label_download" state="needs_review" hash="2567692">Downloaden</string>
-	<string name="label_establishing_secure_connection" state="needs_review" hash="-1534656273">Een beveiligd discussiekanaal tot stand brengen</string>
+	<string name="label_establishing_secure_connection" state="needs_review" hash="-1534656273">Een beveiligd gesprekskanaal tot stand brengen</string>
 	<string name="label_group_card" state="needs_review" hash="-1430550686">Groepskaart</string>
 	<string name="label_group_card_published" state="needs_review" hash="-58328192">Groepskaart - Gepubliceerd</string>
 	<string name="label_group_card_published_update" state="needs_review" hash="-1889428058">Groepskaart - Nieuw</string>
@@ -208,14 +207,24 @@
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">Contactnaam wijzigen</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">Opslaan</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">Instellingen</string>
+	<string name="menu_action_send_photo" state="needs_review" hash="13932391">Een foto sturen</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">Delen</string>
 	<string name="menu_action_bookmark" state="needs_review" hash="1146136289">Bladwijzer</string>
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Verwijder bladwijzer</string>
+	<string name="menu_action_view_message" state="needs_review" hash="-211312046">Bericht bekijken</string>
+	<string name="label_see_more" state="needs_review" hash="-1206298538">Meer bekijken</string>
+	<string name="label_formatted_text" state="needs_review" hash="664283030">Geformatteerd</string>
+	<string name="label_raw_text" state="needs_review" hash="-1645103337">Onbewerkt</string>
+	<string name="pref_truncate_long_messages_title" state="needs_review" hash="576500375">Lange berichten inkorten</string>
+	<string name="pref_truncate_long_messages_full_screen" state="needs_review" hash="1513604976">Klik om het scherm op volledig formaat te openen</string>
+	<string name="pref_truncate_long_messages_inline" state="needs_review" hash="1658956871">Klik om uit te vouwen</string>
+	<string name="pref_truncate_long_messages_never" state="needs_review" hash="1348404810">Nooit inkorten</string>
+	<string name="label_select_message_to_copy" state="needs_review" hash="1560698970">Selecteer een deel van het bericht om het te kopiëren.</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Archiveren</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Archief ongedaan maken</string>
 	<string name="menu_check_update" state="needs_review" hash="1635875089">Controleer op updates</string>
-	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Deze chat is vergrendeld</string>
-	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Deze chat is alleen-lezen</string>
+	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Dit gesprek is vergrendeld</string>
+	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Dit gesprek is alleen-lezen</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Je berichten worden automatisch verzonden zodra een beveiligde verbinding voor dit gesprek is ingesteld. Tot die tijd blijven ze in de wacht staan.</string>
 	<string name="message_error_first_or_last_name_needed" state="needs_review" hash="-1907938730">Vul een voor- of achternaam in.</string>
 	<string name="message_error_trust_origin" state="needs_review" hash="51944132">Fout bij het ophalen van de oorsprong van het contactvertrouwen</string>
@@ -248,6 +257,8 @@
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">Zeer hoog</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Je hebt de groep verlaten</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Je bent weer bij de groep gekomen</string>
+	<string name="label_groups_administered" state="needs_review" hash="353496672">Groepen die je beheert</string>
+	<string name="label_groups_joined" state="needs_review" hash="-1353689862">Toegetreden groepen</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Je bent bij de groep gekomen</string>
 	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s heeft je toegevoegd aan deze groep.</string>
 	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s heeft je opnieuw aan deze groep toegevoegd.</string>
@@ -324,7 +335,7 @@
 	<string name="text_user_added_to_contacts" state="needs_review" hash="-792506872">Gebruiker toegevoegd aan je contacten</string>
 	<string name="toast_message_user_deleted" state="needs_review" hash="-1664642954">Gebruiker verwijderd</string>
 	<string name="text_original_message_not_found" state="needs_review" hash="2014071006">Originele bericht niet gevonden</string>
-	<string name="text_discussion_end2end_disclaimer" state="needs_review" hash="165389435">Berichten die in deze discussie zijn geplaatst, zijn beschermd met end-to-end-encryptie.\nHun vertrouwelijkheid, authenticiteit en de identiteit van de afzender worden gegarandeerd door cryptografie.</string>
+	<string name="text_discussion_end2end_disclaimer" state="needs_review" hash="165389435">Berichten die in dit gesprek zijn geplaatst, zijn beschermd met end-to-end-encryptie.\nHun vertrouwelijkheid, authenticiteit en de identiteit van de afzender worden gegarandeerd door cryptografie.</string>
 	<string name="text_unknown_member_joined_the_group" state="needs_review" hash="1051900858">Een onbekend lid is toegevoegd aan de groep</string>
 	<string name="text_unknown_member_left_the_group" state="needs_review" hash="183620441">Een onbekend lid heeft de groep verlaten</string>
 	<string name="pref_reset_dialogs_title" state="needs_review" hash="-1377245223">Alle waarschuwingen resetten</string>
@@ -509,6 +520,8 @@
 	<string name="pref_text_dark_mode_on" state="needs_review" hash="794872984">Gebruik altijd het donkere thema</string>
 	<string name="pref_text_dark_mode_off" state="needs_review" hash="1031187033">Gebruik altijd het lichte thema</string>
 	<string name="pref_text_dark_mode_auto" state="needs_review" hash="-1140013121">Systeeminstelling gebruiken</string>
+	<string name="pref_use_pattern_avatars_title" state="needs_review" hash="-184462474">Gegenereerde avatars</string>
+	<string name="pref_use_pattern_avatars_summary" state="needs_review" hash="-1895366464">Voor contacten zonder foto, toon een uniek gekleurd patroon in plaats van hun initialen.</string>
 	<string name="menu_action_help_faq" state="needs_review" hash="971329012">Hulp / FAQ</string>
 	<string name="menu_action_call_contact" state="needs_review" hash="546297186">Contact bellen</string>
 	<string name="notification_title_incoming_webrtc_call" state="needs_review" hash="-2109880396">Inkomend Olvid-gesprek van %1$s</string>
@@ -692,7 +705,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">Licentieserver:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">Je server:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">Ongeldige licentieactiveringslink.\n\nNeem contact op met de persoon die je deze link heeft gestuurd.</string>
-	<string name="label_checking_license" state="needs_review" hash="-777109669">Licentie wordt gecontroleerd…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">Kan licentiestatus niet controleren</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Onbekende licentie</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Geldige licentie</string>
@@ -740,6 +752,16 @@
 	<string name="text_message_content_wiped" state="needs_review" hash="1781783786">(berichtinhoud gewist)</string>
 	<string name="text_ephemeral_message_explanation" state="needs_review" hash="612413232">Tik om de\ninhoud van het bericht te bekijken</string>
 	<string name="text_visible_once" state="needs_review" hash="962464352">Slechts één keer zichtbaar</string>
+	<string name="dialog_title_ephemeral_message" state="needs_review" hash="-1527208333">Verwijdervende bericht</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave" state="needs_review" hash="1852111882">Dit bericht wordt verwijderd zodra je dit gesprek verlaat.</string>
+	<string name="text_ephemeral_read_once_erased_on_leave" state="needs_review" hash="-1031412379">De inhoud van dit bericht wordt verwijderd wanneer je dit gesprek verlaat.</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave_once_opened" state="needs_review" hash="-1827602456">Zodra deze is geopend, wordt dit bericht verwijderd wanneer je dit gesprek verlaat.</string>
+	<string name="text_ephemeral_deleted_at_time" state="needs_review" hash="831937049">Wordt verwijderd op %1$s</string>
+	<string name="text_ephemeral_deleted_on_date_at_time" state="needs_review" hash="667854133">Wordt verwijderd op %1$s om %2$s.</string>
+	<string name="text_ephemeral_content_erased_at_time" state="needs_review" hash="1038815627">De inhoud wordt verwijderd op %1$s.</string>
+	<string name="text_ephemeral_content_erased_on_date_at_time" state="needs_review" hash="848079053">De inhoud wordt verwijderd op %1$s om %2$s.</string>
+	<string name="text_ephemeral_countdown_starts_when_sent" state="needs_review" hash="-1010200489">Het aftellen begint zodra het bericht is verzonden.</string>
+	<string name="text_ephemeral_countdown_starts_when_opened" state="needs_review" hash="1194691757">De aftelling begint wanneer je het bericht opent.</string>
 	<string name="text_timer_s" state="needs_review" hash="-1146250144">%1$ds</string>
 	<string name="text_timer_m" state="needs_review" hash="-1318025056">%1$dm</string>
 	<string name="text_timer_h" state="needs_review" hash="-1461170816">%1$dh</string>
@@ -775,8 +797,10 @@
 	<string name="pref_auto_open_limited_visibility_inbound_title" state="needs_review" hash="-1870189996">Verwisselbare berichten automatisch openen</string>
 	<string name="pref_retain_wiped_outbound_messages_title" state="needs_review" hash="-342021313">Verwijderde uitgaande berichten behouden</string>
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Berichten verzenden en ontvangen</string>
-	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Wanneer geactiveerd, worden eenmalige berichten en berichten met de standaard beperkte zichtbaarheidsduur geopend zodra je de discussie opent. Anders is er een klik nodig.</string>
+	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Wanneer geactiveerd, worden eenmalige berichten en berichten met de standaard beperkte zichtbaarheidsduur geopend zodra je het gesprek opent. Anders is er een klik nodig.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Wanneer geactiveerd, worden gewiste uitgaande berichten bewaard, zodat je kunt zien wanneer ze zijn afgeleverd of gelezen. Anders worden ze verwijderd.</string>
+	<string name="pref_default_reaction_title" state="needs_review" hash="1457188713">Standaardreactie</string>
+	<string name="pref_default_reaction_summary" state="needs_review" hash="-1065900793">Tik twee keer op een ontvangen bericht om te reageren met %1$s. Tik nogmaals om je reactie te verwijderen.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Webclient</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Fout bij het verwerken van de link voor het bijwerken van instellingen</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Berichten verzenden en ontvangen</string>
@@ -784,7 +808,7 @@
 	<string name="pref_discussion_category_shared_ephemeral_settings_summary" state="needs_review" hash="-1511387101">De onderstaande instellingen worden gedeeld door alle deelnemers aan dit gesprek. Het wijzigen ervan heeft invloed op de standaardzichtbaarheid en de bewaartermijn van berichten die door alle deelnemers worden verzonden.</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_summary_only_owner" state="needs_review" hash="507098821">De onderstaande instellingen worden gedeeld door alle deelnemers aan dit gesprek. Het wijzigen ervan heeft invloed op de standaard zichtbaarheid en duur van de berichten die door alle deelnemers worden verzonden.\n\nJe hebt geen toestemming om deze instellingen te wijzigen.</string>
 	<string name="pref_discussion_read_once_title" state="needs_review" hash="1347493911">Eenmalig leesbare berichten</string>
-	<string name="pref_discussion_read_once_summary" state="needs_review" hash="-126623825">Wanneer geactiveerd, worden berichten en bijlagen één keer weergegeven en verwijderd wanneer je de chat verlaat.</string>
+	<string name="pref_discussion_read_once_summary" state="needs_review" hash="-126623825">Wanneer geactiveerd, worden berichten en bijlagen één keer weergegeven en verwijderd wanneer je het gesprek verlaat.</string>
 	<string name="pref_discussion_visibility_duration_title" state="needs_review" hash="-640499771">Duur van de zichtbaarheid van berichten</string>
 	<string name="pref_discussion_existence_duration_title" state="needs_review" hash="530735129">Duur van het bestaan van berichten</string>
 	<string name="pref_discussion_remote_delete_title" state="needs_review" hash="1812520789">Wie kan \"overal verwijderen\" berichten van andere gebruikers?</string>
@@ -814,7 +838,7 @@
 	<string name="pref_discussion_existence_duration_summary" state="needs_review" hash="1593195523">Berichten worden automatisch verwijderd na: %1$s</string>
 	<string name="dialog_title_shared_ephemeral_settings_modified" state="needs_review" hash="-710464596">Instellingen voor gedeelde, verdwijnende berichten gewijzigd</string>
 	<string name="dialog_message_shared_ephemeral_settings_modified" state="needs_review" hash="715864223">Je hebt de standaardinstellingen voor verdwijnende berichten voor dit gesprek gewijzigd.\n\nWil je deze instellingen bijwerken voor jou en alle andere deelnemers aan het gesprek, of wil je je wijzigingen annuleren?</string>
-	<string name="text_discussion_shared_settings_updated" state="needs_review" hash="-151974912">Gedeelde chatinstellingen bijgewerkt</string>
+	<string name="text_discussion_shared_settings_updated" state="needs_review" hash="-151974912">Gedeelde gespreksinstellingen bijgewerkt</string>
 	<string name="text_updated_shared_settings" state="needs_review" hash="1457023446">%1$s heeft de gedeelde instellingen van het gesprek bijgewerkt</string>
 	<string name="text_updated_shared_settings_you" state="needs_review" hash="40728921">Je hebt de gedeelde instellingen van het gesprek bijgewerkt</string>
 	<string name="text_non_ephemeral_messages" state="needs_review" hash="402305240">Niet-vervluchtigende berichten</string>
@@ -833,7 +857,7 @@
 	<string name="pref_discussion_retention_count_dialog_message_default_null" state="needs_review" hash="-86538410">Voer het aantal berichten in dat je in dit gesprek wilt bewaren.\nLaat dit veld leeg om je standaardinstelling te gebruiken (alle berichten bewaren).\n\nOngelezen berichten worden nooit verwijderd.</string>
 	<string name="pref_discussion_retention_count_dialog_message_default_number" state="needs_review" hash="-2144782876">Voer het aantal berichten in dat je in dit gesprek wilt bewaren.\nLaat dit veld leeg om je standaardinstelling te gebruiken (de laatste %1$d berichten bewaren).\nVoer 0 in om alle berichten te bewaren.\n\nOngelezen berichten worden nooit verwijderd.</string>
 	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">Beleid voor het bewaren van gespreksberichten</string>
-	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">Met de onderstaande instellingen kun je oude berichten in deze chat automatisch verwijderen. Ze hebben voorrang op je standaardretentiebeleid.</string>
+	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">Met de onderstaande instellingen kun je oude berichten in dit gesprek automatisch verwijderen. Ze hebben voorrang op je standaardretentiebeleid.</string>
 	<string name="pref_text_app_default_string" state="needs_review" hash="-1921282000">Gebruik je standaardinstelling (%1$s)</string>
 	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1349151852">Spraakbericht opnemen</string>
 	<string name="dialog_title_voice_message_explanation" state="needs_review" hash="943269997">Spraakberichten van Olvid</string>
@@ -896,7 +920,8 @@
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Licentie: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Identiteitsprovider</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Identiteitsprovider server</string>
-	<string name="explanation_identity_provider" state="needs_review" hash="-964456322">Dit scherm stelt je in staat om de identiteitsprovider van je bedrijf in Olvid te configureren. Zodra geconfigureerd, kun je verifiëren met deze server en Olvid stelt je in staat om andere medewerkers naadloos aan je contacten toe te voegen.\nNeem contact op met je beheerder voor meer informatie.</string>
+	<string name="explanation_identity_provider" state="needs_review" hash="-1014276138">Via dit scherm kunt u de identiteitsprovider van uw organisatie configureren in Olvid. Zodra dit is gedaan, kunt u zich aanmelden en kunt u via Olvid eenvoudig andere gebruikers aan uw contacten toevoegen.\nNeem contact op met uw beheerder voor meer informatie.</string>
+	<string name="explanation_identity_provider_mdm" state="needs_review" hash="-1274626281">Deze installatie wordt beheerd door uw organisatie en is geconfigureerd om een identiteitsprovider te gebruiken. De onderstaande instellingen zijn vooraf geconfigureerd en kunnen niet worden gewijzigd.\nNeem contact op met uw beheerder voor meer informatie.</string>
 	<string name="button_label_authenticate" state="needs_review" hash="272245375">Authenticeren</string>
 	<string name="button_label_check_identity_provider" state="needs_review" hash="508428497">Identiteitsprovider controleren</string>
 	<string name="menu_action_use_identity_provider" state="needs_review" hash="1305090894">Gebruik een identiteitsprovider</string>
@@ -980,8 +1005,6 @@
 	<string name="text_failed_call" state="needs_review" hash="-1934816919">Mislukte telefoongesprek</string>
 	<string name="text_busy_call" state="needs_review" hash="-310279946">Inkomend gesprek tijdens een andere verbinding</string>
 	<string name="text_busy_outgoing_call" state="needs_review" hash="92373387">Telefoongesprek met bezette contactpersoon</string>
-	<string name="content_description_profile_picture" state="needs_review" hash="-1074340378">Profielafbeelding</string>
-	<string name="ime_action_rename" state="needs_review" hash="-1795678977">Naam wijzigen</string>
 	<string name="pref_storage_explorer_title" state="needs_review" hash="735816049">Interne opslagverkenner</string>
 	<string name="pref_storage_explorer_summary" state="needs_review" hash="-1991214388">Verken de interne opslag van je Olvid-app!</string>
 	<string name="activity_title_storage_explorer" state="needs_review" hash="735816049">Interne opslagverkenner</string>
@@ -1052,6 +1075,8 @@
 	<string name="pref_image_text_recognition_title" state="needs_review" hash="1877261687">Herken en indexeer tekst in afbeeldingen</string>
 	<string name="pref_image_text_recognition_summary" state="needs_review" hash="1217699919">Hiermee kan tekst in afbeeldingen die als bijlage zijn verzonden of ontvangen, worden doorzocht en gekopieerd. Dit kan veel van de systeembronnen vragen, dus schakel het uit als je het niet nodig hebt.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">Afbeelding kan niet worden weergegeven</string>
+	<string name="label_unsupported_image_format" state="needs_review" hash="-1487560676">Niet-ondersteund afbeeldingsformaat</string>
+	<string name="label_unsupported_video_format" state="needs_review" hash="2131303733">Niet ondersteund videoformaat</string>
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">Aanmelden bij cloudprovider vereist</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Je hebt Olvid geconfigureerd om automatische back-ups naar een cloudprovider te gebruiken, maar je sessie is verlopen. Je moet opnieuw inloggen bij deze provider.\n\nAls je geen automatische back-ups meer wilt, kun je ze uitschakelen in de App-instellingen. Houd er rekening mee dat automatische back-ups de enige manier zijn om het verlies van je contacten te voorkomen als je apparaat verloren gaat of beschadigd raakt.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Inloggen</string>
@@ -1095,11 +1120,11 @@
 	<string name="dialog_title_open_external_app_warning" state="needs_review" hash="-1214423015">Openen met externe app</string>
 	<string name="dialog_message_open_external_app_warning" state="needs_review" hash="-1385087179">Je staat op het punt een bestand te openen met een externe applicatie. De inhoud van dit bestand wordt buiten Olvid onthuld.\nWil je doorgaan?</string>
 	<string name="menu_action_unblock_discussion" state="needs_review" hash="519270640">Gesprek deblokkeren</string>
-	<string name="message_discussion_blocked" state="needs_review" hash="-1837237060">Deze chat is geblokkeerd</string>
-	<string name="toast_message_failed_to_unblock_contact" state="needs_review" hash="457134560">Kon de chat niet deblokkeren, probeer het opnieuw</string>
+	<string name="message_discussion_blocked" state="needs_review" hash="-1837237060">Dit gesprek is geblokkeerd</string>
+	<string name="toast_message_failed_to_unblock_contact" state="needs_review" hash="457134560">Kon het gesprek niet deblokkeren, probeer het opnieuw</string>
 	<string name="button_label_unblock" state="needs_review" hash="-1980951299">Ontgrendelen</string>
 	<string name="dialog_title_unblock_revoked_contact_discussion" state="needs_review" hash="1781806471">Ingeschakelde contactpersonen deblokkeren</string>
-	<string name="dialog_message_unblock_revoked_contact_discussion" state="needs_review" hash="1756654447">Deze chat is vergrendeld omdat je contactpersoon is ingetrokken door de identiteitsprovider van je bedrijf. Hun Olvid ID is mogelijk gecompromitteerd en de veiligheid van je communicatie kan niet worden gegarandeerd. Deblokkeer deze chat alleen als je zeker weet dat de Olvid ID van je contactpersoon nooit is gecompromitteerd.\nNeem contact op met je beheerder voor meer informatie.</string>
+	<string name="dialog_message_unblock_revoked_contact_discussion" state="needs_review" hash="1756654447">Dit gesprek is vergrendeld omdat je contactpersoon is ingetrokken door de identiteitsprovider van je bedrijf. Hun Olvid ID is mogelijk gecompromitteerd en de veiligheid van je communicatie kan niet worden gegarandeerd. Deblokkeer dit gesprek alleen als je zeker weet dat de Olvid ID van je contactpersoon nooit is gecompromitteerd.\nNeem contact op met je beheerder voor meer informatie.</string>
 	<string name="text_contact_was_blocked" state="needs_review" hash="-945793876">Contact geblokkeerd</string>
 	<string name="text_contact_was_blocked_revoked" state="needs_review" hash="447469977">Contact ingetrokken door de identiteitsprovider van uw bedrijf</string>
 	<string name="toast_message_unable_to_write_to_folder" state="needs_review" hash="1365085880">Kan niet naar de geselecteerde map schrijven</string>
@@ -1180,9 +1205,9 @@
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">Antwoord op bericht wissen</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">Indicator dat meldingen zijn uitgeschakeld voor dit profiel</string>
 	<string name="button_label_create_a_profile" state="needs_review" hash="-1568207484">Maak een profiel aan</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="1428471064">De identiteitsprovider van uw bedrijf is succesvol geconfigureerd. Druk op de knop \"authentiseren\" hieronder om ermee te authenticeren en uw persoonlijke informatie op te halen.</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="1823898406">De identiteitsprovider van uw bedrijf is succesvol geconfigureerd. Druk op de knop \"gebruik de magische link\" hieronder om uw persoonlijke informatie op te halen.</string>
-	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="1340457300">Welkom bij Olvid.\n\nDeze installatie wordt beheerd door uw bedrijf en is geconfigureerd om een identiteitsprovider te gebruiken. Druk op de knop \"authentiseren\" hieronder om u hiermee te authenticeren en uw persoonlijke informatie op te halen.\n\nAls u Olvid al eerder hebt gebruikt en uw sleutels en contacten wilt herstellen vanuit een back-up, druk dan op \"back-up herstellen\".</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="-2030851622">De identiteitsprovider van uw organisatie is succesvol geconfigureerd. Druk op de knop \"verificeren\" hieronder om u te authenticeren en uw persoonlijke informatie op te halen.</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="903193568">De identiteitsprovider van uw organisatie is succesvol geconfigureerd. Druk op de knop \"magische link gebruiken\" hieronder om uw persoonlijke informatie op te halen.</string>
+	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="-5109440">Deze installatie wordt beheerd door uw organisatie en is geconfigureerd om een identiteitsprovider te gebruiken. Druk op de knop \"%1$s\" hieronder om u te authenticeren bij de identiteitsprovider en uw persoonlijke informatie op te halen.</string>
 	<string name="button_label_see_details" state="needs_review" hash="238834473">Bekijk details</string>
 	<string name="link_label_invitation_url" state="needs_review" hash="744905192">Contact toevoegen</string>
 	<string name="link_label_configuration_url" state="needs_review" hash="-441435162">Configuratie of licentie importeren</string>
@@ -1223,6 +1248,33 @@
 	<string name="label_attach_timer" state="needs_review" hash="-1527208333">Verwisselbare bericht</string>
 	<string name="label_attach_camera" state="needs_review" hash="-1123080444">Maak een foto</string>
 	<string name="label_attach_video" state="needs_review" hash="1626268086">Video opnemen</string>
+	<string name="label_attach_scan" state="needs_review" hash="1128596739">Scan een document</string>
+	<string name="label_scan_page_count" state="needs_review" hash="1987610035">Pagina %1$d van %2$d</string>
+	<string name="button_label_scan_add_page" state="needs_review" hash="1724653886">Een pagina toevoegen</string>
+	<string name="button_label_scan_crop" state="needs_review" hash="-292939300">Bijsnijden</string>
+	<string name="button_label_scan_rotate" state="needs_review" hash="807341684">Draaien</string>
+	<string name="button_label_scan_auto_crop" state="needs_review" hash="1502815262">Automatisch</string>
+	<string name="button_label_scan_full_image" state="needs_review" hash="1366902062">Volledige afbeelding</string>
+	<string name="label_scan_filter_original" state="needs_review" hash="-817276190">Origineel</string>
+	<string name="label_scan_filter_enhanced" state="needs_review" hash="851648098">Verbeterd</string>
+	<string name="label_scan_filter_grayscale" state="needs_review" hash="-695463257">Grijstinten</string>
+	<string name="label_scan_filter_black_and_white" state="needs_review" hash="1668578691">Zwart-wit</string>
+	<string name="dialog_title_discard_scan" state="needs_review" hash="-94972780">Deze scan annuleren?</string>
+	<string name="dialog_message_discard_scan" state="needs_review" hash="-1145223011">De gescande pagina\'s gaan verloren.</string>
+	<string name="toast_message_scan_failed" state="needs_review" hash="512858351">Kon de PDF niet maken</string>
+	<string name="button_label_scan_retake" state="needs_review" hash="-439420481">Opnieuw proberen</string>
+	<string name="button_label_scan_enhance" state="needs_review" hash="-1842671012">Verbeteren</string>
+	<string name="button_label_scan_filters" state="needs_review" hash="-1898368294">Filters</string>
+	<string name="button_label_scan_crop_rotate" state="needs_review" hash="-1750423698">Bijsnijden en draaien</string>
+	<string name="button_label_scan_discard" state="needs_review" hash="-248729677">Scan verwijderen</string>
+	<string name="label_scan_mode_manual" state="needs_review" hash="-751509695">Handmatig</string>
+	<string name="label_scan_mode_auto" state="needs_review" hash="315272314">Automatische opname</string>
+	<string name="label_scan_hint" state="needs_review" hash="289920901">Plaats het document in het frame</string>
+	<string name="label_scan_hint_hold_still" state="needs_review" hash="584896298">Stilhouden…</string>
+	<string name="button_label_scan_flash" state="needs_review" hash="775381504">Flits</string>
+	<string name="label_scan_camera_permission" state="needs_review" hash="-1855763825">Sta Olvid toe om de camera te gebruiken om documenten te scannen. Je kunt nog steeds foto\'s importeren vanuit je galerij.</string>
+	<string name="button_label_scan_file_name" state="needs_review" hash="2098556706">Bestandsnaam</string>
+	<string name="dialog_title_scan_file_name" state="needs_review" hash="1332508838">Naam van het PDF-bestand</string>
 	<string name="pref_font_scale" state="needs_review" hash="1773040591">Lettergrootte</string>
 	<string name="pref_text_font_scale_0_75" state="needs_review" hash="-1963894407">Klein (75%)</string>
 	<string name="pref_text_font_scale_0_9" state="needs_review" hash="-708054676">Klein (90%)</string>
@@ -1274,6 +1326,9 @@
 	<string name="your_message" state="needs_review" hash="1739533147">je bericht</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d reacties op: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s reageerde op %2$s</string>
+	<string name="menu_action_remove_your_reaction" state="needs_review" hash="-1609298248">Je reactie verwijderen</string>
+	<string name="menu_action_add_to_favorites" state="needs_review" hash="-1933720211">Toevoegen aan favorieten</string>
+	<string name="menu_action_remove_from_favorites" state="needs_review" hash="1796304724">Verwijderen uit favorieten</string>
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Emoji invoegen</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Debug-informatie</string>
 	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">Aantal apparaten:</string>
@@ -1379,9 +1434,9 @@
 	<string name="menu_action_select_all" state="needs_review" hash="346006780">Alles selecteren</string>
 	<string name="label_swipe_reply" state="needs_review" hash="-410287287">Antwoorden</string>
 	<string name="label_swipe_select" state="needs_review" hash="103682895">Selecteren</string>
-	<string name="menu_action_discussion_pin" state="needs_review" hash="554322472">Deze chat vastzetten</string>
+	<string name="menu_action_discussion_pin" state="needs_review" hash="554322472">Dit gesprek vastzetten</string>
 	<string name="menu_action_discussion_unpin" state="needs_review" hash="1464070527">Gesprek losmaken</string>
-	<string name="pref_discussion_pin_title" state="needs_review" hash="554322472">Deze chat vastzetten</string>
+	<string name="pref_discussion_pin_title" state="needs_review" hash="554322472">Dit gesprek vastzetten</string>
 	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">Vastgezette gesprekken blijven altijd boven aan je gesprekslijst staan</string>
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Weergavegrootte</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Gesprek openen</string>
@@ -1389,6 +1444,14 @@
 	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Alleen lezen\nin behandeling</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Administrator</string>
 	<string name="label_pending_admin" state="needs_review" hash="-2032202913">In behandeling\nbeheerder</string>
+	<string name="label_moderator" state="needs_review" hash="767421225">Moderator</string>
+	<string name="label_pending_moderator" state="needs_review" hash="1955900662">In afwachting\nmoderator</string>
+	<string name="dialog_title_group_roles" state="needs_review" hash="1155086227">Groepsrollen</string>
+	<string name="content_description_group_roles" state="needs_review" hash="-449063250">Uitleg van de groepsrollen</string>
+	<string name="explanation_group_role_admin" state="needs_review" hash="731519662">Je kunt leden aan een groep toevoegen en verwijderen.</string>
+	<string name="explanation_group_role_moderator" state="needs_review" hash="2037600722">Kan berichten van iedereen markeren als \"overal verwijderen\".</string>
+	<string name="explanation_group_role_read_only" state="needs_review" hash="1017523379">Kan de discussie zien, reageren op berichten en deelnemen aan polls, maar kan geen berichten plaatsen.</string>
+	<string name="explanation_group_role_pending" state="needs_review" hash="-843291456">Deze persoon is uitgenodigd voor de groep, maar heeft de uitnodiging nog niet geaccepteerd. Berichten die in de tussentijd zijn verzonden, worden aan hen bezorgd zodra ze de uitnodiging accepteren.</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">De naam van deze gebruiker kan niet worden weergegeven</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Onbenoemde groep</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Gespreksmeldingen</string>
@@ -1414,7 +1477,7 @@
 	<string name="toast_message_leaving_group_v2" state="needs_review" hash="-240458647">Verzoek om de groep te verlaten wordt verwerkt</string>
 	<string name="dialog_message_disband_non_empty_group_v2_confirmation" state="needs_review" hash="-1561301545">Je staat op het punt de groep %1$s te ontbinden.\nDit verwijdert de %2$d leden.\n\nGa je door met het ontbinden van deze groep?</string>
 	<string name="menu_action_sync_group" state="needs_review" hash="67261165">Groep opnieuw synchroniseren</string>
-	<string name="text_unnamed_discussion" state="needs_review" hash="-170463889">Naamloze chat</string>
+	<string name="text_unnamed_discussion" state="needs_review" hash="-170463889">Naamloos gesprek</string>
 	<string name="dialog_message_delete_user_impossible_start" state="needs_review" hash="-644289574">Je kunt %1$s niet verwijderen uit je lijst met andere gebruikers, omdat jullie allebei tot dezelfde groep behoren.</string>
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">Groepsleden/totaal uitgenodigd:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">Groepsversie:</string>
@@ -1518,6 +1581,10 @@
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">Groep wordt aangemaakt</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">Nieuwe groep</string>
 	<string name="label_group_type" state="needs_review" hash="498463258">Groepstype</string>
+	<string name="label_existing_discussions" state="needs_review" hash="-2089160663">Bestaande gesprekken</string>
+	<string name="label_last_message_date" state="needs_review" hash="1218222521">Laatste bericht %1$s</string>
+	<string name="button_label_open" state="needs_review" hash="-2066377003">Openen</string>
+	<string name="button_label_create_a_new_group" state="needs_review" hash="-1073202815">Maak een nieuwe groep aan</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">Standaard</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">Alle groepsleden kunnen nieuwe leden uitnodigen</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">Gecontroleerd</string>
@@ -1531,6 +1598,8 @@
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Je bent geen groepsbeheerder meer</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Je mag nu berichten plaatsen</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-930933808">U kunt hier geen berichten plaatsen.</string>
+	<string name="text_you_became_moderator" state="needs_review" hash="-609725743">Je bent nu moderator van deze groep.</string>
+	<string name="text_you_are_no_longer_moderator" state="needs_review" hash="1396461107">Je bent geen moderator meer van deze groep.</string>
 	<string name="label_pending" state="needs_review" hash="1975294811">In behandeling</string>
 	<string name="pref_app_language_title" state="needs_review" hash="-1748962099">App-taal</string>
 	<string name="pref_text_default_device_language" state="needs_review" hash="-1062620207">Standaardtaal van het apparaat</string>
@@ -1627,10 +1696,12 @@
 	<string name="label_zoom_in_for_address" state="needs_review" hash="902696925">Zoom in om het adres te zoeken</string>
 	<string name="label_address_lookup_disabled" state="needs_review" hash="-2140124686">Adreslookup uitgeschakeld</string>
 	<string name="dialog_title_introducing_mentions" state="needs_review" hash="-1741341288">We introduceren gebruikersvermeldingen!</string>
-	<string name="dialog_message_introducing_mentions" state="needs_review" hash="622739087">Olvid staat je nu toe om een gebruiker te vermelden in een discussie 🫵! Typ gewoon @ gevolgd door een letter of hun naam om te zien wie vermeld kan worden.\nDaarnaast kun je bij het dempen 💤 van een discussie of profiel nu kiezen om alleen meldingen te ontvangen wanneer je expliciet in een bericht wordt vermeld.\n\nHoud er rekening mee dat je contacten de nieuwste versie van Olvid moeten bijwerken om te zien dat je ze hebt vermeld.</string>
+	<string name="dialog_message_introducing_mentions" state="needs_review" hash="622739087">Olvid staat je nu toe om een gebruiker te vermelden in een gesprek 🫵! Typ gewoon @ gevolgd door een letter of hun naam om te zien wie vermeld kan worden.\nDaarnaast kun je bij het dempen 💤 van een gesprek of profiel nu kiezen om alleen meldingen te ontvangen wanneer je expliciet in een bericht wordt vermeld.\n\nHoud er rekening mee dat je contacten de nieuwste versie van Olvid moeten bijwerken om te zien dat je ze hebt vermeld.</string>
 	<string name="pref_no_notify_certificate_change_for_previews_title" state="needs_review" hash="-434788963">Schakel meldingen over certificaatwijzigingen voor linkvoorbeelden uit</string>
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Schakel deze optie in om de detectie van certificaatwijzigingen uit te schakelen bij het ophalen van een linkpreview. Sommige sites kunnen bij elke verbinding een ander certificaat presenteren en je kunt frequente meldingen ontvangen als je deze optie uitschakelt.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Gebruik de oude ZXing-bibliotheek voor het scannen van QR-codes</string>
+	<string name="pref_use_in_house_document_scanner_title" state="needs_review" hash="1552486206">Gebruik de documentenscanner van Olvid</string>
+	<string name="pref_use_in_house_document_scanner_summary" state="needs_review" hash="-2092532938">Standaard worden documenten gescand met ML Kit als onderdeel van Google Play-services. Schakel deze optie in om de ingebouwde scanner van Olvid te gebruiken.</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">Standaard gebruikt Olvid ML Kit voor het scannen van QR-codes. Schakel deze optie in als je problemen ondervindt bij het scannen van QR-codes binnen Olvid.</string>
 	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Gebruik interne PDF-viewer</string>
 	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">Standaard worden PDF-bijlagen geopend in een (basis) interne viewer. Schakel deze optie uit om een externe viewer te gebruiken.</string>
@@ -1638,7 +1709,7 @@
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Apparaat %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">Dit apparaat</string>
 	<string name="menu_action_rename_device" state="needs_review" hash="43131083">Apparaat hernoemen</string>
-	<string name="menu_action_trust_device" state="needs_review" hash="360435227">Apparaat vertrouwen</string>
+	<string name="menu_action_trust_device" state="needs_review" hash="105728494">Ik herken dit apparaat</string>
 	<string name="menu_action_remove_device" state="needs_review" hash="-1485256427">Apparaat verwijderen</string>
 	<string name="menu_action_refresh_device_list" state="needs_review" hash="1430227802">Apparaatlijst vernieuwen</string>
 	<string name="menu_action_recreate_channel" state="needs_review" hash="837900266">Veilige verbinding opnieuw aanmaken</string>
@@ -1706,8 +1777,9 @@
 	<string name="button_label_add_device_xxx" state="needs_review" hash="-1479212354">Apparaat \"%1$s\" toevoegen</string>
 	<string name="notification_title_device_trust" state="needs_review" hash="-1568042777">Nieuw apparaat: \"%1$s\"</string>
 	<string name="notification_title_unnamed_device_trust" state="needs_review" hash="1704207127">Nieuw apparaat</string>
-	<string name="notification_message_device_trust" state="needs_review" hash="753501294">Een nieuw apparaat is toegevoegd aan een van je Olvid-profielen</string>
-	<string name="notification_action_device_trust" state="needs_review" hash="1450001608">Dit apparaat vertrouwen</string>
+	<string name="notification_message_device_trust" state="needs_review" hash="-1646747013">Er is een nieuw apparaat toegevoegd aan een van je Olvid-profielen. Als je dit niet hebt gedaan, verwijder het dan uit je lijst met apparaten.</string>
+	<string name="notification_action_device_trust" state="needs_review" hash="936727529">Ja, dat ben ik</string>
+	<string name="notification_action_device_see_devices" state="needs_review" hash="-1832505809">Mijn apparaten</string>
 	<string name="notification_channel_device_name" state="needs_review" hash="1347557771">Apparaatbeheer</string>
 	<string name="notification_channel_device_description" state="needs_review" hash="-36703170">Meldingen over je apparaten</string>
 	<string name="notification_title_device_expiration" state="needs_review" hash="202400638">Deactivering van «%1$s»</string>
@@ -1813,7 +1885,7 @@
 	<string name="preset_ephemeral_read_once" state="needs_review" hash="-2058606108">Eenmalig bekijken</string>
 	<string name="preset_ephemeral_visibility_duration" state="needs_review" hash="670535132">Zichtbaarheidsduur</string>
 	<string name="preset_ephemeral_existence_duration" state="needs_review" hash="-1767785784">Duur van het bestaan</string>
-	<string name="preset_ephemeral_read_once_explanation" state="needs_review" hash="-1210246751">Berichten en bijlagen die één keer bekeken kunnen worden, worden één keer weergegeven en verwijderd wanneer je de chat sluit.</string>
+	<string name="preset_ephemeral_read_once_explanation" state="needs_review" hash="-1210246751">Berichten en bijlagen die één keer bekeken kunnen worden, worden één keer weergegeven en verwijderd wanneer je het gesprek sluit.</string>
 	<string name="preset_ephemeral_visibility_duration_explanation" state="needs_review" hash="-788761972">Bepaalt hoe lang het bericht wordt weergegeven wanneer de gebruiker het leest.</string>
 	<string name="preset_ephemeral_existence_duration_explanation" state="needs_review" hash="310879510">Tijd na de welke het bericht wordt verwijderd, ongeacht of het is gelezen of niet.</string>
 	<string name="ephemeral_settings_invalid" state="needs_review" hash="-215763241">Je mag alleen strengere instellingen gebruiken dan de standaardinstellingen van het gesprek.</string>
@@ -1874,7 +1946,7 @@
 	<string name="pref_app_icon_fragment_title" state="needs_review" hash="-639159435">App-icoon wijzigen</string>
 	<string name="pref_app_icon_fragment_summary" state="needs_review" hash="655175894">De naam en het pictogram van de app worden gewijzigd op je startscherm. Dit geldt niet voor het pictogram van de meldingen.</string>
 	<string name="pref_app_icon_apply" state="needs_review" hash="509380077">Toepassen (kan de applicatie sluiten)</string>
-	<string name="pref_app_icon_shortcut_warning_title" state="needs_review" hash="472834764">Chat-sneltoetsen</string>
+	<string name="pref_app_icon_shortcut_warning_title" state="needs_review" hash="472834764">Gesprekssneltoetsen</string>
 	<string name="pref_app_icon_shortcut_warning_text" state="needs_review" hash="648578102">Let op: het wijzigen van het app-icoon verwijdert de gespreksafkortingen die je hebt gemaakt. Je moet ze opnieuw aanmaken.</string>
 	<string name="app_name_weather" state="needs_review" hash="-202325750">Weer</string>
 	<string name="app_name_bricks" state="needs_review" hash="-2084998503">Stenen</string>
@@ -1972,7 +2044,7 @@
 	<string name="dialog_unarchive_setting_button_notified" state="needs_review" hash="1859399328">Bij de volgende melding</string>
 	<string name="dialog_unarchive_setting_button_never" state="needs_review" hash="610329857">Nooit</string>
 	<string name="dialog_unarchive_setting_explain" state="needs_review" hash="1798267293">Je kunt het gedrag van meldingen wijzigen in de instellingen van elk gesprek</string>
-	<string name="pref_archived_attachments_title" state="needs_review" hash="-159125479">Gearchiveerde discussiebijlagen automatisch downloaden</string>
+	<string name="pref_archived_attachments_title" state="needs_review" hash="-159125479">Gearchiveerde gespreksbijlagen automatisch downloaden</string>
 	<string name="pref_archived_attachments_summary" state="needs_review" hash="1596754073">Wanneer dit is ingeschakeld, worden bijlagen van gearchiveerde gesprekken automatisch gedownload volgens de bovenstaande instelling.</string>
 	<string name="pref_unarchive_on_notification_title" state="needs_review" hash="-1146947153">Gearchiveerde gesprekken op notificatie</string>
 	<string name="pref_unarchive_on_notification_summary" state="needs_review" hash="778062251">Wanneer dit is ingeschakeld, worden gearchiveerde gesprekken automatisch weer uit het archief gehaald wanneer er een melding van een nieuw bericht wordt ontvangen.</string>
@@ -2080,6 +2152,8 @@
 	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">Er is een wachtwoord vereist om dit PDF-bestand te openen.</string>
 	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">Wachtwoord</string>
 	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">Incorrect wachtwoord</string>
+	<string name="content_description_previous_match" state="needs_review" hash="-124264476">Vorig resultaat</string>
+	<string name="content_description_next_match" state="needs_review" hash="-405381756">Volgend resultaat</string>
 	<string name="label_poll_create" state="needs_review" hash="-1677246175">Een poll aanmaken</string>
 	<string name="label_poll_question" state="needs_review" hash="-1615603188">Vraag</string>
 	<string name="hint_poll_question" state="needs_review" hash="1961289317">Een vraag stellen</string>
@@ -2110,6 +2184,7 @@
 	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">Nog geen antwoord</string>
 	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">Aankomende apparaatdeactivering</string>
 	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">Mijn apparaten beheren</string>
+	<string name="tip_expiring_current_device_title" state="needs_review" hash="-2044212270">Dit apparaat wordt binnenkort uitgeschakeld.</string>
 	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">Apparaat offline</string>
 	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">Eén van uw apparaten is **meer dan 30 dagen** offline geweest.\nAls u het niet meer gebruikt, raden we aan om **het te verwijderen** om synchronisatieproblemen te voorkomen.</string>
 	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">Mijn apparaten beheren</string>
@@ -2185,8 +2260,15 @@
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Gebruik de \"magische link\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Ongeldige magische link.</string>
 	<string name="label_hanged_up" state="needs_review" hash="-1516413384">Oproep beëindigd.</string>
-	<string name="store_link_need_licenses" state="needs_review" hash="-1212508527">Heeft uw team abonnementen nodig?</string>
 	<string name="store_link_olvid_store" state="needs_review" hash="-1825630369">Bezoek de Olvid Store</string>
+	<string name="store_link_need_more_options" state="needs_review" hash="-839181230">Meer opties nodig?</string>
+	<string name="button_label_check_all_offers_olvid_store" state="needs_review" hash="361882901">Bekijk al onze aanbiedingen in de Olvid Store.</string>
+	<string name="label_store_offer_individual" state="needs_review" hash="-1969313106">Individueel</string>
+	<string name="label_store_offer_individual_description" state="needs_review" hash="368977236">Een persoonlijke licentie, speciaal voor jou.</string>
+	<string name="label_store_offer_family" state="needs_review" hash="-2103729206">Familie</string>
+	<string name="label_store_offer_family_description" state="needs_review" hash="-1487232440">Een pakket van 6 licenties voor jou en je familie.</string>
+	<string name="label_store_offer_team" state="needs_review" hash="-421568242">Team</string>
+	<string name="label_store_offer_team_description" state="needs_review" hash="687093077">Meerdere licenties om aan je team te distribueren.</string>
 	<string name="toast_message_reminder_set" state="needs_review" hash="-961055414">Herinnering ingesteld</string>
 	<string name="dialog_title_keycloak_authentication_impossible" state="needs_review" hash="325273853">Authenticatie mislukt</string>
 	<string name="dialog_message_keycloak_authentication_impossible" state="needs_review" hash="-2031322232">Uw profiel wordt momenteel beheerd door uw organisatie en er is een herauthentificatie vereist. Er lijkt echter geen ondersteunde authenticatiemethode beschikbaar te zijn.\n\nNeem contact op met uw beheerder voor meer informatie.</string>
@@ -2242,7 +2324,7 @@
 	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Volledige overdracht. Bevat alle berichten en bijlagen.</string>
 	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">Exporteer uw chatgeschiedenis als een .zip-bestand. U kunt dit later importeren op een ander apparaat van uw profiel **%1$s**.\n\nU kunt dit bestand ook uitpakken om **uw chatgeschiedenis in een webpagina weer te geven**.</string>
 	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Maak een .zip-bestand</string>
-	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d discussies en %2$d berichten</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d gesprekken en %2$d berichten</string>
 	<string name="label_computing" state="needs_review" hash="1393495921">Bezig met berekenen…</string>
 	<string name="label_total_size" state="needs_review" hash="-788411929">Totale grootte: %1$s</string>
 	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Bescherm uw export.</string>
@@ -2298,8 +2380,6 @@
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analyseer inhoud</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Geëxporteerde gesprekken worden geanalyseerd</string>
 	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">Er is een fout opgetreden bij het laden van het OpenStreetMap-stijlbestand.</string>
-	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">In-app abonnementen zijn niet beschikbaar.</string>
-	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">De versie van Olvid die u heeft geïnstalleerd, bevat niet de Google Billing-bibliotheek en ondersteunt geen in-app-aankopen.\n\nNeem voor meer informatie contact met ons op via **feedback@olvid.io**.</string>
 	<string name="ftux_next" state="needs_review" hash="1158639077">Volgende</string>
 	<string name="ftux_start" state="needs_review" hash="646298532">Aan de slag</string>
 	<string name="ftux_page_indicator" state="needs_review" hash="1987610035">Pagina %1$d van %2$d</string>

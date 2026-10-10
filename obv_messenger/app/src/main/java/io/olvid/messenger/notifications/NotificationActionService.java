@@ -26,10 +26,12 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import io.olvid.engine.engine.types.ObvDialog;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.UnreadCountsSingleton;
@@ -41,6 +43,7 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonMessage;
+import io.olvid.messenger.databases.tasks.ApplySyncAtomTaskKt;
 import io.olvid.messenger.databases.tasks.CreateReadMessageMetadata;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -342,6 +345,16 @@ public class NotificationActionService extends IntentService {
         if (discussion.unread) {
             AppDatabase.getInstance().discussionDao().updateDiscussionUnreadStatus(discussionId, false);
             UnreadCountsSingleton.INSTANCE.discussionUnreadFlagChanged(discussionId, false);
+
+            try {
+                AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(
+                        discussion.bytesOwnedIdentity,
+                        ObvSyncAtom.createUnreadDiscussionsChange(
+                                Collections.singletonList(ApplySyncAtomTaskKt.getDiscussionIdentifier(discussion)),
+                                false
+                        )
+                );
+            } catch (Exception ignored) {}
         }
         UnreadCountsSingleton.INSTANCE.markDiscussionRead(discussionId, null);
     }

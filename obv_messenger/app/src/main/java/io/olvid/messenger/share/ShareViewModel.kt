@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration
@@ -38,6 +39,9 @@ import io.olvid.messenger.databases.tasks.ReplaceDiscussionDraftTask
 import io.olvid.messenger.databases.tasks.SetDraftJsonExpirationTask
 import io.olvid.messenger.discussion.linkpreview.OpenGraph
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel.SearchableDiscussion
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ShareViewModel : ViewModel() {
 
@@ -87,10 +91,16 @@ class ShareViewModel : ViewModel() {
         initialized = true
         sharedText = text.orEmpty()
         sharedUris = uris
-        attachments = uris.map { resolveShareAttachment(resolver, it, intentType) }
         // Pre-fill the compose field with whatever caption the sender attached (text-only share,
         // or image+caption from Photos/browsers). User can edit/clear before sending.
         draftText = sharedText
+        viewModelScope.launch {
+            val resolved = withContext(Dispatchers.IO) {
+                uris.map { resolveShareAttachment(resolver, it, intentType) }
+            }
+            // drop any attachment the user removed while metadata was being resolved
+            attachments = resolved.filter { it.uri in sharedUris }
+        }
     }
 
     fun markLinkPreviewDismissed(url: String?) {

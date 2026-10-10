@@ -59,6 +59,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jose4j.jwk.JsonWebKeySet
 import kotlin.math.min
+import kotlin.time.Duration.Companion.milliseconds
 
 // Define ScanState
 sealed class ScanUiState {
@@ -191,7 +192,7 @@ class PlusButtonViewModel : ViewModel() {
                 }
 
                 // 5-second timeout
-                delay(5000)
+                delay(5000.milliseconds)
                 // Check if we are still in the processing state before changing to pending
                 if (_scanUiState.value is ScanUiState.MutualScanProcessing) {
                    updateScanState(ScanUiState.MutualScanPending(contactName))

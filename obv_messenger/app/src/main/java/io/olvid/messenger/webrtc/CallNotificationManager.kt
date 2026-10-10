@@ -23,14 +23,14 @@ import android.content.Intent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 
 object CallNotificationManager {
     var currentCallData: CallData? by mutableStateOf(null)
 }
 
 data class CallData(
-    val initialViewSetup: (InitialView) -> Unit = {},
+    val avatar: AvatarTarget? = null,
     val title: String,
     val subtitle: String? = null,
     val fullScreenIntent: Intent? = null,

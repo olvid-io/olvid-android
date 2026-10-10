@@ -32,5 +32,11 @@
         app:singleLineTitle="false"
         android:icon="@drawable/ic_pref_retain_wiped"
         android:order="30"/>
+    <Preference
+        android:key="pref_key_discussion_default_reaction"
+        android:title="@string/pref_default_reaction_title"
+        app:singleLineTitle="false"
+        android:icon="@drawable/ic_pref_default_reaction"
+        android:order="40"/>
 
 </PreferenceScreen>

@@ -38,6 +38,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class LockScreenViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -113,7 +114,7 @@ class LockScreenViewModel(application: Application) : AndroidViewModel(applicati
                 if (remainingMs <= 0) break
                 val remainingSeconds = 1 + (remainingMs - 1) / 1000
                 lockoutRemainingSeconds.value = remainingSeconds.toInt()
-                delay(1000)
+                delay(1000.milliseconds)
             }
             lockoutRemainingSeconds.value = 0
             tryToEnablePinInput()

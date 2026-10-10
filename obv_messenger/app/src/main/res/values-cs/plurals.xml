@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Jedno z vašich zařízení vyprší a bude deaktivováno za **méně než %1$d den**.\nMůžete si zakoupit předplatné **Olvid+** a udržet jej aktivní.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Jedno z vašich zařízení vyprší a bude deaktivováno za **méně než %1$d dní**.\nMůžete si zakoupit předplatné **Olvid+** a udržet jej aktivní.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Toto zařízení bude brzy neaktivní a bude deaktivováno za **méně než %1$d den**.\nMůžete si zakoupit předplatné **Olvid+**, abyste jej udrželi aktivní.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Toto zařízení bude brzy neaktivní a bude deaktivováno za **méně než %1$d dní**.\nMůžete si zakoupit předplatné **Olvid+**, abyste jej udrželi aktivní.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s přidal/a se do skupiny</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s se připojil ke skupině</item>
@@ -123,8 +127,8 @@
 		<item quantity="other" state="needs_review" hash="-1558931055">Chystáte se **trvale** smazat %1$d konverzace a zprávy, které obsahují, pro **všechny** účastníky těchto konverzací. Ujistěte se, že to je skutečně to, co chcete udělat.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">Chystáte se pozvat každého člena skupiny, se kterým máte kanál (v současné době 1 člen), do soukromé diskuze.\nChcete pokračovat?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">Chystáte se pozvat každého člena skupiny, se kterým máte kanál (v současné době %1$d členů), do soukromé diskuze.\nChcete pokračovat?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">Chystáte se pozvat každého člena skupiny, se kterým máte kanál (v současné době 1 člen), do soukromé konverzace.\nChcete pokračovat?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Chystáte se pozvat každého člena skupiny, se kterým máte kanál (v současné době %1$d členů), do soukromé konverzace.\nChcete pokračovat?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-127723614">Lze pozvat 1 člena skupiny do soukromé konverzace</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Přidat do skupiny %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Přidat do %1$d skupin</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Už máte zahájenou konverzaci s těmito účastníky.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Už máte %1$d konverzací s těmito účastníky.</item>
 	</plurals>
 </resources>

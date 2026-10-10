@@ -1,0 +1,5 @@
+- Chỉ hiển thị 4 hình ảnh đầu tiên của một tin nhắn và thêm chế độ xem album để xem tất cả.
+- Thêm trình quét tài liệu.
+- Nhấn đúp vào một tin nhắn đã nhận để phản hồi bằng biểu tượng cảm xúc mặc định.
+- Thêm hình đại diện mới cho các liên hệ và nhóm không có ảnh đại diện.
+- Thêm một nút để gửi ảnh trực tiếp từ màn hình chính.

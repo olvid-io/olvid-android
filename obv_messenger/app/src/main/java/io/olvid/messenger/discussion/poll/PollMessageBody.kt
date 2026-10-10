@@ -64,16 +64,20 @@ import io.olvid.messenger.databases.entity.PollVote
 import io.olvid.messenger.databases.entity.jsons.JsonPoll
 import io.olvid.messenger.databases.entity.jsons.JsonPollCandidate
 import io.olvid.messenger.designsystem.components.CircleCheckBox
+import io.olvid.messenger.designsystem.dampened
+import io.olvid.messenger.designsystem.scaled
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun PollMessageBody(
     pollResults: List<PollVote>,
     jsonPoll: JsonPoll,
+    scale: Float = 1f,
     highlighter: ((Context, AnnotatedString) -> AnnotatedString)? = null,
     onVote: (voteUuid: UUID, voted: Boolean) -> Unit = { _, _ -> }
 ) {
@@ -82,7 +86,7 @@ fun PollMessageBody(
         Text(
             text = highlighter?.invoke(context, AnnotatedString(jsonPoll.question))
                 ?: AnnotatedString(jsonPoll.question),
-            style = OlvidTypography.body1.copy(
+            style = OlvidTypography.body1.scaled(scale).copy(
                 fontWeight = FontWeight.Medium,
                 color = colorResource(R.color.almostBlack)
             )
@@ -90,7 +94,7 @@ fun PollMessageBody(
         if (jsonPoll.multipleChoice) {
             Text(
                 stringResource(R.string.explanation_poll_answer_multiple_choice),
-                style = OlvidTypography.body2.copy(
+                style = OlvidTypography.body2.scaled(scale.dampened()).copy(
                     color = colorResource(
                         R.color.greyTint
                     ), fontStyle = FontStyle.Italic
@@ -158,14 +162,14 @@ fun PollMessageBody(
                                 this
                             ) ?: this
                         },
-                        style = OlvidTypography.body2.copy(
+                        style = OlvidTypography.body2.scaled(scale).copy(
                             color = colorResource(R.color.almostBlack)
                         )
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = "${(candidateProgress * 100).roundToInt()}%",
-                        style = OlvidTypography.body2.copy(
+                        style = OlvidTypography.body2.scaled(scale).copy(
                             color = colorResource(R.color.almostBlack)
                         )
                     )
@@ -211,7 +215,7 @@ fun PollMessageBody(
                 DisposableEffect(jsonPoll.expiration) {
                     val job = coroutineScope.launch {
                         while (remainingTime > 0) {
-                            delay(1000)
+                            delay(1000.milliseconds)
                             remainingTime -= 1000
                         }
                     }
@@ -231,7 +235,7 @@ fun PollMessageBody(
                     } else {
                         stringResource(R.string.label_poll_ended)
                     },
-                    style = OlvidTypography.body2.copy(
+                    style = OlvidTypography.body2.scaled(scale.dampened()).copy(
                         color = colorResource(
                             R.color.greyTint
                         )

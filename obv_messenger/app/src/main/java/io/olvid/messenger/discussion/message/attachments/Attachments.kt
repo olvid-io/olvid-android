@@ -47,6 +47,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -97,9 +98,12 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.map
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import android.content.Context
+import coil.memory.MemoryCache
 import io.olvid.messenger.App
 import io.olvid.messenger.App.imageLoader
 import io.olvid.messenger.FyleProgressSingleton
@@ -128,7 +132,10 @@ import io.olvid.messenger.databases.tasks.StartAttachmentDownloadTask
 import io.olvid.messenger.databases.tasks.StopAttachmentDownloadTask
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
+import io.olvid.messenger.designsystem.components.OverflowIndicator
+import io.olvid.messenger.designsystem.components.OverflowItems
 import io.olvid.messenger.designsystem.constantSp
+import io.olvid.messenger.designsystem.dampened
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.gallery.AudioListItem
 import io.olvid.messenger.discussion.gallery.FyleListItem
@@ -141,6 +148,11 @@ import io.olvid.messenger.owneddetails.canBeUsedAsProfilePicture
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+/** Number of image/video tiles composed in a message bubble; the rest is folded into a "+N" overlay. */
+private const val MAX_VISIBLE_IMAGE_ATTACHMENTS = 4
+
+private fun visibleImageTileCount(imageCount: Int) = minOf(imageCount, MAX_VISIBLE_IMAGE_ATTACHMENTS)
 
 enum class Visibility {
     VISIBLE,
@@ -164,6 +176,10 @@ data class Attachment(val fyle: Fyle, val fyleMessageJoinWithStatus: FyleMessage
     }
 }
 
+fun FyleAndStatus.attachment() : Attachment {
+    return Attachment(fyle, fyleMessageJoinWithStatus)
+}
+
 data class SelectedImage(
     val uri: Uri?,
     val imageResolution: ImageResolution?,
@@ -175,6 +191,7 @@ data class SelectedImage(
 fun Attachments(
     modifier: Modifier = Modifier,
     message: Message,
+    scale: Float = 1f,
     onEnableMessageSwipe: ((Boolean) -> Unit)? = null,
     showStatuses: Boolean = true,
     audioAttachmentServiceBinding: AudioAttachmentServiceBinding?,
@@ -184,6 +201,10 @@ fun Attachments(
     openOnClick: Boolean = true,
     onLocationClicked: (() -> Unit)? = null,
     openViewerCallback: (() -> Unit)? = null,
+    /** Host-provided opener for image/video tiles (in-discussion viewer or album); null falls back to GalleryActivity. */
+    openImageAttachment: ((message: Message, fyleAndStatus: FyleAndStatus, showTextBlocks: Boolean, wholeMessage: Boolean) -> Unit)? = null,
+    /** Wraps each image/video tile so a host can attach visibility and shared-element modifiers to it. */
+    imageTileModifier: @Composable (fyleAndStatus: FyleAndStatus, hiddenCount: Int) -> Modifier = { _, _ -> Modifier },
     discussionSearchViewModel: DiscussionSearchViewModel?,
     saveAttachment: () -> Unit,
     saveAllAttachments: () -> Unit,
@@ -200,13 +221,19 @@ fun Attachments(
                 )
             }
         }.observeAsState()
-    val attachments =
-        attachmentFyles?.sortedByDescending { PreviewUtils.mimeTypeIsSupportedImageOrVideo(it.fyleMessageJoinWithStatus.getNonNullMimeType()) }
+    // images and videos are laid out first, files after
+    val (images, files) = remember(attachmentFyles) {
+        attachmentFyles.orEmpty().partition { PreviewUtils.mimeTypeIsSupportedImageOrVideo(it.fyleMessageJoinWithStatus.getNonNullMimeType()) }
+    }
     val expiration: JsonExpiration? = message.jsonMessage.jsonExpiration
     val readOnce = expiration?.readOnce == true
-    val imageCount =
-        attachments?.count { PreviewUtils.mimeTypeIsSupportedImageOrVideo(it.fyleMessageJoinWithStatus.getNonNullMimeType()) }
-            ?: 0
+    val imageCount = images.size
+    val visibleImageCount = visibleImageTileCount(imageCount)
+    val noFileAttachments = files.isEmpty()
+    val multipleAttachments = images.size + files.size > 1
+    val minimumHeight = remember(message.imageResolutions, message.imageAndVideoCount, message.totalAttachmentCount, maxWidth, scale) {
+        getMinimumHeight(message, maxWidth, 4.dp, 64.dp * scale.dampened())
+    }
 
     var imageResolutions: Array<ImageResolution>? by remember { mutableStateOf(null) }
 
@@ -219,228 +246,168 @@ fun Attachments(
     FlowRow(
         modifier = modifier
             .fillMaxWidth()
-            .requiredHeight(
-                getMinimumHeight(
-                    message,
-                    maxWidth,
-                    4.dp,
-                    64.dp
-                )
-            )
+            .requiredHeight(minimumHeight)
             .clip(RoundedCornerShape(6.dp)),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalArrangement = Arrangement.SpaceBetween,
         maxItemsInEachRow = 2,
     ) {
-        attachments?.forEachIndexed { index, attachment ->
+        // only the first MAX_VISIBLE_IMAGE_ATTACHMENTS images are composed; the last visible tile
+        // carries a "+N" overlay for the hidden ones, and every tile then opens the album
+        OverflowItems(items = images, maxVisible = MAX_VISIBLE_IMAGE_ATTACHMENTS) { index, attachment, hiddenCount ->
             var textBlocks by remember { mutableStateOf(emptyList<TextBlock>()) }
             val attachmentProgress by rememberAttachmentProgress(attachment.fyleMessageJoinWithStatus)
+            Box(
+                Modifier.background(colorResource(id = R.color.almostWhite))
+            ) {
+                var attachmentContextMenuOpened by remember { mutableStateOf(false) }
+                AttachmentContextMenu(
+                    menuOpened = attachmentContextMenuOpened,
+                    onDismiss = { attachmentContextMenuOpened = false },
+                    message = message,
+                    attachment = attachment,
+                    visibility = VISIBLE,
+                    readOnce = false,
+                    multipleAttachment = multipleAttachments,
+                    onCancelAttachmentUpload = onCancelAttachmentUpload,
+                    saveAttachment = saveAttachment,
+                    saveAllAttachments = saveAllAttachments
+                )
+                val wide =
+                    visibleImageCount == 2 || (visibleImageCount > 2 && index == visibleImageCount - 1 && (visibleImageCount and 1) != 0)
 
-
-            val downloadAwareClick = { completeClick: () -> Unit ->
-                when (attachment.fyleMessageJoinWithStatus.status) {
-                    FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE ->
-                        App.runThread(
-                            StartAttachmentDownloadTask(
-                                attachment.fyleMessageJoinWithStatus
-                            )
-                        )
-
-                    FyleMessageJoinWithStatus.STATUS_DOWNLOADING ->
-                        App.runThread(
-                            StopAttachmentDownloadTask(
-                                attachment.fyleMessageJoinWithStatus
-                            )
-                        )
-
-                    FyleMessageJoinWithStatus.STATUS_DRAFT,
-                    FyleMessageJoinWithStatus.STATUS_UPLOADING,
-                    FyleMessageJoinWithStatus.STATUS_COMPLETE,
-                        -> {
-                        completeClick()
-                    }
-                }
-            }
-
-            if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(attachment.fyleMessageJoinWithStatus.getNonNullMimeType())) {
-                Box(
-                    Modifier.background(colorResource(id = R.color.almostWhite))
-                ) {
-                    var attachmentContextMenuOpened by remember { mutableStateOf(false) }
-                    AttachmentContextMenu(
-                        menuOpened = attachmentContextMenuOpened,
-                        onDismiss = { attachmentContextMenuOpened = false },
-                        message = message,
-                        attachment = attachment,
-                        visibility = VISIBLE,
-                        readOnce = false,
-                        multipleAttachment = attachments.size > 1,
-                        onCancelAttachmentUpload = onCancelAttachmentUpload,
-                        saveAttachment = saveAttachment,
-                        saveAllAttachments = saveAllAttachments
-                    )
-                    val wide =
-                        imageCount == 2 || (imageCount > 2 && index == imageCount - 1 && (imageCount and 1) != 0)
-
-                    if (message.isContentHidden) {
-                        Image(
-                            modifier = Modifier
-                                .width(if (wide || imageCount == 1) maxWidth else (maxWidth / 2 - 2.dp))
-                                .requiredHeight(if (message.imageAndVideoCount == 1) maxWidth else (maxWidth / 2 - 2.dp))
-                                .border(
-                                    width = 1.dp,
-                                    color = colorResource(id = R.color.attachmentBorder),
-                                    shape = RoundedCornerShape(
-                                        if (index == 0) 6.dp else 0.dp,
-                                        if ((index == 0 && imageCount < 3) || (index == 1 && imageCount >= 3)) 6.dp else 0.dp,
-                                        if ((message.totalAttachmentCount == imageCount) && (index == imageCount - 1)) 6.dp else 0.dp,
-                                        if ((message.totalAttachmentCount == imageCount) &&
-                                            ((index == 1 && imageCount == 2)
-                                                    || (index == imageCount - 1 && ((imageCount and 1) != 0))
-                                                    || (index == imageCount - 2 && imageCount > 2 && ((imageCount and 1) == 0)))
-                                        ) 6.dp else 0.dp
-                                    )
+                if (message.isContentHidden) {
+                    Image(
+                        modifier = Modifier
+                            .width(if (wide || visibleImageCount == 1) maxWidth else (maxWidth / 2 - 2.dp))
+                            .requiredHeight(if (visibleImageCount == 1) maxWidth else (maxWidth / 2 - 2.dp))
+                            .border(
+                                width = 1.dp,
+                                color = colorResource(id = R.color.attachmentBorder),
+                                shape = RoundedCornerShape(
+                                    if (index == 0) 6.dp else 0.dp,
+                                    if ((index == 0 && visibleImageCount < 3) || (index == 1 && visibleImageCount >= 3)) 6.dp else 0.dp,
+                                    if ((noFileAttachments) && (index == visibleImageCount - 1)) 6.dp else 0.dp,
+                                    if ((noFileAttachments) &&
+                                        ((index == 1 && visibleImageCount == 2)
+                                                || (index == visibleImageCount - 1 && ((visibleImageCount and 1) != 0))
+                                                || (index == visibleImageCount - 2 && visibleImageCount > 2 && ((visibleImageCount and 1) == 0)))
+                                    ) 6.dp else 0.dp
                                 )
-                                .then(if (blockClicks.not() && openOnClick) {
-                                    Modifier.clickable(
-                                        indication = ripple(),
-                                        interactionSource = remember { MutableInteractionSource() }
-                                    ) {
-                                        downloadAwareClick {
-                                            App.runThread(
-                                                InboundEphemeralMessageClicked(
-                                                    attachment.fyleMessageJoinWithStatus.bytesOwnedIdentity,
-                                                    attachment.fyleMessageJoinWithStatus.messageId
-                                                )
-                                            )
-                                        }
-                                    }
-                                } else Modifier),
-                            painter = painterResource(id = R.drawable.ic_incognito),
-                            contentScale = ContentScale.Fit,
-                            contentDescription = null
-                        )
-                        EphemeralVisibilityExplanation(
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .requiredSizeIn(
-                                    maxWidth = if (wide || imageCount == 1) maxWidth else (maxWidth / 2 - 2.dp),
-                                    maxHeight = if (message.imageAndVideoCount == 1) maxWidth else (maxWidth / 2 - 2.dp)
-                                )
-                                .padding(top = 8.dp),
-                            duration = expiration?.visibilityDuration,
-                            readOnce = readOnce
-                        )
-                    } else {
-                        var imageUri: ImageRequest? by remember {
-                            mutableStateOf(null)
-                        }
-                        val cacheKey =
-                            "${attachment.fyleMessageJoinWithStatus.fyleId}-${attachment.fyleMessageJoinWithStatus.messageId}"
-                        LaunchedEffect(
-                            attachment.fyleMessageJoinWithStatus.miniPreview != null,
-                            attachment.fyle.filePath
-                        ) {
-                            imageUri = if (attachment.fyle.isComplete) {
-                                ImageRequest.Builder(context)
-                                    .data(attachment.deterministicContentUriForGallery)
-                                    .placeholderMemoryCacheKey(cacheKey)
-                                    .build()
-                            } else if (attachment.fyleMessageJoinWithStatus.miniPreview != null) {
-                                ImageRequest.Builder(context)
-                                    .data(attachment.fyleMessageJoinWithStatus.miniPreview)
-                                    .memoryCacheKey(cacheKey)
-                                    .build()
-                            } else {
-                                null
-                            }
-                        }
-                        LaunchedEffect(attachment.fyle.id, attachment.fyle.filePath) {
-                            launch(Dispatchers.IO) {
-                                // TODO: only get the image resolution and store it in the fyleMessageJoinWithStatus
-                                if (VERSION.SDK_INT < VERSION_CODES.P || !attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith(
-                                        "image/"
-                                    )
+                            )
+                            .then(if (blockClicks.not() && openOnClick) {
+                                Modifier.clickable(
+                                    indication = ripple(),
+                                    interactionSource = remember { MutableInteractionSource() }
                                 ) {
-                                    PreviewUtils.getBitmapPreview(
+                                    attachment.fyleAndStatus.downloadAwareClick {
+                                        App.runThread(
+                                            InboundEphemeralMessageClicked(
+                                                attachment.fyleMessageJoinWithStatus.bytesOwnedIdentity,
+                                                attachment.fyleMessageJoinWithStatus.messageId
+                                            )
+                                        )
+                                    }
+                                }
+                            } else Modifier),
+                        painter = painterResource(id = R.drawable.ic_incognito),
+                        contentScale = ContentScale.Fit,
+                        contentDescription = null
+                    )
+                    EphemeralVisibilityExplanation(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .requiredSizeIn(
+                                maxWidth = if (wide || visibleImageCount == 1) maxWidth else (maxWidth / 2 - 2.dp),
+                                maxHeight = if (visibleImageCount == 1) maxWidth else (maxWidth / 2 - 2.dp)
+                            )
+                            .padding(top = 8.dp),
+                        duration = expiration?.visibilityDuration,
+                        readOnce = readOnce
+                    )
+                } else {
+                    var imageUri: ImageRequest? by remember {
+                        mutableStateOf(null)
+                    }
+                    val cacheKey = attachment.fyleAndStatus.thumbnailPlaceholderCacheKey()
+                    LaunchedEffect(
+                        attachment.fyleMessageJoinWithStatus.miniPreview != null,
+                        attachment.fyle.filePath
+                    ) {
+                        imageUri = attachment.fyleAndStatus.thumbnailRequest(context)
+                    }
+                    LaunchedEffect(attachment.fyle.id, attachment.fyle.filePath) {
+                        launch(Dispatchers.IO) {
+                            // TODO: only get the image resolution and store it in the fyleMessageJoinWithStatus
+                            if (VERSION.SDK_INT < VERSION_CODES.P || !attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith(
+                                    "image/"
+                                )
+                            ) {
+                                PreviewUtils.getBitmapPreview(
+                                    attachment.fyle,
+                                    attachment.fyleMessageJoinWithStatus,
+                                    1
+                                )
+                            } else {
+                                runCatching {
+                                    PreviewUtilsWithDrawables.getDrawablePreview(
                                         attachment.fyle,
                                         attachment.fyleMessageJoinWithStatus,
                                         1
                                     )
-                                } else {
-                                    runCatching {
-                                        PreviewUtilsWithDrawables.getDrawablePreview(
-                                            attachment.fyle,
-                                            attachment.fyleMessageJoinWithStatus,
-                                            1
-                                        )
-                                    }.onFailure {
-                                        imageUri = ImageRequest.Builder(context)
-                                            .data(R.drawable.ic_broken_image)
-                                            .build()
-                                    }
+                                }.onFailure {
+                                    imageUri = ImageRequest.Builder(context)
+                                        .data(R.drawable.ic_broken_image)
+                                        .build()
                                 }
                             }
                         }
+                    }
 
-                        AsyncImage(
-                            modifier = Modifier
-                                .width(if (wide || imageCount == 1) maxWidth else (maxWidth / 2 - 2.dp))
-                                .requiredHeight(
-                                    imageResolutions
-                                        ?.getOrNull(index)
-                                        ?.getPreferredHeight(
-                                            if (wide || imageCount == 1) maxWidth else (maxWidth / 2 - 2.dp),
-                                            wide,
-                                            2.dp
-                                        )
-                                        ?: if (imageCount == 1) maxWidth else (maxWidth / 2 - 2.dp)
+                    val tileWidth = if (wide || visibleImageCount == 1) maxWidth else (maxWidth / 2 - 2.dp)
+                    val tileHeight = imageResolutions
+                        ?.getOrNull(index)
+                        ?.getPreferredHeight(tileWidth, wide, 2.dp)
+                        ?: if (visibleImageCount == 1) maxWidth else (maxWidth / 2 - 2.dp)
+                    Box(
+                        modifier = Modifier
+                            .width(tileWidth)
+                            .requiredHeight(tileHeight)
+                            .border(
+                                width = 1.dp,
+                                color = colorResource(id = R.color.attachmentBorder),
+                                shape = RoundedCornerShape(
+                                    if (index == 0) 6.dp else 0.dp,
+                                    if ((index == 0 && visibleImageCount < 3) || (index == 1 && visibleImageCount >= 3)) 6.dp else 0.dp,
+                                    if ((noFileAttachments) && (index == visibleImageCount - 1)) 6.dp else 0.dp,
+                                    if ((noFileAttachments) &&
+                                        ((index == 1 && visibleImageCount == 2)
+                                                || (index == visibleImageCount - 1 && ((visibleImageCount and 1) != 0))
+                                                || (index == visibleImageCount - 2 && visibleImageCount > 2 && ((visibleImageCount and 1) == 0)))
+                                    ) 6.dp else 0.dp
                                 )
-                                .border(
-                                    width = 1.dp,
-                                    color = colorResource(id = R.color.attachmentBorder),
-                                    shape = RoundedCornerShape(
-                                        if (index == 0) 6.dp else 0.dp,
-                                        if ((index == 0 && imageCount < 3) || (index == 1 && imageCount >= 3)) 6.dp else 0.dp,
-                                        if ((message.totalAttachmentCount == imageCount) && (index == imageCount - 1)) 6.dp else 0.dp,
-                                        if ((message.totalAttachmentCount == imageCount) &&
-                                            ((index == 1 && imageCount == 2)
-                                                    || (index == imageCount - 1 && ((imageCount and 1) != 0))
-                                                    || (index == imageCount - 2 && imageCount > 2 && ((imageCount and 1) == 0)))
-                                        ) 6.dp else 0.dp
-                                    )
-                                )
-                                .drawWithContent {
-                                    drawContent()
-                                    highlightImageTextBlock(
-                                        textBlocks = textBlocks,
-                                        discussionSearchViewModel = discussionSearchViewModel,
-                                        selectedImage = SelectedImage(
-                                            imageResolution = imageResolutions?.getOrNull(index),
-                                            uri = null,
-                                            cacheKey = cacheKey,
-                                        ),
-                                        textElementColor = highlightColor
-                                    )
-                                }
-                                .then(
-                                    if (blockClicks)
-                                        Modifier
-                                    else
-                                        Modifier.combinedClickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = ripple(),
-                                            onClick = {
-                                                downloadAwareClick {
-                                                    if (message.isLocationMessage) {
-                                                        onLocationClicked?.invoke()
-                                                    } else if (attachment.fyleMessageJoinWithStatus.mimeType != "image/svg+xml") {
-                                                        val showTextBlocksInGallery = textBlocks.isNotEmpty()
-                                                                && (discussionSearchViewModel?.matchedMessageAndFyleIds?.any {
-                                                            it.first == message.id
-                                                                    && it.second.first == attachment.fyle.id
-                                                        } == true)
+                            )
+                            .then(
+                                if (blockClicks)
+                                    Modifier
+                                else
+                                    Modifier.combinedClickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = ripple(),
+                                        onClick = {
+                                            val onClick: () -> Unit = {
+                                                if (message.isLocationMessage) {
+                                                    onLocationClicked?.invoke()
+                                                } else if (attachment.fyleMessageJoinWithStatus.mimeType != "image/svg+xml") {
+                                                    val showTextBlocksInGallery = textBlocks.isNotEmpty()
+                                                            && (discussionSearchViewModel?.matchedMessageAndFyleIds?.any {
+                                                        it.first == message.id
+                                                                && it.second.first == attachment.fyle.id
+                                                    } == true)
 
+                                                    if (openImageAttachment != null) {
+                                                        openImageAttachment(message, attachment.fyleAndStatus, showTextBlocksInGallery, imageCount > visibleImageCount)
+                                                    } else {
                                                         openViewerCallback?.invoke()
                                                         App.openDiscussionGalleryActivity(
                                                             context,
@@ -453,375 +420,459 @@ fun Attachments(
                                                         )
                                                     }
                                                 }
-                                            },
-                                            onLongClick = {
-                                                onAttachmentLongClick(attachment.fyleAndStatus)
-                                                if (message.isLocationMessage.not()) {
-                                                    attachmentContextMenuOpened = true
-                                                }
                                             }
-                                        )),
-                            model = imageUri,
-                            imageLoader = imageLoader,
-                            contentScale = if (attachment.fyleMessageJoinWithStatus.nonNullMimeType != "image/gif" && (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith(
-                                    "image/"
-                                ) || attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith(
-                                    "video/"
-                                ))
-                            ) ContentScale.Crop else ContentScale.Fit,
-                            contentDescription = attachment.fyleMessageJoinWithStatus.fileName,
-                        )
-
-                        if (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith("video/")) {
-                            Image(
+                                            if (hiddenCount == 0) {
+                                                attachment.fyleAndStatus.downloadAwareClick (onClick)
+                                            } else {
+                                                onClick()
+                                            }
+                                        },
+                                        onLongClick = {
+                                            onAttachmentLongClick(attachment.fyleAndStatus)
+                                            if (message.isLocationMessage.not()) {
+                                                attachmentContextMenuOpened = true
+                                            }
+                                        }
+                                    ))
+                    ) {
+                        // the "+N" and play overlays hide with the picture while the viewer or the album close flight draws it
+                        Box(modifier = imageTileModifier(attachment.fyleAndStatus, hiddenCount).fillMaxSize()) {
+                            AsyncImage(
                                 modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .requiredSize(64.dp),
-                                painter = painterResource(id = R.drawable.overlay_video_small),
-                                contentDescription = "video"
-                            )
-                        }
-                        if (discussionSearchViewModel?.filterRegexes?.takeIf { it.isNotEmpty() }
-                                ?.all {
-                                    StringUtils.unAccent(attachment.fyleMessageJoinWithStatus.fileName)
-                                        .contains(it)
-                                } == true) {
-                            Text(
-                                modifier = Modifier
-                                    .widthIn(max = if (wide || imageCount == 1) maxWidth else (maxWidth / 2 - 2.dp))
-                                    .padding(3.dp)
-                                    .background(
-                                        shape = RoundedCornerShape(4.dp),
-                                        color = colorResource(R.color.whiteOpaqueOverlay)
+                                    .fillMaxSize()
+                                .drawWithContent {
+                                    drawContent()
+                                    highlightImageTextBlock(
+                                        textBlocks = textBlocks,
+                                        discussionSearchViewModel = discussionSearchViewModel,
+                                        selectedImage = SelectedImage(
+                                            imageResolution = imageResolutions?.getOrNull(index),
+                                            uri = null,
+                                            cacheKey = cacheKey,
+                                        ),
+                                        textElementColor = highlightColor
                                     )
-                                    .padding(horizontal = 4.dp, vertical = 2.dp),
-                                color = colorResource(R.color.almostBlack),
-                                text = discussionSearchViewModel.highlight(
-                                    context,
-                                    AnnotatedString(attachment.fyleMessageJoinWithStatus.fileName)
-                                ),
-                                maxLines = 2,
+                                },
+                                model = imageUri,
+                                imageLoader = imageLoader,
+                                contentScale = if ((imageCount > 1 || attachment.fyleMessageJoinWithStatus.nonNullMimeType != "image/gif") && (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith(
+                                        "image/"
+                                    ) || attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith(
+                                        "video/"
+                                    ))
+                                ) ContentScale.Crop else ContentScale.Fit,
+                                contentDescription = attachment.fyleMessageJoinWithStatus.fileName,
                             )
-                        }
-                    }
-                    LaunchedEffect(discussionSearchViewModel?.matchedMessageAndFyleIds) {
-                        if (discussionSearchViewModel?.matchedMessageAndFyleIds?.any {it.first == attachment.fyleMessageJoinWithStatus.messageId && it.second.first == attachment.fyle.id } == true) {
-                            launch(Dispatchers.IO) {
-                                textBlocks =
-                                    AppDatabase.getInstance().fyleMessageTextBlockDao().getAll(
-                                        messageId = attachment.fyleMessageJoinWithStatus.messageId,
-                                        fyleId = attachment.fyleMessageJoinWithStatus.fyleId
-                                    )
+                            // the "+N" overlay replaces the play icon on the last tile
+                            if (hiddenCount > 0) {
+                                OverflowIndicator(hiddenCount = hiddenCount, textStyle = OlvidTypography.h2)
+                            } else if (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith("video/")) {
+                                Image(
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .requiredSize(64.dp),
+                                    painter = painterResource(id = R.drawable.overlay_video_small),
+                                    contentDescription = "video"
+                                )
                             }
-                        } else {
-                            textBlocks = emptyList()
                         }
                     }
-
-                    if (showStatuses) {
-                        AttachmentReceptionStatusIcon(attachment.fyleMessageJoinWithStatus.receptionStatus)
-                    }
-
-                    getProgressLabel(status = attachment.fyleMessageJoinWithStatus.status)?.let {
+                    if (discussionSearchViewModel?.filterRegexes?.takeIf { it.isNotEmpty() }
+                            ?.all {
+                                StringUtils.unAccent(attachment.fyleMessageJoinWithStatus.fileName)
+                                    .contains(it)
+                            } == true) {
                         Text(
                             modifier = Modifier
-                                .width(if (wide || imageCount == 1) maxWidth else (maxWidth / 2 - 2.dp))
-                                .padding(1.dp)
-                                .requiredHeight(18.dp)
+                                .widthIn(max = if (wide || visibleImageCount == 1) maxWidth else (maxWidth / 2 - 2.dp))
+                                .padding(3.dp)
                                 .background(
-                                    color = colorResource(
-                                        id = R.color.primary400_90
-                                    )
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = colorResource(R.color.whiteOpaqueOverlay)
                                 )
-                                .wrapContentHeight(Alignment.CenterVertically),
-                            text = it,
-                            fontSize = constantSp(12),
-                            textAlign = TextAlign.Center,
-                            style = OlvidTypography.subtitle1,
-                            color = colorResource(
-                                id = R.color.almostWhite
-                            )
+                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                            color = colorResource(R.color.almostBlack),
+                            text = discussionSearchViewModel.highlight(
+                                context,
+                                AnnotatedString(attachment.fyleMessageJoinWithStatus.fileName)
+                            ),
+                            fontSize = 14.sp * scale.dampened(),
+                            maxLines = 2,
                         )
-                    }
-                    when (attachment.fyleMessageJoinWithStatus.status) {
-                        FyleMessageJoinWithStatus.STATUS_DOWNLOADING,
-                        FyleMessageJoinWithStatus.STATUS_UPLOADING,
-                        FyleMessageJoinWithStatus.STATUS_COPYING -> {
-                            AttachmentDownloadProgress(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(8.dp),
-                                speed = attachmentProgress.speed,
-                                eta = attachmentProgress.eta,
-                                progress = attachmentProgress.progress,
-                                large = imageCount == 1
-                            )
-                        }
-
-                        FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE -> {
-                            Image(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(if (imageCount == 1) 0.dp else 4.dp)
-                                    .size(if (imageCount == 1) 64.dp else 32.dp),
-                                painter = painterResource(id = R.drawable.ic_file_download),
-                                contentDescription = null
-                            )
-                        }
-
-                        FyleMessageJoinWithStatus.STATUS_DRAFT, FyleMessageJoinWithStatus.STATUS_COMPLETE -> { }
-
-                        FyleMessageJoinWithStatus.STATUS_FAILED -> {
-                            Image(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(if (imageCount == 1) 0.dp else 4.dp)
-                                    .size(if (imageCount == 1) 64.dp else 32.dp),
-                                painter = painterResource(id = R.drawable.ic_attachment_status_failed),
-                                contentDescription = null
-                            )
-                        }
-
-                        FyleMessageJoinWithStatus.STATUS_UNTRANSFERRED -> {
-                            Icon(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(8.dp)
-                                    .size(24.dp),
-                                painter = painterResource(id = R.drawable.ic_transfer),
-                                tint = colorResource(R.color.red),
-                                contentDescription = null
-                            )
-                        }
                     }
                 }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .border(
-                            width = 1.dp,
-                            color = colorResource(id = R.color.attachmentBorder),
-                            shape = RoundedCornerShape(
-                                if (imageCount == 0 && index == 0) 6.dp else 0.dp,
-                                if (imageCount == 0 && index == 0) 6.dp else 0.dp,
-                                if (index == (message.totalAttachmentCount - 1)) 6.dp else 0.dp,
-                                if (index == (message.totalAttachmentCount - 1)) 6.dp else 0.dp,
+                LaunchedEffect(discussionSearchViewModel?.matchedMessageAndFyleIds) {
+                    if (discussionSearchViewModel?.matchedMessageAndFyleIds?.any {it.first == attachment.fyleMessageJoinWithStatus.messageId && it.second.first == attachment.fyle.id } == true) {
+                        launch(Dispatchers.IO) {
+                            textBlocks =
+                                AppDatabase.getInstance().fyleMessageTextBlockDao().getAll(
+                                    messageId = attachment.fyleMessageJoinWithStatus.messageId,
+                                    fyleId = attachment.fyleMessageJoinWithStatus.fyleId
+                                )
+                        }
+                    } else {
+                        textBlocks = emptyList()
+                    }
+                }
+
+                if (showStatuses) {
+                    AttachmentReceptionStatusIcon(attachment.fyleMessageJoinWithStatus.receptionStatus)
+                }
+
+                getProgressLabel(status = attachment.fyleMessageJoinWithStatus.status)?.let {
+                    Text(
+                        modifier = Modifier
+                            .width(if (wide || visibleImageCount == 1) maxWidth else (maxWidth / 2 - 2.dp))
+                            .padding(1.dp)
+                            .requiredHeight(18.dp)
+                            .background(
+                                color = colorResource(
+                                    id = R.color.primary400_90
+                                )
                             )
+                            .wrapContentHeight(Alignment.CenterVertically),
+                        text = it,
+                        fontSize = constantSp(12),
+                        textAlign = TextAlign.Center,
+                        style = OlvidTypography.subtitle1,
+                        color = colorResource(
+                            id = R.color.almostWhite
                         )
-                        .then(
-                            if (message.isContentHidden) {
-                                Modifier.background(colorResource(R.color.almostWhite))
-                            } else Modifier
+                    )
+                }
+                when (attachment.fyleMessageJoinWithStatus.status) {
+                    FyleMessageJoinWithStatus.STATUS_DOWNLOADING,
+                    FyleMessageJoinWithStatus.STATUS_UPLOADING,
+                    FyleMessageJoinWithStatus.STATUS_COPYING -> {
+                        AttachmentDownloadProgress(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(8.dp),
+                            speed = attachmentProgress.speed,
+                            eta = attachmentProgress.eta,
+                            progress = attachmentProgress.progress,
+                            large = visibleImageCount == 1
                         )
-                ) {
-                    if (message.isContentHidden) {
+                    }
+
+                    FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE -> {
                         Image(
                             modifier = Modifier
-                                .width(64.dp)
-                                .height(64.dp),
-                            painter = painterResource(id = R.drawable.ic_incognito),
-                            contentScale = ContentScale.Fit,
+                                .align(Alignment.BottomEnd)
+                                .padding(if (visibleImageCount == 1) 0.dp else 4.dp)
+                                .size(if (visibleImageCount == 1) 64.dp else 32.dp),
+                            painter = painterResource(id = R.drawable.ic_file_download),
                             contentDescription = null
                         )
-                        EphemeralVisibilityExplanation(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 64.dp)
-                                .align(Alignment.Center),
-                            duration = expiration?.visibilityDuration,
-                            readOnce = readOnce
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(64.dp)
-                                .then(if (blockClicks.not() && openOnClick) {
-                                    Modifier.clickable {
-                                        downloadAwareClick {
-                                            App.runThread(
-                                                InboundEphemeralMessageClicked(
-                                                    attachment.fyleMessageJoinWithStatus.bytesOwnedIdentity,
-                                                    attachment.fyleMessageJoinWithStatus.messageId
-                                                )
-                                            )
-                                        }
-                                    }
-                                } else Modifier)
-                        )
-                    } else {
-                        if (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith("audio/")) {
-                            var menuOpened by remember { mutableStateOf(false) }
-                            AudioListItem(
-                                modifier = Modifier
-                                    .background(color = colorResource(id = R.color.almostWhite)),
-                                fyleAndStatus = attachment.fyleAndStatus,
-                                activity = context as AppCompatActivity,
-                                discussionSearchViewModel = discussionSearchViewModel,
-                                onEnableMessageSwipe = onEnableMessageSwipe,
-                                audioAttachmentServiceBinding = audioAttachmentServiceBinding,
-                                discussionId = message.discussionId,
-                                onLongClick = {
-                                    if (blockClicks.not()) {
-                                        onAttachmentLongClick(attachment.fyleAndStatus)
-                                        menuOpened = true
-                                    }
-                                },
-                                onIncompleteClick = {
-                                    if (blockClicks.not()) {
-                                        downloadAwareClick {}
-                                    }
-                                },
-                                contextMenu = {
-                                    if (blockClicks.not()) {
-                                        AttachmentContextMenu(
-                                            menuOpened = menuOpened,
-                                            message = message,
-                                            attachment = attachment,
-                                            visibility = VISIBLE,
-                                            readOnce = false,
-                                            multipleAttachment = attachments.size > 1,
-                                            onDismiss = { menuOpened = false },
-                                            onCancelAttachmentUpload = onCancelAttachmentUpload,
-                                            saveAttachment = saveAttachment,
-                                            saveAllAttachments = saveAllAttachments
-                                        )
-                                    }
-                                }
-                            )
-                        } else {
-                            var menuOpened by remember { mutableStateOf(false) }
-                            FyleListItem(
-                                modifier = Modifier
-                                    .background(colorResource(id = R.color.almostWhite)),
-                                fyleAndStatus = attachment.fyleAndStatus,
-                                fileName = AnnotatedString(attachment.fyleMessageJoinWithStatus.fileName).let {
-                                    discussionSearchViewModel?.highlight(context, it) ?: it
-                                },
-                                onClick = {
-                                    if (blockClicks.not()) {
-                                        downloadAwareClick {
-                                            App.openFyleViewer(
-                                                context,
-                                                attachment.fyleAndStatus,
-                                                { attachment.fyleMessageJoinWithStatus.markAsOpened() },
-                                                { openViewerCallback?.invoke() }
-                                            )
-                                        }
-                                    }
-                                },
-                                onLongClick = {
-                                    if (blockClicks.not()) {
-                                        onAttachmentLongClick(attachment.fyleAndStatus)
-                                        menuOpened = true
-                                    }
-                                },
-                                contextMenu = {
-                                    if (blockClicks.not()) {
-                                        AttachmentContextMenu(
-                                            menuOpened = menuOpened,
-                                            message = message,
-                                            attachment = attachment,
-                                            visibility = VISIBLE,
-                                            readOnce = false,
-                                            multipleAttachment = attachments.size > 1,
-                                            onDismiss = { menuOpened = false },
-                                            onCancelAttachmentUpload = onCancelAttachmentUpload,
-                                            saveAttachment = saveAttachment,
-                                            saveAllAttachments = saveAllAttachments
-                                        )
-                                    }
-                                },
-                                previewBorder = false
-                            )
-                        }
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .align(Alignment.TopStart)
-                    ) {
-                        AttachmentReceptionStatusIcon(attachment.fyleMessageJoinWithStatus.receptionStatus)
-                    }
+                    FyleMessageJoinWithStatus.STATUS_DRAFT, FyleMessageJoinWithStatus.STATUS_COMPLETE -> { }
 
-                    getProgressLabel(status = attachment.fyleMessageJoinWithStatus.status)?.let {
-                        Text(
+                    FyleMessageJoinWithStatus.STATUS_FAILED -> {
+                        Image(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(1.dp)
-                                .requiredHeight(18.dp)
-                                .background(
-                                    color = colorResource(
-                                        id = R.color.primary400_90
-                                    )
-                                )
-                                .wrapContentHeight(Alignment.CenterVertically),
-                            text = it,
-                            fontSize = constantSp(12),
-                            textAlign = TextAlign.Center,
-                            style = OlvidTypography.subtitle1,
-                            color = colorResource(
-                                id = R.color.almostWhite
-                            )
+                                .align(Alignment.BottomEnd)
+                                .padding(if (visibleImageCount == 1) 0.dp else 4.dp)
+                                .size(if (visibleImageCount == 1) 64.dp else 32.dp),
+                            painter = painterResource(id = R.drawable.ic_attachment_status_failed),
+                            contentDescription = null
                         )
                     }
-                    when (attachment.fyleMessageJoinWithStatus.status) {
-                        FyleMessageJoinWithStatus.STATUS_DOWNLOADING,
-                        FyleMessageJoinWithStatus.STATUS_UPLOADING,
-                        FyleMessageJoinWithStatus.STATUS_COPYING -> {
-                            AttachmentDownloadProgress(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(8.dp),
-                                speed = attachmentProgress.speed,
-                                eta = attachmentProgress.eta,
-                                progress = attachmentProgress.progress,
-                                large = false
-                            )
-                        }
 
-                        FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE -> {
-                            Image(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(4.dp)
-                                    .size(32.dp),
-                                painter = painterResource(id = R.drawable.ic_file_download),
-                                contentDescription = null
-                            )
-                        }
-
-                        FyleMessageJoinWithStatus.STATUS_DRAFT, FyleMessageJoinWithStatus.STATUS_COMPLETE -> {
-
-                        }
-
-                        FyleMessageJoinWithStatus.STATUS_FAILED -> {
-                            Image(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(4.dp)
-                                    .size(32.dp),
-                                painter = painterResource(id = R.drawable.ic_attachment_status_failed),
-                                contentDescription = null
-                            )
-                        }
-
-                        FyleMessageJoinWithStatus.STATUS_UNTRANSFERRED -> {
-                            Icon(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(4.dp)
-                                    .size(32.dp)
-                                    .padding(4.dp),
-                                painter = painterResource(id = R.drawable.ic_transfer),
-                                tint = colorResource(R.color.red),
-                                contentDescription = null
-                            )
-                        }
+                    FyleMessageJoinWithStatus.STATUS_UNTRANSFERRED -> {
+                        Icon(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(8.dp)
+                                .size(24.dp),
+                            painter = painterResource(id = R.drawable.ic_transfer),
+                            tint = colorResource(R.color.red),
+                            contentDescription = null
+                        )
                     }
                 }
             }
         }
+        files.forEachIndexed { fileIndex, attachment ->
+            val attachmentProgress by rememberAttachmentProgress(attachment.fyleMessageJoinWithStatus)
+            Box(
+                modifier = Modifier
+                    .border(
+                        width = 1.dp,
+                        color = colorResource(id = R.color.attachmentBorder),
+                        shape = RoundedCornerShape(
+                            if (imageCount == 0 && fileIndex == 0) 6.dp else 0.dp,
+                            if (imageCount == 0 && fileIndex == 0) 6.dp else 0.dp,
+                            if (fileIndex == files.lastIndex) 6.dp else 0.dp,
+                            if (fileIndex == files.lastIndex) 6.dp else 0.dp,
+                        )
+                    )
+                    .then(
+                        if (message.isContentHidden) {
+                            Modifier.background(colorResource(R.color.almostWhite))
+                        } else Modifier
+                    )
+            ) {
+                if (message.isContentHidden) {
+                    Image(
+                        modifier = Modifier
+                            .width(64.dp)
+                            .height(64.dp),
+                        painter = painterResource(id = R.drawable.ic_incognito),
+                        contentScale = ContentScale.Fit,
+                        contentDescription = null
+                    )
+                    EphemeralVisibilityExplanation(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 64.dp)
+                            .align(Alignment.Center),
+                        duration = expiration?.visibilityDuration,
+                        readOnce = readOnce
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(64.dp)
+                            .then(if (blockClicks.not() && openOnClick) {
+                                Modifier.clickable {
+                                    attachment.fyleAndStatus.downloadAwareClick {
+                                        App.runThread(
+                                            InboundEphemeralMessageClicked(
+                                                attachment.fyleMessageJoinWithStatus.bytesOwnedIdentity,
+                                                attachment.fyleMessageJoinWithStatus.messageId
+                                            )
+                                        )
+                                    }
+                                }
+                            } else Modifier)
+                    )
+                } else {
+                    if (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith("audio/")) {
+                        var menuOpened by remember { mutableStateOf(false) }
+                        AudioListItem(
+                            modifier = Modifier
+                                .background(color = colorResource(id = R.color.almostWhite)),
+                            fyleAndStatus = attachment.fyleAndStatus,
+                            scale = scale,
+                            activity = context as AppCompatActivity,
+                            discussionSearchViewModel = discussionSearchViewModel,
+                            onEnableMessageSwipe = onEnableMessageSwipe,
+                            audioAttachmentServiceBinding = audioAttachmentServiceBinding,
+                            discussionId = message.discussionId,
+                            onLongClick = {
+                                if (blockClicks.not()) {
+                                    onAttachmentLongClick(attachment.fyleAndStatus)
+                                    menuOpened = true
+                                }
+                            },
+                            onIncompleteClick = {
+                                if (blockClicks.not()) {
+                                    attachment.fyleAndStatus.downloadAwareClick {}
+                                }
+                            },
+                            contextMenu = {
+                                if (blockClicks.not()) {
+                                    AttachmentContextMenu(
+                                        menuOpened = menuOpened,
+                                        message = message,
+                                        attachment = attachment,
+                                        visibility = VISIBLE,
+                                        readOnce = false,
+                                        multipleAttachment = multipleAttachments,
+                                        onDismiss = { menuOpened = false },
+                                        onCancelAttachmentUpload = onCancelAttachmentUpload,
+                                        saveAttachment = saveAttachment,
+                                        saveAllAttachments = saveAllAttachments
+                                    )
+                                }
+                            }
+                        )
+                    } else {
+                        var menuOpened by remember { mutableStateOf(false) }
+                        FyleListItem(
+                            modifier = Modifier
+                                .background(colorResource(id = R.color.almostWhite)),
+                            fyleAndStatus = attachment.fyleAndStatus,
+                            scale = scale,
+                            fileName = AnnotatedString(attachment.fyleMessageJoinWithStatus.fileName).let {
+                                discussionSearchViewModel?.highlight(context, it) ?: it
+                            },
+                            onClick = {
+                                if (blockClicks.not()) {
+                                    attachment.fyleAndStatus.downloadAwareClick {
+                                        App.openFyleViewer(
+                                            context,
+                                            attachment.fyleAndStatus,
+                                            { attachment.fyleMessageJoinWithStatus.markAsOpened() },
+                                            { openViewerCallback?.invoke() }
+                                        )
+                                    }
+                                }
+                            },
+                            onLongClick = {
+                                if (blockClicks.not()) {
+                                    onAttachmentLongClick(attachment.fyleAndStatus)
+                                    menuOpened = true
+                                }
+                            },
+                            contextMenu = {
+                                if (blockClicks.not()) {
+                                    AttachmentContextMenu(
+                                        menuOpened = menuOpened,
+                                        message = message,
+                                        attachment = attachment,
+                                        visibility = VISIBLE,
+                                        readOnce = false,
+                                        multipleAttachment = multipleAttachments,
+                                        onDismiss = { menuOpened = false },
+                                        onCancelAttachmentUpload = onCancelAttachmentUpload,
+                                        saveAttachment = saveAttachment,
+                                        saveAllAttachments = saveAllAttachments
+                                    )
+                                }
+                            },
+                            previewBorder = false
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .align(Alignment.TopStart)
+                ) {
+                    AttachmentReceptionStatusIcon(attachment.fyleMessageJoinWithStatus.receptionStatus)
+                }
+
+                getProgressLabel(status = attachment.fyleMessageJoinWithStatus.status)?.let {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(1.dp)
+                            .requiredHeight(18.dp)
+                            .background(
+                                color = colorResource(
+                                    id = R.color.primary400_90
+                                )
+                            )
+                            .wrapContentHeight(Alignment.CenterVertically),
+                        text = it,
+                        fontSize = constantSp(12),
+                        textAlign = TextAlign.Center,
+                        style = OlvidTypography.subtitle1,
+                        color = colorResource(
+                            id = R.color.almostWhite
+                        )
+                    )
+                }
+                when (attachment.fyleMessageJoinWithStatus.status) {
+                    FyleMessageJoinWithStatus.STATUS_DOWNLOADING,
+                    FyleMessageJoinWithStatus.STATUS_UPLOADING,
+                    FyleMessageJoinWithStatus.STATUS_COPYING -> {
+                        AttachmentDownloadProgress(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(8.dp),
+                            speed = attachmentProgress.speed,
+                            eta = attachmentProgress.eta,
+                            progress = attachmentProgress.progress,
+                            large = false
+                        )
+                    }
+
+                    FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE -> {
+                        Image(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(4.dp)
+                                .size(32.dp),
+                            painter = painterResource(id = R.drawable.ic_file_download),
+                            contentDescription = null
+                        )
+                    }
+
+                    FyleMessageJoinWithStatus.STATUS_DRAFT, FyleMessageJoinWithStatus.STATUS_COMPLETE -> {
+
+                    }
+
+                    FyleMessageJoinWithStatus.STATUS_FAILED -> {
+                        Image(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(4.dp)
+                                .size(32.dp),
+                            painter = painterResource(id = R.drawable.ic_attachment_status_failed),
+                            contentDescription = null
+                        )
+                    }
+
+                    FyleMessageJoinWithStatus.STATUS_UNTRANSFERRED -> {
+                        Icon(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(4.dp)
+                                .size(32.dp)
+                                .padding(4.dp),
+                            painter = painterResource(id = R.drawable.ic_transfer),
+                            tint = colorResource(R.color.red),
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Shared-element key of an image/video attachment, common to bubble tiles, album cells and viewer pages. */
+fun attachmentSharedElementKey(messageId: Long, fyleId: Long) = "attachment-$messageId-$fyleId"
+
+fun attachmentSharedElementKey(fyleAndStatus: FyleAndStatus) =
+    attachmentSharedElementKey(fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndStatus.fyle.id)
+
+/** Coil key under which a tile keeps its mini preview until the file is decoded. */
+fun FyleAndStatus.thumbnailPlaceholderCacheKey() =
+    "${fyleMessageJoinWithStatus.fyleId}-${fyleMessageJoinWithStatus.messageId}"
+
+/**
+ * Coil key under which the decoded thumbnail of a complete attachment ends up: Coil's default key for
+ * its content Uri, as [thumbnailRequest] sets none. Read back by the viewer's placeholder and morph.
+ */
+fun FyleAndStatus.decodedThumbnailCacheKey(): MemoryCache.Key? =
+    deterministicContentUriForGallery?.let { MemoryCache.Key(it.toString()) }
+
+/** Thumbnail request shared by bubble tiles and album cells: the file once complete, else the mini preview. */
+fun FyleAndStatus.thumbnailRequest(context: Context): ImageRequest? = when {
+    fyle.isComplete -> ImageRequest.Builder(context)
+        .data(deterministicContentUriForGallery)
+        .placeholderMemoryCacheKey(thumbnailPlaceholderCacheKey())
+        .build()
+
+    fyleMessageJoinWithStatus.miniPreview != null -> ImageRequest.Builder(context)
+        .data(fyleMessageJoinWithStatus.miniPreview)
+        .memoryCacheKey(thumbnailPlaceholderCacheKey())
+        .build()
+
+    else -> null
+}
+
+/**
+ * Runs [completeClick] for complete/draft/uploading attachments, starts or stops the download for
+ * downloadable/downloading ones, and ignores failed, untransferred and copying ones.
+ */
+fun FyleAndStatus.downloadAwareClick(completeClick: () -> Unit) {
+    when (fyleMessageJoinWithStatus.status) {
+        FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE ->
+            App.runThread(StartAttachmentDownloadTask(fyleMessageJoinWithStatus))
+
+        FyleMessageJoinWithStatus.STATUS_DOWNLOADING ->
+            App.runThread(StopAttachmentDownloadTask(fyleMessageJoinWithStatus))
+
+        FyleMessageJoinWithStatus.STATUS_DRAFT,
+        FyleMessageJoinWithStatus.STATUS_UPLOADING,
+        FyleMessageJoinWithStatus.STATUS_COMPLETE,
+            -> completeClick()
     }
 }
 
@@ -912,14 +963,18 @@ fun getMinimumHeight(
     message: Message,
     displayWidth: Dp,
     attachmentSpace: Dp,
-    attachmentFileHeight: Dp
+    attachmentFileHeight: Dp,
 ): Dp {
     var attachmentsHeight = 0.dp
+    // only the first MAX_VISIBLE_IMAGE_ATTACHMENTS images are laid out, the others hide behind a "+N" overlay
+    val visibleImageCount = visibleImageTileCount(message.imageAndVideoCount)
     val imageResolutions = runCatching {
         ImageResolution.parseMultiple(message.imageResolutions)
     }.getOrNull()
+        ?.takeIf { it.size == message.imageAndVideoCount }
+        ?.take(visibleImageCount)
 
-    if (!imageResolutions.isNullOrEmpty() && imageResolutions.size == message.imageAndVideoCount) {
+    if (!imageResolutions.isNullOrEmpty()) {
         when (imageResolutions.size) {
             1 -> {
                 attachmentsHeight += imageResolutions[0].getPreferredHeight(
@@ -974,16 +1029,16 @@ fun getMinimumHeight(
         }
     } else {
         // images
-        if (message.imageAndVideoCount == 1) {
+        if (visibleImageCount == 1) {
             attachmentsHeight += displayWidth
-        } else if (message.imageAndVideoCount == 2) {
+        } else if (visibleImageCount == 2) {
             attachmentsHeight += displayWidth
-        } else if (message.imageAndVideoCount > 2) {
-            if ((message.imageAndVideoCount and 1) != 0) {
-                attachmentsHeight += ((displayWidth + attachmentSpace) / 2) * (message.imageAndVideoCount / 2)
+        } else if (visibleImageCount > 2) {
+            if ((visibleImageCount and 1) != 0) {
+                attachmentsHeight += ((displayWidth + attachmentSpace) / 2) * (visibleImageCount / 2)
                 attachmentsHeight += (displayWidth - attachmentSpace) / 2
             } else {
-                attachmentsHeight += ((displayWidth + attachmentSpace) / 2) * (message.imageAndVideoCount / 2)
+                attachmentsHeight += ((displayWidth + attachmentSpace) / 2) * (visibleImageCount / 2)
                 attachmentsHeight -= attachmentSpace
             }
         }
@@ -1019,6 +1074,7 @@ fun AttachmentContextMenu(
     readOnce: Boolean,
     multipleAttachment: Boolean,
     openViewerCallback: (() -> Unit)? = null,
+    onOpen: (() -> Unit)? = null,
     onCancelAttachmentUpload: (FyleAndStatus) -> Unit,
     saveAttachment: () -> Unit,
     saveAllAttachments: () -> Unit
@@ -1060,7 +1116,9 @@ fun AttachmentContextMenu(
     val open = @Composable {
         OlvidDropdownMenuItem(
             onClick = {
-                if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(
+                if (onOpen != null) {
+                    onOpen()
+                } else if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(
                         PreviewUtils.getNonNullMimeType(
                             attachment.fyleMessageJoinWithStatus.mimeType,
                             attachment.fyleMessageJoinWithStatus.fileName

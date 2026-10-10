@@ -155,6 +155,7 @@ public abstract class DiscussionDao {
                     "cust." + DiscussionCustomization.PREF_MUTE_NOTIFICATIONS_START_TIMESTAMP + " AS cust_" + DiscussionCustomization.PREF_MUTE_NOTIFICATIONS_START_TIMESTAMP + ", " +
                     "cust." + DiscussionCustomization.PREF_AUTO_OPEN_LIMITED_VISIBILITY_INBOUND_MESSAGES + " AS cust_" + DiscussionCustomization.PREF_AUTO_OPEN_LIMITED_VISIBILITY_INBOUND_MESSAGES + ", " +
                     "cust." + DiscussionCustomization.PREF_RETAIN_WIPED_OUTBOUND_MESSAGES + " AS cust_" + DiscussionCustomization.PREF_RETAIN_WIPED_OUTBOUND_MESSAGES + ", " +
+                    "cust." + DiscussionCustomization.PREF_DEFAULT_REACTION + " AS cust_" + DiscussionCustomization.PREF_DEFAULT_REACTION + ", " +
                     "cust." + DiscussionCustomization.PREF_DISCUSSION_RETENTION_COUNT + " AS cust_" + DiscussionCustomization.PREF_DISCUSSION_RETENTION_COUNT + ", " +
                     "cust." + DiscussionCustomization.PREF_DISCUSSION_RETENTION_DURATION + " AS cust_" + DiscussionCustomization.PREF_DISCUSSION_RETENTION_DURATION + ", " +
                     "cust." + DiscussionCustomization.PREF_USE_CUSTOM_MESSAGE_NOTIFICATION + " AS cust_" + DiscussionCustomization.PREF_USE_CUSTOM_MESSAGE_NOTIFICATION + ", " +

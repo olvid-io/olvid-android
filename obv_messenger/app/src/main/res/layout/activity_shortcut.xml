@@ -55,7 +55,7 @@
             app:layout_constraintBottom_toTopOf="@id/separator"
             app:layout_constraintTop_toBottomOf="@id/activity_shortcut_title">
 
-            <io.olvid.messenger.customClasses.InitialView
+            <androidx.compose.ui.platform.ComposeView
                 android:id="@+id/current_identity_initial_view"
                 android:layout_width="36dp"
                 android:layout_height="36dp"

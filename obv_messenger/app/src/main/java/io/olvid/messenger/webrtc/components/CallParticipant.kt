@@ -44,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -56,14 +57,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.ContactCacheSingleton
+import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.webrtc.WebrtcCallService.CallParticipantPojo
 import io.olvid.messenger.webrtc.WebrtcCallService.PeerState.CONNECTED
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.webrtc.VideoTrack
 
 @Composable
@@ -166,12 +169,22 @@ fun CallParticipant(
                 animationSpec = tween(durationMillis = 600),
                 label = "waveAlpha"
             )
+            val ownedIdentity by produceState<OwnedIdentity?>(
+                initialValue = null,
+                bytesOwnedIdentity
+            ) {
+                value = bytesOwnedIdentity?.let { bytes ->
+                    withContext(Dispatchers.IO) {
+                        AppDatabase.getInstance().ownedIdentityDao().get(bytes)
+                    }
+                }
+            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(bottom = if (isPip) 0.dp else peekHeight)
             ) {
-                InitialView(
+                Avatar(
                     modifier = Modifier
                         .align(Alignment.Center)
                         .sizeIn(maxWidth = 200.dp)
@@ -186,17 +199,10 @@ fun CallParticipant(
                                 )
                             }
                         },
-                    initialViewSetup = { view ->
-                        if (bytesOwnedIdentity != null) {
-                            App.runThread {
-                                AppDatabase.getInstance().ownedIdentityDao().get(bytesOwnedIdentity)
-                                    ?.let {
-                                        view.setOwnedIdentity(it)
-                                    }
-                            }
-                        } else {
-                            callParticipant?.initialViewSetup()?.invoke(view)
-                        }
+                    target = if (bytesOwnedIdentity != null) {
+                        ownedIdentity
+                    } else {
+                        callParticipant?.avatar()
                     }
                 )
                 callParticipant?.peerState.takeUnless { it == CONNECTED }?.let {

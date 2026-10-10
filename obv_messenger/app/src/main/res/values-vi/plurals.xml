@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Một trong các thiết bị của bạn sẽ hết hạn và bị hủy kích hoạt trong **ít hơn %1$d ngày**.\nBạn có thể mua đăng ký **Olvid+** để giữ cho thiết bị hoạt động.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Một trong các thiết bị của bạn sẽ hết hạn và bị hủy kích hoạt trong **ít hơn %1$d ngày**.\nBạn có thể mua đăng ký **Olvid+** để giữ cho thiết bị hoạt động.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Thiết bị này sẽ hết hạn và bị vô hiệu hóa trong vòng **ít hơn %1$d ngày**.\nBạn có thể mua gói đăng ký **Olvid+** để giữ cho thiết bị hoạt động.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Thiết bị này sẽ hết hạn và bị vô hiệu hóa trong vòng **dưới %1$d ngày**.\nBạn có thể mua gói đăng ký **Olvid+** để giữ cho thiết bị hoạt động.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s đã tham gia nhóm</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s đã tham gia nhóm</item>
@@ -92,7 +96,7 @@
 	</plurals>
 	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-716893580">Xóa cuộc trò chuyện đã chọn?</item>
-		<item quantity="other" state="needs_review" hash="-15840526">Xóa các cuộc hội thoại đã chọn?</item>
+		<item quantity="other" state="needs_review" hash="-15840526">Xóa các cuộc trò chuyện đã chọn?</item>
 	</plurals>
 	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-862879351">Xóa tin nhắn đã chọn?</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Thêm vào nhóm %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Thêm vào %1$d nhóm</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Bạn đã có một cuộc trò chuyện với những người tham gia này.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Bạn đã có %1$d cuộc trò chuyện với những người tham gia này.</item>
 	</plurals>
 </resources>

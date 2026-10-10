@@ -1,0 +1,5 @@
+- Dabar rodomos tik pirmosios 4 žinutės nuotraukos, o visų nuotraukų peržiūrai pridėtas albumo vaizdas.
+- Pridėtas dokumentų skaitytuvas.
+- Dukart bakstelėkite gautą žinutę, kad reaguotumėte numatytuoju jaustuku.
+- Nauji kontaktų ir grupių, kurių profilio nuotraukos nėra, atvaizdai.
+- Pridėtas mygtukas, skirtas siųsti nuotrauką tiesiogiai iš pagrindinio ekrano.

@@ -29,6 +29,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.ContactCacheSingleton;
+import io.olvid.messenger.databases.GroupAvatarCacheSingleton;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
@@ -321,6 +322,7 @@ public class RestoreAppDataFromBackupTask implements Callable<Boolean> {
                 new UpdateAllGroupMembersNames().run();
 
                 ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues();
+                GroupAvatarCacheSingleton.INSTANCE.reload();
             }
 
             if (appBackupPojo.settings != null) {

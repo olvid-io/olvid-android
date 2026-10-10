@@ -31,6 +31,7 @@ import androidx.room.Index;
 import java.util.List;
 
 import io.olvid.engine.engine.types.JsonGroupDetails;
+import io.olvid.messenger.designsystem.avatar.AvatarTarget;
 import io.olvid.messenger.customClasses.StringUtils;
 
 @Entity(tableName = Group.TABLE_NAME,
@@ -51,7 +52,7 @@ import io.olvid.messenger.customClasses.StringUtils;
                 @Index({Group.BYTES_GROUP_OWNER_IDENTITY, Group.BYTES_OWNED_IDENTITY}),
         }
 )
-public class Group {
+public class Group implements AvatarTarget {
     public static final String TABLE_NAME = "group_table";
 
     public static final String BYTES_GROUP_OWNER_AND_UID = "bytes_group_owner_and_uid";

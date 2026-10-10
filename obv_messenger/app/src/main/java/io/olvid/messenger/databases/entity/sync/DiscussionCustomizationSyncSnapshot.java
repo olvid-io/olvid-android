@@ -59,6 +59,7 @@ public class DiscussionCustomizationSyncSnapshot implements ObvSyncSnapshotNode 
                 localSettings.mute = true;
                 localSettings.mute_timestamp = discussionCustomization.prefMuteNotificationsTimestamp;
             }
+            localSettings.preferred_reaction = discussionCustomization.prefDefaultReaction;
             discussionCustomizationSyncSnapshot.local_settings = localSettings;
 
             if (discussionCustomization.sharedSettingsVersion != null) {
@@ -110,6 +111,11 @@ public class DiscussionCustomizationSyncSnapshot implements ObvSyncSnapshotNode 
                 }
                 changed = true;
             }
+
+            if (!Objects.equals(local_settings.preferred_reaction, discussionCustomization.prefDefaultReaction)) {
+                discussionCustomization.prefDefaultReaction = local_settings.preferred_reaction;
+                changed = true;
+            }
         }
 
         if (domain.contains(SHARED_SETTINGS) && shared_settings != null && shared_settings.version != null) {
@@ -129,7 +135,7 @@ public class DiscussionCustomizationSyncSnapshot implements ObvSyncSnapshotNode 
                 JsonSharedSettings jsonSharedSettings = new JsonSharedSettings();
                 jsonSharedSettings.setVersion(shared_settings.version);
                 jsonSharedSettings.setJsonExpiration(jsonExpiration);
-                Message settingsMessage = Message.createDiscussionSettingsUpdateMessage(db, discussionId, jsonSharedSettings, new byte[0], true, null);
+                Message settingsMessage = Message.createDiscussionSettingsUpdateMessage(db, discussionId, jsonSharedSettings, new byte[0], false, null);
                 if (settingsMessage != null) {
                     db.messageDao().insert(settingsMessage);
                 }
@@ -197,10 +203,10 @@ public class DiscussionCustomizationSyncSnapshot implements ObvSyncSnapshotNode 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SharedSettings {
         // TODO when implementing sync, add a domain
-        public Integer version;
-        public Long existence_duration;
-        public Long visibility_duration;
-        public Boolean read_once;
+        @Nullable  public Integer version;
+        @Nullable public Long existence_duration;
+        @Nullable public Long visibility_duration;
+        @Nullable public Boolean read_once;
 
         public boolean areContentsTheSame(SharedSettings other) {
             return Objects.equals(version, other.version)
@@ -213,14 +219,16 @@ public class DiscussionCustomizationSyncSnapshot implements ObvSyncSnapshotNode 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class LocalSettings {
         // TODO when implementing sync, add a domain
-        public Boolean send_read_receipt;
-        public Boolean mute;
-        public Long mute_timestamp;
+        @Nullable public Boolean send_read_receipt;
+        @Nullable public Boolean mute;
+        @Nullable public Long mute_timestamp;
+        @Nullable public String preferred_reaction;
 
         public boolean areContentsTheSame(LocalSettings other) {
             return Objects.equals(send_read_receipt, other.send_read_receipt)
                     && Objects.equals(mute, other.mute)
-                    && Objects.equals(mute_timestamp, other.mute_timestamp);
+                    && Objects.equals(mute_timestamp, other.mute_timestamp)
+                    && Objects.equals(preferred_reaction, other.preferred_reaction);
         }
     }
 }

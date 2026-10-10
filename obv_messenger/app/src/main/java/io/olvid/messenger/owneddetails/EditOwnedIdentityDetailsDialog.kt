@@ -26,10 +26,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,13 +41,9 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.window.DialogProperties
 import io.olvid.messenger.App
-import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.OwnedIdentityDao.OwnedIdentityPasswordAndSalt
 import io.olvid.messenger.designsystem.components.BaseDialogContent
@@ -75,7 +73,6 @@ fun EditOwnedIdentityDetailsDialog(
     onPublish: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val context = LocalContext.current
     val valid by viewModel.valid.observeAsState()
     var profileHidden by remember { mutableStateOf(viewModel.isProfileHidden) }
     var showPasswordCreation by remember { mutableStateOf(false) }

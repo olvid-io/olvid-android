@@ -343,7 +343,12 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
 
     @Override
     public void setOnMapReadyCallback(@Nullable Runnable callback) {
-        this.onMapReadyCallback = callback;
+        if (googleMap != null && callback != null) {
+            // the map was ready before the callback was attached (e.g. fragment restored by the FragmentManager)
+            callback.run();
+        } else {
+            this.onMapReadyCallback = callback;
+        }
     }
 
     @Override

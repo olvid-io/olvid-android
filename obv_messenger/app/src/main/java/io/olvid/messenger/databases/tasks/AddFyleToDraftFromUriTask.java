@@ -43,7 +43,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
@@ -175,6 +174,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                     mimeType = PreviewUtils.getNonNullMimeType(null, fileName);
                 }
             } else if (uri != null) {
+                // some providers (e.g. MMS parts shared from SMS apps) reject the OpenableColumns projection: fall back to a generated name
                 String[] projection = {OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE};
                 try (Cursor cursor = contentResolver.query(uri, projection, null, null, null)) {
                     if ((cursor != null) && cursor.moveToFirst()) {
@@ -195,6 +195,8 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                             // do nothing
                         }
                     }
+                } catch (Exception e) {
+                    Logger.w("AddFyleToDraftFromUriTask: unable to query Uri metadata: " + e.getMessage());
                 }
             }
 
@@ -474,6 +476,8 @@ public class AddFyleToDraftFromUriTask implements Runnable {
             if (nullFyle != null) {
                 db.fyleDao().delete(nullFyle);
             }
+            // if the message was already sent and was only waiting for this copy, let it go without this attachment
+            repostIfDraftIsUnprocessed(db, draftMessage.id);
             if (fileName != null) {
                 App.toast(App.getContext().getResources().getString(R.string.toast_message_failed_to_attach_filename, fileName), Toast.LENGTH_SHORT, Gravity.BOTTOM);
             } else {
@@ -486,7 +490,12 @@ public class AddFyleToDraftFromUriTask implements Runnable {
         if (this.mimeType != null) {
             return this.mimeType;
         } else if (uri != null) {
-            return contentResolver.getType(uri);
+            try {
+                return contentResolver.getType(uri);
+            } catch (Exception e) {
+                Logger.x(e);
+                return "application/octet-stream";
+            }
         } else {
             Logger.e("AddFyleToDraftFromUriTask: both mimeType and uri are null");
             throw new Exception();
@@ -553,13 +562,19 @@ public class AddFyleToDraftFromUriTask implements Runnable {
         return photoFile;
     }
 
-    private static void repostIfDraftIsUnprocessed(AppDatabase db, long draftMessageId) {
+    // post() keeps holding the message while an attachment is still COPYING or being added, so this may be a no-op until the last one
+    public static void repostIfDraftIsUnprocessed(AppDatabase db, long draftMessageId) {
         db.runInTransaction(() -> {
             Message reDraftMessage = db.messageDao().get(draftMessageId);
             if (reDraftMessage != null && reDraftMessage.status == Message.STATUS_UNPROCESSED) {
                 reDraftMessage.recomputeAttachmentCount(db);
                 db.messageDao().updateAttachmentCount(reDraftMessage.id, reDraftMessage.totalAttachmentCount, reDraftMessage.imageAndVideoCount, reDraftMessage.videoCount, reDraftMessage.audioCount, reDraftMessage.firstAttachmentName, 0, reDraftMessage.imageResolutions);
-                reDraftMessage.post(false, null);
+                if (reDraftMessage.isEmpty()) {
+                    // every attachment failed to copy and there is no text: nothing left to send
+                    db.messageDao().delete(reDraftMessage);
+                } else {
+                    reDraftMessage.post(false, null);
+                }
             }
         });
     }

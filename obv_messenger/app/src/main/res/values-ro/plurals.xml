@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Unul dintre dispozitivele tale va expira și va fi dezactivat în **mai puțin de %1$d zi**.\nPoți achiziționa un abonament **Olvid+** pentru a-l menține activ.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Unul dintre dispozitivele dumneavoastră va expira și va fi dezactivat în **mai puțin de %1$d zile**.\nPuteți achiziționa un abonament **Olvid+** pentru a-l menține activ.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Acest dispozitiv va expira și va fi dezactivat în **mai puțin de %1$d zi**.\nPoți achiziționa un abonament **Olvid+** pentru a-l menține activ.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Acest dispozitiv va expira și va fi dezactivat în **mai puțin de %1$d zile**.\nPoți achiziționa un abonament **Olvid+** pentru a-l menține activ.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s a aderat la grup</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s a intrat în grup</item>
@@ -103,8 +107,8 @@
 		<item quantity="other" state="needs_review" hash="-1815739098">Ești sigur că dorești să ștergi discuțiile %1$d selectate și toate mesajele pe care le conțin?\nAceastă acțiune nu poate fi anulată.</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-2139168692">Cum doriți să ștergeți această conversație și toate mesajele pe care le conține?\nAceastă acțiune nu poate fi anulată.</item>
-		<item quantity="other" state="needs_review" hash="-1430564144">Cum doriți să ștergeți cele %1$d conversații selectate și toate mesajele pe care le conțin?\nAceastă acțiune nu poate fi anulată.</item>
+		<item quantity="one" state="needs_review" hash="-2139168692">Cum doriți să ștergeți această discuție și toate mesajele pe care le conține?\nAceastă acțiune nu poate fi anulată.</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">Cum doriți să ștergeți cele %1$d discuții selectate și toate mesajele pe care le conțin?\nAceastă acțiune nu poate fi anulată.</item>
 	</plurals>
 	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-947341357">Ești sigur că vrei să ștergi mesajul selectat?\nAceastă acțiune nu poate fi anulată.</item>
@@ -115,12 +119,12 @@
 		<item quantity="other" state="needs_review" hash="-895867176">Cum doriți să ștergeți cele %1$d mesaje selectate?\nAceastă acțiune nu poate fi anulată.</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-606769319">Pe punctul de a șterge **definitiv** un mesaj pentru **toată lumea** din această conversație. Asigurați-vă că acesta este ceea ce doriți să faceți.</item>
-		<item quantity="other" state="needs_review" hash="-1284393519">Pe punctul de a șterge **definitiv** %1$d mesaje pentru **toată lumea** din această conversație. Asigurați-vă că acesta este ceea ce doriți să faceți.</item>
+		<item quantity="one" state="needs_review" hash="-606769319">Pe punctul de a șterge **definitiv** un mesaj pentru **toată lumea** din această discuție. Asigurați-vă că acesta este ceea ce doriți să faceți.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">Pe punctul de a șterge **definitiv** %1$d mesaje pentru **toată lumea** din această discuție. Asigurați-vă că acesta este ceea ce doriți să faceți.</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="2118446236">Pe punctul de a șterge **definitiv** o conversație și mesajele pe care le conține pentru **toți** participanții la această conversație. Asigurați-vă că acesta este ceea ce doriți să faceți.</item>
-		<item quantity="other" state="needs_review" hash="-1558931055">Sunteți pe cale să ștergeți **definitiv** %1$d conversații și mesajele pe care le conțin pentru **toți** participanții la aceste conversații. Vă rugăm să vă asigurați că acesta este într-adevăr ceea ce doriți să faceți.</item>
+		<item quantity="one" state="needs_review" hash="2118446236">Pe punctul de a șterge **definitiv** o discuție și mesajele pe care le conține pentru **toți** participanții la această discuție. Asigurați-vă că acesta este ceea ce doriți să faceți.</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">Sunteți pe cale să ștergeți **definitiv** %1$d discuții și mesajele pe care le conțin pentru **toți** participanții la aceste discuții. Vă rugăm să vă asigurați că acesta este într-adevăr ceea ce doriți să faceți.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">Pe punctul de a invita fiecare membru al grupului cu care ai un canal (în prezent 1 membru) într-o discuție privată.\nDorești să continui?</item>
@@ -263,8 +267,8 @@
 		<item quantity="other" state="needs_review" hash="965402074">%1$d membri</item>
 	</plurals>
 	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1006155949">Aiți în prezent 1 mesaj șters de la distanță în conversațiile dumneavoastră. Doriți să îl ștergeți?</item>
-		<item quantity="other" state="needs_review" hash="-1716115044">În prezent ai %1$d mesaje șterse de la distanță în conversațiile tale. Dorești să ștergi toate aceste marcaje?</item>
+		<item quantity="one" state="needs_review" hash="-1006155949">Aiți în prezent 1 mesaj șters de la distanță în discuțiile dumneavoastră. Doriți să îl ștergeți?</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">În prezent ai %1$d mesaje șterse de la distanță în discuțiile tale. Dorești să ștergi toate aceste marcaje?</item>
 	</plurals>
 	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1367750681">1 contact își împărtășește locația</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Adăugați la grupul %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Adăugați la grupurile %1$d</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Deja aveți o discuție cu acești participanți.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Aveți deja %1$d discuții cu acești participanți.</item>
 	</plurals>
 </resources>

@@ -24,7 +24,10 @@ import android.content.Context
 import android.net.Uri
 import android.text.Editable
 import android.text.InputType
+import android.text.SpannableString
+import android.text.Spanned
 import android.text.TextUtils
+import android.text.style.RelativeSizeSpan
 import android.view.ActionMode
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -57,6 +60,7 @@ import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.customClasses.insertMarkdown
 import io.olvid.messenger.databases.tasks.AddFyleToDraftFromUriTask
 import io.olvid.messenger.databases.tasks.SaveDraftTask
+import io.olvid.messenger.designsystem.dampened
 import io.olvid.messenger.discussion.DiscussionViewModel
 import io.olvid.messenger.discussion.Utils
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
@@ -367,7 +371,8 @@ fun DiscussionInputEditText(
         },
         update = { view ->
             view.textSize = 18f * fontScale
-            view.hint = view.context.getString(if (ephemeralMessage) R.string.hint_compose_your_message_ephemeral else R.string.hint_compose_your_message)
+            val hint = view.context.getString(if (ephemeralMessage) R.string.hint_compose_your_message_ephemeral else R.string.hint_compose_your_message)
+            view.setHintWhenEmpty(hint)
         }
     )
 }

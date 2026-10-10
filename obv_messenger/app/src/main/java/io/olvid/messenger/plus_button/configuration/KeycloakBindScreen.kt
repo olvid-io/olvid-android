@@ -66,7 +66,8 @@ import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.OlvidCircularProgress
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.openid.KeycloakTasks
 import io.olvid.messenger.plus_button.PlusButtonViewModel
@@ -272,22 +273,22 @@ fun KeycloakBindScreen(
 
                 Column(Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally) {
-                    InitialView(
+                    Avatar(
                         modifier = Modifier.size(96.dp),
-                        initialViewSetup = {
-                            viewModel.currentIdentity?.photoUrl?.also { photoUrl ->
-                                it.setAbsolutePhotoUrl(viewModel.currentIdentity?.bytesOwnedIdentity, App.absolutePathFromRelative(photoUrl))
-                            } ?: run {
-                                it.setInitial(
-                                    viewModel.currentIdentity?.bytesOwnedIdentity,
-                                    StringUtils.getInitial(
-                                        viewModel.keycloakUserDetails?.userDetails?.firstName
-                                            ?: viewModel.keycloakUserDetails?.userDetails?.lastName
-                                    )
-                                )
-                            }
-                            it.setKeycloakCertified(true)
-                        },
+                        target = viewModel.currentIdentity?.photoUrl?.let { photoUrl ->
+                            AvatarSource.photo(
+                                viewModel.currentIdentity?.bytesOwnedIdentity,
+                                photoUrl,
+                                keycloakCertified = true,
+                            )
+                        } ?: AvatarSource.initial(
+                            viewModel.currentIdentity?.bytesOwnedIdentity,
+                            StringUtils.getInitial(
+                                viewModel.keycloakUserDetails?.userDetails?.firstName
+                                    ?: viewModel.keycloakUserDetails?.userDetails?.lastName
+                            ),
+                            keycloakCertified = true,
+                        ),
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     viewModel.keycloakUserDetails?.userDetails?.let { details ->

@@ -14,8 +14,8 @@ plugins {
 
 val os: OperatingSystem? = OperatingSystem.current()
 
-val appVersionCode = 311
-val appVersionName = "4.5.1"
+val appVersionCode = 314
+val appVersionName = "4.6"
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
@@ -285,7 +285,7 @@ dependencies {
 
     implementation(libs.bundles.paging)
 
-    implementation(libs.google.protobuf.lite)
+    implementation(libs.google.protobuf.javalite)
     implementation(libs.appauth)
     implementation(libs.jose4j)
 
@@ -308,32 +308,26 @@ dependencies {
     "fullImplementation"(libs.google.play.services.oss.licenses)
     "fullImplementation"(libs.google.mlkit.barcode.scanning)
     "fullImplementation"(libs.google.mlkit.text.recognition)
+    "fullImplementation"(libs.google.mlkit.document.scanner)
+    "fullImplementation"(libs.google.play.installreferrer)
 }
 
 protobuf {
     protoc {
         artifact = if (os?.isMacOsX ?: false) {
-            "com.google.protobuf:protoc:${libs.versions.protobuf.protoc.get()}:osx-x86_64"
+            val arch = if (System.getProperty("os.arch") == "aarch64") "osx-aarch_64" else "osx-x86_64"
+            "com.google.protobuf:protoc:${libs.versions.protobuf.javalite.get()}:$arch"
         } else {
-            "com.google.protobuf:protoc:${libs.versions.protobuf.protoc.get()}"
+            "com.google.protobuf:protoc:${libs.versions.protobuf.javalite.get()}"
         }
     }
-    plugins {
-        create("javalite") {
-            artifact = if (os?.isMacOsX ?: false) {
-                "com.google.protobuf:protoc-gen-javalite:${libs.versions.protobuf.protocgenjavalite.get()}:osx-x86_64"
-            } else {
-                "com.google.protobuf:protoc-gen-javalite:${libs.versions.protobuf.protocgenjavalite.get()}"
-            }
-        }
-    }
+    // No external plugin: protoc has built-in lite support via java { option("lite") }
     generateProtoTasks {
         all().forEach { task ->
             task.builtins {
-                (this as NamedDomainObjectContainer<*>).remove("java")
-            }
-            task.plugins {
-                create("javalite") { }
+                create("java") {
+                    option("lite")
+                }
             }
         }
     }

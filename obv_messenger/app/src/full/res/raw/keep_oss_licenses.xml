@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- play-services-oss-licenses inflates these layouts through getIdentifier, which resource shrinking cannot see -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@layout/license_menu_fragment,@layout/license_menu_activity_loading,@layout/license_menu_activity_no_licenses,@layout/libraries_social_licenses_license,@layout/libraries_social_licenses_license_activity,@layout/libraries_social_licenses_license_loading,@layout/libraries_social_licenses_license_menu_activity" />

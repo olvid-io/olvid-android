@@ -11,6 +11,8 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.location.Location
 import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.Network
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -49,8 +51,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -69,21 +73,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.location.LocationListenerCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.location.LocationRequestCompat
 import androidx.core.net.toUri
-import androidx.fragment.app.FragmentContainerView
-import io.olvid.engine.Logger
+import androidx.fragment.compose.AndroidFragment
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.HandlerExecutor
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.customClasses.NetworkUtils
+import io.olvid.messenger.designsystem.avatar.AvatarBitmapRenderer
+import io.olvid.messenger.designsystem.avatar.AvatarSource
 import io.olvid.messenger.customClasses.OlvidLocationListener
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Message
@@ -103,6 +108,7 @@ import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class MapActivityType {
     MESSAGE, DISCUSSION, OWNED_IDENTITY, SEND_LOCATION, SEND_LOCATION_BASIC
@@ -338,6 +344,32 @@ class LocationActivity : LockableActivity() {
 
         var failedStyleUrl: String? by remember { mutableStateOf(null) }
         var forceMapReload by remember { mutableIntStateOf(0) }
+        // while offline, keep a gray map without spinner or error; a style failure swallowed offline triggers a reload once connectivity returns
+        val context = LocalContext.current
+        var offline by remember { mutableStateOf(!NetworkUtils.isNetworkAvailable(context)) }
+        var reloadWhenOnline by remember { mutableStateOf(false) }
+        DisposableEffect(Unit) {
+            val connectivityManager = context.getSystemService<ConnectivityManager>()
+            val callback = object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    Handler(Looper.getMainLooper()).post {
+                        offline = false
+                        if (reloadWhenOnline) {
+                            reloadWhenOnline = false
+                            forceMapReload++
+                        }
+                    }
+                }
+
+                override fun onLost(network: Network) {
+                    Handler(Looper.getMainLooper()).post {
+                        offline = !NetworkUtils.isNetworkAvailable(context)
+                    }
+                }
+            }
+            runCatching { connectivityManager?.registerDefaultNetworkCallback(callback) }
+            onDispose { runCatching { connectivityManager?.unregisterNetworkCallback(callback) } }
+        }
 
         if (currentType != MapActivityType.SEND_LOCATION_BASIC) {
             Scaffold(
@@ -353,31 +385,22 @@ class LocationActivity : LockableActivity() {
                             .weight(1f)
                             .fillMaxWidth()
                     ) {
-                        // Map Fragment Hosting
-                        AndroidView(
-                            factory = { context ->
-                                FragmentContainerView(context).apply {
-                                    id = R.id.fullscreen_map_fragment_container
-                                }
-                            },
-                            modifier = Modifier.fillMaxSize(),
-                            update = { _ ->
-                                // read the forceMapRealod state so we can trigger a fragment recreation
-                                Logger.d("MapLibre forcereload calls: $forceMapReload")
-
-                                val fragment =
-                                    MapFragmentProvider.getMapFragmentForProvider(integration)
-                                if (fragment != null) {
+                        // Map Fragment Hosting: AndroidFragment owns the container and commits once;
+                        // re-keying on forceMapReload creates a fresh fragment when the user retries
+                        MapFragmentProvider.getMapFragmentClassForProvider(integration)?.let { fragmentClass ->
+                            key(forceMapReload) {
+                                AndroidFragment(
+                                    clazz = fragmentClass,
+                                    modifier = Modifier.fillMaxSize(),
+                                ) { fragment ->
                                     mapView = fragment
-                                    supportFragmentManager.beginTransaction()
-                                        .replace(
-                                            R.id.fullscreen_map_fragment_container,
-                                            fragment,
-                                            "map_fragment"
-                                        )
-                                        .commit()
                                     fragment.setFailedStyleUrlCallback { url ->
-                                        failedStyleUrl = url
+                                        if (url != null && !NetworkUtils.isNetworkAvailable(context)) {
+                                            reloadWhenOnline = true
+                                        } else {
+                                            if (url == null) reloadWhenOnline = false
+                                            failedStyleUrl = url
+                                        }
                                     }
                                     fragment.setOnMapReadyCallback {
                                         isMapLoading = false
@@ -442,7 +465,7 @@ class LocationActivity : LockableActivity() {
                                     }
                                 }
                             }
-                        )
+                        }
 
                         // Layers Button
                         if (layersButtonVisible) {
@@ -653,7 +676,7 @@ class LocationActivity : LockableActivity() {
                         androidx.compose.animation.AnimatedVisibility(
                             modifier = Modifier
                                 .align(Alignment.Center),
-                            visible = isMapLoading && failedStyleUrl == null,
+                            visible = isMapLoading && failedStyleUrl == null && !offline,
                             enter = fadeIn(),
                             exit = fadeOut(),
                         ) {
@@ -710,7 +733,6 @@ class LocationActivity : LockableActivity() {
                                         style = OlvidTypography.body1,
                                         textAlign = TextAlign.Center,
                                     )
-                                    val context = LocalContext.current
                                     val url by remember { mutableStateOf(failedStyleUrl) }
 
                                     url?.takeIf { it.isNotEmpty() }?.let { url ->
@@ -741,7 +763,7 @@ class LocationActivity : LockableActivity() {
                                         coroutineScope.launch {
                                             failedStyleUrl = null
                                             runCatching {
-                                                delay(1000)
+                                                delay(1000.milliseconds)
                                             }
                                             forceMapReload++
                                         }
@@ -1058,8 +1080,7 @@ class LocationActivity : LockableActivity() {
     }
 
     private fun getInitialViewMarkerIcon(bytesIdentity: ByteArray?): Bitmap {
-        val initialView = InitialView(this)
-        bytesIdentity?.let { initialView.setFromCache(it) } ?: initialView.setUnknown()
+        val avatarSource = bytesIdentity?.let { AvatarSource.fromCache(it) } ?: AvatarSource.unknown()
 
         val initialViewSize = (64 * resources.displayMetrics.density).toInt()
         val shadowHeight = initialViewSize / 3
@@ -1096,8 +1117,9 @@ class LocationActivity : LockableActivity() {
             blackPaint
         )
 
-        initialView.setSize(initialViewSize, initialViewSize)
-        initialView.drawOnCanvas(markerIconCanvas)
+        markerIconCanvas.drawBitmap(
+            AvatarBitmapRenderer.render(this, avatarSource, initialViewSize), 0f, 0f, null,
+        )
 
         return markerIcon
     }

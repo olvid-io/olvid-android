@@ -37,6 +37,7 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +45,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -54,7 +57,8 @@ import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.designsystem.theme.olvidDefaultTextFieldColors
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.Avatar
+import io.olvid.messenger.designsystem.avatar.AvatarSource
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsViewModel.InitialViewContent
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsViewModel.ValidStatus.INVALID
 
@@ -63,6 +67,7 @@ import io.olvid.messenger.owneddetails.OwnedIdentityDetailsViewModel.ValidStatus
  * company, position) plus, when [showNicknameAndHidden] is true, the local nickname and the hidden
  * profile checkbox. State lives in the shared [OwnedIdentityDetailsViewModel]; photo and hidden
  * password interactions are delegated to the hosting dialog via the callbacks.
+ * [focusFirstName] focuses the empty first name field on open, so typing doesn't go to the nickname.
  */
 @Composable
 fun EditOwnedIdentityDetailsScreen(
@@ -74,6 +79,7 @@ fun EditOwnedIdentityDetailsScreen(
     onPhotoRemove: () -> Unit,
     onChooseImageFromOlvid: ((bytesOwnedIdentity: ByteArray) -> Unit)?,
     onHiddenClick: () -> Unit,
+    focusFirstName: Boolean = false,
 ) {
     val initialViewContent: InitialViewContent? by viewModel.initialViewContent.observeAsState()
     val valid by viewModel.valid.observeAsState()
@@ -91,24 +97,32 @@ fun EditOwnedIdentityDetailsScreen(
     val fieldsEnabled = !viewModel.detailsLocked
     val tfColors = olvidDefaultTextFieldColors()
 
+    val firstNameFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        if (focusFirstName && fieldsEnabled && viewModel.firstName.isNullOrEmpty() && viewModel.lastName.isNullOrEmpty()) {
+            firstNameFocusRequester.requestFocus()
+        }
+    }
+
     Column(modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth()) {
         // Header: photo (with edit menu) + nickname/hidden checkbox
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Box {
-                InitialView(
+                Avatar(
                     modifier = Modifier.requiredSize(64.dp),
                     editable = !viewModel.pictureLocked,
-                    initialViewSetup = { iv ->
-                        iv.setKeycloakCertified(viewModel.detailsLocked)
-                        iv.setInactive(viewModel.isIdentityInactive)
-                        val content = initialViewContent
-                        if (content != null) {
-                            if (content.absolutePhotoUrl != null) {
-                                iv.setAbsolutePhotoUrl(content.bytesOwnedIdentity, content.absolutePhotoUrl)
-                            } else {
-                                iv.setInitial(content.bytesOwnedIdentity, content.initial)
-                            }
-                        }
+                    target = initialViewContent.let { content ->
+                        AvatarSource.Single(
+                            bytes = content?.bytesOwnedIdentity ?: ByteArray(0),
+                            initial = content?.initial ?: "",
+                            photoUrl = content?.absolutePhotoUrl,
+                            keycloakCertified = viewModel.detailsLocked,
+                            inactive = viewModel.isIdentityInactive,
+                        )
                     },
                     onClick = { if (!viewModel.pictureLocked) showPhotoMenu = true },
                 )
@@ -209,7 +223,9 @@ fun EditOwnedIdentityDetailsScreen(
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .focusRequester(firstNameFocusRequester),
                 value = viewModel.firstName.orEmpty(),
                 shape = RoundedCornerShape(12.dp),
                 enabled = fieldsEnabled,

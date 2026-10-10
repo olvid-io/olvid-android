@@ -81,12 +81,7 @@ fun CallLogScreen(
                                 callLogItemAndContacts = call,
                                 title = call.getAnnotatedTitle(),
                                 date = call.callLogItem.getAnnotatedDate(),
-                                initialViewSetup = { initialView ->
-                                    callLogViewModel.initialViewSetup(
-                                        initialView,
-                                        call
-                                    )
-                                },
+                                avatar = callLogViewModel.avatar(call),
                                 onClick = { onClick(call) },
                                 onDeleteCallLogItem = callLogViewModel::delete
                             )

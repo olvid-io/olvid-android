@@ -25,12 +25,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.ListPreference;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
 import io.olvid.messenger.R;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
+import io.olvid.messenger.fragments.dialog.DefaultReactionPickerDialogFragment;
 import io.olvid.messenger.settings.SettingsActivity;
+import kotlin.Unit;
 
 
 public class DiscussionSendReceiveMessagesPreferenceFragment extends PreferenceFragmentCompat implements DiscussionSettingsViewModel.SettingsChangedListener {
@@ -41,6 +44,7 @@ public class DiscussionSendReceiveMessagesPreferenceFragment extends PreferenceF
     ListPreference readReceiptPreference;
     ListPreference autoOpenLimitedVisibilityPreference;
     ListPreference retainWipedOutboundMessagesPreference;
+    Preference defaultReactionPreference;
 
 
     @Override
@@ -83,6 +87,26 @@ public class DiscussionSendReceiveMessagesPreferenceFragment extends PreferenceF
             }
         }
 
+        defaultReactionPreference = screen.findPreference(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_DEFAULT_REACTION);
+        if (defaultReactionPreference != null) {
+            defaultReactionPreference.setOnPreferenceClickListener((Preference preference) -> {
+                DiscussionCustomization discussionCustomization = discussionSettingsViewModel.getDiscussionCustomization().getValue();
+                DefaultReactionPickerDialogFragment dialogFragment = new DefaultReactionPickerDialogFragment();
+                dialogFragment.setCurrentReaction(discussionCustomization == null ? null : discussionCustomization.prefDefaultReaction);
+                dialogFragment.setAppDefaultReaction(SettingsActivity.getDefaultReaction());
+                dialogFragment.setOnEmojiSelected((String emoji) -> {
+                    discussionSettingsDataStore.putString(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_DEFAULT_REACTION, emoji);
+                    return Unit.INSTANCE;
+                });
+                dialogFragment.setOnAppDefaultSelected(() -> {
+                    discussionSettingsDataStore.putString(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_DEFAULT_REACTION, "null");
+                    return Unit.INSTANCE;
+                });
+                dialogFragment.show(getChildFragmentManager(), "DefaultReactionPickerDialogFragment");
+                return true;
+            });
+        }
+
         discussionSettingsViewModel.addSettingsChangedListener(this);
     }
 
@@ -97,6 +121,14 @@ public class DiscussionSendReceiveMessagesPreferenceFragment extends PreferenceF
         if (retainWipedOutboundMessagesPreference != null) {
             retainWipedOutboundMessagesPreference.setValue(discussionSettingsDataStore.getString(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_RETAIN_WIPED_OUTBOUND_MESSAGES, "null"));
         }
+        if (defaultReactionPreference != null) {
+            String defaultReaction = discussionCustomization == null ? null : discussionCustomization.prefDefaultReaction;
+            if (defaultReaction == null) {
+                defaultReactionPreference.setSummary(getString(R.string.pref_text_app_default_string, SettingsActivity.getDefaultReaction()));
+            } else {
+                defaultReactionPreference.setSummary(getString(R.string.pref_default_reaction_summary, defaultReaction));
+            }
+        }
     }
 
     @Override
@@ -109,6 +141,9 @@ public class DiscussionSendReceiveMessagesPreferenceFragment extends PreferenceF
         }
         if (retainWipedOutboundMessagesPreference != null) {
             retainWipedOutboundMessagesPreference.setEnabled(!locked);
+        }
+        if (defaultReactionPreference != null) {
+            defaultReactionPreference.setEnabled(!locked);
         }
     }
 

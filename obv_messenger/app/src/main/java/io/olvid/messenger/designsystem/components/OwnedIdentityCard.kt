@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -41,21 +42,20 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.Avatar
 
 /**
  * Rounded card row for an [OwnedIdentity] — avatar + name + (position @ company) + trailing slot.
  *
  * Used by the share-extension profile picker and the history-transfer "pick profile" screen.
- * The avatar goes through the canonical [InitialView], so keycloak certification badges, custom
- * photos and initial fallbacks are all handled the same way as everywhere else in the app.
+ * The avatar goes through the canonical [Avatar] composable, so keycloak certification badges,
+ * custom photos and initial fallbacks are all handled the same way as everywhere else in the app.
  *
  * @param backgroundColor card background. Use [R.color.lighterGrey] when the parent surface is
  *   `almostWhite` (e.g. a bottom sheet), [R.color.almostWhite] when the parent is `lightGrey`
@@ -65,7 +65,7 @@ import io.olvid.messenger.main.InitialView
  *   (e.g. pure first+last without nickname).
  * @param subtitle overrides the second line. Default is `position @ company` from the identity
  *   details, hidden when empty. Pass `null` explicitly to suppress the subtitle entirely.
- * @param avatarCornerRadius corner radius applied to the [InitialView]; `null` keeps the default
+ * @param avatarCornerRadius corner radius applied to the [Avatar]; `null` keeps the default
  *   circular shape. Pass a [Dp] (e.g. `12.dp`) for a rounded-square avatar instead.
  * @param trailing slot rendered on the right — defaults to the standard chevron-right glyph.
  */
@@ -80,7 +80,6 @@ fun OwnedIdentityCard(
     avatarCornerRadius: Dp? = null,
     trailing: @Composable RowScope.() -> Unit = { ChevronRight() },
 ) {
-    val cornerRadiusPx = avatarCornerRadius?.let { with(LocalDensity.current) { it.toPx() } } ?: -1f
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -91,16 +90,10 @@ fun OwnedIdentityCard(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        InitialView(
+        Avatar(
+            target = identity,
             modifier = Modifier.size(40.dp),
-            initialViewSetup = {
-                // setCornerRadius first: when bytes==null on first bind it early-returns inside
-                // init() (size==0 / bytes==null), avoiding the wasted "decode photo into a circular
-                // bitmap then null it and re-decode as a rounded square" pass that would happen
-                // if setOwnedIdentity ran before the corner radius was applied.
-                it.setCornerRadius(cornerRadiusPx)
-                it.setOwnedIdentity(identity)
-            },
+            shape = avatarCornerRadius?.let { RoundedCornerShape(it) } ?: CircleShape,
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(

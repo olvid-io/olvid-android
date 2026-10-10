@@ -1,0 +1,5 @@
+- Mesajlardaki ilk 4 görseli gösterin ve hepsini görmek için bir albüm görünümü ekleyin.
+- Belge tarayıcı eklendi.
+- Alınan bir mesaja çift tıklayarak varsayılan bir emoji ile tepki verin.
+- Profil resmi olmayan kişiler ve gruplar için yeni avatarlar.
+- Ana ekrandan doğrudan fotoğraf göndermek için bir düğme eklendi.

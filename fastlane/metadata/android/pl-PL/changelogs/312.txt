@@ -1,0 +1,5 @@
+- Teraz wyświetlane są tylko pierwsze 4 zdjęcia w wiadomości, a także dodano widok albumu, aby zobaczyć wszystkie.
+- Dodano skaner dokumentów.
+- Dwa razy dotknij otrzymanej wiadomości, aby zareagować domyślną emotikoną.
+- Nowe awatary dla kontaktów i grup bez zdjęcia profilowego.
+- Dodano przycisk, aby wysyłać zdjęcia bezpośrednio z głównego ekranu.

@@ -1,0 +1,5 @@
+- Affichage limité à 4 images par message, avec une vue album pour toutes les voir.
+- Ajout d'un scanner de documents.
+- Appuyez deux fois sur un message reçu pour réagir avec un émoji par défaut.
+- Nouveaux avatars pour les contacts et les groupes sans photo de profil.
+- Ajout d'un bouton pour envoyer une photo directement depuis l'écran principal.

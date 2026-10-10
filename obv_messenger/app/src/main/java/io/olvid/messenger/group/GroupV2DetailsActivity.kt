@@ -336,6 +336,7 @@ class GroupV2DetailsActivity : LockableActivity() {
                             editGroupDetails(
                                 groupV2DetailsViewModel = groupDetailsViewModel,
                                 editGroupDetailsViewModel = ownedGroupDetailsViewModel,
+                                groupCreationViewModel = null,
                                 onTakePicture = ::onTakePicture,
                                 onBack = { navController.popBackStack() },
                                 onValidate = {

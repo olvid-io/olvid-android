@@ -88,6 +88,7 @@ import io.olvid.messenger.group.components.Routes
 import io.olvid.messenger.group.components.addMembers
 import io.olvid.messenger.group.components.chooseNewGroupAdmins
 import io.olvid.messenger.group.components.editGroupDetails
+import io.olvid.messenger.group.components.existingDiscussions
 import io.olvid.messenger.group.components.groupType
 import io.olvid.messenger.group.components.toGroupMember
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoActivity
@@ -171,6 +172,7 @@ class GroupCreationActivity : LockableActivity() {
                             Routes.ADD_GROUP_MEMBERS -> stringResource(R.string.button_label_new_group)
                             Routes.CHOOSE_NEW_GROUP_ADMINS -> stringResource(R.string.label_group_choose_admins)
                             Routes.GROUP_TYPE -> stringResource(R.string.label_group_type)
+                            Routes.EXISTING_DISCUSSIONS -> stringResource(R.string.label_existing_discussions)
                             else -> stringResource(R.string.activity_title_group_details)
                         },
                         onBackPressed = onBackPressedDispatcher::onBackPressed
@@ -198,11 +200,29 @@ class GroupCreationActivity : LockableActivity() {
                                 } else {
                                     groupCreationViewModel.selectedContacts.value =
                                         it.mapNotNull { it.contact }
-                                    navController.navigate(
-                                        route = Routes.GROUP_TYPE
-                                    )
+                                    groupCreationViewModel.searchExistingDiscussions { existingDiscussions ->
+                                        navController.navigate(
+                                            route = if (existingDiscussions.isEmpty())
+                                                Routes.GROUP_TYPE
+                                            else
+                                                Routes.EXISTING_DISCUSSIONS
+                                        )
+                                    }
                                 }
                             })
+                        existingDiscussions(
+                            groupCreationViewModel = groupCreationViewModel,
+                            onOpenDiscussion = { discussion ->
+                                App.openDiscussionActivity(this@GroupCreationActivity, discussion.id)
+                                finish()
+                            },
+                            onCreateNewGroup = {
+                                navController.navigate(route = Routes.GROUP_TYPE) {
+                                    popUpTo(Routes.ADD_GROUP_MEMBERS)
+                                }
+                            },
+                            onBack = { navController.popBackStack() }
+                        )
                         groupType(
                             groupV2DetailsViewModel = groupV2DetailsViewModel,
                             content = {
@@ -248,6 +268,7 @@ class GroupCreationActivity : LockableActivity() {
                         editGroupDetails(
                             groupV2DetailsViewModel = groupV2DetailsViewModel,
                             editGroupDetailsViewModel = ownedGroupDetailsViewModel,
+                            groupCreationViewModel = groupCreationViewModel,
                             onTakePicture = ::onTakePicture,
                             isGroupCreation = true,
                             isGroupV2 = CREATE_GROUPS_AS_V2,

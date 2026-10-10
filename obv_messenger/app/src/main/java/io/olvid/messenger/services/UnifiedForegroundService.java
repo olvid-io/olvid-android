@@ -96,6 +96,7 @@ public class UnifiedForegroundService extends Service {
     public static final int SERVICE_ID = 8957;
 
     public static final String SUB_SERVICE_INTENT_EXTRA = "sub_service_intent_extra";
+    public static final String STARTED_AS_FOREGROUND_SERVICE_INTENT_EXTRA = "started_as_foreground_service";
 
     public static final int SUB_SERVICE_LOCK = 1;
     public static final int SUB_SERVICE_WEB_CLIENT = 2;
@@ -110,6 +111,7 @@ public class UnifiedForegroundService extends Service {
     private WebClientSubService webClientSubService = null;
     private MessageSendingSubService messageSendingSubService = null;
     private LocationSharingSubService locationSharingSubService = null;
+    private volatile boolean isForeground = false;
 
     public static void onAppForeground(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -258,6 +260,9 @@ public class UnifiedForegroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && intent.getBooleanExtra(STARTED_AS_FOREGROUND_SERVICE_INTENT_EXTRA, false) && !isForeground) {
+            fulfillStartForegroundServiceContract();
+        }
         executor.execute(() -> {
             if (intent != null && intent.hasExtra(SUB_SERVICE_INTENT_EXTRA)) {
                 int subService = intent.getIntExtra(SUB_SERVICE_INTENT_EXTRA, -1);
@@ -343,6 +348,7 @@ public class UnifiedForegroundService extends Service {
 
         if (!showLockScreenNotification && !showWebClientNotification && !showPermanentNotification && !showMessageSendingNotification && !showLocationSharingNotification) {
             stopForeground(true);
+            isForeground = false;
             return;
         }
 
@@ -437,6 +443,7 @@ public class UnifiedForegroundService extends Service {
 
         if (App.isVisible()) {
             stopForeground(true);
+            isForeground = false;
         }
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -444,9 +451,35 @@ public class UnifiedForegroundService extends Service {
             } else {
                 startForeground(SERVICE_ID, builder.build());
             }
+            isForeground = true;
         } catch (Exception e) {
+            Logger.w("UnifiedForegroundService: startForeground failed");
             e.printStackTrace();
         }
+    }
+
+    // Started with startForegroundService() but onCreate decided not to go foreground (its conditions
+    // are stricter than willUnifiedForegroundServiceStartForeground(), or startForeground() threw):
+    // the system kills the app unless startForeground() is called, so post and immediately remove one.
+    @SuppressLint("ForegroundServiceType")
+    private void fulfillStartForegroundServiceContract() {
+        AndroidNotificationManager.ensureUnifiedServiceChannelExists();
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, AndroidNotificationManager.UNIFIED_SERVICE_NOTIFICATION_CHANNEL_ID)
+                .setWhen(0)
+                .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setContentTitle(getString(R.string.notification_title_olvid_is_running))
+                .setSmallIcon(R.drawable.ic_lock_open);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(SERVICE_ID, builder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING);
+            } else {
+                startForeground(SERVICE_ID, builder.build());
+            }
+        } catch (Exception e) {
+            Logger.w("UnifiedForegroundService: startForeground failed");
+            e.printStackTrace();
+        }
+        stopForeground(true);
     }
 
 
@@ -1507,7 +1540,8 @@ public class UnifiedForegroundService extends Service {
                 };
 
                 // need run task synchronously in some databases tasks
-                if (synchronously) {
+                // never on the main thread (Service.onDestroy, STOP_SHARING_ACTION)
+                if (synchronously && Looper.myLooper() != Looper.getMainLooper()) {
                     task.run();
                 } else {
                     App.runThread(task);

@@ -32,7 +32,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.content.res.Configuration
-import android.graphics.Canvas
 import android.graphics.drawable.Icon
 import android.media.AudioAttributes
 import android.media.AudioAttributes.Builder
@@ -62,7 +61,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
-import androidx.core.graphics.createBitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -90,8 +88,8 @@ import io.olvid.messenger.R.plurals
 import io.olvid.messenger.R.raw
 import io.olvid.messenger.R.string
 import io.olvid.messenger.UnreadCountsSingleton
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.customClasses.BytesKey
-import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.CallLogItem
@@ -103,6 +101,8 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.jsons.JsonPayload
 import io.olvid.messenger.databases.entity.jsons.JsonWebrtcCallMessage
+import io.olvid.messenger.designsystem.avatar.AvatarBitmapRenderer
+import io.olvid.messenger.designsystem.avatar.AvatarSource
 import io.olvid.messenger.notifications.AndroidNotificationManager
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.webrtc.OutgoingCallRinger.Type
@@ -175,14 +175,6 @@ import io.olvid.messenger.webrtc.json.JsonUpdateParticipantsInnerMessage
 import io.olvid.messenger.webrtc.json.JsonVideoSharingInnerMessage
 import io.olvid.messenger.webrtc.json.JsonVideoSupportedInnerMessage
 import io.olvid.messenger.webrtc.json.JsonWebrtcProtocolMessage
-import org.webrtc.Camera1Enumerator
-import org.webrtc.Camera2Enumerator
-import org.webrtc.CameraEnumerationAndroid
-import org.webrtc.CameraEnumerator
-import org.webrtc.CameraVideoCapturer
-import org.webrtc.ScreenCapturerAndroid
-import org.webrtc.SurfaceTextureHelper
-import org.webrtc.VideoCapturer
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -198,6 +190,14 @@ import java.util.zip.Inflater
 import java.util.zip.InflaterInputStream
 import kotlin.concurrent.timer
 import kotlin.concurrent.timerTask
+import org.webrtc.Camera1Enumerator
+import org.webrtc.Camera2Enumerator
+import org.webrtc.CameraEnumerationAndroid
+import org.webrtc.CameraEnumerator
+import org.webrtc.CameraVideoCapturer
+import org.webrtc.ScreenCapturerAndroid
+import org.webrtc.SurfaceTextureHelper
+import org.webrtc.VideoCapturer
 
 class WebrtcCallService : Service() {
     enum class Role {
@@ -3116,8 +3116,7 @@ class WebrtcCallService : Service() {
             callActivityIntent,
             PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val initialView = InitialView(App.getContext())
-        val setupInitialView = mutableListOf<(InitialView) -> Unit>()
+        var avatar: AvatarTarget = AvatarSource.unknown()
         var notificationName: String? = null
         if (callParticipants.size > 1 && bytesGroupOwnerAndUidOrIdentifier != null) {
             when (discussionType) {
@@ -3129,12 +3128,7 @@ class WebrtcCallService : Service() {
                         }
                     }
                     group?.getCustomPhotoUrl()?.let {
-                        setupInitialView.add { iv ->
-                            iv.setPhotoUrl(
-                                bytesGroupOwnerAndUidOrIdentifier,
-                                it
-                            )
-                        }
+                        avatar = AvatarSource.photo(bytesGroupOwnerAndUidOrIdentifier, it)
                         notificationName = getString(
                             string.text_count_contacts_from_group,
                             callParticipants.size,
@@ -3151,12 +3145,7 @@ class WebrtcCallService : Service() {
                         }
                     }
                     group?.getCustomPhotoUrl()?.let {
-                        setupInitialView.add { iv ->
-                            iv.setPhotoUrl(
-                                bytesGroupOwnerAndUidOrIdentifier,
-                                it
-                            )
-                        }
+                        avatar = AvatarSource.photo(bytesGroupOwnerAndUidOrIdentifier, it)
                         notificationName = getString(
                             string.text_count_contacts_from_group,
                             callParticipants.size,
@@ -3166,37 +3155,26 @@ class WebrtcCallService : Service() {
                 }
             }
             if (notificationName == null) {
-                setupInitialView.add {
-                    it.setGroup(bytesGroupOwnerAndUidOrIdentifier)
-                }
+                avatar = AvatarSource.group(bytesGroupOwnerAndUidOrIdentifier)
                 notificationName = getString(string.text_count_contacts, callParticipants.size)
             }
         } else {
             val callParticipant = callParticipants.values.iterator().next()
             notificationName = if (callParticipant.contact != null) {
-                setupInitialView.add {
-                    it.setContact(callParticipant.contact)
-                }
+                avatar = callParticipant.contact
                 callParticipant.contact.getCustomDisplayName()
             } else {
-                setupInitialView.add {
-                    it.setInitial(
-                        callParticipant.bytesContactIdentity,
-                        StringUtils.getInitial(callParticipant.displayName)
-                    )
-                }
+                avatar = AvatarSource.initial(
+                    callParticipant.bytesContactIdentity,
+                    StringUtils.getInitial(callParticipant.displayName)
+                )
                 callParticipant.displayName
             }
         }
         val size = App.getContext().resources.getDimensionPixelSize(dimen.notification_icon_size)
-        initialView.setSize(size, size)
-        setupInitialView.forEach { it.invoke(initialView) }
-        val largeIcon = createBitmap(size, size)
-        initialView.drawOnCanvas(Canvas(largeIcon))
+        val largeIcon = AvatarBitmapRenderer.render(App.getContext(), avatar, size)
         CallNotificationManager.currentCallData = CallData(
-            initialViewSetup = { iv ->
-                setupInitialView.forEach { it.invoke(iv) }
-            },
+            avatar = avatar,
             title = notificationName ?: "",
             subtitle = _state.humanReadable(failReason),
             fullScreenIntent = callActivityIntent,
@@ -3306,14 +3284,10 @@ class WebrtcCallService : Service() {
             fullScreenIntent,
             PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val initialView = InitialView(App.getContext())
         val size = App.getContext().resources.getDimensionPixelSize(dimen.notification_icon_size)
-        initialView.setSize(size, size)
-        initialView.setContact(contact)
-        val largeIcon = createBitmap(size, size)
-        initialView.drawOnCanvas(Canvas(largeIcon))
+        val largeIcon = AvatarBitmapRenderer.render(App.getContext(), contact, size)
         CallNotificationManager.currentCallData = CallData(
-            initialViewSetup = { it.setContact(contact) },
+            avatar = contact,
             title = contact.getCustomDisplayName(),
             subtitle = if (participantCount > 1) {
                 resources.getQuantityString(
@@ -3478,6 +3452,8 @@ class WebrtcCallService : Service() {
     // region Service lifecycle
     override fun onCreate() {
         super.onCreate()
+        // create the companion's snapshot states on the main thread, not lazily on the executor while CallScreen composes
+        WebrtcPeerConnectionHolder.localVideoTrack
         webrtcMessageReceivedBroadcastReceiver = WebrtcMessageReceivedBroadcastReceiver()
         LocalBroadcastManager.getInstance(this).registerReceiver(
             webrtcMessageReceivedBroadcastReceiver!!, IntentFilter(ACTION_MESSAGE)

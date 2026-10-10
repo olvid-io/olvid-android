@@ -280,6 +280,8 @@ class DiscussionSettingsActivity : LockableActivity(), OnPreferenceStartFragment
             "pref_key_discussion_auto_open_limited_visibility_inbound"
         const val PREF_KEY_DISCUSSION_RETAIN_WIPED_OUTBOUND_MESSAGES: String =
             "pref_key_discussion_retain_wiped_outbound_messages"
+        const val PREF_KEY_DISCUSSION_DEFAULT_REACTION: String =
+            "pref_key_discussion_default_reaction"
 
         const val PREF_KEY_DISCUSSION_RETENTION_COUNT: String =
             "pref_key_discussion_retention_count"

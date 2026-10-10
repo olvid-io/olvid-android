@@ -38,11 +38,17 @@ interface EmojiDao {
     @Query("SELECT * FROM ${Emoji.TABLE_NAME} WHERE ${Emoji.LAST_USED} > 0 ORDER BY ${Emoji.LAST_USED} DESC LIMIT 10")
     fun getRecentEmojis(): LiveData<List<Emoji>>
 
+    @Query("SELECT * FROM ${Emoji.TABLE_NAME} WHERE ${Emoji.LAST_USED_KEYBOARD} > 0 ORDER BY ${Emoji.LAST_USED_KEYBOARD} DESC LIMIT 20")
+    suspend fun getRecentKeyboardEmojis(): List<Emoji>
+
     @Query("UPDATE ${Emoji.TABLE_NAME} SET ${Emoji.IS_FAVORITE} = :isFavorite WHERE ${Emoji.EMOJI} = :emoji")
     suspend fun setFavorite(emoji: String, isFavorite: Boolean)
 
     @Query("UPDATE ${Emoji.TABLE_NAME} SET ${Emoji.LAST_USED} = :timestamp WHERE ${Emoji.EMOJI} = :emoji")
     suspend fun updateLastUsed(emoji: String, timestamp: Long)
+
+    @Query("UPDATE ${Emoji.TABLE_NAME} SET ${Emoji.LAST_USED_KEYBOARD} = :timestamp WHERE ${Emoji.EMOJI} = :emoji")
+    suspend fun updateLastUsedKeyboard(emoji: String, timestamp: Long)
 
     @Query("SELECT * FROM ${Emoji.TABLE_NAME} WHERE ${Emoji.EMOJI} = :emoji")
     suspend fun getEmoji(emoji: String): Emoji?

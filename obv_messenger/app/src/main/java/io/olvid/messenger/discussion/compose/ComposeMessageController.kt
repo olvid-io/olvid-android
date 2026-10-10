@@ -28,12 +28,12 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
-import android.provider.OpenableColumns
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -41,17 +41,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.fragment.app.FragmentActivity
 import io.olvid.engine.Logger
 import io.olvid.messenger.App
-import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.CameraCapture
 import io.olvid.messenger.customClasses.DiscussionInputEditText
 import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
-import io.olvid.messenger.customClasses.StringUtils2.Companion.normalize
 import io.olvid.messenger.databases.tasks.AddFyleToDraftFromUriTask
+import io.olvid.messenger.databases.tasks.AddMultipleFylesToDraftFromUrisTask
+import io.olvid.messenger.databases.tasks.sortedByDisplayName
 import io.olvid.messenger.databases.tasks.PostMessageInDiscussionTask
 import io.olvid.messenger.databases.tasks.UpdateMessageBodyTask
 import io.olvid.messenger.discussion.DiscussionViewModel
@@ -60,14 +60,15 @@ import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.location.LocationActivity
 import io.olvid.messenger.discussion.mention.MentionViewModel
 import io.olvid.messenger.discussion.poll.PollCreationActivity
+import io.olvid.messenger.discussion.scan.DocumentScannerActivity
 import io.olvid.messenger.fragments.dialog.ContactIntroductionDialogFragment
+import io.olvid.messenger.google_services.GoogleDocumentScanner
 import io.olvid.messenger.services.UnifiedForegroundService.LocationSharingSubService
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.BASIC
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.CUSTOM_OSM
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.MAPS
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.OSM
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -86,6 +87,8 @@ class ComposeMessageController(
     private val attachFileLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>,
     private val takePictureImpl: () -> Unit,
     private val takeVideoImpl: () -> Unit,
+    private val scanDocumentLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>,
+    private val scanDocumentInHouseLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>,
     private val requestPermissionForPictureLauncher: ManagedActivityResultLauncher<String, Boolean>,
     private val requestPermissionForVideoLauncher: ManagedActivityResultLauncher<String, Boolean>,
     private val requestPermissionForAudioLauncher: ManagedActivityResultLauncher<String, Boolean>,
@@ -153,6 +156,30 @@ class ComposeMessageController(
                 Toast.LENGTH_SHORT
             )
         }
+    }
+
+    // ML Kit when available (full flavor with Play services and the scanner module installed), the in-house scanner otherwise
+    fun onAttachScan() {
+        val activity = activity ?: return
+        if (SettingsActivity.useInHouseDocumentScanner() || !GoogleDocumentScanner.isAvailable(context)) {
+            launchInHouseScanner(activity)
+            return
+        }
+        GoogleDocumentScanner.getStartScanIntent(
+            activity = activity,
+            onSuccess = { intentSender ->
+                discussionViewModel.doNotMarkAsReadOnPause()
+                App.prepareForStartActivityForResult(activity)
+                scanDocumentLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
+            },
+            onFailure = { launchInHouseScanner(activity) }
+        )
+    }
+
+    private fun launchInHouseScanner(activity: FragmentActivity) {
+        discussionViewModel.doNotMarkAsReadOnPause()
+        App.prepareForStartActivityForResult(activity)
+        scanDocumentInHouseLauncher.launch(Intent(context, DocumentScannerActivity::class.java))
     }
 
     fun onAttachPoll() {
@@ -424,24 +451,7 @@ fun rememberComposeMessageController(
                     val clipData = data.clipData
                     if (clipData != null) {
                         val uris = (0 until clipData.itemCount).map { clipData.getItemAt(it).uri }
-                        App.runThread {
-                            // Sort URIs alphabetically by display name before inserting to preserve order
-                            val sortedUris = uris.sortedBy { uri ->
-                                context.contentResolver.query(
-                                    uri,
-                                    arrayOf(OpenableColumns.DISPLAY_NAME),
-                                    null, null, null
-                                )?.use { cursor ->
-                                    if (cursor.moveToFirst())
-                                        cursor.getString(0)?.normalize()
-                                    else
-                                        null
-                                } ?: uri.lastPathSegment?.normalize() ?: ""
-                            }
-                            for (uri in sortedUris) {
-                                AddFyleToDraftFromUriTask(uri, null, null, discussionId).run()
-                            }
-                        }
+                        App.runThread(AddMultipleFylesToDraftFromUrisTask(uris.sortedByDisplayName(), discussionId))
                     } else {
                         data.data?.let {
                             App.runThread(
@@ -498,6 +508,39 @@ fun rememberComposeMessageController(
             }
         }
 
+    val scanDocumentLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartIntentSenderForResult()
+        ) { result ->
+            val discussionId = discussionViewModel.discussionId ?: return@rememberLauncherForActivityResult
+
+            if (result.resultCode == Activity.RESULT_OK) {
+                GoogleDocumentScanner.getPdfUri(result.data)?.let { uri ->
+                    App.runThread(
+                        AddFyleToDraftFromUriTask(
+                            uri,
+                            "Scan_" + SimpleDateFormat(App.TIMESTAMP_FILE_NAME_FORMAT, Locale.ENGLISH).format(Date()) + ".pdf",
+                            "application/pdf",
+                            discussionId
+                        )
+                    )
+                }
+            }
+        }
+
+    val scanDocumentInHouseLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            val discussionId = discussionViewModel.discussionId ?: return@rememberLauncherForActivityResult
+
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    App.runThread(AddFyleToDraftFromUriTask(uri, uri.lastPathSegment, "application/pdf", discussionId))
+                }
+            }
+        }
+
     val voiceMessageRecorder = remember {
         VoiceMessageRecorder(
             activity = activity!!,
@@ -512,33 +555,15 @@ fun rememberComposeMessageController(
                 composeMessageViewModel.photoOrVideoUri = null
                 composeMessageViewModel.photoOrVideoFile = null
                 if (context.packageManager.let { takePictureIntent.resolveActivity(it) } != null) {
-                    val photoDir = File(context.cacheDir, App.CAMERA_PICTURE_FOLDER)
-                    val photoFile =
-                        File(
-                            photoDir,
-                            SimpleDateFormat(App.TIMESTAMP_FILE_NAME_FORMAT, Locale.ENGLISH)
-                                .format(Date()) + ".jpg"
-                        )
-                    runCatching {
-                        photoDir.mkdirs()
-                        if (photoFile.createNewFile()) {
-                            composeMessageViewModel.photoOrVideoFile = photoFile
-                            val photoUri =
-                                FileProvider.getUriForFile(
-                                    context,
-                                    BuildConfig.APPLICATION_ID + ".PICTURE_FILES_PROVIDER",
-                                    photoFile
-                                )
-                            composeMessageViewModel.photoOrVideoUri = photoUri
-                            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                            discussionViewModel.doNotMarkAsReadOnPause()
-                            if (activity != null) {
-                                App.prepareForStartActivityForResult(activity)
-                            }
-                            takePictureLauncher.launch(takePictureIntent)
+                    CameraCapture.createOutputFile(context, "jpg")?.let { (photoFile, photoUri) ->
+                        composeMessageViewModel.photoOrVideoFile = photoFile
+                        composeMessageViewModel.photoOrVideoUri = photoUri
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                        discussionViewModel.doNotMarkAsReadOnPause()
+                        if (activity != null) {
+                            App.prepareForStartActivityForResult(activity)
                         }
-                    }.onFailure {
-                        Logger.w("Error creating photo capture file $photoFile")
+                        takePictureLauncher.launch(takePictureIntent)
                     }
                 }
             }
@@ -550,33 +575,15 @@ fun rememberComposeMessageController(
             composeMessageViewModel.photoOrVideoUri = null
             composeMessageViewModel.photoOrVideoFile = null
             if (context.packageManager.let { takeVideoIntent.resolveActivity(it) } != null) {
-                val videoDir = File(context.cacheDir, App.CAMERA_PICTURE_FOLDER)
-                val videoFile =
-                    File(
-                        videoDir,
-                        SimpleDateFormat(App.TIMESTAMP_FILE_NAME_FORMAT, Locale.ENGLISH)
-                            .format(Date()) + ".mp4"
-                    )
-                runCatching {
-                    videoDir.mkdirs()
-                    if (videoFile.createNewFile()) {
-                        composeMessageViewModel.photoOrVideoFile = videoFile
-                        val photoUri =
-                            FileProvider.getUriForFile(
-                                context,
-                                BuildConfig.APPLICATION_ID + ".PICTURE_FILES_PROVIDER",
-                                videoFile
-                            )
-                        composeMessageViewModel.photoOrVideoUri = photoUri
-                        takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                        discussionViewModel.doNotMarkAsReadOnPause()
-                        if (activity != null) {
-                            App.prepareForStartActivityForResult(activity)
-                        }
-                        takeVideoLauncher.launch(takeVideoIntent)
+                CameraCapture.createOutputFile(context, "mp4")?.let { (videoFile, videoUri) ->
+                    composeMessageViewModel.photoOrVideoFile = videoFile
+                    composeMessageViewModel.photoOrVideoUri = videoUri
+                    takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri)
+                    discussionViewModel.doNotMarkAsReadOnPause()
+                    if (activity != null) {
+                        App.prepareForStartActivityForResult(activity)
                     }
-                }.onFailure {
-                    Logger.w("Error creating video capture file $videoFile")
+                    takeVideoLauncher.launch(takeVideoIntent)
                 }
             }
         }
@@ -661,6 +668,8 @@ fun rememberComposeMessageController(
         attachFileLauncher,
         takePictureLauncher,
         takeVideoLauncher,
+        scanDocumentLauncher,
+        scanDocumentInHouseLauncher,
         requestPermissionForPictureLauncher,
         requestPermissionForVideoLauncher,
         requestPermissionForAudioLauncher,
@@ -679,6 +688,8 @@ fun rememberComposeMessageController(
             attachFileLauncher = attachFileLauncher,
             takePictureImpl = takePictureImpl,
             takeVideoImpl = takeVideoImpl,
+            scanDocumentLauncher = scanDocumentLauncher,
+            scanDocumentInHouseLauncher = scanDocumentInHouseLauncher,
             requestPermissionForPictureLauncher = requestPermissionForPictureLauncher,
             requestPermissionForVideoLauncher = requestPermissionForVideoLauncher,
             requestPermissionForAudioLauncher = requestPermissionForAudioLauncher,

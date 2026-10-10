@@ -94,9 +94,9 @@ import io.olvid.messenger.onboarding.flow.screens.keycloak.keycloakSelection
 import io.olvid.messenger.onboarding.flow.screens.newProfileScreen
 import io.olvid.messenger.onboarding.flow.screens.onboardingScan
 import io.olvid.messenger.onboarding.flow.screens.profile.existingProfile
-import io.olvid.messenger.onboarding.flow.screens.profile.identityCreation
+import io.olvid.messenger.onboarding.flow.screens.profile.firstIdentityCreation
 import io.olvid.messenger.onboarding.flow.screens.profile.identityCreationOptions
-import io.olvid.messenger.onboarding.flow.screens.profile.managedIdentityCreation
+import io.olvid.messenger.onboarding.flow.screens.profile.additionalIdentityCreation
 import io.olvid.messenger.onboarding.flow.screens.profile.profilePicture
 import io.olvid.messenger.onboarding.flow.screens.transfer.activeDeviceSelection
 import io.olvid.messenger.onboarding.flow.screens.transfer.sourceConfirmation
@@ -114,6 +114,11 @@ import io.olvid.messenger.services.MDMConfigurationSingleton
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.settings.backupV2.checkIfAvailable
 import io.olvid.messenger.settings.backupV2.loadCredentials
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
+import kotlin.time.Duration
 import kotlinx.coroutines.runBlocking
 import java.util.UUID
 import java.util.concurrent.Executor
@@ -148,13 +153,11 @@ class OnboardingFlowActivity : AppCompatActivity() {
         const val TRANSFER_RESTRICTED_INTENT_EXTRA = "transfer_restricted"
         const val KEYCLOAK_WITHOUT_OIDC_INTENT_EXTRA = "keycloak_without_oidc"
         const val TRANSFER_TARGET_INTENT_EXTRA = "transfer_target"
-        const val NEW_PROFILE_INTENT_EXTRA = "new_profile"
         const val RESTORE_BACKUP_INTENT_EXTRA = "restore_backup"
 
         // managed/configured profile creation (migrated from the legacy OnboardingActivity)
         const val FIRST_ID_INTENT_EXTRA = "first_id"
         const val LINK_URI_INTENT_EXTRA = "link_uri"
-        const val PROFILE_CREATION_INTENT_EXTRA = "profile_creation"
 
         var snapshotToRestore: Triple<DeviceBackupProfile, ProfileBackupSnapshot, ObvDeviceList?>? =
             null
@@ -174,6 +177,8 @@ class OnboardingFlowActivity : AppCompatActivity() {
         super.attachBaseContext(SettingsActivity.overrideContextScales(baseContext))
     }
 
+    private var windowHasFocus = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
@@ -186,6 +191,16 @@ class OnboardingFlowActivity : AppCompatActivity() {
             )
         )
         super.onCreate(savedInstanceState)
+        // the Play referrer may be resolved after this screen already has focus, or before
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                ClipboardDeferredLink.expected.collect { expected ->
+                    if (expected) {
+                        consumeClipboardLinkIfExpected()
+                    }
+                }
+            }
+        }
         credentialManager = CredentialManager.create(App.getContext())
         executor = Executor { runnable -> runOnUiThread(runnable) }
 
@@ -204,7 +219,6 @@ class OnboardingFlowActivity : AppCompatActivity() {
         val keycloakWithoutOidcAuthentication =
             intent.getBooleanExtra(KEYCLOAK_WITHOUT_OIDC_INTENT_EXTRA, false)
         val transferTarget = intent.getBooleanExtra(TRANSFER_TARGET_INTENT_EXTRA, false)
-        val newProfile = intent.getBooleanExtra(NEW_PROFILE_INTENT_EXTRA, false)
         val restoreBackup = intent.getBooleanExtra(RESTORE_BACKUP_INTENT_EXTRA, false)
 
         // managed/configured onboarding (migrated from the legacy OnboardingActivity)
@@ -213,14 +227,12 @@ class OnboardingFlowActivity : AppCompatActivity() {
         if (onboardingViewModel.server == null) {
             onboardingViewModel.validateServer(BuildConfig.SERVER_NAME)
         }
-        val managedStartDestination: String? = computeManagedStartDestination(firstIdentity)
+        val linkStartDestination: String? = computeLinkStartDestination()
 
-        val startDestination = managedStartDestination ?: if (transferSource && transferRestricted)
+        val startDestination = linkStartDestination ?: if (transferSource && transferRestricted)
             OnboardingRoutes.TRANSFER_RESTRICTED_WARNING
         else if (transferSource)
             OnboardingRoutes.TRANSFER_SOURCE_SESSION
-        else if (newProfile)
-            OnboardingRoutes.NEW_PROFILE_SCREEN
         else if (transferTarget)
             OnboardingRoutes.TRANSFER_TARGET_DEVICE_NAME
         else if (restoreBackup) {
@@ -241,8 +253,10 @@ class OnboardingFlowActivity : AppCompatActivity() {
                     OnboardingRoutes.BACKUP_V2_RESTORE_RESULT
                 }
             } ?: OnboardingRoutes.WELCOME_SCREEN
-        } else
+        } else if (firstIdentity)
             OnboardingRoutes.FTUX_CAROUSEL
+        else
+            OnboardingRoutes.NEW_PROFILE_SCREEN
 
 
         setContent {
@@ -283,10 +297,10 @@ class OnboardingFlowActivity : AppCompatActivity() {
                             if (configureMdmKeycloak()) {
                                 navController.navigate(OnboardingRoutes.KEYCLOAK_SELECTION)
                             } else {
-                                navController.navigate(OnboardingRoutes.IDENTITY_CREATION)
+                                navController.navigate(OnboardingRoutes.FIRST_IDENTITY_CREATION)
                             }
                         }.onFailure {
-                            navController.navigate(OnboardingRoutes.IDENTITY_CREATION)
+                            navController.navigate(OnboardingRoutes.FIRST_IDENTITY_CREATION)
                         }
                     },
                     onClose = { finish() }
@@ -297,12 +311,12 @@ class OnboardingFlowActivity : AppCompatActivity() {
                     },
                     onNewProfile = {
                         onboardingViewModel.isFirstIdentity = false
-                        navController.navigate(OnboardingRoutes.MANAGED_IDENTITY_CREATION)
+                        navController.navigate(OnboardingRoutes.ADDITIONAL_IDENTITY_CREATION)
                     },
                     onManagedProfile = { navController.navigate(OnboardingRoutes.ONBOARDING_SCAN) },
                     onClose = { finish() }
                 )
-                identityCreation(
+                firstIdentityCreation(
                     onboardingFlowViewModel = onboardingFlowViewModel,
                     onIdentityCreated = {
                         runOnUiThread {
@@ -321,7 +335,14 @@ class OnboardingFlowActivity : AppCompatActivity() {
                         backupsV2ViewModel.resetBackupKey()
                         navController.navigate(OnboardingRoutes.BACKUP_V2_LOAD_OR_INPUT)
                     },
-                    onManagedProfile = { navController.navigate(OnboardingRoutes.ONBOARDING_SCAN) },
+                    onManagedProfile = {
+                        // MDM keycloak configuration is only used when creating the first profile
+                        if (firstIdentity && configureMdmKeycloak()) {
+                            navController.navigate(OnboardingRoutes.KEYCLOAK_SELECTION)
+                        } else {
+                            navController.navigate(OnboardingRoutes.ONBOARDING_SCAN)
+                        }
+                    },
                     onBack = { navController.navigateUp() },
                     onClose = { finish() }
                 )
@@ -338,17 +359,17 @@ class OnboardingFlowActivity : AppCompatActivity() {
                 )
                 identityCreationOptions(
                     onboardingViewModel = onboardingViewModel,
-                    onContinue = { navController.navigate(OnboardingRoutes.MANAGED_IDENTITY_CREATION) },
+                    onContinue = { navController.navigate(OnboardingRoutes.ADDITIONAL_IDENTITY_CREATION) },
                     onBack = { if (!navController.navigateUp()) finish() },
                     onClose = { finish() }
                 )
                 keycloakSelection(
                     onboardingViewModel = onboardingViewModel,
-                    onIdentityCreation = { navController.navigate(OnboardingRoutes.MANAGED_IDENTITY_CREATION) },
+                    onIdentityCreation = { navController.navigate(OnboardingRoutes.ADDITIONAL_IDENTITY_CREATION) },
                     onBack = { if (!navController.navigateUp()) finish() },
                     onClose = { finish() }
                 )
-                managedIdentityCreation(
+                additionalIdentityCreation(
                     onboardingViewModel = onboardingViewModel,
                     detailsViewModel = ownedDetailsViewModel,
                     onBack = { if (!navController.navigateUp()) finish() },
@@ -392,20 +413,30 @@ class OnboardingFlowActivity : AppCompatActivity() {
                         navController.popBackStack(OnboardingRoutes.WELCOME_SCREEN, false)
                         navController.popBackStack(OnboardingRoutes.NEW_PROFILE_SCREEN, false)
                         Handler(mainLooper).postDelayed({
-                            if (newProfile) {
-                                onboardingViewModel.isFirstIdentity = false
-                                navController.navigate(OnboardingRoutes.MANAGED_IDENTITY_CREATION)
+                            if (firstIdentity) {
+                                if (configureMdmKeycloak()) {
+                                    navController.navigate(OnboardingRoutes.KEYCLOAK_SELECTION)
+                                } else {
+                                    navController.navigate(OnboardingRoutes.FIRST_IDENTITY_CREATION)
+                                }
                             } else {
-                                navController.navigate(OnboardingRoutes.IDENTITY_CREATION)
+                                navController.navigate(OnboardingRoutes.ADDITIONAL_IDENTITY_CREATION)
                             }
                         }, 300)
                     },
-                    onManagedProfile = { navController.navigate(OnboardingRoutes.ONBOARDING_SCAN) },
+                    onManagedProfile = {
+                        // MDM keycloak configuration is only used when creating the first profile
+                        if (firstIdentity && configureMdmKeycloak()) {
+                            navController.navigate(OnboardingRoutes.KEYCLOAK_SELECTION)
+                        } else {
+                            navController.navigate(OnboardingRoutes.ONBOARDING_SCAN)
+                        }
+                    },
                     onBack = { navController.navigateUp() },
                     onClose = { finish() }
                 )
                 backupV2EnterKey(
-                    newProfile = newProfile,
+                    newProfile = !firstIdentity,
                     backupSeed = backupsV2ViewModel.backupKey,
                     backupKeyState = backupsV2ViewModel.backupKeyCheckState,
                     onValidateSeed = {
@@ -805,16 +836,11 @@ class OnboardingFlowActivity : AppCompatActivity() {
     }
 
     /**
-     * Computes the managed/configured-onboarding start destination from the launch intent (MDM keycloak
+     * Computes the onboarding start destination from the launch intent (MDM keycloak
      * config, configuration/keycloak deep link, or simple profile creation), populating
      * [onboardingViewModel] as a side effect. Returns null when no managed entry point applies.
      */
-    private fun computeManagedStartDestination(firstIdentity: Boolean): String? {
-        // MDM keycloak configuration is only used when creating the first profile
-        if (firstIdentity && configureMdmKeycloak()) {
-            return OnboardingRoutes.KEYCLOAK_SELECTION
-        }
-
+    private fun computeLinkStartDestination(): String? {
         intent.getStringExtra(LINK_URI_INTENT_EXTRA)?.let { uri ->
             val matcher = ObvLinkActivity.CONFIGURATION_PATTERN.matcher(uri)
             if (matcher.find() && onboardingViewModel.parseScannedConfigurationUri(matcher.group(2))) {
@@ -828,9 +854,6 @@ class OnboardingFlowActivity : AppCompatActivity() {
             deferLinkOrToast(uri)
         }
 
-        if (intent.getBooleanExtra(PROFILE_CREATION_INTENT_EXTRA, false)) {
-            return OnboardingRoutes.MANAGED_IDENTITY_CREATION
-        }
         return null
     }
 
@@ -839,14 +862,53 @@ class OnboardingFlowActivity : AppCompatActivity() {
      * without a profile, so it is persisted and MainActivity routes it to ScanActivity once
      * onboarding completes; any other link (except web client ones) gets an invalid link toast.
      */
-    private fun deferLinkOrToast(uri: String) {
+    private fun deferLinkOrToast(
+        uri: String,
+        validity: Duration = PendingInvitationLink.DEFAULT_VALIDITY
+    ) {
         if (ObvLinkActivity.INVITATION_PATTERN.matcher(uri).find()
             || ObvLinkActivity.MUTUAL_SCAN_PATTERN.matcher(uri).find()
         ) {
-            PendingInvitationLink.save(uri)
+            PendingInvitationLink.save(uri, validity)
             App.toast(R.string.toast_message_invitation_link_deferred_to_end_of_onboarding, Toast.LENGTH_LONG)
         } else if (!ObvLinkActivity.WEB_CLIENT_PATTERN.matcher(uri).find()) {
             App.toast(R.string.toast_message_invalid_configuration_link, Toast.LENGTH_SHORT)
+        }
+    }
+
+    // Android only lets the focused foreground app read the clipboard: an install flagged by the
+    // Play referrer as coming from an Olvid link gets its clipboard inspected here, once
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        windowHasFocus = hasFocus
+        if (hasFocus) {
+            consumeClipboardLinkIfExpected()
+        }
+    }
+
+    /**
+     * Reads the link the landing page copied to the clipboard before the Play Store install and
+     * routes it like a tapped deep link: a configuration link (keycloak, licence, magic link,
+     * settings…) restarts the onboarding with it, an invitation is deferred until the profile
+     * exists, anything else is ignored. See [ClipboardDeferredLink].
+     */
+    private fun consumeClipboardLinkIfExpected() {
+        if (!windowHasFocus || !ClipboardDeferredLink.expected.value) {
+            return
+        }
+        val link = ClipboardDeferredLink.consumeFromClipboard(this) ?: return
+        if (ObvLinkActivity.CONFIGURATION_PATTERN.matcher(link).find()) {
+            // finish first: the activity is singleTop and a still-running instance would receive
+            // the intent through onNewIntent instead of computing its start destination from it
+            finish()
+            startActivity(
+                Intent(this, OnboardingFlowActivity::class.java)
+                    .putExtra(LINK_URI_INTENT_EXTRA, link)
+                    .putExtra(FIRST_ID_INTENT_EXTRA,
+                        intent.getBooleanExtra(FIRST_ID_INTENT_EXTRA, false))
+            )
+        } else if (!ObvLinkActivity.WEB_CLIENT_PATTERN.matcher(link).find()) {
+            deferLinkOrToast(link, ClipboardDeferredLink.DEFERRED_INVITATION_VALIDITY)
         }
     }
 
@@ -873,7 +935,7 @@ class OnboardingFlowActivity : AppCompatActivity() {
             onboardingViewModel.keycloakServer = null
             false
         }
-    }.onFailure { it.printStackTrace() }.getOrDefault(false)
+    }.onFailure { Logger.x(it) }.getOrDefault(false)
 
     override fun onDestroy() {
         super.onDestroy()

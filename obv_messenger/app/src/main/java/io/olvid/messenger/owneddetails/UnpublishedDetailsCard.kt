@@ -54,7 +54,9 @@ import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto
 import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.settings.SettingsActivity
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -202,22 +204,15 @@ internal fun UnpublishedDetailsCard(
                             modifier = Modifier.padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            InitialView(
+                            Avatar(
                                 modifier = Modifier.size(56.dp),
-                                initialViewSetup = { initialView ->
-                                    if (latestDetails.photoUrl.isNullOrEmpty()) {
-                                        initialView.setInitial(
-                                            bytesOwnedIdentity,
-                                            io.olvid.messenger.customClasses.StringUtils.getInitial(
-                                                latestFirstLine
-                                            )
-                                        )
-                                    } else {
-                                        initialView.setPhotoUrl(
-                                            bytesOwnedIdentity,
-                                            latestDetails.photoUrl
-                                        )
-                                    }
+                                target = if (latestDetails.photoUrl.isNullOrEmpty()) {
+                                    AvatarSource.initial(
+                                        bytesOwnedIdentity,
+                                        StringUtils.getInitial(latestFirstLine)
+                                    )
+                                } else {
+                                    AvatarSource.photo(bytesOwnedIdentity, latestDetails.photoUrl)
                                 })
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(

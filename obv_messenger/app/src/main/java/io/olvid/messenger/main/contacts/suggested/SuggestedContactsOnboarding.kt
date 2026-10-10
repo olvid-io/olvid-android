@@ -83,8 +83,8 @@ import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.components.DialogFullScreen
 import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.OlvidTextButton
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
@@ -353,12 +353,10 @@ private fun OriginDiagram(items: List<SuggestedContactItem>) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         if (LocalConfiguration.current.orientation != Configuration.ORIENTATION_LANDSCAPE) {
             AvatarWithChip(label = stringResource(R.string.label_suggested_contacts_you)) {
-                InitialView(
+                Avatar(
                     modifier = Modifier.size(DIAGRAM_AVATAR_SIZE),
-                    initialViewSetup = { view ->
-                        view.setShowBadges(false)
-                        ownedIdentity?.let { view.setOwnedIdentity(it) } ?: view.setUnknown()
-                    },
+                    target = ownedIdentity,
+                    showBadges = false,
                 )
             }
 
@@ -421,14 +419,10 @@ private fun DiagramContactAvatar(item: SuggestedContactItem?, size: Dp, alpha: F
         .size(size)
         .graphicsLayer { this.alpha = alpha }
     if (item != null) {
-        InitialView(
+        Avatar(
             modifier = modifier,
-            initialViewSetup = remember(item) {
-                { view ->
-                    view.setShowBadges(false)
-                    view.setContact(item.contact)
-                }
-            },
+            target = item.contact,
+            showBadges = false,
         )
     } else {
         // placeholder when there aren't enough suggestions to fill the row

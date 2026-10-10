@@ -71,8 +71,8 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.formatMarkdownToAnnotatedString
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.onboarding.flow.Device
 import io.olvid.messenger.onboarding.flow.OnboardingFlowViewModel
 import io.olvid.messenger.onboarding.flow.OnboardingRoutes
@@ -132,20 +132,14 @@ fun NavGraphBuilder.sourceConfirmation(
                         .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    InitialView(
+                    Avatar(
                         modifier = Modifier
                             .padding(
                                 horizontal = 8.dp,
                                 vertical = 4.dp,
                             )
                             .requiredSize(40.dp),
-                        initialViewSetup = { initialView ->
-                            if (ownedIdentity != null) {
-                                initialView.setOwnedIdentity(ownedIdentity)
-                            } else {
-                                initialView.setUnknown()
-                            }
-                        },
+                        target = ownedIdentity,
                     )
 
                     Column(

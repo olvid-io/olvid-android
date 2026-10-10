@@ -234,6 +234,52 @@ public interface Group2MemberDao {
             " WHERE " + Group2Member.PENDING_CREATION_TIMESTAMP + " IS NOT NULL")
     List<Group2Member> getAllWithPendingCreationTimestamp();
 
+    // members and pending members of all groups (or one group), ranked for the avatar cluster:
+    // with-photo first, then admins, then by name; pending members usually have no contact row
+    // so they naturally rank last
+    String GROUP_MEMBER_AVATAR_INFO_HAS_PHOTO = " (CASE WHEN c." + Contact.CUSTOM_PHOTO_URL + " IS NULL THEN c." + Contact.PHOTO_URL + " WHEN c." + Contact.CUSTOM_PHOTO_URL + " = '' THEN NULL ELSE c." + Contact.CUSTOM_PHOTO_URL + " END) IS NOT NULL AS hasPhoto ";
+    String GROUP_MEMBER_AVATAR_INFO_MEMBER_SELECT = "SELECT gm." + Group2Member.BYTES_GROUP_IDENTIFIER + " AS bytesGroupIdentifier, " +
+            " gm." + Group2Member.BYTES_CONTACT_IDENTITY + " AS bytesContactIdentity, " +
+            " gm." + Group2Member.PERMISSION_ADMIN + " AS permissionAdmin, " +
+            " c." + Contact.SORT_DISPLAY_NAME + " AS sortName, " +
+            GROUP_MEMBER_AVATAR_INFO_HAS_PHOTO +
+            " FROM " + Group2Member.TABLE_NAME + " AS gm " +
+            " LEFT JOIN " + Contact.TABLE_NAME + " AS c " +
+            " ON gm." + Group2Member.BYTES_OWNED_IDENTITY + " = c." + Contact.BYTES_OWNED_IDENTITY +
+            " AND gm." + Group2Member.BYTES_CONTACT_IDENTITY + " = c." + Contact.BYTES_CONTACT_IDENTITY +
+            " WHERE gm." + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ";
+    String GROUP_MEMBER_AVATAR_INFO_PENDING_SELECT = "SELECT pm." + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " AS bytesGroupIdentifier, " +
+            " pm." + Group2PendingMember.BYTES_CONTACT_IDENTITY + " AS bytesContactIdentity, " +
+            " pm." + Group2PendingMember.PERMISSION_ADMIN + " AS permissionAdmin, " +
+            " COALESCE(c." + Contact.SORT_DISPLAY_NAME + ", pm." + Group2PendingMember.SORT_DISPLAY_NAME + ") AS sortName, " +
+            GROUP_MEMBER_AVATAR_INFO_HAS_PHOTO +
+            " FROM " + Group2PendingMember.TABLE_NAME + " AS pm " +
+            " LEFT JOIN " + Contact.TABLE_NAME + " AS c " +
+            " ON pm." + Group2PendingMember.BYTES_OWNED_IDENTITY + " = c." + Contact.BYTES_OWNED_IDENTITY +
+            " AND pm." + Group2PendingMember.BYTES_CONTACT_IDENTITY + " = c." + Contact.BYTES_CONTACT_IDENTITY +
+            " WHERE pm." + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ";
+    String GROUP_MEMBER_AVATAR_INFO_ORDER = " ORDER BY hasPhoto DESC, permissionAdmin DESC, sortName ASC";
+
+    @Query("SELECT * FROM ( " + GROUP_MEMBER_AVATAR_INFO_MEMBER_SELECT +
+            " UNION ALL " + GROUP_MEMBER_AVATAR_INFO_PENDING_SELECT +
+            " )" + GROUP_MEMBER_AVATAR_INFO_ORDER)
+    List<GroupMemberAvatarInfo> getAllGroupMembersAvatarInfoSync(@NonNull byte[] bytesOwnedIdentity);
+
+    @Query("SELECT * FROM ( " + GROUP_MEMBER_AVATAR_INFO_MEMBER_SELECT +
+            " AND gm." + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
+            " UNION ALL " + GROUP_MEMBER_AVATAR_INFO_PENDING_SELECT +
+            " AND pm." + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
+            " )" + GROUP_MEMBER_AVATAR_INFO_ORDER)
+    List<GroupMemberAvatarInfo> getGroupMembersAvatarInfoSync(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier);
+
+    class GroupMemberAvatarInfo {
+        public byte[] bytesGroupIdentifier;
+        public byte[] bytesContactIdentity;
+        public boolean permissionAdmin;
+        public byte[] sortName;
+        public boolean hasPhoto;
+    }
+
 
     class Group2MemberOrPending {
         @Embedded

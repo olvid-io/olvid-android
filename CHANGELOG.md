@@ -1,4 +1,36 @@
+# Build 314 (4.6)
+
+- Remove forced portrait orientation in manifest.
+
+# ~~Build 313 (4.6)~~
+2026-10-09
+
+- Fix a few minor bugs of build 312.
+
+# ~~Build 312 (4.6)~~
+2026-10-06
+
+New features:
+- Only display the first 4 images of a message, and add an album view to see them all.
+- Added a document scanner (including an ML Kit and an internal "no google" implementation).
+- Double-tap a received message to react with a default emoji (configurable by discussion).
+- Truncate long messages with a "View more" button and add a full screen message text view (including a raw text view, without any formatting).
+- Detect duplicate groups during group creation and offer to use an existing group instead.
+- Add a button to send a photo directly from the main screen.
+- Add group discussions to the main "+" button.
+- Deferred deep links: when installing Olvid after scanning a contact's QR code, offer to automatically invite them.
+
+UI improvements:
+- New generative avatar pattern for contacts without a profile picture.
+- New "cluster" avatar for groups without a profile picture.
+- Redesign of the "+" attachment button in a discussion.
+- Add a placeholder for unsupported image formats in the gallery.
+- Better pinch-to-zoom inside a discussion
+- Display the moderator status in groups managed bu a user directory.
+- Multiple small fixes for occasional crashes. 
+
 # Build 311 (4.5.1)
+2026-09-23
 
 - Force OCR analysis to run in a single thread to avoid memory overload.
 - New setting to disable OCR altogether.

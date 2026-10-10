@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Едно от вашите устройства ще изтече и ще бъде деактивирано след **по-малко от %1$d ден**.\nМожете да закупите абонамент за **Olvid+**, за да го поддържате активно.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Едно от вашите устройства ще изтече и ще бъде деактивирано след **по-малко от %1$d дни**.\nМожете да закупите абонамент за **Olvid+**, за да го поддържате активно.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Това устройство ще изтече и ще бъде деактивирано след **по-малко от %1$d ден**.\nМожете да закупите абонамент за **Olvid+**, за да го поддържате активно.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Това устройство ще изтече и ще бъде деактивирано след **по-малко от %1$d дни**.\nМожете да закупите абонамент за **Olvid+**, за да го поддържате активно.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s се присъедини към групата</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s се присъедини към групата</item>
@@ -79,11 +83,11 @@
 		<item quantity="other" state="needs_review" hash="1022571360">%1$d контакти</item>
 	</plurals>
 	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="1772966333">Дискусията е архивирана</item>
-		<item quantity="other" state="needs_review" hash="1402495414">%1$d дискусиите са архивирани</item>
+		<item quantity="one" state="needs_review" hash="1772966333">Разговорът е архивиран</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d разговорите са архивирани</item>
 	</plurals>
 	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1312483800">Дискусията е възстановена от архива</item>
+		<item quantity="one" state="needs_review" hash="-1312483800">Разговорът е възстановено от архива</item>
 		<item quantity="other" state="needs_review" hash="-2093736213">%1$d разговорите са възстановени от архива</item>
 	</plurals>
 	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -91,7 +95,7 @@
 		<item quantity="other" state="needs_review" hash="204728896">%1$d съобщения, премахнати от списъка с отметки</item>
 	</plurals>
 	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-716893580">Изтриване на избраната дискусия?</item>
+		<item quantity="one" state="needs_review" hash="-716893580">Изтриване на избрания разговор?</item>
 		<item quantity="other" state="needs_review" hash="-15840526">Изтриване на избраните разговори?</item>
 	</plurals>
 	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -99,11 +103,11 @@
 		<item quantity="other" state="needs_review" hash="-2020248805">Изтриване на избраните съобщения?</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-931157230">Наистина ли искате да изтриете избраната дискусия и всички съобщения, които съдържа?\nТова действие не може да бъде отменено.</item>
+		<item quantity="one" state="needs_review" hash="-931157230">Наистина ли искате да изтриете избрания разговор и всички съобщения, които съдържа?\nТова действие не може да бъде отменено.</item>
 		<item quantity="other" state="needs_review" hash="-1815739098">Наистина ли искате да изтриете избраните %1$d разговори и всички съобщения, които съдържат?\nТова действие не може да бъде отменено.</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-2139168692">Как искате да изтриете избраната дискусия и всички съобщения в нея?\nТова действие не може да бъде отменено.</item>
+		<item quantity="one" state="needs_review" hash="-2139168692">Как искате да изтриете избрания разговор и всички съобщения в нея?\nТова действие не може да бъде отменено.</item>
 		<item quantity="other" state="needs_review" hash="-1430564144">Как искате да изтриете избраните %1$d разговори и всички съобщения, които съдържат?\nТова действие не може да бъде отменено.</item>
 	</plurals>
 	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -115,20 +119,20 @@
 		<item quantity="other" state="needs_review" hash="-895867176">Как искате да изтриете избраните %1$d съобщения?\nТова действие не може да бъде отменено.</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-606769319">Ще изтриете **постоянно** съобщение за **всички** участници в тази дискусия. Моля, уверете се, че това е точно това, което искате да направите.</item>
-		<item quantity="other" state="needs_review" hash="-1284393519">Ще изтриете **безвъзвратно** %1$d съобщения за **всички** в тази дискусия. Моля, уверете се, че това наистина е, което искате да направите.</item>
+		<item quantity="one" state="needs_review" hash="-606769319">Ще изтриете **постоянно** съобщение за **всички** участници в този разговор. Моля, уверете се, че това е точно това, което искате да направите.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">Ще изтриете **безвъзвратно** %1$d съобщения за **всички** в този разговор. Моля, уверете се, че това наистина е, което искате да направите.</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="2118446236">Ще изтриете **безвъзвратно** дадена дискусия и всички съобщения в нея за **всички** участници в нея. Моля, уверете се, че това е точно това, което искате да направите.</item>
-		<item quantity="other" state="needs_review" hash="-1558931055">Ще изтриете **безвъзвратно** %1$d дискусии и съобщенията, които съдържат, за **всички** участници в тези дискусии. Моля, уверете се, че това е точно това, което искате да направите.</item>
+		<item quantity="one" state="needs_review" hash="2118446236">Ще изтриете **безвъзвратно** даден разговор и всички съобщения в нея за **всички** участници в нея. Моля, уверете се, че това е точно това, което искате да направите.</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">Ще изтриете **безвъзвратно** %1$d разговори и съобщенията, които съдържат, за **всички** участници в тези разговори. Моля, уверете се, че това е точно това, което искате да направите.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">Ще поканите всеки член на групата, с когото имате общ канал (в момента 1 член), да участва в лична дискусия.\nИскате ли да продължите?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">Ще поканите всеки член на групата, с когото имате общ канал (в момента %1$d членове), да участва в лична дискусия.\nИскате ли да продължите?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">Ще поканите всеки член на групата, с когото имате общ канал (в момента 1 член), да участва в личен разговор.\nИскате ли да продължите?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Ще поканите всеки член на групата, с когото имате общ канал (в момента %1$d членове), да участва в личен разговор.\nИскате ли да продължите?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">Един член на групата може да бъде поканен в лична дискусия.</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d членовете на групата могат да бъдат поканени в лична дискусия</item>
+		<item quantity="one" state="needs_review" hash="-127723614">Един член на групата може да бъде поканен в личен разговор.</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d членовете на групата могат да бъдат поканени в личен разговор</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 обща група</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Добавяне към групата %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Добавяне към %1$d групи</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Вече имате разговор с тези участници.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Вече имате %1$d разговори с тези участници.</item>
 	</plurals>
 </resources>

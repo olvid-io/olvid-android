@@ -45,9 +45,11 @@ import io.olvid.engine.engine.types.JsonGroupType
 import io.olvid.messenger.App
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView
+import androidx.compose.ui.platform.ComposeView
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.TextChangeListener
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.setAvatar
 import io.olvid.messenger.group.GroupTypeModel.RemoteDeleteSetting
 import io.olvid.messenger.group.GroupV2DetailsActivity.Companion.REQUEST_CODE_CHOOSE_IMAGE
 import io.olvid.messenger.group.GroupV2DetailsActivity.Companion.REQUEST_CODE_PERMISSION_CAMERA
@@ -67,7 +69,7 @@ class OwnedGroupDetailsFragment : Fragment() {
 
     private val viewModel: OwnedGroupDetailsViewModel by activityViewModels()
     private lateinit var groupNameLayout: TextInputLayout
-    private lateinit var initialView: InitialView
+    private lateinit var initialView: ComposeView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -131,14 +133,16 @@ class OwnedGroupDetailsFragment : Fragment() {
         viewModel.getInitialViewContent()
             .observe(viewLifecycleOwner) { initialViewContent: InitialViewContent? ->
                 initialViewContent?.let {
-                    if (initialViewContent.absolutePhotoUrl != null) {
-                        initialView.setAbsolutePhotoUrl(
-                            initialViewContent.bytesGroupOwnerAndUid,
-                            initialViewContent.absolutePhotoUrl
-                        )
-                    } else {
-                        initialView.setGroup(initialViewContent.bytesGroupOwnerAndUid)
-                    }
+                    initialView.setAvatar(
+                        if (initialViewContent.absolutePhotoUrl != null) {
+                            AvatarSource.absolutePhoto(
+                                initialViewContent.bytesGroupOwnerAndUid,
+                                initialViewContent.absolutePhotoUrl
+                            )
+                        } else {
+                            AvatarSource.group(initialViewContent.bytesGroupOwnerAndUid)
+                        }
+                    )
                 }
             }
         initialView.setOnClickListener { v: View ->

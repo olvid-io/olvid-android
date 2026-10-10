@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">ನಿಮ್ಮ ಸಾಧನಗಳಲ್ಲಿ ಒಂದು **%1$d ದಿನಕ್ಕಿಂತ ಕಡಿಮೆ ಸಮಯದಲ್ಲಿ** ನಿಷ್ಕ್ರಿಯಗೊಳ್ಳುತ್ತದೆ ಮತ್ತು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲ್ಪಡುತ್ತದೆ.\nನೀವು ಅದನ್ನು ಸಕ್ರಿಯವಾಗಿರಿಸಲು **ಒಲ್ವಿಡ್+** ಚಂದಾದಾರಿಕೆಯನ್ನು ಖರೀದಿಸಬಹುದು.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">ನಿಮ್ಮ ಸಾಧನಗಳಲ್ಲಿ ಒಂದು **%1$d ದಿನಗಳಲ್ಲಿ** ನಿಷ್ಕ್ರಿಯಗೊಳ್ಳುತ್ತದೆ ಮತ್ತು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲ್ಪಡುತ್ತದೆ.\nನೀವು ಅದನ್ನು ಸಕ್ರಿಯವಾಗಿರಿಸಲು **ಒಲ್ವಿಡ್+** ಚಂದಾದಾರಿಕೆಯನ್ನು ಖರೀದಿಸಬಹುದು.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">ಈ ಸಾಧನವು **%1$d ದಿನಕ್ಕಿಂತ ಕಡಿಮೆ** ಸಮಯದಲ್ಲಿ ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ ಮತ್ತು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲ್ಪಡುತ್ತದೆ.\nಇದನ್ನು ಸಕ್ರಿಯವಾಗಿರಿಸಲು ನೀವು **Olvid+** ಚಂದಾದಾರಿಕೆಯನ್ನು ಖರೀದಿಸಬಹುದು.</item>
+		<item quantity="other" state="needs_review" hash="993103846">ಈ ಸಾಧನವು **%1$d ದಿನಗಳಲ್ಲಿ** ನಿಷ್ಕ್ರಿಯಗೊಳ್ಳುತ್ತದೆ ಮತ್ತು ಬಳಕೆಗೆ ನಿಷ್ಕ್ರಿಯವಾಗುತ್ತದೆ.\nಇದನ್ನು ಸಕ್ರಿಯವಾಗಿರಿಸಲು, ನೀವು **Olvid+** ಚಂದಾದಾರಿಕೆಯನ್ನು ಖರೀದಿಸಬಹುದು.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s ಗುಂಪಿನಲ್ಲಿ ಸೇರಿದರು</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s ಗುಂಪಿನಲ್ಲಿ ಸೇರಿದರು</item>
@@ -99,11 +103,11 @@
 		<item quantity="other" state="needs_review" hash="-2020248805">ಆಯ್ಕೆ ಮಾಡಿದ ಸಂದೇಶಗಳನ್ನು ಅಳಿಸಬೇಕೇ?</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-931157230">ನೀವು ನಿಜವಾಗಿಯೂ ಆಯ್ಕೆಮಾಡಿದ ಸಂಭಾಷಣೆ ಮತ್ತು ಅದರಲ್ಲಿರುವ ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಅಳಿಸಲು ಬಯಸುತ್ತೀರಾ?\nಈ ಕ್ರಿಯೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.</item>
-		<item quantity="other" state="needs_review" hash="-1815739098">ನೀವು ನಿಜವಾಗಿಯೂ %1$d ಆಯ್ಕೆಮಾಡಿದ ಸಂಭಾಷಣೆಗಳು ಮತ್ತು ಅವು ಒಳಗೊಂಡಿರುವ ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಅಳಿಸಲು ಬಯಸುತ್ತೀರಾ?\nಈ ಕ್ರಿಯೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.</item>
+		<item quantity="one" state="needs_review" hash="-931157230">ನೀವು ನಿಜವಾಗಿಯೂ ಆಯ್ಕೆಮಾಡಿದ ಚರ್ಚೆ ಮತ್ತು ಅದರಲ್ಲಿರುವ ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಅಳಿಸಲು ಬಯಸುತ್ತೀರಾ?\nಈ ಕ್ರಿಯೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">ನೀವು ನಿಜವಾಗಿಯೂ %1$d ಆಯ್ಕೆಮಾಡಿದ ಚರ್ಚೆಗಳು ಮತ್ತು ಅವು ಒಳಗೊಂಡಿರುವ ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಅಳಿಸಲು ಬಯಸುತ್ತೀರಾ?\nಈ ಕ್ರಿಯೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-2139168692">ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ ಸಂಭಾಷಣೆ ಮತ್ತು ಅದರಲ್ಲಿರುವ ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಹೇಗೆ ಅಳಿಸಲು ಬಯಸುತ್ತೀರಿ?\nಈ ಕ್ರಿಯೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.</item>
+		<item quantity="one" state="needs_review" hash="-2139168692">ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ ಚರ್ಚೆ ಮತ್ತು ಅದರಲ್ಲಿರುವ ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಹೇಗೆ ಅಳಿಸಲು ಬಯಸುತ್ತೀರಿ?\nಈ ಕ್ರಿಯೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.</item>
 		<item quantity="other" state="needs_review" hash="-1430564144">ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ %1$d ಚರ್ಚೆಗಳು ಮತ್ತು ಅವು ಒಳಗೊಂಡಿರುವ ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು ಹೇಗೆ ಅಳಿಸಲು ಬಯಸುತ್ತೀರಿ?\nಈ ಕ್ರಿಯೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.</item>
 	</plurals>
 	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -119,7 +123,7 @@
 		<item quantity="other" state="needs_review" hash="-1284393519">ನೀವು ಈ ಚರ್ಚೆಯಲ್ಲಿರುವ **ಎಲ್ಲರಿಗೂ** %1$d ಸಂದೇಶಗಳನ್ನು **ಶಾಶ್ವತವಾಗಿ** ಅಳಿಸಲು ಹೊರಟಿರಿದ್ದೀರಿ. ದಯವಿಟ್ಟು ನೀವು ನಿಜವಾಗಿಯೂ ಇದನ್ನು ಮಾಡಲು ಬಯಸುತ್ತೀರಾ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ.</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="2118446236">ನೀವು ಈ ಚಾಟ್‌ನಲ್ಲಿರುವ **ಎಲ್ಲಾ ಸದಸ್ಯರಿಗೂ** ಈ ಚಾಟ್ ಮತ್ತು ಅದರಲ್ಲಿರುವ ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು **ಶಾಶ್ವತವಾಗಿ** ಅಳಿಸಲು ಹೊರಟಿರಬಹುದು. ದಯವಿಟ್ಟು ನೀವು ನಿಜವಾಗಿಯೂ ಇದನ್ನು ಮಾಡಲು ಬಯಸುತ್ತೀರಾ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ.</item>
+		<item quantity="one" state="needs_review" hash="2118446236">ನೀವು ಈ ಚರ್ಚೆಯಲ್ಲಿರುವ **ಎಲ್ಲಾ ಸದಸ್ಯರಿಗೂ** ಈ ಚರ್ಚೆ ಮತ್ತು ಅದರಲ್ಲಿರುವ ಎಲ್ಲಾ ಸಂದೇಶಗಳನ್ನು **ಶಾಶ್ವತವಾಗಿ** ಅಳಿಸಲು ಹೊರಟಿರಬಹುದು. ದಯವಿಟ್ಟು ನೀವು ನಿಜವಾಗಿಯೂ ಇದನ್ನು ಮಾಡಲು ಬಯಸುತ್ತೀರಾ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ.</item>
 		<item quantity="other" state="needs_review" hash="-1558931055">ನೀವು %1$d ಚರ್ಚೆಗಳನ್ನು ಮತ್ತು ಅವುಗಳಲ್ಲಿರುವ ಸಂದೇಶಗಳನ್ನು **ಶಾಶ್ವತವಾಗಿ** ಎಲ್ಲರಿಗೂ ಅಳಿಸಲು ಹೊರಟಿರಿದ್ದೀರಿ. ದಯವಿಟ್ಟು ನೀವು ನಿಜವಾಗಿಯೂ ಇದನ್ನು ಮಾಡಲು ಬಯಸುತ್ತೀರಾ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -263,8 +267,8 @@
 		<item quantity="other" state="needs_review" hash="965402074">%1$d\u00a0ಸದಸ್ಯರು</item>
 	</plurals>
 	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1006155949">ನಿಮ್ಮ ಚಾಟ್‌ಗಳಲ್ಲಿ ಪ್ರಸ್ತುತ ಒಂದು ರಿಮೋಟ್ ಆಗಿ ಡಿಲೀಟ್ ಮಾಡಲಾದ ಸಂದೇಶವಿದೆ. ನೀವು ಅದನ್ನು ಡಿಲೀಟ್ ಮಾಡಲು ಬಯಸುತ್ತೀರಾ?</item>
-		<item quantity="other" state="needs_review" hash="-1716115044">ನಿಮ್ಮ ಚಾಟ್‌ಗಳಲ್ಲಿ ಪ್ರಸ್ತುತ %1$d ದೂರದಿಂದ ಅಳಿಸಲಾದ ಸಂದೇಶಗಳಿವೆ. ನೀವು ಅವುಗಳನ್ನು ಎಲ್ಲವನ್ನೂ ಅಳಿಸಲು ಬಯಸುತ್ತೀರಾ?</item>
+		<item quantity="one" state="needs_review" hash="-1006155949">ನಿಮ್ಮ ಚರ್ಚೆಗಳಲ್ಲಿ ಪ್ರಸ್ತುತ ಒಂದು ರಿಮೋಟ್ ಆಗಿ ಡಿಲೀಟ್ ಮಾಡಲಾದ ಸಂದೇಶವಿದೆ. ನೀವು ಅದನ್ನು ಡಿಲೀಟ್ ಮಾಡಲು ಬಯಸುತ್ತೀರಾ?</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">ನಿಮ್ಮ ಚರ್ಚೆಗಳಲ್ಲಿ ಪ್ರಸ್ತುತ %1$d ದೂರದಿಂದ ಅಳಿಸಲಾದ ಸಂದೇಶಗಳಿವೆ. ನೀವು ಅವುಗಳನ್ನು ಎಲ್ಲವನ್ನೂ ಅಳಿಸಲು ಬಯಸುತ್ತೀರಾ?</item>
 	</plurals>
 	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1367750681">1 ಸಂಪರ್ಕ ತಮ್ಮ ಸ್ಥಳವನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿದೆ</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">%1$d ಗುಂಪಿಗೆ ಸೇರಿಸಿ</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">%1$d ಗುಂಪುಗಳಿಗೆ ಸೇರಿಸಿ</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">ನೀವು ಈಗಾಗಲೇ ಈ ಭಾಗವಹಿಸುವವರೊಂದಿಗೆ ಚರ್ಚೆ ನಡೆಸಿದ್ದೀರಿ.</item>
+		<item quantity="other" state="needs_review" hash="809550612">ನೀವು ಈಗಾಗಲೇ ಈ ಭಾಗವಹಿಸುವವರೊಂದಿಗೆ %1$d ಚರ್ಚೆಗಳನ್ನು ನಡೆಸಿದ್ದೀರಿ.</item>
 	</plurals>
 </resources>

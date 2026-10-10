@@ -59,7 +59,9 @@ import io.olvid.messenger.OwnedIdentityUnreadCounts;
 import io.olvid.messenger.R;
 import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.customClasses.BytesKey;
-import io.olvid.messenger.customClasses.InitialView;
+import androidx.compose.ui.platform.ComposeView;
+import io.olvid.messenger.designsystem.avatar.AvatarComposeViewKt;
+import io.olvid.messenger.designsystem.avatar.AvatarSource;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.OwnedIdentityDao;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
@@ -102,14 +104,14 @@ public class OwnIdentitySelectorPopupWindow {
         this.popupWindow.setElevation(12);
         this.popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(activity, R.drawable.background_rounded_dialog));
 
-        final InitialView currentIdentityInitialView = popupView.findViewById(R.id.current_identity_initial_view);
+        final ComposeView currentIdentityInitialView = popupView.findViewById(R.id.current_identity_initial_view);
         final TextView currentNameTextView = popupView.findViewById(R.id.current_identity_name_text_view);
         final TextView currentNameSecondLineTextView = popupView.findViewById(R.id.current_identity_name_second_line_text_view);
         final ImageView currentIdentityMutedImageView = popupView.findViewById(R.id.current_identity_muted_marker_image_view);
         currentIdentityInitialView.setOnClickListener(v -> popupWindow.dismiss());
         this.currentIdentityObserver = (OwnedIdentity ownedIdentity) -> {
             if (ownedIdentity == null) {
-                currentIdentityInitialView.setUnknown();
+                AvatarComposeViewKt.setAvatar(currentIdentityInitialView, AvatarSource.unknown());
                 currentIdentityMutedImageView.setVisibility(View.GONE);
                 return;
             }
@@ -140,7 +142,7 @@ public class OwnIdentitySelectorPopupWindow {
                     currentNameSecondLineTextView.setText(null);
                 }
             }
-            currentIdentityInitialView.setOwnedIdentity(ownedIdentity);
+            AvatarComposeViewKt.setAvatar(currentIdentityInitialView, ownedIdentity);
             if (ownedIdentity.shouldMuteNotifications()) {
                 currentIdentityMutedImageView.setVisibility(View.VISIBLE);
             } else {
@@ -212,7 +214,6 @@ public class OwnIdentitySelectorPopupWindow {
         addProfileButton.setOnClickListener(v -> {
             popupWindow.dismiss();
             Intent onboardingIntent = new Intent(activity, OnboardingFlowActivity.class);
-            onboardingIntent.putExtra(OnboardingFlowActivity.NEW_PROFILE_INTENT_EXTRA, true);
             activity.startActivity(onboardingIntent);
         });
         addProfileButton.setOnLongClickListener(v -> {
@@ -323,7 +324,7 @@ public class OwnIdentitySelectorPopupWindow {
                 holder.unreadMessageLabel.setText(Long.toString(ownedIdentityAndUnreadMessageCount.unreadMessageCount + ownedIdentityAndUnreadMessageCount.unreadInvitationCount + ownedIdentityAndUnreadMessageCount.unreadDiscussionCount));
             }
 
-            holder.initialView.setOwnedIdentity(ownedIdentityAndUnreadMessageCount.ownedIdentity);
+            AvatarComposeViewKt.setAvatar(holder.initialView, ownedIdentityAndUnreadMessageCount.ownedIdentity);
 
             if (ownedIdentityAndUnreadMessageCount.ownedIdentity.shouldMuteNotifications()) {
                 holder.notificationMutedImageView.setVisibility(View.VISIBLE);
@@ -367,7 +368,7 @@ public class OwnIdentitySelectorPopupWindow {
     }
 
     private static class OwnedIdentityViewHolder extends RecyclerView.ViewHolder {
-        final InitialView initialView;
+        final ComposeView initialView;
         final TextView displayNameTextView;
         final TextView displayNameSecondLineTextView;
         final TextView unreadMessageLabel;

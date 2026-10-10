@@ -277,6 +277,10 @@ public class FyleMessageJoinWithStatus {
         if (engineNumber == null) {
             return false;
         }
+        // a cancelled upload stays cancelled: recipients who already had a copy of the file still send return receipts for it
+        if (receptionStatus == RECEPTION_STATUS_CANCELLED) {
+            return false;
+        }
 
         List<MessageRecipientInfo> messageRecipientInfos = AppDatabase.getInstance().messageRecipientInfoDao().getAllByMessageId(messageId);
         if (messageRecipientInfos.isEmpty()) {

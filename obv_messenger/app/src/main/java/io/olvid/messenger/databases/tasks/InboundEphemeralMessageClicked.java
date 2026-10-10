@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
@@ -138,6 +139,11 @@ public class InboundEphemeralMessageClicked implements Runnable {
 
         if (expirationCreated) {
             App.runThread(MessageExpirationService::scheduleNextExpiration);
+        }
+
+        if (!clickedOnAnotherDevice && message.isCountedAsLocationSharing()) {
+            // the revealed message is a location sharing message --> it now counts as currently sharing
+            UnreadCountsSingleton.INSTANCE.newLocationSharingMessage(message.discussionId, message.id);
         }
     }
 }

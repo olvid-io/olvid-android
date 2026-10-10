@@ -161,9 +161,7 @@ fun AddContactToGroupsScreen(
                             onClick = {
                                 contactDetailsViewModel.toggleGroupToAdd(group.bytesGroupIdentifier)
                             },
-                            initialViewSetup = { initialView ->
-                                initialView.setGroup2(group)
-                            },
+                            avatar = group,
                             endContent = {
                                 Spacer(modifier = Modifier.width(4.dp))
                                 CircleCheckBox(

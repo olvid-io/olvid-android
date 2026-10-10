@@ -56,14 +56,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.map
 import io.olvid.engine.engine.types.ObvDialog.Category
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView as InitialViewClass
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Invitation
+import io.olvid.messenger.designsystem.avatar.Avatar
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.designsystem.components.OlvidOutlinedActionButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.contacts.DisplayableContact
 
 /** A common group, wrapped so its identity is compared by content (id/title/photo) rather than
@@ -81,7 +81,7 @@ class MutualGroupUi(val discussion: Discussion) {
 /**
  * The fully-resolved, value-stable model a card renders. Being [Immutable] (and value-equal) lets
  * [SuggestedContactCard] be skipped on unchanged data, so the constant DB churn behind the swipe
- * stack no longer recomposes the cards. [initialViewSetup] is hoisted in so the card is agnostic to
+ * stack no longer recomposes the cards. [avatar] is hoisted in so the card is agnostic to
  * whether it is backed by a [Contact] or an [Invitation].
  */
 @Immutable
@@ -94,7 +94,7 @@ data class SuggestedContactUiState(
     val oneToOne: Boolean,
     val receivedInvitation: Invitation?,
     val sentInvitation: Invitation?,
-    val initialViewSetup: (InitialViewClass) -> Unit,
+    val avatar: AvatarTarget?,
 )
 
 /** Build the card model for either source. The stack keys by item identity, so a given key is
@@ -122,7 +122,7 @@ fun rememberSuggestedContactUiState(item: SuggestedContactItem): SuggestedContac
             oneToOne = (liveContact ?: fallback).oneToOne,
             receivedInvitation = pendingInvitation?.takeIf { it.categoryId == Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY },
             sentInvitation = pendingInvitation?.takeIf { it.categoryId == Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY },
-            initialViewSetup = (liveContact ?: fallback).getInitialViewSetup(),
+            avatar = (liveContact ?: fallback).avatarSource(),
         )
     }
 }
@@ -163,7 +163,6 @@ fun SuggestedContactCard(
     modifier: Modifier = Modifier,
     onMoreInfo: () -> Unit = {},
 ) {
-    val initialViewSetup = state.initialViewSetup
     Box(
         modifier = modifier
             .sizeIn(maxWidth = CARD_WIDTH.dp, maxHeight = CARD_HEIGHT.dp)
@@ -180,9 +179,9 @@ fun SuggestedContactCard(
             Spacer(Modifier.height(32.dp))
             // the invitation status chip straddles the avatar's bottom edge (overlaps it ~halfway)
             Box {
-                InitialView(
+                Avatar(
                     modifier = Modifier.size(144.dp),
-                    initialViewSetup = initialViewSetup,
+                    target = state.avatar,
                 )
                 if (state.receivedInvitation != null || state.sentInvitation != null || state.oneToOne) {
                     InvitationBadge(
@@ -258,11 +257,9 @@ fun MutualGroupsRow(groups: List<MutualGroupUi>?) {
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             list.forEach { group ->
-                InitialView(
+                Avatar(
                     modifier = Modifier.size(24.dp),
-                    initialViewSetup = { initialView ->
-                        initialView.setDiscussion(group.discussion)
-                    },
+                    target = group.discussion,
                 )
             }
         }

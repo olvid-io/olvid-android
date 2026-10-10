@@ -55,7 +55,9 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
-import io.olvid.messenger.customClasses.InitialView;
+import androidx.compose.ui.platform.ComposeView;
+import io.olvid.messenger.designsystem.avatar.AvatarComposeViewKt;
+import io.olvid.messenger.designsystem.avatar.AvatarSource;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -70,7 +72,7 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
     private FragmentActivity activity;
     private DiscussionViewModel viewModel;
 
-    private InitialView currentIdentityInitialView;
+    private ComposeView currentIdentityInitialView;
     private TextView currentNameTextView;
     private TextView currentNameSecondLineTextView;
     private ImageView currentIdentityMutedImageView;
@@ -214,7 +216,7 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
 
 
         if (ownedIdentity == null) {
-            currentIdentityInitialView.setUnknown();
+            AvatarComposeViewKt.setAvatar(currentIdentityInitialView, AvatarSource.unknown());
             currentIdentityMutedImageView.setVisibility(View.GONE);
             return;
         }
@@ -246,7 +248,7 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
                 currentNameSecondLineTextView.setText(null);
             }
         }
-        currentIdentityInitialView.setOwnedIdentity(ownedIdentity);
+        AvatarComposeViewKt.setAvatar(currentIdentityInitialView, ownedIdentity);
         if (ownedIdentity.prefMuteNotifications && (ownedIdentity.prefMuteNotificationsTimestamp == null || ownedIdentity.prefMuteNotificationsTimestamp > System.currentTimeMillis())) {
             currentIdentityMutedImageView.setVisibility(View.VISIBLE);
         } else {

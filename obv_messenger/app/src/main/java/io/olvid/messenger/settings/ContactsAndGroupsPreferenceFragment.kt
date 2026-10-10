@@ -41,6 +41,7 @@ import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.databases.AppDatabase.Companion.getInstance
 import io.olvid.messenger.databases.entity.Invitation
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask
+import io.olvid.messenger.designsystem.avatar.refreshUsePatternAvatars
 import io.olvid.messenger.settings.SettingsActivity.AutoJoinGroupsCategory
 import io.olvid.messenger.settings.SettingsActivity.Companion.autoJoinGroups
 import io.olvid.messenger.settings.SettingsActivity.Companion.contactDisplayNameFormat
@@ -188,6 +189,15 @@ class ContactsAndGroupsPreferenceFragment : PreferenceFragmentCompat() {
                     }
                 }
                 return@OnPreferenceChangeListener false
+            }
+
+        val patternAvatarsPreference =
+            screen.findPreference<SwitchPreference?>(SettingsActivity.PREF_KEY_USE_PATTERN_AVATARS)
+        patternAvatarsPreference?.onPreferenceChangeListener =
+            Preference.OnPreferenceChangeListener { _: Preference, _: Any? ->
+                // refresh the snapshot-state mirror once the new value is persisted
+                Handler(Looper.getMainLooper()).post { refreshUsePatternAvatars() }
+                return@OnPreferenceChangeListener true
             }
 
         val showTrustLevelsPreference =

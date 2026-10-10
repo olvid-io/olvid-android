@@ -166,6 +166,7 @@ fun ShareDestinationPickerSheet(
                         onConfirm(selected)
                     },
                 ),
+                requestSearchFocus = true,
                 viewModelKey = membersViewModelKey,
                 ignoreBottomSafeDrawingPadding = true,
             ) { groupMembersViewModel ->

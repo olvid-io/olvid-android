@@ -40,11 +40,14 @@ import android.widget.TextView
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -54,6 +57,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -83,7 +87,9 @@ import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.MessageMetadata
 import io.olvid.messenger.databases.entity.MessageRecipientInfo
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.theme.ProvideOlvidRipple
 import io.olvid.messenger.discussion.message.DateHeader
+import io.olvid.messenger.discussion.message.EphemeralDetails
 import io.olvid.messenger.discussion.message.Message
 import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel
@@ -148,38 +154,57 @@ class MessageDetailsActivity : LockableActivity() {
                     updateMessageStatus(message)
                 }
             }
-            message?.let {
-                val messageExpiration by AppDatabase.getInstance()
-                    .messageExpirationDao().getLive(it.id)
-                    .observeAsState()
-                Column(
+            ProvideOlvidRipple {
+                message?.let {
+                    val messageExpiration by AppDatabase.getInstance()
+                        .messageExpirationDao().getLive(it.id)
+                        .observeAsState()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        DateHeader(
+                            date = StringUtils.getDayOfDateString(LocalContext.current, it.timestamp)
+                                .toString()
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Message(
+                            modifier = Modifier.cutoutHorizontalPadding(),
+                            message = it,
+                            scrollToMessage = { },
+                            replyAction = { },
+                            menuAction = { },
+                            editedSeen = { },
+                            showSender = it.isInbound,
+                            lastFromSender = true,
+                            scale = 1f,
+                            useAnimatedEmojis = remember { SettingsActivity.useAnimatedEmojis() },
+                            loopAnimatedEmojis = remember { SettingsActivity.loopAnimatedEmojis() },
+                            audioAttachmentServiceBinding = audioAttachmentServiceBinding,
+                            messageExpiration = messageExpiration,
+                            openOnClick = false,
+                            blockSwipe = true,
+                        )
+                    }
+                }
+            }
+        }
+
+        findViewById<ComposeView>(R.id.ephemeral_details_compose_view).setContent {
+            messageDetailsViewModel.message.observeAsState().value?.let {
+                val message by messageDetailsViewModel.message.observeAsState()
+
+                EphemeralDetails(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    DateHeader(
-                        date = StringUtils.getDayOfDateString(LocalContext.current, it.timestamp)
-                            .toString()
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Message(
-                        modifier = Modifier.cutoutHorizontalPadding(),
-                        message = it,
-                        scrollToMessage = { },
-                        replyAction = { },
-                        menuAction = { },
-                        editedSeen = { },
-                        showSender = it.isInbound,
-                        lastFromSender = true,
-                        scale = 1f,
-                        useAnimatedEmojis = remember { SettingsActivity.useAnimatedEmojis() },
-                        loopAnimatedEmojis = remember { SettingsActivity.loopAnimatedEmojis() },
-                        audioAttachmentServiceBinding = audioAttachmentServiceBinding,
-                        messageExpiration = messageExpiration,
-                        openOnClick = false,
-                        blockSwipe = true,
-                    )
-                }
+                        .padding(start = 8.dp, end = 8.dp, bottom = 8.dp, top = if (message?.isInbound == true) 8.dp else 0.dp)
+                        .border(1.dp, colorResource(id = R.color.primary400_90), RoundedCornerShape(8.dp))
+                        .background(colorResource(R.color.almostWhite), RoundedCornerShape(8.dp))
+                        .padding(vertical = 4.dp, horizontal = 6.dp),
+                    message = it,
+                    forMessageDetailsActivity = true,
+                )
             }
         }
 

@@ -67,7 +67,8 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.OlvidOutlinedActionButton
 import io.olvid.messenger.designsystem.components.OlvidTextButton
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.onboarding.flow.OnboardingFlowViewModel
 import io.olvid.messenger.onboarding.flow.OnboardingRoutes
@@ -180,17 +181,11 @@ fun NavGraphBuilder.profilePicture(
                     .padding(16.dp)
                     .requiredSize(160.dp),
             ) {
-                InitialView(
+                Avatar(
                     modifier = Modifier.fillMaxSize(),
-                    initialViewSetup = { initialView ->
-                        ownedIdentity?.let { initialView.setOwnedIdentity(it) }
-                        onboardingFlowViewModel.absolutePhotoUrl?.let {
-                            initialView.setAbsolutePhotoUrl(
-                                ownedIdentity?.bytesOwnedIdentity,
-                                it
-                            )
-                        }
-                    }
+                    target = onboardingFlowViewModel.absolutePhotoUrl?.let {
+                        AvatarSource.absolutePhoto(ownedIdentity?.bytesOwnedIdentity, it)
+                    } ?: ownedIdentity
                 )
                 if (onboardingFlowViewModel.absolutePhotoUrl != null) {
                     Image(

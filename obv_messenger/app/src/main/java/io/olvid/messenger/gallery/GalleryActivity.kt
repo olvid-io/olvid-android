@@ -18,37 +18,26 @@
  */
 package io.olvid.messenger.gallery
 
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.util.Pair
 import android.view.WindowManager.LayoutParams
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.viewModels
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import io.olvid.messenger.App
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.StringUtils
-import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.linkpreview.OpenGraph
 import io.olvid.messenger.lock_screen.LockableActivity
-import java.io.FileInputStream
 
 class GalleryActivity : LockableActivity() {
     private val viewModel: GalleryViewModel by viewModels()
 
-    private val saveAttachmentLauncher =
-        registerForActivityResult(GetAttachmentSaveUri()) { result: Pair<Uri, FyleAndStatus>? ->
-            saveCallback(result)
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         window.addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -80,7 +69,6 @@ class GalleryActivity : LockableActivity() {
             val sortOrder = intent.getStringExtra(BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA)
             val ascending = intent.getBooleanExtra(ASCENDING_INTENT_EXTRA, true)
             val discussionId = intent.getLongExtra(DISCUSSION_ID_INTENT_EXTRA, -1)
-            val draft = intent.getBooleanExtra(DRAFT_INTENT_EXTRA, false)
             val messageId = intent.getLongExtra(INITIAL_MESSAGE_ID_INTENT_EXTRA, -1)
             val fyleId = intent.getLongExtra(INITIAL_FYLE_ID_INTENT_EXTRA, -1)
             val sentByMe = intent.getBooleanExtra(SENT_BY_ME_INTENT_EXTRA, false)
@@ -94,7 +82,7 @@ class GalleryActivity : LockableActivity() {
                 sentByMe && bytesOwnedIdentity != null -> viewModel.setSentByMeGallery(bytesOwnedIdentity, sortOrder, ascending)
                 minFileSize != -1L && bytesOwnedIdentity != null -> viewModel.setLargeFilesGallery(bytesOwnedIdentity, minFileSize, sortOrder, ascending)
                 bytesOwnedIdentity != null -> viewModel.setBytesOwnedIdentity(bytesOwnedIdentity, sortOrder, ascending)
-                messageId != -1L -> viewModel.setMessageId(messageId, draft)
+                messageId != -1L -> viewModel.setMessageId(messageId, false)
                 fromLinkPreview && openGraphToShow != null -> viewModel.setLinkPreview(openGraphToShow!!)
                 else -> {
                     finish()
@@ -114,18 +102,14 @@ class GalleryActivity : LockableActivity() {
         val capturedFromStorageManager = fromStorageManager
 
         setContent {
+            val saveAttachment = rememberSaveAttachmentAction()
             GalleryScreen(
                 viewModel = viewModel,
                 initialMessageId = capturedInitialMessageId,
                 initialFyleId = capturedInitialFyleId,
                 showTextBlocksInitially = capturedShowTextBlocks,
                 onBack = { onBackPressedDispatcher.onBackPressed() },
-                onSave = { fyleAndStatus ->
-                    App.prepareForStartActivityForResult(this)
-                    saveAttachmentLauncher.launch(
-                        Pair(fyleAndStatus.fyleMessageJoinWithStatus.fileName, fyleAndStatus)
-                    )
-                },
+                onSave = saveAttachment,
                 onOpen = { fyleAndStatus ->
                     App.openFyleViewer(this, fyleAndStatus) {
                         fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened()
@@ -154,59 +138,11 @@ class GalleryActivity : LockableActivity() {
         }
     }
 
-    private fun saveCallback(result: Pair<Uri, FyleAndStatus>?) {
-        result ?: return
-        val uri = result.first
-        val fyleAndStatus = result.second
-        if (StringUtils.validateUri(uri) && fyleAndStatus != null) {
-            App.runThread {
-                try {
-                    contentResolver.openOutputStream(uri).use { os ->
-                        os ?: throw Exception("Unable to write to provided Uri")
-                        FileInputStream(
-                            App.absolutePathFromRelative(fyleAndStatus.fyle.filePath)
-                        ).use { fis ->
-                            val buffer = ByteArray(262144)
-                            var c: Int
-                            while (fis.read(buffer).also { c = it } != -1) {
-                                os.write(buffer, 0, c)
-                            }
-                        }
-                        App.toast(R.string.toast_message_attachment_saved, android.widget.Toast.LENGTH_SHORT)
-                    }
-                } catch (_: Exception) {
-                    App.toast(R.string.toast_message_failed_to_save_attachment, android.widget.Toast.LENGTH_SHORT)
-                }
-            }
-        }
-    }
-
-    private class GetAttachmentSaveUri :
-        ActivityResultContract<Pair<String, FyleAndStatus>, Pair<Uri, FyleAndStatus>?>() {
-        private var fyleAndStatus: FyleAndStatus? = null
-
-        override fun createIntent(context: Context, input: Pair<String, FyleAndStatus>): Intent {
-            fyleAndStatus = input.second
-            return Intent(Intent.ACTION_CREATE_DOCUMENT)
-                .addCategory(Intent.CATEGORY_OPENABLE)
-                .setType(input.second.fyleMessageJoinWithStatus.nonNullMimeType)
-                .putExtra(Intent.EXTRA_TITLE, input.first)
-        }
-
-        override fun parseResult(resultCode: Int, intent: Intent?): Pair<Uri, FyleAndStatus>? {
-            if (intent != null && resultCode == RESULT_OK) {
-                return Pair(intent.data, fyleAndStatus)
-            }
-            return null
-        }
-    }
-
     companion object {
         const val BYTES_OWNED_IDENTITY_INTENT_EXTRA: String = "bytes_owned_identity"
         const val BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA: String = "sort_order"
         const val ASCENDING_INTENT_EXTRA: String = "ascending"
         const val DISCUSSION_ID_INTENT_EXTRA: String = "discussion_id"
-        const val DRAFT_INTENT_EXTRA: String = "draft"
         const val INITIAL_MESSAGE_ID_INTENT_EXTRA: String = "initial_message_id"
         const val INITIAL_FYLE_ID_INTENT_EXTRA: String = "initial_fyle_id"
         const val SHOW_TEXT_BLOCKS_INTENT_EXTRA: String = "show_text_blocks"

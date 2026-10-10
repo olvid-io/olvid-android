@@ -57,7 +57,7 @@
 	<string name="dialog_message_group_reinvite" state="needs_review" hash="-180516223">هل ترغب في إرسال دعوة جديدة إلى %1$s للانضمام إلى المجموعة %2$s؟</string>
 	<string name="dialog_message_leave_group" state="needs_review" hash="-1662560406">أنت على وشك مغادرة المجموعة %1$s. سيتم إعلام الأعضاء الآخرين في المجموعة وستتوقف عن تلقي الرسائل المرسلة إلى هذه المجموعة.\n\nهل أنت متأكد من أنك تريد مغادرة المجموعة؟</string>
 	<string name="dialog_message_recreate_channels" state="needs_review" hash="-561666395">قد تصبح القنوات الآمنة بينك وبين جهة الاتصال غير متزامنة. إذا لاحظت أن الرسائل التي ترسلها لم تعد تُستلم من قبل جهة الاتصال، فقد يؤدي إعادة إنشاء القنوات الآمنة إلى تصحيح ذلك.\n\nهل ترغب في بدء إعادة إنشاء القنوات الآمنة؟</string>
-	<string name="dialog_message_restart_channel_establishment" state="needs_review" hash="1438599907">هل ترغب حقًا في إعادة تشغيل بروتوكول إنشاء قناة الدردشة الآمنة الجارية؟</string>
+	<string name="dialog_message_restart_channel_establishment" state="needs_review" hash="1438599907">هل ترغب حقًا في إعادة تشغيل بروتوكول إنشاء قناة المحادثة الآمنة الجارية؟</string>
 	<string name="dialog_title_abort_invitation" state="needs_review" hash="1866349160">هل أنت متأكد حقًا من الإلغاء؟</string>
 	<string name="dialog_title_about_olvid" state="needs_review" hash="-1845320867">حول أولفيد</string>
 	<string name="dialog_title_contact_introduction" state="needs_review" hash="402798978">تقديم جهات الاتصال</string>
@@ -79,11 +79,10 @@
 	<string name="dialog_title_rename_discussion" state="needs_review" hash="1413472286">إعادة تسمية المحادثة</string>
 	<string name="dialog_title_rename_group" state="needs_review" hash="1461324427">إعادة تسمية المجموعة</string>
 	<string name="dialog_title_restart_channel_establishment" state="needs_review" hash="-645769680">إعادة بدء إنشاء القناة؟</string>
-	<string name="dialog_title_share_with" state="needs_review" hash="854107768">شارك مع…</string>
-	<string name="dialog_title_share_recipients" state="needs_review" hash="1157053138">اختر المستلمين</string>
+	<string name="dialog_title_share_recipients" state="needs_review" hash="463614560">اختر المحادثات</string>
 	<string name="share_label_from" state="needs_review" hash="2049052075">من:</string>
 	<string name="share_label_to" state="needs_review" hash="-1785690373">إلى:</string>
-	<string name="share_label_choose_recipients" state="needs_review" hash="1157053138">اختر المستلمين</string>
+	<string name="share_label_choose_recipients" state="needs_review" hash="463614560">اختر المحادثات</string>
 	<string name="hint_share_message" state="needs_review" hash="-763169957">أضف رسالة…</string>
 	<string name="content_description_delete_attachment" state="needs_review" hash="-220348329">إزالة المرفق</string>
 	<string name="dialog_title_shortcut_to" state="needs_review" hash="-1193591200">إنشاء اختصار إلى…</string>
@@ -111,7 +110,7 @@
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">لم يتم العثور على مرفق</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">لم يتم العثور على رابط</string>
 	<string name="hint_company" state="needs_review" hash="988571519">شركة</string>
-	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">اكتب رسالة</string>
+	<string name="hint_compose_your_message" state="needs_review" hash="809999904">رسالة</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">رسالة مؤقتة</string>
 	<string name="label_edit_your_message" state="needs_review" hash="1091877412">عدّل رسالتك</string>
 	<string name="label_reply_to_x" state="needs_review" hash="1941377665">الرد على %s</string>
@@ -168,7 +167,7 @@
 	<string name="label_copy" state="needs_review" hash="-811327733">نسخ</string>
 	<string name="label_creating_channel" state="needs_review" hash="1375229137">إنشاء\nالقناة</string>
 	<string name="label_download" state="needs_review" hash="2567692">تنزيل</string>
-	<string name="label_establishing_secure_connection" state="needs_review" hash="-1534656273">إنشاء قناة دردشة آمنة</string>
+	<string name="label_establishing_secure_connection" state="needs_review" hash="-1534656273">إنشاء قناة محادثة آمنة</string>
 	<string name="label_group_card" state="needs_review" hash="-1430550686">بطاقة المجموعة</string>
 	<string name="label_group_card_published" state="needs_review" hash="-58328192">بطاقة المجموعة - منشورة</string>
 	<string name="label_group_card_published_update" state="needs_review" hash="-1889428058">بطاقة المجموعة - جديد</string>
@@ -208,15 +207,25 @@
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">إعادة تسمية جهة الاتصال</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">حفظ</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">إعدادات</string>
+	<string name="menu_action_send_photo" state="needs_review" hash="13932391">أرسل صورة</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">مشاركة</string>
 	<string name="menu_action_bookmark" state="needs_review" hash="1146136289">إشارة مرجعية</string>
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">إزالة الإشارة</string>
+	<string name="menu_action_view_message" state="needs_review" hash="-211312046">عرض الرسالة</string>
+	<string name="label_see_more" state="needs_review" hash="-1206298538">اطلع على المزيد</string>
+	<string name="label_formatted_text" state="needs_review" hash="664283030">منسق</string>
+	<string name="label_raw_text" state="needs_review" hash="-1645103337">خام</string>
+	<string name="pref_truncate_long_messages_title" state="needs_review" hash="576500375">تقصير الرسائل الطويلة</string>
+	<string name="pref_truncate_long_messages_full_screen" state="needs_review" hash="1513604976">انقر لفتح الشاشة الكاملة</string>
+	<string name="pref_truncate_long_messages_inline" state="needs_review" hash="1658956871">انقر للتوسيع</string>
+	<string name="pref_truncate_long_messages_never" state="needs_review" hash="1348404810">لا تقم أبدًا بالاقتطاع</string>
+	<string name="label_select_message_to_copy" state="needs_review" hash="1560698970">حدد جزءًا من الرسالة لنسخه.</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">أرشيف</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">استعادة من الأرشيف</string>
 	<string name="menu_check_update" state="needs_review" hash="1635875089">تحقق من وجود تحديثات</string>
-	<string name="message_discussion_locked" state="needs_review" hash="1316975941">هذا النقاش مقفل</string>
+	<string name="message_discussion_locked" state="needs_review" hash="1316975941">هذه المحادثة مقفلة</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">هذه المحادثة للقراءة فقط</string>
-	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">ستُرسَل رسائلك تلقائيًا بمجرد إنشاء قناة آمنة لهذا النقاش. حتى ذلك الحين، ستبقى معلقة.</string>
+	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">ستُرسَل رسائلك تلقائيًا بمجرد إنشاء قناة آمنة لهذه المحادثة. حتى ذلك الحين، ستبقى معلقة.</string>
 	<string name="message_error_first_or_last_name_needed" state="needs_review" hash="-1907938730">الرجاء إدخال اسم أول أو اسم عائلة.</string>
 	<string name="message_error_trust_origin" state="needs_review" hash="51944132">خطأ في استرجاع مصدر ثقة جهة الاتصال</string>
 	<string name="message_user_invitation" state="needs_review" hash="609322254">%1$s يرغب في الدردشة معك على Olvid. لقبول ذلك، استخدم الرابط أدناه:\n\n%2$s</string>
@@ -228,7 +237,7 @@
 	<string name="notification_channel_message_description" state="needs_review" hash="-780386348">إشعارات بالرسائل الجديدة</string>
 	<string name="notification_channel_message_name" state="needs_review" hash="-1639407912">رسائل</string>
 	<string name="notification_content_exchange_sas" state="needs_review" hash="-1014025516">تبادل رموزك مع %1$s</string>
-	<string name="notification_content_group_invite" state="needs_review" hash="-947588285">%1$s يدعوك إلى مجموعة دردشة</string>
+	<string name="notification_content_group_invite" state="needs_review" hash="-947588285">%1$s يدعوك إلى محادثة مجموعة</string>
 	<string name="notification_content_mediator_invite" state="needs_review" hash="439791783">مقدم من %1$s</string>
 	<string name="notification_public_title_exchange_sas" state="needs_review" hash="786512983">تبادل الرموز الخاصة بك</string>
 	<string name="notification_public_title_group_invitation" state="needs_review" hash="-366531705">تم استقبال دعوة لمجموعة جديدة</string>
@@ -248,6 +257,8 @@
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">عالي جداً</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">لقد غادرت المجموعة</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">لقد انضممت إلى المجموعة مرة أخرى</string>
+	<string name="label_groups_administered" state="needs_review" hash="353496672">المجموعات التي تديرها</string>
+	<string name="label_groups_joined" state="needs_review" hash="-1353689862">المجموعات التي انضممت إليها</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">انضممت إلى المجموعة</string>
 	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s أضافك إلى هذه المجموعة</string>
 	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s أضافك مرة أخرى إلى هذه المجموعة</string>
@@ -324,7 +335,7 @@
 	<string name="text_user_added_to_contacts" state="needs_review" hash="-792506872">تم إضافة المستخدم إلى جهات الاتصال الخاصة بك</string>
 	<string name="toast_message_user_deleted" state="needs_review" hash="-1664642954">تم حذف المستخدم</string>
 	<string name="text_original_message_not_found" state="needs_review" hash="2014071006">الرسالة الأصلية غير موجودة</string>
-	<string name="text_discussion_end2end_disclaimer" state="needs_review" hash="165389435">الرسائل المنشورة في هذه المناقشة محمية باستخدام تشفير من طرف إلى طرف.\nيتم ضمان سرية الرسائل وأصالتها وهوية مرسلها من خلال علم التشفير.</string>
+	<string name="text_discussion_end2end_disclaimer" state="needs_review" hash="165389435">الرسائل المنشورة في هذه المحادثة محمية باستخدام تشفير من طرف إلى طرف.\nيتم ضمان سرية الرسائل وأصالتها وهوية مرسلها من خلال علم التشفير.</string>
 	<string name="text_unknown_member_joined_the_group" state="needs_review" hash="1051900858">انضم عضو غير معروف إلى المجموعة</string>
 	<string name="text_unknown_member_left_the_group" state="needs_review" hash="183620441">عضو غير معروف غادر المجموعة</string>
 	<string name="pref_reset_dialogs_title" state="needs_review" hash="-1377245223">إعادة تعيين جميع تحذيرات الحوار</string>
@@ -456,11 +467,11 @@
 	<string name="button_label_generate_new_backup_key" state="needs_review" hash="2125865513">إنشاء مفتاح جديد</string>
 	<string name="toast_message_backup_failed" state="needs_review" hash="-138183706">فشل إنشاء ملف النسخ الاحتياطي. يرجى المحاولة مرة أخرى.</string>
 	<string name="dialog_title_identity_deactivated" state="needs_review" hash="1998160098">تم إلغاء تنشيط الملف الشخصي على هذا الجهاز</string>
-	<string name="dialog_message_identity_deactivated" state="needs_review" hash="2063920395">تم إلغاء تنشيط ملفك الشخصي على هذا الجهاز.\n\nلم يتمكن Olvid من استرداد قائمة الأجهزة التي هو نشط عليها حاليًا. قد يؤدي إعادة تنشيط ملفك الشخصي على هذا الجهاز إلى إلغاء تنشيطه على جهاز آخر.\n\nإذا كنت ترغب في المتابعة، اضغط على "إعادة تنشيط ملفي الشخصي على هذا الجهاز" أدناه. يرجى ملاحظة أن استخدام Olvid لإرسال واستقبال الرسائل على جهازين في وقت واحد يتطلب ترخيصًا.\n\nاضغط على "إلغاء" لإغلاق هذا الحوار وإبقاء هذا الجهاز غير نشط: لن تتمكن من إرسال أو استقبال الرسائل على هذا الجهاز، ولكن قد تتمكن من تصفح مناقشاتك القديمة.</string>
-	<string name="dialog_message_identity_deactivated_multi_device" state="needs_review" hash="713165097">تم إلغاء تنشيط ملفك الشخصي على هذا الجهاز.\n\nيبدو أن لديك ترخيصًا لاستخدام Olvid على أجهزة متعددة في وقت واحد، لذا يمكنك إعادة تنشيط ملفك الشخصي متى شئت. لإعلامك، إليك قائمة بأجهزتك النشطة الحالية.\n\nإذا كنت ترغب في المتابعة، اضغط على "إعادة تنشيط ملفي الشخصي على هذا الجهاز" أدناه. سيقوم هذا الجهاز بعد ذلك بالمزامنة مع أجهزتك النشطة الأخرى لتحديث جهات الاتصال والمجموعات الخاصة بك.\n\nاضغط على "إلغاء" لإغلاق هذا الحوار وإبقاء هذا الجهاز غير نشط: لن تتمكن من إرسال أو استقبال الرسائل على هذا الجهاز، ولكن يمكنك الاستمرار في تصفح مناقشاتك القديمة.</string>
-	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">تم إلغاء تنشيط ملفك الشخصي على هذا الجهاز.\n\nيبدو أنه لا يوجد لديك أي جهاز نشط حاليًا، لذا يمكنك إعادة تنشيط ملفك الشخصي متى شئت.\n\nإذا كنت ترغب في المتابعة، اضغط على "إعادة تنشيط ملفي الشخصي على هذا الجهاز" أدناه.\n\nاضغط على "إلغاء" لإغلاق هذا الحوار وإبقاء هذا الجهاز غير نشط: لن تتمكن من إرسال أو استقبال الرسائل على هذا الجهاز، ولكن يمكنك الاستمرار في تصفح مناقشاتك القديمة.</string>
-	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">تم إلغاء تنشيط ملفك الشخصي على هذا الجهاز.\n\nيبدو أنك لا تملك ترخيصًا لاستخدام Olvid على أجهزة متعددة في وقت واحد. يتطلب إعادة تنشيط هذا الجهاز إلغاء تنشيط جهاز آخر من أجهزتك.\n\nإذا كنت ترغب في المتابعة، حدد الجهاز الذي ترغب في إلغاء تنشيطه من القائمة أدناه، ثم اضغط على "إعادة تنشيط ملفي الشخصي على هذا الجهاز".\n\nاضغط على "إلغاء" لإغلاق هذا الحوار وإبقاء هذا الجهاز غير نشط: لن تتمكن من إرسال أو استقبال الرسائل على هذا الجهاز، ولكن يمكنك الاستمرار في تصفح مناقشاتك القديمة.</string>
-	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">تم إلغاء تنشيط ملفك الشخصي على هذا الجهاز.\n\nيبدو أن جميع أجهزتك الأخرى مُجدولة لإلغاء التنشيط في المستقبل القريب، لذا يمكنك إعادة تنشيط ملفك الشخصي على هذا الجهاز متى شئت. لإعلامك، إليك قائمة بأجهزتك النشطة الحالية.\n\nإذا كنت ترغب في المتابعة، اضغط على "إعادة تنشيط ملفي الشخصي على هذا الجهاز" أدناه.\n\nاضغط على "إلغاء" لإغلاق هذا الحوار وإبقاء هذا الجهاز غير نشط: لن تتمكن من إرسال أو استقبال الرسائل على هذا الجهاز، ولكن يمكنك الاستمرار في تصفح مناقشاتك القديمة.</string>
+	<string name="dialog_message_identity_deactivated" state="needs_review" hash="2063920395">تم إلغاء تنشيط ملفك الشخصي على هذا الجهاز.\n\nلم يتمكن Olvid من استرداد قائمة الأجهزة التي هو نشط عليها حاليًا. قد يؤدي إعادة تنشيط ملفك الشخصي على هذا الجهاز إلى إلغاء تنشيطه على جهاز آخر.\n\nإذا كنت ترغب في المتابعة، اضغط على "إعادة تنشيط ملفي الشخصي على هذا الجهاز" أدناه. يرجى ملاحظة أن استخدام Olvid لإرسال واستقبال الرسائل على جهازين في وقت واحد يتطلب ترخيصًا.\n\nاضغط على "إلغاء" لإغلاق هذا الحوار وإبقاء هذا الجهاز غير نشط: لن تتمكن من إرسال أو استقبال الرسائل على هذا الجهاز، ولكن قد تتمكن من تصفح محادثاتك القديمة.</string>
+	<string name="dialog_message_identity_deactivated_multi_device" state="needs_review" hash="713165097">تم إلغاء تنشيط ملفك الشخصي على هذا الجهاز.\n\nيبدو أن لديك ترخيصًا لاستخدام Olvid على أجهزة متعددة في وقت واحد، لذا يمكنك إعادة تنشيط ملفك الشخصي متى شئت. لإعلامك، إليك قائمة بأجهزتك النشطة الحالية.\n\nإذا كنت ترغب في المتابعة، اضغط على "إعادة تنشيط ملفي الشخصي على هذا الجهاز" أدناه. سيقوم هذا الجهاز بعد ذلك بالمزامنة مع أجهزتك النشطة الأخرى لتحديث جهات الاتصال والمجموعات الخاصة بك.\n\nاضغط على "إلغاء" لإغلاق هذا الحوار وإبقاء هذا الجهاز غير نشط: لن تتمكن من إرسال أو استقبال الرسائل على هذا الجهاز، ولكن يمكنك الاستمرار في تصفح محادثاتك القديمة.</string>
+	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">تم إلغاء تنشيط ملفك الشخصي على هذا الجهاز.\n\nيبدو أنه لا يوجد لديك أي جهاز نشط حاليًا، لذا يمكنك إعادة تنشيط ملفك الشخصي متى شئت.\n\nإذا كنت ترغب في المتابعة، اضغط على "إعادة تنشيط ملفي الشخصي على هذا الجهاز" أدناه.\n\nاضغط على "إلغاء" لإغلاق هذا الحوار وإبقاء هذا الجهاز غير نشط: لن تتمكن من إرسال أو استقبال الرسائل على هذا الجهاز، ولكن يمكنك الاستمرار في تصفح محادثاتك القديمة.</string>
+	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">تم إلغاء تنشيط ملفك الشخصي على هذا الجهاز.\n\nيبدو أنك لا تملك ترخيصًا لاستخدام Olvid على أجهزة متعددة في وقت واحد. يتطلب إعادة تنشيط هذا الجهاز إلغاء تنشيط جهاز آخر من أجهزتك.\n\nإذا كنت ترغب في المتابعة، حدد الجهاز الذي ترغب في إلغاء تنشيطه من القائمة أدناه، ثم اضغط على "إعادة تنشيط ملفي الشخصي على هذا الجهاز".\n\nاضغط على "إلغاء" لإغلاق هذا الحوار وإبقاء هذا الجهاز غير نشط: لن تتمكن من إرسال أو استقبال الرسائل على هذا الجهاز، ولكن يمكنك الاستمرار في تصفح محادثاتك القديمة.</string>
+	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">تم إلغاء تنشيط ملفك الشخصي على هذا الجهاز.\n\nيبدو أن جميع أجهزتك الأخرى مُجدولة لإلغاء التنشيط في المستقبل القريب، لذا يمكنك إعادة تنشيط ملفك الشخصي على هذا الجهاز متى شئت. لإعلامك، إليك قائمة بأجهزتك النشطة الحالية.\n\nإذا كنت ترغب في المتابعة، اضغط على "إعادة تنشيط ملفي الشخصي على هذا الجهاز" أدناه.\n\nاضغط على "إلغاء" لإغلاق هذا الحوار وإبقاء هذا الجهاز غير نشط: لن تتمكن من إرسال أو استقبال الرسائل على هذا الجهاز، ولكن يمكنك الاستمرار في تصفح محادثاتك القديمة.</string>
 	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">تم تعطيل ملفك الشخصي على هذا الجهاز.\n\nلن تتمكن من إرسال أو استقبال الرسائل هنا إلا إذا قمت بإعادة تفعيله.</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">إعادة تفعيل ملفي الشخصي على هذا الجهاز</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">حدث خطأ. يرجى المحاولة مرة أخرى.</string>
@@ -509,6 +520,8 @@
 	<string name="pref_text_dark_mode_on" state="needs_review" hash="794872984">دائمًا استخدام الوضع الداكن</string>
 	<string name="pref_text_dark_mode_off" state="needs_review" hash="1031187033">دائمًا استخدام الثيم الفاتح</string>
 	<string name="pref_text_dark_mode_auto" state="needs_review" hash="-1140013121">اتّباع تفضيل النظام</string>
+	<string name="pref_use_pattern_avatars_title" state="needs_review" hash="-184462474">صور رمزية مُنشأة</string>
+	<string name="pref_use_pattern_avatars_summary" state="needs_review" hash="-1895366464">بالنسبة لجهات الاتصال التي ليس لديها صورة، اعرض نمطًا ملونًا فريدًا بدلاً من الأحرف الأولى من أسمائهم.</string>
 	<string name="menu_action_help_faq" state="needs_review" hash="971329012">مساعدة / أسئلة متكررة</string>
 	<string name="menu_action_call_contact" state="needs_review" hash="546297186">اتصل بالجهة اتصال</string>
 	<string name="notification_title_incoming_webrtc_call" state="needs_review" hash="-2109880396">مكالمة واردة من Olvid من %1$s</string>
@@ -692,7 +705,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">خادم الترخيص:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">خادمك:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">رابط تفعيل الترخيص غير صالح.\n\nيرجى الاتصال بالشخص الذي أرسل لك هذا الرابط.</string>
-	<string name="label_checking_license" state="needs_review" hash="-777109669">التحقق من الترخيص…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">تعذر التحقق من حالة الترخيص</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">ترخيص غير معروف</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">ترخيص صالح</string>
@@ -732,7 +744,7 @@
 	<string name="text_ended_on" state="needs_review" hash="1280012933">انتهت في: %1$s</string>
 	<string name="text_free_trial_ended" state="needs_review" hash="-1458860892">انتهت الفترة التجريبية المجانية</string>
 	<string name="text_free_trial_expired" state="needs_review" hash="-2049452081">رخصة النسخة التجريبية المجانية منتهية الصلاحية</string>
-	<string name="pref_expose_recent_discussions_title" state="needs_review" hash="2045885329">احتفظ بقائمة بالمناقشات الحديثة</string>
+	<string name="pref_expose_recent_discussions_title" state="needs_review" hash="2045885329">احتفظ بقائمة بالمحادثات الحديثة</string>
 	<string name="pref_expose_recent_discussions_summary" state="needs_review" hash="-413873715">عند تفعيل هذا الخيار، يحتفظ أولفيد بقائمة بالمحادثات الحديثة ويعرضها على نظام أندرويد الخاص بك. يمكن أن يجعل هذا المشاركة المباشرة مع أولفيد أسرع، ولكنه قد يكشف أسماء جهات الاتصال الخاصة بك.</string>
 	<string name="notification_action_disconnect" state="needs_review" hash="-614955768">تسجيل الخروج</string>
 	<string name="notification_title_webclient_connected" state="needs_review" hash="-941986119">اتصال عميل الويب Olvid نشط</string>
@@ -740,6 +752,16 @@
 	<string name="text_message_content_wiped" state="needs_review" hash="1781783786">(محتوى الرسالة محذوف)</string>
 	<string name="text_ephemeral_message_explanation" state="needs_review" hash="612413232">انقر لعرض\nمحتوى الرسالة</string>
 	<string name="text_visible_once" state="needs_review" hash="962464352">مرئي مرة واحدة</string>
+	<string name="dialog_title_ephemeral_message" state="needs_review" hash="-1527208333">رسالة مؤقتة</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave" state="needs_review" hash="1852111882">سيتم حذف هذه الرسالة عند مغادرتك هذه المحادثة.</string>
+	<string name="text_ephemeral_read_once_erased_on_leave" state="needs_review" hash="-1031412379">سيتم حذف محتوى هذه الرسالة عند مغادرتك هذه المحادثة.</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave_once_opened" state="needs_review" hash="-1827602456">بمجرد فتحه، سيتم حذف هذه الرسالة عند مغادرتك هذا المحادثة.</string>
+	<string name="text_ephemeral_deleted_at_time" state="needs_review" hash="831937049">سيتم حذفه في %1$s</string>
+	<string name="text_ephemeral_deleted_on_date_at_time" state="needs_review" hash="667854133">سيتم حذفه في %1$s في %2$s.</string>
+	<string name="text_ephemeral_content_erased_at_time" state="needs_review" hash="1038815627">سيتم مسح المحتوى في %1$s</string>
+	<string name="text_ephemeral_content_erased_on_date_at_time" state="needs_review" hash="848079053">سيتم مسح المحتوى في %1$s في %2$s.</string>
+	<string name="text_ephemeral_countdown_starts_when_sent" state="needs_review" hash="-1010200489">يبدأ العد التنازلي بمجرد إرسال الرسالة.</string>
+	<string name="text_ephemeral_countdown_starts_when_opened" state="needs_review" hash="1194691757">يبدأ العد التنازلي عند فتح الرسالة.</string>
 	<string name="text_timer_s" state="needs_review" hash="-1146250144">%1$ds</string>
 	<string name="text_timer_m" state="needs_review" hash="-1318025056">%1$dm</string>
 	<string name="text_timer_h" state="needs_review" hash="-1461170816">%1$dh</string>
@@ -777,12 +799,14 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">إرسال واستقبال الرسائل</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">عند التفعيل، تُفتح الرسائل التي تُقرأ مرة واحدة والرسائل ذات مدة الرؤية المحددة افتراضيًا بمجرد دخولك إلى المحادثة. وإلا، يلزم النقر عليها.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">عند التفعيل، يتم الاحتفاظ بالرسائل الصادرة المحذوفة حتى تتمكن من معرفة متى تم تسليمها أو قراءتها. وإلا، فسيتم حذفها.</string>
+	<string name="pref_default_reaction_title" state="needs_review" hash="1457188713">الرد الافتراضي</string>
+	<string name="pref_default_reaction_summary" state="needs_review" hash="-1065900793">انقر نقرًا مزدوجًا على رسالة مستلمة للتفاعل مع %1$s. انقر نقرًا مزدوجًا مرة أخرى لإزالة رد فعلك.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">عميل الويب</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">خطأ في تحليل رابط تحديث الإعدادات</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">إرسال واستقبال الرسائل</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">إعدادات الرسائل المؤقتة المشتركة</string>
-	<string name="pref_discussion_category_shared_ephemeral_settings_summary" state="needs_review" hash="-1511387101">الإعدادات أدناه مشتركة بين جميع المشاركين في هذه المناقشة. سيؤثر تغييرها على مدة الرؤية والوجود الافتراضية للرسائل المرسلة من قبل جميع المشاركين.</string>
-	<string name="pref_discussion_category_shared_ephemeral_settings_summary_only_owner" state="needs_review" hash="507098821">الإعدادات أدناه مشتركة بين جميع المشاركين في هذه المناقشة. سيؤثر تغييرها على مدة الرؤية والوجود الافتراضية للرسائل المرسلة من قبل جميع المشاركين.\n\nليس لديك الإذن لتعديل هذه الإعدادات.</string>
+	<string name="pref_discussion_category_shared_ephemeral_settings_summary" state="needs_review" hash="-1511387101">الإعدادات أدناه مشتركة بين جميع المشاركين في هذه المحادثة. سيؤثر تغييرها على مدة الرؤية والوجود الافتراضية للرسائل المرسلة من قبل جميع المشاركين.</string>
+	<string name="pref_discussion_category_shared_ephemeral_settings_summary_only_owner" state="needs_review" hash="507098821">الإعدادات أدناه مشتركة بين جميع المشاركين في هذه المحادثة. سيؤثر تغييرها على مدة الرؤية والوجود الافتراضية للرسائل المرسلة من قبل جميع المشاركين.\n\nليس لديك الإذن لتعديل هذه الإعدادات.</string>
 	<string name="pref_discussion_read_once_title" state="needs_review" hash="1347493911">رسائل تُقرأ مرة واحدة</string>
 	<string name="pref_discussion_read_once_summary" state="needs_review" hash="-126623825">عند التفعيل، تُعرض الرسائل والمرفقات مرة واحدة فقط، وتُحذف عند الخروج من المحادثة.</string>
 	<string name="pref_discussion_visibility_duration_title" state="needs_review" hash="-640499771">مدة رؤية الرسالة</string>
@@ -815,8 +839,8 @@
 	<string name="dialog_title_shared_ephemeral_settings_modified" state="needs_review" hash="-710464596">إعدادات الرسائل المؤقتة المشتركة المعدلة</string>
 	<string name="dialog_message_shared_ephemeral_settings_modified" state="needs_review" hash="715864223">لقد عدّلت إعدادات الرسائل المؤقتة الافتراضية لهذه المحادثة.\n\nهل تريد تحديث هذه الإعدادات لك ولجميع المشاركين الآخرين في هذه المحادثة، أم تريد التخلي عن تغييراتك؟</string>
 	<string name="text_discussion_shared_settings_updated" state="needs_review" hash="-151974912">تم تحديث إعدادات المشاركة في المحادثة</string>
-	<string name="text_updated_shared_settings" state="needs_review" hash="1457023446">%1$s قام بتحديث إعدادات المناقشة المشتركة</string>
-	<string name="text_updated_shared_settings_you" state="needs_review" hash="40728921">لقد قمت بتحديث إعدادات المناقشة المشتركة</string>
+	<string name="text_updated_shared_settings" state="needs_review" hash="1457023446">%1$s قام بتحديث إعدادات المحادثة المشتركة</string>
+	<string name="text_updated_shared_settings_you" state="needs_review" hash="40728921">لقد قمت بتحديث إعدادات المحادثة المشتركة</string>
 	<string name="text_non_ephemeral_messages" state="needs_review" hash="402305240">الرسائل غير المؤقتة</string>
 	<string name="pref_category_default_retention_policy_title" state="needs_review" hash="925391440">سياسة الاحتفاظ بالرسائل</string>
 	<string name="pref_category_default_retention_policy_summary" state="needs_review" hash="-1071833812">تتيح لك الإعدادات أدناه حذف الرسائل القديمة في محادثاتك تلقائيًا. يمكن تجاوزها في كل محادثة.</string>
@@ -830,10 +854,10 @@
 	<string name="pref_discussion_retention_count_hint" state="needs_review" hash="-1516581060">عدد الرسائل التي سيتم الاحتفاظ بها</string>
 	<string name="pref_discussion_retention_duration_summary_null" state="needs_review" hash="1734971768">احتفظ بجميع الرسائل</string>
 	<string name="pref_discussion_default_retention_count_dialog_message" state="needs_review" hash="113844640">أدخل عدد الرسائل التي تريد الاحتفاظ بها في كل محادثة. اترك الحقل فارغًا للاحتفاظ بجميع الرسائل.\n\nالرسائل غير المقروءة لا يتم حذفها أبدًا.</string>
-	<string name="pref_discussion_retention_count_dialog_message_default_null" state="needs_review" hash="-86538410">أدخل عدد الرسائل التي تريد الاحتفاظ بها في هذا النقاش.\nاترك هذا الحقل فارغًا لاستخدام سياستك الافتراضية (الاحتفاظ بجميع الرسائل).\n\nالرسائل غير المقروءة لا يتم حذفها أبدًا.</string>
-	<string name="pref_discussion_retention_count_dialog_message_default_number" state="needs_review" hash="-2144782876">أدخل عدد الرسائل التي تريد الاحتفاظ بها في هذا النقاش.\nاترك هذا الحقل فارغًا لاستخدام سياساتك الافتراضية (الاحتفاظ بأحدث %1$d رسالة).\nأدخل 0 للاحتفاظ بجميع الرسائل.\n\nالرسائل غير المقروءة لا يتم حذفها أبدًا.</string>
+	<string name="pref_discussion_retention_count_dialog_message_default_null" state="needs_review" hash="-86538410">أدخل عدد الرسائل التي تريد الاحتفاظ بها في هذه المحادثة.\nاترك هذا الحقل فارغًا لاستخدام سياستك الافتراضية (الاحتفاظ بجميع الرسائل).\n\nالرسائل غير المقروءة لا يتم حذفها أبدًا.</string>
+	<string name="pref_discussion_retention_count_dialog_message_default_number" state="needs_review" hash="-2144782876">أدخل عدد الرسائل التي تريد الاحتفاظ بها في هذه المحادثة.\nاترك هذا الحقل فارغًا لاستخدام سياساتك الافتراضية (الاحتفاظ بأحدث %1$d رسالة).\nأدخل 0 للاحتفاظ بجميع الرسائل.\n\nالرسائل غير المقروءة لا يتم حذفها أبدًا.</string>
 	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">سياسة الاحتفاظ بالرسائل</string>
-	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">تتيح لك الإعدادات أدناه حذف الرسائل القديمة في هذا النقاش تلقائيًا. لها الأولوية على سياسة الاحتفاظ الافتراضية الخاصة بك.</string>
+	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">تتيح لك الإعدادات أدناه حذف الرسائل القديمة في هذه المحادثة تلقائيًا. لها الأولوية على سياسة الاحتفاظ الافتراضية الخاصة بك.</string>
 	<string name="pref_text_app_default_string" state="needs_review" hash="-1921282000">استخدم الإعداد الافتراضي الخاص بك (%1$s)</string>
 	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1349151852">تسجيل رسالة صوتية</string>
 	<string name="dialog_title_voice_message_explanation" state="needs_review" hash="943269997">رسائل صوتية أولفيد</string>
@@ -896,7 +920,8 @@
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">الترخيص: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">مزود الهوية</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">خادم مزود الهوية</string>
-	<string name="explanation_identity_provider" state="needs_review" hash="-964456322">يتيح لك هذا الشاشة تهيئة مزود الهوية الخاص بشركتك في Olvid. بمجرد التهيئة، يمكنك المصادقة مع هذا الخادم وسيسمح لك Olvid بإضافة الموظفين الآخرين إلى جهات الاتصال الخاصة بك بسلاسة.\nيرجى الاتصال بالمسؤول الخاص بك للحصول على مزيد من التفاصيل.</string>
+	<string name="explanation_identity_provider" state="needs_review" hash="-1014276138">يتيح لك هذا الشاشة تهيئة مزود الهوية الخاص بمؤسستك في Olvid. بمجرد التكوين، يمكنك المصادقة وسيسمح لك Olvid بإضافة مستخدمين آخرين إلى جهات الاتصال الخاصة بك بسلاسة.\nيرجى الاتصال بالمسؤول الخاص بك للحصول على مزيد من التفاصيل.</string>
+	<string name="explanation_identity_provider_mdm" state="needs_review" hash="-1274626281">يتم إدارة هذا التثبيت بواسطة مؤسستك وتم تكوينه لاستخدام موفر هوية. الإعدادات أدناه مُعدة مسبقًا ولا يمكن تغييرها.\nيرجى الاتصال بالمسؤول للحصول على مزيد من التفاصيل.</string>
 	<string name="button_label_authenticate" state="needs_review" hash="272245375">التحقق</string>
 	<string name="button_label_check_identity_provider" state="needs_review" hash="508428497">التحقق من مزود الهوية</string>
 	<string name="menu_action_use_identity_provider" state="needs_review" hash="1305090894">استخدم مزود هوية</string>
@@ -980,8 +1005,6 @@
 	<string name="text_failed_call" state="needs_review" hash="-1934816919">فشل مكالمة هاتفية</string>
 	<string name="text_busy_call" state="needs_review" hash="-310279946">مكالمة واردة أثناء الانشغال</string>
 	<string name="text_busy_outgoing_call" state="needs_review" hash="92373387">مكالمة هاتفية لجهة اتصال مشغولة</string>
-	<string name="content_description_profile_picture" state="needs_review" hash="-1074340378">صورة الملف الشخصي</string>
-	<string name="ime_action_rename" state="needs_review" hash="-1795678977">أعد التسمية</string>
 	<string name="pref_storage_explorer_title" state="needs_review" hash="735816049">مستكشف التخزين الداخلي</string>
 	<string name="pref_storage_explorer_summary" state="needs_review" hash="-1991214388">استكشف التخزين الداخلي لتطبيق Olvid الخاص بك!</string>
 	<string name="activity_title_storage_explorer" state="needs_review" hash="735816049">مستكشف التخزين الداخلي</string>
@@ -1052,6 +1075,8 @@
 	<string name="pref_image_text_recognition_title" state="needs_review" hash="1877261687">التعرف على النص في الصور وفهرسته</string>
 	<string name="pref_image_text_recognition_summary" state="needs_review" hash="1217699919">يتيح لك البحث عن النص ونسخه الموجود في مرفقات الصور. قد يستهلك هذا الكثير من موارد الجهاز على الأجهزة ذات المواصفات المنخفضة: قم بتعطيله إذا لم تكن بحاجة إليه.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">تعذر عرض الصورة</string>
+	<string name="label_unsupported_image_format" state="needs_review" hash="-1487560676">تنسيق صورة غير مدعوم</string>
+	<string name="label_unsupported_video_format" state="needs_review" hash="2131303733">تنسيق فيديو غير مدعوم</string>
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">تسجيل الدخول إلى مزود الخدمة السحابية مطلوب</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">لقد قمت بتكوين Olvid لاستخدام النسخ الاحتياطي التلقائي لمزود سحابي، ولكن جلستك قد انتهت صلاحيتها. تحتاج إلى تسجيل الدخول إلى هذا المزود مرة أخرى.\n\nإذا لم تعد ترغب في النسخ الاحتياطي التلقائي، يمكنك تعطيله في إعدادات التطبيق. تذكر أن النسخ الاحتياطي التلقائي هو الطريقة الوحيدة لمنع فقدان جهات الاتصال الخاصة بك في حالة فقد جهازك أو تلفه.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">تسجيل الدخول</string>
@@ -1099,7 +1124,7 @@
 	<string name="toast_message_failed_to_unblock_contact" state="needs_review" hash="457134560">فشل إلغاء حظر المحادثة، يرجى المحاولة مرة أخرى</string>
 	<string name="button_label_unblock" state="needs_review" hash="-1980951299">إلغاء الحظر</string>
 	<string name="dialog_title_unblock_revoked_contact_discussion" state="needs_review" hash="1781806471">إلغاء حظر جهة اتصال تم إلغاء صلاحيتها</string>
-	<string name="dialog_message_unblock_revoked_contact_discussion" state="needs_review" hash="1756654447">تم قفل هذا النقاش لأن جهة الاتصال الخاصة بك تم إلغاؤها من قبل مزود الهوية الخاص بشركتك. قد يكون مُعرّف Olvid الخاص بهم قد تعرض للاختراق ولا يمكن ضمان أمان اتصالاتك. لا تقم بإلغاء قفل هذا النقاش إلا إذا كنت متأكدًا من أن مُعرّف Olvid الخاص بجهة الاتصال الخاصة بك لم يتعرض للاختراق أبدًا.\nيرجى الاتصال بالمسؤول الخاص بك للحصول على مزيد من التفاصيل.</string>
+	<string name="dialog_message_unblock_revoked_contact_discussion" state="needs_review" hash="1756654447">تم قفل هذه المحادثة لأن جهة الاتصال الخاصة بك تم إلغاؤها من قبل مزود الهوية الخاص بشركتك. قد يكون مُعرّف Olvid الخاص بهم قد تعرض للاختراق ولا يمكن ضمان أمان اتصالاتك. لا تقم بإلغاء قفل هذه المحادثة إلا إذا كنت متأكدًا من أن مُعرّف Olvid الخاص بجهة الاتصال الخاصة بك لم يتعرض للاختراق أبدًا.\nيرجى الاتصال بالمسؤول الخاص بك للحصول على مزيد من التفاصيل.</string>
 	<string name="text_contact_was_blocked" state="needs_review" hash="-945793876">تم حظر جهة الاتصال</string>
 	<string name="text_contact_was_blocked_revoked" state="needs_review" hash="447469977">تم إلغاء صلاحية جهة الاتصال من قبل مزود الهوية الخاص بشركتك</string>
 	<string name="toast_message_unable_to_write_to_folder" state="needs_review" hash="1365085880">تعذر الكتابة إلى المجلد المحدد</string>
@@ -1180,9 +1205,9 @@
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">إزالة الرد على الرسالة</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">مؤشر على أن الإشعارات مكتومة لهذا الملف الشخصي</string>
 	<string name="button_label_create_a_profile" state="needs_review" hash="-1568207484">إنشاء ملف شخصي</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="1428471064">تم تكوين موفر الهوية الخاص بشركتك بنجاح. اضغط على زر "المصادقة" أدناه للمصادقة معه واسترداد معلوماتك الشخصية.</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="1823898406">تم تكوين موفر الهوية الخاص بشركتك بنجاح. اضغط على زر \"استخدام الرابط السحري\" أدناه لاسترداد معلوماتك الشخصية.</string>
-	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="1340457300">أهلاً بك في Olvid.\n\nيتم إدارة هذا التثبيت من قبل شركتك وتم تكوينه لاستخدام موفر للهوية. اضغط على زر "المصادقة" أدناه للمصادقة معه واسترداد معلوماتك الشخصية.\n\nإذا كنت قد استخدمت Olvid بالفعل وتريد استعادة مفاتيحك وجهات الاتصال الخاصة بك من نسخة احتياطية، فاضغط على "استعادة نسخة احتياطية".</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="-2030851622">تم تكوين موفر الهوية الخاص بمؤسستك بنجاح. اضغط على زر \"المصادقة\" أدناه للمصادقة معه واسترداد معلوماتك الشخصية.</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="903193568">تم تكوين موفر الهوية الخاص بمؤسستك بنجاح. اضغط على زر \"استخدام الرابط السحري\" أدناه لاسترداد معلوماتك الشخصية.</string>
+	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="-5109440">يتم إدارة هذا التثبيت بواسطة مؤسستك وتم تكوينه لاستخدام موفر هوية. اضغط على زر \"%1$s\" أدناه للمصادقة عليه واسترداد معلوماتك الشخصية.</string>
 	<string name="button_label_see_details" state="needs_review" hash="238834473">رؤية التفاصيل</string>
 	<string name="link_label_invitation_url" state="needs_review" hash="744905192">إضافة جهة اتصال</string>
 	<string name="link_label_configuration_url" state="needs_review" hash="-441435162">استيراد الإعدادات أو الترخيص</string>
@@ -1223,6 +1248,33 @@
 	<string name="label_attach_timer" state="needs_review" hash="-1527208333">رسالة مؤقتة</string>
 	<string name="label_attach_camera" state="needs_review" hash="-1123080444">التقط صورة</string>
 	<string name="label_attach_video" state="needs_review" hash="1626268086">سجّل فيديو</string>
+	<string name="label_attach_scan" state="needs_review" hash="1128596739">مسح مستند</string>
+	<string name="label_scan_page_count" state="needs_review" hash="1987610035">الصفحة %1$d من %2$d</string>
+	<string name="button_label_scan_add_page" state="needs_review" hash="1724653886">أضف صفحة</string>
+	<string name="button_label_scan_crop" state="needs_review" hash="-292939300">قصّ</string>
+	<string name="button_label_scan_rotate" state="needs_review" hash="807341684">أدر</string>
+	<string name="button_label_scan_auto_crop" state="needs_review" hash="1502815262">تلقائي</string>
+	<string name="button_label_scan_full_image" state="needs_review" hash="1366902062">الصورة كاملة</string>
+	<string name="label_scan_filter_original" state="needs_review" hash="-817276190">الأصل</string>
+	<string name="label_scan_filter_enhanced" state="needs_review" hash="851648098">مُحَسَّن</string>
+	<string name="label_scan_filter_grayscale" state="needs_review" hash="-695463257">تدرّج الرمادي</string>
+	<string name="label_scan_filter_black_and_white" state="needs_review" hash="1668578691">أبيض وأسود</string>
+	<string name="dialog_title_discard_scan" state="needs_review" hash="-94972780">هل تريد تجاهل هذا المسح؟</string>
+	<string name="dialog_message_discard_scan" state="needs_review" hash="-1145223011">سيتم فقدان الصفحات الممسوحة ضوئيًا.</string>
+	<string name="toast_message_scan_failed" state="needs_review" hash="512858351">تعذر إنشاء ملف PDF</string>
+	<string name="button_label_scan_retake" state="needs_review" hash="-439420481">أعد المحاولة</string>
+	<string name="button_label_scan_enhance" state="needs_review" hash="-1842671012">تحسين</string>
+	<string name="button_label_scan_filters" state="needs_review" hash="-1898368294">مرشحات</string>
+	<string name="button_label_scan_crop_rotate" state="needs_review" hash="-1750423698">قص وتدوير</string>
+	<string name="button_label_scan_discard" state="needs_review" hash="-248729677">حذف المسح الضوئي</string>
+	<string name="label_scan_mode_manual" state="needs_review" hash="-751509695">يدوي</string>
+	<string name="label_scan_mode_auto" state="needs_review" hash="315272314">التقاط تلقائي</string>
+	<string name="label_scan_hint" state="needs_review" hash="289920901">ضع المستند في الإطار.</string>
+	<string name="label_scan_hint_hold_still" state="needs_review" hash="584896298">ابقَ ثابتًا…</string>
+	<string name="button_label_scan_flash" state="needs_review" hash="775381504">فلاش</string>
+	<string name="label_scan_camera_permission" state="needs_review" hash="-1855763825">اسمح لتطبيق Olvid باستخدام الكاميرا لمسح المستندات. يمكنك دائمًا استيراد الصور من معرض الصور الخاص بك.</string>
+	<string name="button_label_scan_file_name" state="needs_review" hash="2098556706">اسم الملف</string>
+	<string name="dialog_title_scan_file_name" state="needs_review" hash="1332508838">اسم ملف PDF</string>
 	<string name="pref_font_scale" state="needs_review" hash="1773040591">حجم الخط</string>
 	<string name="pref_text_font_scale_0_75" state="needs_review" hash="-1963894407">صغير جداً (75٪)</string>
 	<string name="pref_text_font_scale_0_9" state="needs_review" hash="-708054676">صغير (٩٠٪)</string>
@@ -1274,6 +1326,9 @@
 	<string name="your_message" state="needs_review" hash="1739533147">رسالتك</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d تفاعل مع: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s تفاعل مع %2$s</string>
+	<string name="menu_action_remove_your_reaction" state="needs_review" hash="-1609298248">إزالة رد فعلك</string>
+	<string name="menu_action_add_to_favorites" state="needs_review" hash="-1933720211">أضف إلى المفضلة</string>
+	<string name="menu_action_remove_from_favorites" state="needs_review" hash="1796304724">إزالة من المفضلة</string>
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">إدراج رمز تعبيري</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">معلومات التصحيح</string>
 	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">عدد الأجهزة:</string>
@@ -1382,13 +1437,21 @@
 	<string name="menu_action_discussion_pin" state="needs_review" hash="554322472">تثبيت هذه المحادثة</string>
 	<string name="menu_action_discussion_unpin" state="needs_review" hash="1464070527">إزالة تثبيت هذه المحادثة</string>
 	<string name="pref_discussion_pin_title" state="needs_review" hash="554322472">تثبيت هذه المحادثة</string>
-	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">تبقى المناقشات المثبتة دائمًا في أعلى قائمة المحادثات الخاصة بك</string>
+	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">تبقى المحادثات المثبتة دائمًا في أعلى قائمة المحادثات الخاصة بك</string>
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">حجم العرض</string>
-	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">فتح النقاش</string>
+	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">فتح المحادثة</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">للقراءة فقط</string>
 	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">معلق\nللقراءة فقط</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">مدير</string>
 	<string name="label_pending_admin" state="needs_review" hash="-2032202913">قيد الانتظار\nمسؤول</string>
+	<string name="label_moderator" state="needs_review" hash="767421225">مشرف</string>
+	<string name="label_pending_moderator" state="needs_review" hash="1955900662">معلق، في انتظار الموافقة</string>
+	<string name="dialog_title_group_roles" state="needs_review" hash="1155086227">أدوار المجموعة</string>
+	<string name="content_description_group_roles" state="needs_review" hash="-449063250">شرح أدوار المجموعة</string>
+	<string name="explanation_group_role_admin" state="needs_review" hash="731519662">يمكن إضافة وإزالة أعضاء المجموعة.</string>
+	<string name="explanation_group_role_moderator" state="needs_review" hash="2037600722">يمكن حذف الرسائل من أي شخص في \"جميع الأجهزة\".</string>
+	<string name="explanation_group_role_read_only" state="needs_review" hash="1017523379">يمكنه رؤية المحادثة، والتفاعل مع الرسائل، والإجابة على استطلاعات الرأي، ولكنه لا يستطيع إرسال رسائل.</string>
+	<string name="explanation_group_role_pending" state="needs_review" hash="-843291456">تمت دعوته إلى المجموعة ولكنه لم يقبل الدعوة بعد. سيتم تسليم الرسائل التي تم نشرها في هذه الأثناء إليه بمجرد قبوله.</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">تعذر عرض اسم هذا المستخدم</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">مجموعة غير مسماة</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">إشعارات المحادثات</string>
@@ -1398,11 +1461,11 @@
 	<string name="dialog_title_pick_led_color" state="needs_review" hash="174987784">اختر لون الإضاءة</string>
 	<string name="pref_discussion_category_locked_explanation_title" state="needs_review" hash="-661795104">تم قفل المحادثة</string>
 	<string name="pref_discussion_category_locked_explanation_summary" state="needs_review" hash="-2027915932">بعض الإعدادات غير متاحة للمحادثات المقفلة.</string>
-	<string name="pref_discussion_message_custom_notification_title" state="needs_review" hash="-625696878">إشعارات رسائل مخصصة لهذا النقاش</string>
+	<string name="pref_discussion_message_custom_notification_title" state="needs_review" hash="-625696878">إشعارات رسائل مخصصة لهذه المحادثة</string>
 	<string name="pref_discussion_call_custom_notification_title" state="needs_review" hash="2074412984">إشعارات مكالمات مخصصة لهذه المحادثة</string>
 	<string name="notification_channel_discussion_name" state="needs_review" hash="588648320">محادثة %1$d</string>
 	<string name="notification_channel_discussion_group_name" state="needs_review" hash="491497248">المحادثات</string>
-	<string name="notification_channel_discussion_group_description" state="needs_review" hash="-1448542719">إشعارات مخصصة لمناقشات Olvid محددة.</string>
+	<string name="notification_channel_discussion_group_description" state="needs_review" hash="-1448542719">إشعارات مخصصة لمحادثات Olvid محددة.</string>
 	<string name="button_label_edit_group_members" state="needs_review" hash="1855939143">تعديل الأعضاء</string>
 	<string name="button_label_add_members" state="needs_review" hash="-203515331">إضافة أعضاء</string>
 	<string name="label_group_update_in_progress_title" state="needs_review" hash="-2019791170">مزامنة المجموعة قيد التقدم</string>
@@ -1518,6 +1581,10 @@
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">جارٍ إنشاء المجموعة</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">مجموعة جديدة</string>
 	<string name="label_group_type" state="needs_review" hash="498463258">نوع المجموعة</string>
+	<string name="label_existing_discussions" state="needs_review" hash="-2089160663">المحادثات الحالية</string>
+	<string name="label_last_message_date" state="needs_review" hash="1218222521">آخر رسالة %1$s</string>
+	<string name="button_label_open" state="needs_review" hash="-2066377003">افتح</string>
+	<string name="button_label_create_a_new_group" state="needs_review" hash="-1073202815">إنشاء مجموعة جديدة</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">افتراضي</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">يمكن لجميع أعضاء المجموعة دعوة أعضاء جدد</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">مسيطر عليه</string>
@@ -1531,6 +1598,8 @@
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">لم تعد مسؤول مجموعة</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">أنت الآن مسموح لك بنشر الرسائل</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-930933808">لا يمكنك إرسال رسائل هنا</string>
+	<string name="text_you_became_moderator" state="needs_review" hash="-609725743">أنت الآن مشرف المجموعة.</string>
+	<string name="text_you_are_no_longer_moderator" state="needs_review" hash="1396461107">لم تعد مشرفًا على هذه المجموعة.</string>
 	<string name="label_pending" state="needs_review" hash="1975294811">قيد الانتظار</string>
 	<string name="pref_app_language_title" state="needs_review" hash="-1748962099">لغة التطبيق</string>
 	<string name="pref_text_default_device_language" state="needs_review" hash="-1062620207">اللغة الافتراضية للجهاز</string>
@@ -1543,7 +1612,7 @@
 	<string name="text_setting_beta" state="needs_review" hash="429891963">‣ تفعيل ميزات الإصدار التجريبي:</string>
 	<string name="text_setting_hide_notification_contents" state="needs_review" hash="-2096872476">‣ إخفاء محتوى الإشعارات:</string>
 	<string name="text_setting_allow_notification_suggestions" state="needs_review" hash="1241945743">‣ الردود المقترحة في الإشعارات:</string>
-	<string name="text_setting_expose_recent_discussions" state="needs_review" hash="832121299">‣ الاحتفاظ بقائمة بالمناقشات الحديثة:</string>
+	<string name="text_setting_expose_recent_discussions" state="needs_review" hash="832121299">‣ الاحتفاظ بقائمة بالمحادثات الحديثة:</string>
 	<string name="text_setting_incognito_keyboard" state="needs_review" hash="1709123877">‣ استخدم وضع التخفي في لوحة المفاتيح:</string>
 	<string name="text_setting_prevent_screen_capture" state="needs_review" hash="-43954672">‣ منع لقطات الشاشة:</string>
 	<string name="text_setting_hidden_profile_policy" state="needs_review" hash="-313121742">‣ سياسة إغلاق الملف الشخصي المخفي:</string>
@@ -1631,6 +1700,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_title" state="needs_review" hash="-434788963">تعطيل إشعار تغيير الشهادة لمعاينات الروابط</string>
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">قم بتفعيل هذا الخيار لتعطيل اكتشاف تغيير الشهادة عند جلب معاينة الرابط. قد تعرض بعض المواقع شهادة مختلفة في كل اتصال، وقد تتلقى إشعارات متكررة إذا تم إيقاف هذا الخيار.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">استخدم مكتبة ZXing القديمة لمسح رموز QR</string>
+	<string name="pref_use_in_house_document_scanner_title" state="needs_review" hash="1552486206">استخدم ماسح المستندات الخاص بـ Olvid</string>
+	<string name="pref_use_in_house_document_scanner_summary" state="needs_review" hash="-2092532938">افتراضيًا، يتم فحص المستندات باستخدام ML Kit كجزء من خدمات Google Play. قم بتمكين هذا الخيار لاستخدام الماسح الضوئي المدمج في Olvid.</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">افتراضيًا، يستخدم Olvid مجموعة أدوات ML لمسح رموز QR. قم بتمكين هذا الخيار إذا واجهت مشاكل في مسح رموز QR من داخل Olvid.</string>
 	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">استخدم عارض PDF الداخلي</string>
 	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">افتراضيًا، يتم فتح مرفقات PDF في عارض داخلي (أساسي). قم بتعطيل هذا الخيار لاستخدام عارض خارجي بدلاً من ذلك.</string>
@@ -1638,7 +1709,7 @@
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">جهاز %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">هذا الجهاز</string>
 	<string name="menu_action_rename_device" state="needs_review" hash="43131083">إعادة تسمية الجهاز</string>
-	<string name="menu_action_trust_device" state="needs_review" hash="360435227">الموافقة على الجهاز</string>
+	<string name="menu_action_trust_device" state="needs_review" hash="105728494">أنا أتعرف على هذا الجهاز</string>
 	<string name="menu_action_remove_device" state="needs_review" hash="-1485256427">إزالة الجهاز</string>
 	<string name="menu_action_refresh_device_list" state="needs_review" hash="1430227802">تحديث قائمة الأجهزة</string>
 	<string name="menu_action_recreate_channel" state="needs_review" hash="837900266">إعادة إنشاء قناة آمنة</string>
@@ -1706,8 +1777,9 @@
 	<string name="button_label_add_device_xxx" state="needs_review" hash="-1479212354">إضافة جهاز "%1$s"</string>
 	<string name="notification_title_device_trust" state="needs_review" hash="-1568042777">جهاز جديد: "%1$s"</string>
 	<string name="notification_title_unnamed_device_trust" state="needs_review" hash="1704207127">جهاز جديد</string>
-	<string name="notification_message_device_trust" state="needs_review" hash="753501294">تمت إضافة جهاز جديد إلى أحد ملفات تعريف Olvid الخاصة بك</string>
-	<string name="notification_action_device_trust" state="needs_review" hash="1450001608">ثق بهذا الجهاز</string>
+	<string name="notification_message_device_trust" state="needs_review" hash="-1646747013">تمت إضافة جهاز جديد إلى أحد ملفات تعريف Olvid الخاصة بك. إذا لم تكن أنت من أضافه، فقم بإزالته من أجهزتك.</string>
+	<string name="notification_action_device_trust" state="needs_review" hash="936727529">نعم، هذا أنا</string>
+	<string name="notification_action_device_see_devices" state="needs_review" hash="-1832505809">أجهزتي</string>
 	<string name="notification_channel_device_name" state="needs_review" hash="1347557771">إدارة الأجهزة</string>
 	<string name="notification_channel_device_description" state="needs_review" hash="-36703170">إشعارات حول أجهزتك</string>
 	<string name="notification_title_device_expiration" state="needs_review" hash="202400638">إلغاء تنشيط \"%1$s\"</string>
@@ -2080,6 +2152,8 @@
 	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">يتطلب فتح ملف PDF هذا كلمة مرور</string>
 	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">كلمة المرور</string>
 	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">كلمة مرور غير صحيحة</string>
+	<string name="content_description_previous_match" state="needs_review" hash="-124264476">النتيجة السابقة</string>
+	<string name="content_description_next_match" state="needs_review" hash="-405381756">النتيجة التالية</string>
 	<string name="label_poll_create" state="needs_review" hash="-1677246175">إنشاء استطلاع رأي</string>
 	<string name="label_poll_question" state="needs_review" hash="-1615603188">سؤال</string>
 	<string name="hint_poll_question" state="needs_review" hash="1961289317">اطرح سؤالاً</string>
@@ -2110,6 +2184,7 @@
 	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">لم يتم تلقي رد بعد</string>
 	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">إلغاء تنشيط الجهاز القادم</string>
 	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">إدارة أجهزتي</string>
+	<string name="tip_expiring_current_device_title" state="needs_review" hash="-2044212270">سيتم تعطيل هذا الجهاز قريباً.</string>
 	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">جهاز غير متصل بالإنترنت</string>
 	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">أحد أجهزتك غير متصل بالإنترنت منذ **أكثر من 30 يومًا**.\nإذا كنت لا تستخدمه بعد الآن، نوصي **بإزالته** لتجنب مشاكل المزامنة.</string>
 	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">إدارة أجهزتي</string>
@@ -2185,8 +2260,15 @@
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">استخدم \"الرابط السحري\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">رابط سحري غير صالح</string>
 	<string name="label_hanged_up" state="needs_review" hash="-1516413384">تم إنهاء المكالمة</string>
-	<string name="store_link_need_licenses" state="needs_review" hash="-1212508527">هل تحتاج اشتراكات لفريقك؟</string>
 	<string name="store_link_olvid_store" state="needs_review" hash="-1825630369">تفضل بزيارة متجر Olvid</string>
+	<string name="store_link_need_more_options" state="needs_review" hash="-839181230">هل تحتاج إلى المزيد من الخيارات؟</string>
+	<string name="button_label_check_all_offers_olvid_store" state="needs_review" hash="361882901">اطلع على جميع عروضنا في متجر Olvid.</string>
+	<string name="label_store_offer_individual" state="needs_review" hash="-1969313106">فرد</string>
+	<string name="label_store_offer_individual_description" state="needs_review" hash="368977236">رخصة شخصية واحدة، لك فقط.</string>
+	<string name="label_store_offer_family" state="needs_review" hash="-2103729206">عائلة</string>
+	<string name="label_store_offer_family_description" state="needs_review" hash="-1487232440">حزمة تتضمن 6 تراخيص لك ولعائلتك.</string>
+	<string name="label_store_offer_team" state="needs_review" hash="-421568242">فريق</string>
+	<string name="label_store_offer_team_description" state="needs_review" hash="687093077">تراخيص متعددة لتوزيعها على فريقك.</string>
 	<string name="toast_message_reminder_set" state="needs_review" hash="-961055414">تم تعيين تذكير</string>
 	<string name="dialog_title_keycloak_authentication_impossible" state="needs_review" hash="325273853">تعذر التحقق</string>
 	<string name="dialog_message_keycloak_authentication_impossible" state="needs_review" hash="-2031322232">يتم حاليًا إدارة ملفك الشخصي بواسطة مؤسستك، ويتطلب ذلك إعادة المصادقة. ومع ذلك، لا يبدو أن أيًا من طرق المصادقة المدعومة متاحة.\n\nيرجى الاتصال بالمسؤول الخاص بك للحصول على مزيد من التفاصيل.</string>
@@ -2196,7 +2278,7 @@
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">هل تريد إيقاف عملية النقل الحالية؟</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">يتم نقل سجل الدردشة حاليًا. هل تريد إيقافه؟</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">إلغاء النقل</string>
-	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">في انتظار الانضمام إلى هذا النقاش</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">في انتظار الانضمام إلى هذه المحادثة</string>
 	<string name="label_your_other_device" state="needs_review" hash="-339632056">جهازك الآخر</string>
 	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">يريد نقل سجل الدردشة الخاص بك إلى هذا الجهاز</string>
 	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">\"%1$s\" يريد نقل سجل الدردشة الخاص بك إلى هذا الجهاز</string>
@@ -2242,7 +2324,7 @@
 	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">اكتمل النقل. يتضمن جميع الرسائل والمرفقات.</string>
 	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">قم بتصدير سجل الدردشة الخاص بك كملف .zip. يمكنك لاحقًا استيراده على جهاز آخر من ملفك الشخصي **%1$s**.\n\nيمكنك أيضًا فك ضغط هذا الملف لعرض سجل الدردشة الخاص بك في صفحة ويب.</string>
 	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">إنشاء ملف .zip</string>
-	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d مناقشات و %2$d رسائل</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d محادثات و %2$d رسائل</string>
 	<string name="label_computing" state="needs_review" hash="1393495921">جارٍ الحساب…</string>
 	<string name="label_total_size" state="needs_review" hash="-788411929">الحجم الكلي: %1$s</string>
 	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">احمِ صادراتك</string>
@@ -2296,10 +2378,8 @@
 	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">جارٍ التصدير</string>
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">جاري الاستيراد</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">تحليل المحتوى</string>
-	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">تحليل المناقشات المصدرة</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">تحليل المحادثات المصدرة</string>
 	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">حدث خطأ أثناء تحميل ملف نمط OpenStreetMap.</string>
-	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">الاشتراكات داخل التطبيق غير متاحة</string>
-	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">الإصدار الذي قمت بتثبيته من Olvid لا يتضمن مكتبة الفوترة من Google ولا يدعم عمليات الشراء داخل التطبيق.\n\nلمزيد من المعلومات، يرجى الاتصال بنا على **feedback@olvid.io**.</string>
 	<string name="ftux_next" state="needs_review" hash="1158639077">التالي</string>
 	<string name="ftux_start" state="needs_review" hash="646298532">ابدأ</string>
 	<string name="ftux_page_indicator" state="needs_review" hash="1987610035">الصفحة %1$d من %2$d</string>
@@ -2307,7 +2387,7 @@
 	<string name="ftux_page_welcome_body" state="needs_review" hash="-2085198139">رسائل خاصة للجميع.</string>
 	<string name="ftux_page_private_title" state="needs_review" hash="1815927819"><b>رسائل خاصة</b></string>
 	<string name="ftux_page_private_body" state="needs_review" hash="-590644231">في %1$s، يمكنك اختيار من تريد الدردشة معه. لا توجد رسائل غير مرغوب فيها، أو توصيات، أو إشعارات غير ضرورية، أو رسائل من غرباء.\n\nلا يمكن لأحد الاتصال بك دون موافقتك.\n\n%1$s هي فقاعتك الرقمية.</string>
-	<string name="ftux_page_everyone_title" state="needs_review" hash="1506796386">رسائل للجميع</string>
+	<string name="ftux_page_everyone_title" state="needs_review" hash="1506796386">رسائل <b>للجميع</b></string>
 	<string name="ftux_page_everyone_body" state="needs_review" hash="-586100377">بغض النظر عن هويتك، %1$s يقدم لك أفضل ما في مجال الأمان. لا حاجة إلى بريد إلكتروني أو رقم هاتف.\n\n%1$s لا يطلب منك أي معلومات، وهذا يغير كل شيء.</string>
 	<string name="ftux_page_protect_title" state="needs_review" hash="1969120191">Olvid <b>يحميك</b>. Olvid يحمي الأشخاص الذين يهمونك.</string>
 	<string name="ftux_page_protect_body" state="needs_review" hash="881847930">هذا ليس مجرد وعد، بل %1$s يقدم دليلًا تشفيريًا.\n\nسواء أضفت جهات الاتصال عن بُعد أو وجهًا لوجه، فإن تبادلاتك أصلية ومُشفرة من طرف إلى طرف بشكل منهجي.</string>

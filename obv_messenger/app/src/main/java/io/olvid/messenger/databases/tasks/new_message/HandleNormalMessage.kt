@@ -327,7 +327,7 @@ fun handleNormalMessage(
                 }
 
                 remoteDeleteAndEditRequest?.takeIf {
-                    it.requestType == RemoteDeleteAndEditRequest.TYPE_EDIT
+                    it.requestType == RemoteDeleteAndEditRequest.TYPE_EDIT && !message.isPollMessage
                 }?.let { remoteDeleteAndEditRequest ->
                     val newBody = remoteDeleteAndEditRequest.body?.trim()
                     val mentions = remoteDeleteAndEditRequest.sanitizedSerializedMentions
@@ -462,7 +462,7 @@ fun handleNormalMessage(
             if (message.status == Message.STATUS_UNREAD) {
                 newUnreadMessage(discussion.bytesOwnedIdentity, message.discussionId, message.id, message.mentioned, message.timestamp)
             }
-            if (message.isLocationMessage && message.locationType == Message.LOCATION_TYPE_SHARE) {
+            if (message.isCountedAsLocationSharing) {
                 newLocationSharingMessage(message.discussionId, message.id)
             }
 

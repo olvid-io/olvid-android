@@ -102,6 +102,7 @@ import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -381,7 +382,7 @@ class TroubleshootingActivity : AppCompatActivity() {
                                     onClick = {
                                         cameraState.launchPermissionRequest()
                                         coroutineScope.launch {
-                                            delay(100)
+                                            delay(100.milliseconds)
                                             if (lifecycle.currentState == RESUMED) {
                                                 startSettingsActivity()
                                             }
@@ -409,7 +410,7 @@ class TroubleshootingActivity : AppCompatActivity() {
                                     onClick = {
                                         microphoneState.launchPermissionRequest()
                                         coroutineScope.launch {
-                                            delay(100)
+                                            delay(100.milliseconds)
                                             if (lifecycle.currentState == RESUMED) {
                                                 startSettingsActivity()
                                             }
@@ -459,7 +460,7 @@ class TroubleshootingActivity : AppCompatActivity() {
                                     onClick = {
                                         locationPermissionState.launchMultiplePermissionRequest()
                                         coroutineScope.launch {
-                                            delay(100)
+                                            delay(100.milliseconds)
                                             if (lifecycle.currentState == RESUMED) {
                                                 startSettingsActivity()
                                             }

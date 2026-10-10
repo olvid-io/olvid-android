@@ -76,6 +76,7 @@ import io.olvid.messenger.databases.entity.jsons.JsonReturnReceipt;
 import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 import io.olvid.messenger.databases.entity.jsons.JsonUpdateMessage;
 import io.olvid.messenger.databases.entity.jsons.JsonUserMention;
+import io.olvid.messenger.databases.tasks.AddMultipleFylesToDraftFromUrisTask;
 import io.olvid.messenger.databases.tasks.ComputeAttachmentPreviewsAndPostMessageTask;
 import io.olvid.messenger.databases.tasks.ExpiringOutboundMessageSent;
 import io.olvid.messenger.discussion.compose.VoiceMessageRecorder;
@@ -188,6 +189,8 @@ public class Message {
     public static final int TYPE_MEDIATOR_INVITATION_IGNORED = 20;
     public static final int TYPE_GAINED_GROUP_SEND_MESSAGE = 21;
     public static final int TYPE_LOST_GROUP_SEND_MESSAGE = 22;
+    public static final int TYPE_GAINED_GROUP_MODERATOR = 23;
+    public static final int TYPE_LOST_GROUP_MODERATOR = 24;
 
 
     public static final int EDITED_NONE = 0;
@@ -264,7 +267,7 @@ public class Message {
     public int totalAttachmentCount;
 
     @ColumnInfo(name = IMAGE_AND_VIDEO_COUNT)
-    public int imageAndVideoCount; // For legacy reasons, this is actually the number of images AND videos. The actual image count is imageCount - videoCount
+    public int imageAndVideoCount; // For legacy reasons, this is actually the number of images AND videos. The actual image count is imageAndVideoCount - videoCount
 
     @ColumnInfo(name = VIDEO_COUNT)
     public int videoCount;
@@ -421,14 +424,7 @@ public class Message {
                 if (previousMessage == null || previousMessage.timestamp < timestamp) {
                     this.sortIndex = timestamp;
                 } else {
-                    Double nextSortIndex = messageDao.getNextSortIndex(previousMessage.sortIndex, discussionId);
-                    if (nextSortIndex != null) {
-                        this.sortIndex = (previousMessage.sortIndex + nextSortIndex) / 2;
-                    } else {
-                        this.sortIndex = previousMessage.sortIndex + 10;
-                    }
-                    // also update the message timestamp to avoid weird time lines
-                    this.timestamp = previousMessage.timestamp;
+                    computeSortIndexAfter(messageDao, previousMessage);
                 }
             } else {
                 Double previousSortIndex = messageDao.getPreviousSortIndex(followingMessage.sortIndex, discussionId);
@@ -439,6 +435,28 @@ public class Message {
                 }
                 // also update the message timestamp to avoid weird time lines
                 this.timestamp = followingMessage.timestamp;
+            }
+        }
+    }
+
+    private void computeSortIndexAfter(MessageDao messageDao, Message previousMessage) {
+        Double nextSortIndex = messageDao.getNextSortIndex(previousMessage.sortIndex, discussionId);
+        if (nextSortIndex != null) {
+            this.sortIndex = (previousMessage.sortIndex + nextSortIndex) / 2;
+        } else {
+            this.sortIndex = previousMessage.sortIndex + 10;
+        }
+        // also update the message timestamp to avoid weird timelines
+        this.timestamp = Math.max(this.timestamp, previousMessage.timestamp);
+    }
+
+    // the latest message of a type must always appear after the previous ones of that type, whatever the local clock says
+    private void ensureSortedAfterLatestOfType(AppDatabase db, int messageType) {
+        synchronized (sortIndexLock) {
+            MessageDao messageDao = db.messageDao();
+            Message previousMessage = messageDao.getLatestMessageOfType(discussionId, messageType);
+            if (previousMessage != null && previousMessage.sortIndex >= sortIndex) {
+                computeSortIndexAfter(messageDao, previousMessage);
             }
         }
     }
@@ -652,6 +670,14 @@ public class Message {
         return createInfoMessage(db, TYPE_LOST_GROUP_SEND_MESSAGE, discussionId, bytesOwnedIdentity, groupUpdateTimestamp, false);
     }
 
+    public static Message createGainedGroupModeratorMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, long groupUpdateTimestamp) {
+        return createInfoMessage(db, TYPE_GAINED_GROUP_MODERATOR, discussionId, bytesOwnedIdentity, groupUpdateTimestamp, false);
+    }
+
+    public static Message createLostGroupModeratorMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, long groupUpdateTimestamp) {
+        return createInfoMessage(db, TYPE_LOST_GROUP_MODERATOR, discussionId, bytesOwnedIdentity, groupUpdateTimestamp, false);
+    }
+
     public static Message createScreenShotDetectedMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesIdentity, long serverTimestamp) {
         return createInfoMessage(db, TYPE_SCREEN_SHOT_DETECTED, discussionId, bytesIdentity, serverTimestamp, false);
     }
@@ -675,26 +701,18 @@ public class Message {
 
     public static Message createDiscussionSettingsUpdateMessage(AppDatabase db, long discussionId, JsonSharedSettings jsonSharedSettings, byte[] bytesIdentityOfInitiator, boolean outbound, Long messageTimestamp) {
         try {
-            double sortIndex;
-            long timestamp;
-
-            if (messageTimestamp == null) {
-                timestamp = System.currentTimeMillis();
-                sortIndex = timestamp;
-            } else if (messageTimestamp == 0L) {
-                sortIndex = 0;
-                timestamp = System.currentTimeMillis();
-            } else {
-                sortIndex = messageTimestamp;
-                timestamp = messageTimestamp;
-            }
+            long timestamp = (messageTimestamp == null || messageTimestamp == 0L) ? System.currentTimeMillis() : messageTimestamp;
 
             String serializedSharedSettings = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonSharedSettings);
 
-            Message message = createInfoMessage(db, TYPE_DISCUSSION_SETTINGS_UPDATE, discussionId, bytesIdentityOfInitiator, timestamp, true);
+            // a local change (null timestamp) is the latest event of the discussion, whatever the local clock says
+            Message message = createInfoMessage(db, TYPE_DISCUSSION_SETTINGS_UPDATE, discussionId, bytesIdentityOfInitiator, timestamp, messageTimestamp != null);
             message.contentBody = serializedSharedSettings;
-            message.sortIndex = sortIndex;
             message.status = outbound ? STATUS_UNPROCESSED : STATUS_READ;
+            if (messageTimestamp != null) {
+                message.sortIndex = messageTimestamp; // 0L pins the message at the top of a brand-new discussion
+                message.ensureSortedAfterLatestOfType(db, TYPE_DISCUSSION_SETTINGS_UPDATE);
+            }
             return message;
         } catch (IOException e) {
             return null;
@@ -1133,6 +1151,14 @@ public class Message {
             }
 
 
+            // attachments are still being added to this message --> posting will be retried once they are all in
+            if (AddMultipleFylesToDraftFromUrisTask.isBeingBuilt(id)) {
+                if (showToasts) {
+                    App.toast(R.string.toast_message_attachment_being_copied, Toast.LENGTH_LONG);
+                }
+                return;
+            }
+
             //////////////////
             // first get all attachments
             List<FyleMessageJoinWithStatusDao.FyleAndStatus> attachmentFylesAndStatuses = db.fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(id);
@@ -1499,6 +1525,10 @@ public class Message {
         if (messageType != TYPE_OUTBOUND_MESSAGE || status == STATUS_UNDELIVERED) {
             return false;
         }
+        // for location sharing messages sent from another device, never change the delivery status
+        if (locationType == Message.LOCATION_TYPE_SHARE && status == STATUS_SENT_FROM_ANOTHER_DEVICE) {
+            return false;
+        }
         List<MessageRecipientInfo> messageRecipientInfos = AppDatabase.getInstance().messageRecipientInfoDao().getAllByMessageId(id);
         if (messageRecipientInfos.isEmpty()) {
             return false;
@@ -1653,6 +1683,10 @@ public class Message {
             return context.getString(R.string.text_you_became_writer);
         } else if (messageType == Message.TYPE_LOST_GROUP_SEND_MESSAGE) {
             return context.getString(R.string.text_you_are_no_longer_writer);
+        } else if (messageType == Message.TYPE_GAINED_GROUP_MODERATOR) {
+            return context.getString(R.string.text_you_became_moderator);
+        } else if (messageType == Message.TYPE_LOST_GROUP_MODERATOR) {
+            return context.getString(R.string.text_you_are_no_longer_moderator);
         } else if (messageType == Message.TYPE_MEDIATOR_INVITATION_SENT) {
             return context.getString(R.string.invitation_status_mediator_invite_information_sent,
                     contentBody);
@@ -1790,6 +1824,12 @@ public class Message {
         return messageType == Message.TYPE_OUTBOUND_MESSAGE
                 && locationType == Message.LOCATION_TYPE_SHARE
                 && status != Message.STATUS_SENT_FROM_ANOTHER_DEVICE;
+    }
+
+    // hidden ephemeral (read once or limited visibility) location sharing messages only count as currently sharing once opened
+    // (must match the SQL predicate used in MessageDao.getAllLocationMessageStubs())
+    public boolean isCountedAsLocationSharing() {
+        return locationType == LOCATION_TYPE_SHARE && !isContentHidden();
     }
 
     public boolean isForwardable() {

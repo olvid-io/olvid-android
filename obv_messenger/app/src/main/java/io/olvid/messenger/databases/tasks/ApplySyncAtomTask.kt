@@ -23,6 +23,7 @@ import io.olvid.engine.engine.types.sync.ObvSyncAtom
 import io.olvid.engine.engine.types.sync.ObvSyncAtom.MuteNotification
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.UnreadCountsSingleton
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
@@ -124,18 +125,7 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                         val ordered = obvSyncAtom.booleanValue ?: false
                         var pinnedIndex = if (ordered) 1 else (pinnedDiscussions.maxOf { it.pinned } + 1)
                         obvSyncAtom.discussionIdentifiers?.forEach { discussionIdentifier ->
-                            val discussion = when(discussionIdentifier.type) {
-                                ObvSyncAtom.DiscussionIdentifier.CONTACT -> {
-                                    db.discussionDao().getByContactWithAnyStatus(bytesOwnedIdentity, discussionIdentifier.bytesDiscussionIdentifier)
-                                }
-                                ObvSyncAtom.DiscussionIdentifier.GROUP_V1 -> {
-                                    db.discussionDao().getByGroupOwnerAndUidWithAnyStatus(bytesOwnedIdentity, discussionIdentifier.bytesDiscussionIdentifier)
-                                }
-                                ObvSyncAtom.DiscussionIdentifier.GROUP_V2 -> {
-                                    db.discussionDao().getByGroupIdentifierWithAnyStatus(bytesOwnedIdentity, discussionIdentifier.bytesDiscussionIdentifier)
-                                }
-                                else -> null
-                            }
+                            val discussion = discussionIdentifier.getDiscussion(db = db, bytesOwnedIdentity = bytesOwnedIdentity)
                             discussion?.let {
                                 // never pin a pre-discussion
                                 if (it.status != Discussion.STATUS_PRE_DISCUSSION) {
@@ -175,18 +165,7 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                     }
                     ObvSyncAtom.TYPE_BOOKMARKED_MESSAGE_CHANGE -> {
                         obvSyncAtom.messageIdentifier?.discussionIdentifier?.let { discussionIdentifier ->
-                            val discussion = when(discussionIdentifier.type) {
-                                ObvSyncAtom.DiscussionIdentifier.CONTACT -> {
-                                    db.discussionDao().getByContactWithAnyStatus(bytesOwnedIdentity, discussionIdentifier.bytesDiscussionIdentifier)
-                                }
-                                ObvSyncAtom.DiscussionIdentifier.GROUP_V1 -> {
-                                    db.discussionDao().getByGroupOwnerAndUidWithAnyStatus(bytesOwnedIdentity, discussionIdentifier.bytesDiscussionIdentifier)
-                                }
-                                ObvSyncAtom.DiscussionIdentifier.GROUP_V2 -> {
-                                    db.discussionDao().getByGroupIdentifierWithAnyStatus(bytesOwnedIdentity, discussionIdentifier.bytesDiscussionIdentifier)
-                                }
-                                else -> null
-                            }
+                            val discussion = discussionIdentifier.getDiscussion(db = db, bytesOwnedIdentity = bytesOwnedIdentity)
                             discussion?.let {
                                 val msgId = obvSyncAtom.messageIdentifier
                                 val message = db.messageDao().getBySenderSequenceNumber(msgId!!.senderSequenceNumber, msgId.senderThreadIdentifier!!, msgId.senderIdentifier, discussion.id)
@@ -198,35 +177,11 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                     }
                     ObvSyncAtom.TYPE_ARCHIVED_DISCUSSIONS_CHANGE -> {
                         obvSyncAtom.discussionIdentifiers?.forEach { discussionIdentifier ->
-                            val discussion = when (discussionIdentifier.type) {
-                                ObvSyncAtom.DiscussionIdentifier.CONTACT -> {
-                                    db.discussionDao().getByContactWithAnyStatus(
-                                        bytesOwnedIdentity,
-                                        discussionIdentifier.bytesDiscussionIdentifier
-                                    )
-                                }
-
-                                ObvSyncAtom.DiscussionIdentifier.GROUP_V1 -> {
-                                    db.discussionDao().getByGroupOwnerAndUidWithAnyStatus(
-                                        bytesOwnedIdentity,
-                                        discussionIdentifier.bytesDiscussionIdentifier
-                                    )
-                                }
-
-                                ObvSyncAtom.DiscussionIdentifier.GROUP_V2 -> {
-                                    db.discussionDao().getByGroupIdentifierWithAnyStatus(
-                                        bytesOwnedIdentity,
-                                        discussionIdentifier.bytesDiscussionIdentifier
-                                    )
-                                }
-
-                                else -> null
-                            }
-                            discussion?.let {
+                            discussionIdentifier.getDiscussion(db, bytesOwnedIdentity)?.let { discussion ->
                                 // never archive a pre-discussion
-                                if (it.status != Discussion.STATUS_PRE_DISCUSSION) {
+                                if (discussion.status != Discussion.STATUS_PRE_DISCUSSION) {
                                     db.discussionDao()
-                                        .updateArchived(obvSyncAtom.booleanValue ?: false, it.id)
+                                        .updateArchived(obvSyncAtom.booleanValue ?: false, discussion.id)
                                     AppSingleton.getEngine().profileBackupNeeded(discussion.bytesOwnedIdentity)
                                 }
                             }
@@ -234,32 +189,7 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                     }
                     ObvSyncAtom.TYPE_DISCUSSIONS_MUTE_CHANGE -> {
                         obvSyncAtom.discussionIdentifiers?.forEach { discussionIdentifier ->
-                            val discussion = when (discussionIdentifier.type) {
-                                ObvSyncAtom.DiscussionIdentifier.CONTACT -> {
-                                    db.discussionDao().getByContactWithAnyStatus(
-                                        bytesOwnedIdentity,
-                                        discussionIdentifier.bytesDiscussionIdentifier
-                                    )
-                                }
-
-                                ObvSyncAtom.DiscussionIdentifier.GROUP_V1 -> {
-                                    db.discussionDao().getByGroupOwnerAndUidWithAnyStatus(
-                                        bytesOwnedIdentity,
-                                        discussionIdentifier.bytesDiscussionIdentifier
-                                    )
-                                }
-
-                                ObvSyncAtom.DiscussionIdentifier.GROUP_V2 -> {
-                                    db.discussionDao().getByGroupIdentifierWithAnyStatus(
-                                        bytesOwnedIdentity,
-                                        discussionIdentifier.bytesDiscussionIdentifier
-                                    )
-                                }
-
-                                else -> null
-                            }
-
-                            discussion?.let {
+                            discussionIdentifier.getDiscussion(db, bytesOwnedIdentity)?.let { discussion ->
                                 val muteNotification = obvSyncAtom.muteNotification
                                 db.discussionCustomizationDao()[discussion.id]?.let { discussionCustomization ->
                                     db.discussionCustomizationDao()
@@ -316,6 +246,53 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                             )
                         }
                     }
+
+                    ObvSyncAtom.TYPE_PREFERRED_REACTION_CHANGE -> {
+                        obvSyncAtom.preferredReaction?.let {
+                            if (it.globalSetting) {
+                                SettingsActivity.defaultReaction = it.emoji ?: SettingsActivity.PREF_KEY_DEFAULT_REACTION_DEFAULT
+                            } else {
+                                it.discussionIdentifier?.getDiscussion(db, bytesOwnedIdentity = bytesOwnedIdentity)?.let { discussion ->
+                                    // only update settings of normal discussions
+                                    if (discussion.isNormalOrReadOnly) {
+                                        db.discussionCustomizationDao()[discussion.id]?.let { discussionCustomization ->
+                                            db.discussionCustomizationDao()
+                                                .update(discussionCustomization.apply {
+                                                    this.prefDefaultReaction = it.emoji
+                                                })
+                                        } ifNull {
+                                            // don't create a discussion customization if the default emoji is null
+                                            if (it.emoji != null) {
+                                                db.discussionCustomizationDao()
+                                                    .insert(DiscussionCustomization(discussion.id).apply {
+                                                        this.prefDefaultReaction = it.emoji
+                                                    })
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    ObvSyncAtom.TYPE_UNREAD_DISCUSSIONS_CHANGE -> {
+                        val unread = obvSyncAtom.booleanValue ?: return@runInTransaction
+                        obvSyncAtom.discussionIdentifiers?.let {
+                            it.forEach { discussionIdentifier ->
+                                discussionIdentifier.getDiscussion(db, bytesOwnedIdentity)?.let { discussion ->
+                                    AppDatabase.getInstance().discussionDao()
+                                        .updateDiscussionUnreadStatus(
+                                            discussion.id,
+                                            unread
+                                        )
+                                    UnreadCountsSingleton.discussionUnreadFlagChanged(
+                                        discussion.id, unread
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     else -> {
                         throw Exception("Unknown App sync atom type")
                     }
@@ -330,6 +307,33 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
     }
 }
 
+private fun ObvSyncAtom.DiscussionIdentifier.getDiscussion(db: AppDatabase, bytesOwnedIdentity: ByteArray) : Discussion? {
+    return when (type) {
+        ObvSyncAtom.DiscussionIdentifier.CONTACT -> {
+            db.discussionDao().getByContactWithAnyStatus(
+                bytesOwnedIdentity,
+                bytesDiscussionIdentifier
+            )
+        }
+
+        ObvSyncAtom.DiscussionIdentifier.GROUP_V1 -> {
+            db.discussionDao().getByGroupOwnerAndUidWithAnyStatus(
+                bytesOwnedIdentity,
+                bytesDiscussionIdentifier
+            )
+        }
+
+        ObvSyncAtom.DiscussionIdentifier.GROUP_V2 -> {
+            db.discussionDao().getByGroupIdentifierWithAnyStatus(
+                bytesOwnedIdentity,
+                bytesDiscussionIdentifier
+            )
+        }
+
+        else -> null
+    }
+}
+
 fun DiscussionCustomization.toMuteNotification(): MuteNotification {
     return MuteNotification(
         prefMuteNotifications,
@@ -338,25 +342,26 @@ fun DiscussionCustomization.toMuteNotification(): MuteNotification {
     )
 }
 
+fun Discussion.getDiscussionIdentifier(): ObvSyncAtom.DiscussionIdentifier {
+    return ObvSyncAtom.DiscussionIdentifier(
+        when (discussionType) {
+            Discussion.TYPE_CONTACT -> ObvSyncAtom.DiscussionIdentifier.CONTACT
+            Discussion.TYPE_GROUP -> ObvSyncAtom.DiscussionIdentifier.GROUP_V1
+            Discussion.TYPE_GROUP_V2 -> ObvSyncAtom.DiscussionIdentifier.GROUP_V2
+            else -> ObvSyncAtom.DiscussionIdentifier.CONTACT // should never happen
+        },
+        bytesDiscussionIdentifier
+    )
+}
+
 fun Discussion.propagateMuteSettings(discussionCustomization: DiscussionCustomization) {
     try {
-        val muteNotification = discussionCustomization.toMuteNotification()
-        val discussionIdentifiers = ObvSyncAtom.DiscussionIdentifier(
-                when (discussionType) {
-                    Discussion.TYPE_CONTACT -> ObvSyncAtom.DiscussionIdentifier.CONTACT
-                    Discussion.TYPE_GROUP -> ObvSyncAtom.DiscussionIdentifier.GROUP_V1
-                    Discussion.TYPE_GROUP_V2 -> ObvSyncAtom.DiscussionIdentifier.GROUP_V2
-                    else -> ObvSyncAtom.DiscussionIdentifier.CONTACT // should never happen
-                },
-                bytesDiscussionIdentifier
-            )
-
         AppSingleton.getEngine()
             .propagateAppSyncAtomToOtherDevicesIfNeeded(
                 bytesOwnedIdentity,
                 ObvSyncAtom.createDiscussionsMuteChange(
-                    listOf(discussionIdentifiers),
-                    muteNotification
+                    listOf(getDiscussionIdentifier()),
+                    discussionCustomization.toMuteNotification()
                 )
             )
     } catch (ex: Exception) {
@@ -371,17 +376,7 @@ fun List<Discussion>.propagateMuteSettings(muted: Boolean, muteTimestamp: Long?,
         val map = mutableMapOf<BytesKey, MutableList<ObvSyncAtom.DiscussionIdentifier>>()
         forEach { discussion ->
             map.getOrPut(BytesKey(discussion.bytesOwnedIdentity)) { mutableListOf() }
-                .add(
-                    ObvSyncAtom.DiscussionIdentifier(
-                        when (discussion.discussionType) {
-                            Discussion.TYPE_CONTACT -> ObvSyncAtom.DiscussionIdentifier.CONTACT
-                            Discussion.TYPE_GROUP -> ObvSyncAtom.DiscussionIdentifier.GROUP_V1
-                            Discussion.TYPE_GROUP_V2 -> ObvSyncAtom.DiscussionIdentifier.GROUP_V2
-                            else -> ObvSyncAtom.DiscussionIdentifier.CONTACT // should never happen
-                        },
-                        discussion.bytesDiscussionIdentifier
-                    )
-                )
+                .add(discussion.getDiscussionIdentifier())
         }
 
         map.forEach { (key, value) ->

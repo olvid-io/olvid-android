@@ -111,9 +111,7 @@ class WebrtcIncomingCallActivity : AppCompatActivity() {
             }) {
                 IncomingCallScreen(
                     name = callStateSnapshot.value?.callerContact?.displayName.orEmpty(),
-                    initialViewSetup = { initialView ->
-                        callStateSnapshot.value?.callerContact?.let { initialView.setContact(it) }
-                    },
+                    avatar = callStateSnapshot.value?.callerContact,
                     callRejected = currentCallState?.value == null,
                     personalNote = callStateSnapshot.value?.callerContact?.personalNote.orEmpty(),
                     participantCount = callStateSnapshot.value?.participantCount ?: 0,

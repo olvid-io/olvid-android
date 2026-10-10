@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Moja ya vifaa vyako itakoma muda wake na itazimwa katika **siku chache kuliko %1$d**.\nUnaweza kununua usajili wa **Olvid+** ili ukiweke katika hali ya kufanya kazi.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Moja ya vifaa vyako itakoma muda wake na itazimwa katika **siku chache kuliko %1$d**.\nUnaweza kununua usajili wa **Olvid+** ili ukiweke katika hali ya kufanya kazi.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Kifaa hiki kitaisha muda wake na kuzimwa katika **siku chini ya %1$d**.\nUnaweza kununua usajili wa **Olvid+** ili ukiweze kuendelea kuitumia.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Kifaa hiki kitaisha na kuzimwa katika **siku chini ya %1$d**.\nUnaweza kununua usajili wa **Olvid+** ili ukiwezeshe kuendelea kutumika.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s amejiunga na kikundi</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s amejiunga na kikundi</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Ongeza kwenye kikundi cha %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Ongeza kwenye makundi ya %1$d</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Tayari una mazungumzo na washiriki hawa.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Tayari una %1$d mazungumzo na washiriki hawa.</item>
 	</plurals>
 </resources>

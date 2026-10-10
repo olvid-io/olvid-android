@@ -74,6 +74,7 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.constantSp
+import io.olvid.messenger.designsystem.dampened
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.compose.StaticSoundWave
 import io.olvid.messenger.discussion.compose.WaveformExtractor
@@ -87,6 +88,7 @@ import kotlin.math.roundToInt
 fun AudioListItem(
     modifier: Modifier = Modifier,
     fyleAndStatus: FyleAndStatus,
+    scale: Float = 1f,
     activity: Activity?,
     discussionSearchViewModel: DiscussionSearchViewModel? = null,
     onEnableMessageSwipe: ((Boolean) -> Unit)? = null,
@@ -98,6 +100,7 @@ fun AudioListItem(
     contextMenu: @Composable (() -> Unit)? = null
 ) {
     val context = LocalContext.current
+    val dampenedScale = scale.dampened()
     var playtime by remember {
         mutableLongStateOf(0)
     }
@@ -198,7 +201,7 @@ fun AudioListItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(64.dp)
+            .height(64.dp * dampenedScale)
             .combinedClickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(),
@@ -267,8 +270,8 @@ fun AudioListItem(
                             .fillMaxWidth()
                             .padding(end = 4.dp),
                         text = AnnotatedString( fyleAndStatus.fyleMessageJoinWithStatus.fileName).let { discussionSearchViewModel?.highlight(context, it) ?: it},
-                        fontSize = constantSp(value = 14),
-                        lineHeight = constantSp(value = 16),
+                        fontSize = constantSp(value = 14) * dampenedScale,
+                        lineHeight = constantSp(value = 16) * dampenedScale,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         color = colorResource(R.color.almostBlack)
@@ -389,7 +392,7 @@ fun AudioListItem(
                             context,
                             fyleAndStatus.fyleMessageJoinWithStatus.size
                         ),
-                        style = OlvidTypography.subtitle1.copy(fontSize = constantSp(value = 12)),
+                        style = OlvidTypography.subtitle1.copy(fontSize = constantSp(value = 12) * dampenedScale),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         color = colorResource(

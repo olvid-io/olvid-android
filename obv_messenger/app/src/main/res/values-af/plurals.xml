@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Een van jou toestelle gaan verval en gedeaktiveer word in **minder as %1$d dag**.\nJy kan \'n **Olvid+** intekening aankoop om dit aktief te hou.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Een van jou toestelle gaan verval en gedeaktiveer word in **minder as %1$d dae**.\nJy kan \'n **Olvid+** intekening aankoop om dit aktief te hou.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Hierdie toestel sal binne **minder as %1$d dag** verval en gedeaktiveer word.\nJy kan ’n **Olvid+**-intekening koop om dit aktief te hou.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Hierdie toestel sal binnekort verval en gedeaktiveer word, en wel in **minder as %1$d dae**.\nJy kan ’n **Olvid+**-intekening koop om dit aktief te hou.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s het by die groep aangesluit</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s het by die groep aangesluit</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Voeg by tot die %1$d-groep</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Voeg by tot %1$d groepe</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Jy het reeds ’n gesprek met hierdie deelnemers.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Jy het reeds %1$d gesprekke met hierdie deelnemers.</item>
 	</plurals>
 </resources>

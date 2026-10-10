@@ -61,6 +61,7 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStat
 import io.olvid.messenger.databases.entity.Fyle
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
 import io.olvid.messenger.designsystem.constantSp
+import io.olvid.messenger.designsystem.dampened
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.linkpreview.OpenGraph
 import kotlinx.coroutines.Dispatchers
@@ -72,6 +73,7 @@ fun FyleListItem(
     modifier: Modifier = Modifier,
     fyleAndStatus: FyleAndStatus,
     fileName: AnnotatedString,
+    scale: Float = 1f,
     onClick: () -> Unit,
     contextMenu: (@Composable () -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
@@ -80,6 +82,7 @@ fun FyleListItem(
     previewModel: Any? = null,
 ) {
     val context = LocalContext.current
+    val dampenedScale = scale.dampened()
     val size = with(LocalDensity.current) {
         (if (previewBorder) 56 else 64).dp.roundToPx()
     }
@@ -121,7 +124,7 @@ fun FyleListItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(64.dp)
+            .height(64.dp * dampenedScale)
             .padding(horizontal = extraHorizontalPadding)
             .combinedClickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -161,12 +164,12 @@ fun FyleListItem(
                 color = colorResource(id = R.color.almostBlack),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                fontSize = constantSp(value = 14),
-                lineHeight = constantSp(value = 16),
+                fontSize = constantSp(value = 14) * dampenedScale,
+                lineHeight = constantSp(value = 16) * dampenedScale,
             )
             Text(
                 text = fyleAndStatus.fyleMessageJoinWithStatus.nonNullMimeType,
-                style = OlvidTypography.subtitle1.copy(fontSize = constantSp(value = 12)),
+                style = OlvidTypography.subtitle1.copy(fontSize = constantSp(value = 12) * dampenedScale),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = colorResource(
@@ -178,7 +181,7 @@ fun FyleListItem(
                     context,
                     fyleAndStatus.fyleMessageJoinWithStatus.size
                 ),
-                style = OlvidTypography.subtitle1.copy(fontSize = constantSp(value = 12)),
+                style = OlvidTypography.subtitle1.copy(fontSize = constantSp(value = 12) * dampenedScale),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = colorResource(

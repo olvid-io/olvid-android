@@ -79,11 +79,10 @@
 	<string name="dialog_title_rename_discussion" state="needs_review" hash="1413472286">Badilisha jina la mazungumzo</string>
 	<string name="dialog_title_rename_group" state="needs_review" hash="1461324427">Badilisha jina la kikundi</string>
 	<string name="dialog_title_restart_channel_establishment" state="needs_review" hash="-645769680">Je, unataka kuanzisha upya uundaji wa chaneli?</string>
-	<string name="dialog_title_share_with" state="needs_review" hash="854107768">Shiriki na…</string>
-	<string name="dialog_title_share_recipients" state="needs_review" hash="1157053138">Chagua wapokeaji</string>
+	<string name="dialog_title_share_recipients" state="needs_review" hash="463614560">Chagua mazungumzo</string>
 	<string name="share_label_from" state="needs_review" hash="2049052075">Kutoka:</string>
 	<string name="share_label_to" state="needs_review" hash="-1785690373">Kwa:</string>
-	<string name="share_label_choose_recipients" state="needs_review" hash="1157053138">Chagua wapokeaji</string>
+	<string name="share_label_choose_recipients" state="needs_review" hash="463614560">Chagua mazungumzo</string>
 	<string name="hint_share_message" state="needs_review" hash="-763169957">Ongeza ujumbe…</string>
 	<string name="content_description_delete_attachment" state="needs_review" hash="-220348329">Ondoa faili iliyojumuishwa</string>
 	<string name="dialog_title_shortcut_to" state="needs_review" hash="-1193591200">Unda mkato wa…</string>
@@ -111,7 +110,7 @@
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">Hakuna faili iliyopatikana</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">Hakuna kiungo kilichopatikana</string>
 	<string name="hint_company" state="needs_review" hash="988571519">Kampuni</string>
-	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Andika ujumbe</string>
+	<string name="hint_compose_your_message" state="needs_review" hash="809999904">Ujumbe</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Ujumbe wa muda</string>
 	<string name="label_edit_your_message" state="needs_review" hash="1091877412">Hariri ujumbe wako</string>
 	<string name="label_reply_to_x" state="needs_review" hash="1941377665">Jibu kwa %s</string>
@@ -208,9 +207,19 @@
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">Badilisha jina la mwasiliani</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">Hifadhi</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">Mipangilio</string>
+	<string name="menu_action_send_photo" state="needs_review" hash="13932391">Tuma picha</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">Shiriki</string>
 	<string name="menu_action_bookmark" state="needs_review" hash="1146136289">Ongeza kwa vipendwa</string>
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Ondoa kutoka kwa vipendwa</string>
+	<string name="menu_action_view_message" state="needs_review" hash="-211312046">Tazama ujumbe</string>
+	<string name="label_see_more" state="needs_review" hash="-1206298538">Ona zaidi</string>
+	<string name="label_formatted_text" state="needs_review" hash="664283030">Iliyoundwa</string>
+	<string name="label_raw_text" state="needs_review" hash="-1645103337">Mbichi</string>
+	<string name="pref_truncate_long_messages_title" state="needs_review" hash="576500375">Kata ujumbe mrefu</string>
+	<string name="pref_truncate_long_messages_full_screen" state="needs_review" hash="1513604976">Bofya ili kufungua katika modi ya skrini nzima</string>
+	<string name="pref_truncate_long_messages_inline" state="needs_review" hash="1658956871">Bofya ili ufungue</string>
+	<string name="pref_truncate_long_messages_never" state="needs_review" hash="1348404810">Usifupishe kamwe</string>
+	<string name="label_select_message_to_copy" state="needs_review" hash="1560698970">Chagua sehemu ya ujumbe ili uweze kuinakili.</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Hifadhi</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Fungua kutoka kwa arkhivi</string>
 	<string name="menu_check_update" state="needs_review" hash="1635875089">Angalia ikiwa kuna sasisho</string>
@@ -248,6 +257,8 @@
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">Juu sana</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Umeacha kikundi</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Umejiunga tena na kikundi</string>
+	<string name="label_groups_administered" state="needs_review" hash="353496672">Vikundi unavyosimamia</string>
+	<string name="label_groups_joined" state="needs_review" hash="-1353689862">Makundi yaliyo jiungi</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Umejiunga na kikundi</string>
 	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s amekuongeza katika kikundi hiki</string>
 	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s amekurejesha katika kikundi hiki</string>
@@ -509,6 +520,8 @@
 	<string name="pref_text_dark_mode_on" state="needs_review" hash="794872984">Tumia mandhari ya giza kila wakati</string>
 	<string name="pref_text_dark_mode_off" state="needs_review" hash="1031187033">Tumia mandhari nyepesi kila wakati</string>
 	<string name="pref_text_dark_mode_auto" state="needs_review" hash="-1140013121">Tumia mipangilio ya mfumo</string>
+	<string name="pref_use_pattern_avatars_title" state="needs_review" hash="-184462474">Avataru zinazozalishwa</string>
+	<string name="pref_use_pattern_avatars_summary" state="needs_review" hash="-1895366464">Kwa anwani ambazo hazina picha, onyesha muundo wa kipekee wa rangi badala ya herufi yao ya kwanza.</string>
 	<string name="menu_action_help_faq" state="needs_review" hash="971329012">Usaidizi / Maswali Yanayoulizwa Mara kwa Mara</string>
 	<string name="menu_action_call_contact" state="needs_review" hash="546297186">Piga simu kwa mwasiliani</string>
 	<string name="notification_title_incoming_webrtc_call" state="needs_review" hash="-2109880396">Simu ya Olvid inakuja kutoka %1$s</string>
@@ -692,7 +705,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">Seva ya leseni:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">Seva yako:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">Kiungo cha uanzishaji wa leseni hakiko sawa.\n\nTafadhali wasiliana na mtu aliyekutumia kiungo hiki.</string>
-	<string name="label_checking_license" state="needs_review" hash="-777109669">Inaangalia leseni...</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">Haiwezekani kuangalia hali ya leseni</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Leseni isijulikani</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Leseni halali</string>
@@ -740,6 +752,16 @@
 	<string name="text_message_content_wiped" state="needs_review" hash="1781783786">(maudhui ya ujumbe yamefutwa)</string>
 	<string name="text_ephemeral_message_explanation" state="needs_review" hash="612413232">Bofya ili uone\nyaliyomo kwenye ujumbe</string>
 	<string name="text_visible_once" state="needs_review" hash="962464352">Inaonekana mara moja tu</string>
+	<string name="dialog_title_ephemeral_message" state="needs_review" hash="-1527208333">Ujumbe wa muda</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave" state="needs_review" hash="1852111882">Ujumbe huu utafutwa unapoondoka kwenye mazungumzo haya.</string>
+	<string name="text_ephemeral_read_once_erased_on_leave" state="needs_review" hash="-1031412379">Yaliyomo kwenye ujumbe huu yatafutwa unapoondoka kwenye mazungumzo haya.</string>
+	<string name="text_ephemeral_read_once_deleted_on_leave_once_opened" state="needs_review" hash="-1827602456">Mara itakapofunguliwa, ujumbe huu utafutwa unapoondoka kwenye mazungumzo haya.</string>
+	<string name="text_ephemeral_deleted_at_time" state="needs_review" hash="831937049">Itafutwa katika %1$s</string>
+	<string name="text_ephemeral_deleted_on_date_at_time" state="needs_review" hash="667854133">Itafutwa tarehe %1$s saa %2$s</string>
+	<string name="text_ephemeral_content_erased_at_time" state="needs_review" hash="1038815627">Yaliyomo yatafutwa katika %1$s</string>
+	<string name="text_ephemeral_content_erased_on_date_at_time" state="needs_review" hash="848079053">Yaliyomo yatafutwa mnamo %1$s saa %2$s</string>
+	<string name="text_ephemeral_countdown_starts_when_sent" state="needs_review" hash="-1010200489">Hesabu inaanza baada ya ujumbe kutumwa.</string>
+	<string name="text_ephemeral_countdown_starts_when_opened" state="needs_review" hash="1194691757">Hesabu inaanza unapoifungua ujumbe.</string>
 	<string name="text_timer_s" state="needs_review" hash="-1146250144">%1$ds</string>
 	<string name="text_timer_m" state="needs_review" hash="-1318025056">%1$dm</string>
 	<string name="text_timer_h" state="needs_review" hash="-1461170816">%1$d saa</string>
@@ -777,6 +799,8 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Kutuma na kupokea ujumbe</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Wakati imewashwa, ujumbe ambao unaweza kusomwa mara moja na ujumbe ambao una muda mdogo wa kuonekana hufunguliwa mara tu unapojiunga na mazungumzo. Vinginevyo, inahitaji kubonyeza.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Ikiwa imewashwa, ujumbe uliotumwa ambao umefutwa huhifadhiwa ili uweze kuona wakati uliwasilishwa au kusomwa. Vinginevyo, hufutwa.</string>
+	<string name="pref_default_reaction_title" state="needs_review" hash="1457188713">Reaksi chaguo-msingi</string>
+	<string name="pref_default_reaction_summary" state="needs_review" hash="-1065900793">Gusa mara mbili kwenye ujumbe uliopokelewa ili uweze kuonyesha hisia zako kwa %1$s. Gusa mara mbili tena ili uondoe hisia yako.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Mteja wa wavuti</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Hitilafu katika kuchakata kiungo cha sasisho la mipangilio</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Kutuma na kupokea ujumbe</string>
@@ -896,7 +920,8 @@
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Leseni: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Mtoa huduma wa utambulisho</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Seva ya mtoa huduma wa utambulisho</string>
-	<string name="explanation_identity_provider" state="needs_review" hash="-964456322">Skrini hii hukuruhusu kusanidi mtoa huduma wa utambulisho wa kampuni yako katika Olvid. Mara baada ya kusanidi, unaweza kuthibitisha utambulisho wako kwenye seva hii na Olvid itakuruhusu uongeze kwa urahisi wafanyakazi wengine kwenye anwani zako.\nTafadhali wasiliana na msimamizi wako kwa maelezo zaidi.</string>
+	<string name="explanation_identity_provider" state="needs_review" hash="-1014276138">Skrini hii hukuruhusu kusanidi mtoa huduma wa utambulisho wa shirika lako katika Olvid. Mara baada ya kusanidiwa, unaweza kuthibitisha na Olvid itakuruhusu uongeze watumiaji wengine kwa urahisi kwenye anwani zako.\nTafadhali wasiliana na msimamizi wako kwa maelezo zaidi.</string>
+	<string name="explanation_identity_provider_mdm" state="needs_review" hash="-1274626281">Usanikishaji huu unadhibitiwa na shirika lako na umesanidiwa kutumia mtoa huduma wa utambulisho. Mipangilio iliyo hapa chini imesanidiwa awali na haiwezi kubadilishwa.\nTafadhali wasiliana na msimamizi wako kwa maelezo zaidi.</string>
 	<string name="button_label_authenticate" state="needs_review" hash="272245375">Thibitisha</string>
 	<string name="button_label_check_identity_provider" state="needs_review" hash="508428497">Angalia mtoa huduma wa utambulisho</string>
 	<string name="menu_action_use_identity_provider" state="needs_review" hash="1305090894">Tumia mtoa huduma wa utambulisho</string>
@@ -980,8 +1005,6 @@
 	<string name="text_failed_call" state="needs_review" hash="-1934816919">Simu ilishindwa</string>
 	<string name="text_busy_call" state="needs_review" hash="-310279946">Simu inakuja wakati nimekaa</string>
 	<string name="text_busy_outgoing_call" state="needs_review" hash="92373387">Simu ilipigwa kwa mtu ambaye alikuwa anatumia simu</string>
-	<string name="content_description_profile_picture" state="needs_review" hash="-1074340378">Picha ya wasifu</string>
-	<string name="ime_action_rename" state="needs_review" hash="-1795678977">Badilisha jina</string>
 	<string name="pref_storage_explorer_title" state="needs_review" hash="735816049">kichunguzi cha hifadhi ya ndani</string>
 	<string name="pref_storage_explorer_summary" state="needs_review" hash="-1991214388">Chunguza hifadhi ya ndani ya programu yako ya Olvid!</string>
 	<string name="activity_title_storage_explorer" state="needs_review" hash="735816049">kichunguzi cha hifadhi ya ndani</string>
@@ -1052,6 +1075,8 @@
 	<string name="pref_image_text_recognition_title" state="needs_review" hash="1877261687">Tambua na uweke alama maandishi katika picha</string>
 	<string name="pref_image_text_recognition_summary" state="needs_review" hash="1217699919">Inaruhusu kutafuta na kunakili maandishi yaliyomo kwenye viambatisho vya picha. Hii inaweza kutumia rasilimali nyingi kwenye vifaa vya chini: zima ikiwa huna uhitaji nayo.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">Haiwezekani kuonyesha picha</string>
+	<string name="label_unsupported_image_format" state="needs_review" hash="-1487560676">Fomati ya picha haitumiki</string>
+	<string name="label_unsupported_video_format" state="needs_review" hash="2131303733">Fomati ya video haitumiki</string>
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">Ni lazima uingie kwenye mtoa huduma wako wa wingu</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Umeweka Olvid iliweze kutumia nakala za kiotomatiki za kuhifadhi kwenye huduma ya wingu, lakini muda wa kikao chako umeisha. Unahitaji kuingia tena kwenye huduma hiyo.\n\nIkiwa hutaki tena kutumia nakala za kiotomatiki, unaweza kuzima katika mipangilio ya programu. Kumbuka kuwa nakala za kiotomatiki ndiyo njia pekee ya kuzuia kupoteza anwani zako ikiwa kifaa chako kitapotea au kuharibika.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Ingia</string>
@@ -1180,9 +1205,9 @@
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">Futa jibu la ujumbe</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">Kiashiria kwamba arifa zimezimwa kwa wasifu huu</string>
 	<string name="button_label_create_a_profile" state="needs_review" hash="-1568207484">Unda wasifu</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="1428471064">Mtoa huduma wa utambulisho wa kampuni yako amesanidiwa kwa mafanikio. Bonyeza kitufe cha \"thibitisha\" hapa chini ili uthibitishe na upate taarifa zako binafsi.</string>
-	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="1823898406">Mtoa huduma wa utambulisho wa kampuni yako umesanidiwa kwa mafanikio. Bonyeza kitufe cha \"tumia kiungo cha kichawi\" hapa chini ili upate taarifa zako binafsi.</string>
-	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="1340457300">Karibu kwenye Olvid.\n\nUfungaji huu unadhibitiwa na kampuni yako na umesanidiwa kutumia mtoa huduma wa utambulisho. Bonyeza kitufe cha \"Thibitisha\" hapa chini ili uthibitishe na upate taarifa zako za kibinafsi.\n\nIkiwa tayari umetumia Olvid na unataka kurejesha funguo na anwani zako kutoka kwa nakala ya faili, bonyeza \"Rejesha nakala ya faili\".</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration" state="needs_review" hash="-2030851622">Mtoa huduma wa utambulisho wa shirika lako umesanidiwa kwa mafanikio. Bonyeza kitufe cha \"ingia\" hapa chini ili uthibitishwe na upate taarifa zako binafsi.</string>
+	<string name="text_explanation_onboarding_keycloak_parsed_configuration_magic" state="needs_review" hash="903193568">Mtoa huduma wa utambulisho wa shirika lako umesanidiwa kwa mafanikio. Bonyeza kitufe cha \"tumia kiungo maalum\" hapa chini ili upate taarifa zako binafsi.</string>
+	<string name="text_explanation_onboarding_keycloak_mdm" state="needs_review" hash="-5109440">Usanikishaji huu unadhibitiwa na shirika lako na umesanidiwa kutumia mtoa huduma wa utambulisho. Bonyeza kitufe cha \"%1$s\" hapa chini ili uthibitishe na upate taarifa zako binafsi.</string>
 	<string name="button_label_see_details" state="needs_review" hash="238834473">Angalia maelezo</string>
 	<string name="link_label_invitation_url" state="needs_review" hash="744905192">Ongeza mwasiliani</string>
 	<string name="link_label_configuration_url" state="needs_review" hash="-441435162">Ingiza usanidi au leseni</string>
@@ -1223,6 +1248,33 @@
 	<string name="label_attach_timer" state="needs_review" hash="-1527208333">Ujumbe wa muda</string>
 	<string name="label_attach_camera" state="needs_review" hash="-1123080444">Piga picha</string>
 	<string name="label_attach_video" state="needs_review" hash="1626268086">Rekodi video</string>
+	<string name="label_attach_scan" state="needs_review" hash="1128596739">Changanua hati</string>
+	<string name="label_scan_page_count" state="needs_review" hash="1987610035">Ukurasa %1$d kati ya %2$d</string>
+	<string name="button_label_scan_add_page" state="needs_review" hash="1724653886">Ongeza ukurasa</string>
+	<string name="button_label_scan_crop" state="needs_review" hash="-292939300">Kata</string>
+	<string name="button_label_scan_rotate" state="needs_review" hash="807341684">Zungusha</string>
+	<string name="button_label_scan_auto_crop" state="needs_review" hash="1502815262">Otomatiki</string>
+	<string name="button_label_scan_full_image" state="needs_review" hash="1366902062">Picha kamili</string>
+	<string name="label_scan_filter_original" state="needs_review" hash="-817276190">Asili</string>
+	<string name="label_scan_filter_enhanced" state="needs_review" hash="851648098">Imeboreshwa</string>
+	<string name="label_scan_filter_grayscale" state="needs_review" hash="-695463257">Nyeusi na nyeupe</string>
+	<string name="label_scan_filter_black_and_white" state="needs_review" hash="1668578691">Nyeusi na nyeupe</string>
+	<string name="dialog_title_discard_scan" state="needs_review" hash="-94972780">Je, unataka kuacha skani hii?</string>
+	<string name="dialog_message_discard_scan" state="needs_review" hash="-1145223011">Kurasa zilizochanganuliwa zitaondoka.</string>
+	<string name="toast_message_scan_failed" state="needs_review" hash="512858351">Haiwezekani kuunda PDF</string>
+	<string name="button_label_scan_retake" state="needs_review" hash="-439420481">Rudia</string>
+	<string name="button_label_scan_enhance" state="needs_review" hash="-1842671012">Boresha</string>
+	<string name="button_label_scan_filters" state="needs_review" hash="-1898368294">Vichungi</string>
+	<string name="button_label_scan_crop_rotate" state="needs_review" hash="-1750423698">Kata na ugeuze</string>
+	<string name="button_label_scan_discard" state="needs_review" hash="-248729677">Futa skani</string>
+	<string name="label_scan_mode_manual" state="needs_review" hash="-751509695">Kwa mkono</string>
+	<string name="label_scan_mode_auto" state="needs_review" hash="315272314">Piga picha kiotomatiki</string>
+	<string name="label_scan_hint" state="needs_review" hash="289920901">Weka hati kwenye fremu</string>
+	<string name="label_scan_hint_hold_still" state="needs_review" hash="584896298">Simama kimya…</string>
+	<string name="button_label_scan_flash" state="needs_review" hash="775381504">Mwoto</string>
+	<string name="label_scan_camera_permission" state="needs_review" hash="-1855763825">Ruhusu Olvid kutumia kamera kuchanganua hati. Bado unaweza kuingiza picha kutoka kwa ghala lako.</string>
+	<string name="button_label_scan_file_name" state="needs_review" hash="2098556706">Jina la faili</string>
+	<string name="dialog_title_scan_file_name" state="needs_review" hash="1332508838">Jina la faili la PDF</string>
 	<string name="pref_font_scale" state="needs_review" hash="1773040591">Ukubwa wa fonti</string>
 	<string name="pref_text_font_scale_0_75" state="needs_review" hash="-1963894407">Ndogo sana (75%)</string>
 	<string name="pref_text_font_scale_0_9" state="needs_review" hash="-708054676">Ndogo (90%)</string>
@@ -1274,6 +1326,9 @@
 	<string name="your_message" state="needs_review" hash="1739533147">ujumbe wako</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d majibu kwa: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s alitoa maoni kuhusu %2$s</string>
+	<string name="menu_action_remove_your_reaction" state="needs_review" hash="-1609298248">Ondoa majibu yako</string>
+	<string name="menu_action_add_to_favorites" state="needs_review" hash="-1933720211">Ongeza kwenye vipendwa</string>
+	<string name="menu_action_remove_from_favorites" state="needs_review" hash="1796304724">Ondoa kutoka kwa vipendwa</string>
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Ingiza emoji</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Taarifa za utatuzi</string>
 	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">Idadi ya vifaa:</string>
@@ -1389,6 +1444,14 @@
 	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Inasubiri\ninayoweza kusomwa tu</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Msimamizi</string>
 	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Inasubiri\nmsimamizi</string>
+	<string name="label_moderator" state="needs_review" hash="767421225">Msimamizi</string>
+	<string name="label_pending_moderator" state="needs_review" hash="1955900662">Moderator anayesubiri\n</string>
+	<string name="dialog_title_group_roles" state="needs_review" hash="1155086227">Majukumu ya kikundi</string>
+	<string name="content_description_group_roles" state="needs_review" hash="-449063250">Maelezo ya majukumu katika kikundi</string>
+	<string name="explanation_group_role_admin" state="needs_review" hash="731519662">Inaweza kuongeza na kuondoa wanachama wa kikundi.</string>
+	<string name="explanation_group_role_moderator" state="needs_review" hash="2037600722">Inaweza kufuta ujumbe kutoka kwa mtu yeyote, popote pale.</string>
+	<string name="explanation_group_role_read_only" state="needs_review" hash="1017523379">Anaweza kuona mazungumzo, kujibu ujumbe na kujibu maswali, lakini hawezi kutuma ujumbe.</string>
+	<string name="explanation_group_role_pending" state="needs_review" hash="-843291456">Alialikwa kwenye kikundi lakini hajajaakubali ombi hilo. Ujumbe wowote uliotumwa wakati huu utawasilishwa kwao mara tu watakapokubali.</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Haiwezekani kuonyesha jina la mtumiaji huyu</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Kikundi kisichokuwa na jina</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Arifa za mazungumzo</string>
@@ -1518,6 +1581,10 @@
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">Kikundi kinaundwa</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">Kundi jipya</string>
 	<string name="label_group_type" state="needs_review" hash="498463258">Aina ya kikundi</string>
+	<string name="label_existing_discussions" state="needs_review" hash="-2089160663">Mazungumzo yaliyopo</string>
+	<string name="label_last_message_date" state="needs_review" hash="1218222521">Ujumbe wa mwisho %1$s</string>
+	<string name="button_label_open" state="needs_review" hash="-2066377003">Fungua</string>
+	<string name="button_label_create_a_new_group" state="needs_review" hash="-1073202815">Unda kikundi kipya</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">Kawaida</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">Wajumbe wote wa kikundi wanaweza kuongeza wajumbe wapya</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">Imedhibitiwa</string>
@@ -1531,6 +1598,8 @@
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Huwezi kuwa msimamizi wa kikundi</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Sasa unaweza kuweka ujumbe</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-930933808">Huwezi kutuma ujumbe hapa.</string>
+	<string name="text_you_became_moderator" state="needs_review" hash="-609725743">Sasa wewe ni msimamizi wa kikundi</string>
+	<string name="text_you_are_no_longer_moderator" state="needs_review" hash="1396461107">Huwezi kuwa msimamizi wa kikundi tena</string>
 	<string name="label_pending" state="needs_review" hash="1975294811">Inasubiri</string>
 	<string name="pref_app_language_title" state="needs_review" hash="-1748962099">Lugha ya programu</string>
 	<string name="pref_text_default_device_language" state="needs_review" hash="-1062620207">Lugha chagu msingi ya kifaa</string>
@@ -1631,6 +1700,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_title" state="needs_review" hash="-434788963">Zima arifa za mabadiliko ya cheti kwa picha ndogo za viungo</string>
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Washa chaguo hili ili uzime ufuatiliaji wa mabadiliko ya cheti wakati wa kupata muhtasari wa kiungo. Baadhi ya tovuti zinaweza kuonyesha cheti tofauti kila mara, na ikiwa chaguo hili halijawashwa, utapokea arifa mara kwa mara.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Tumia maktaba ya zamani ya ZXing kwa ajili ya kuchanganua misimbo ya QR</string>
+	<string name="pref_use_in_house_document_scanner_title" state="needs_review" hash="1552486206">Tumia skana ya nyaraka ya Olvid</string>
+	<string name="pref_use_in_house_document_scanner_summary" state="needs_review" hash="-2092532938">Kwa kawaida, hati husomwa kwa kutumia ML Kit kama sehemu ya huduma za Google Play. Washa chaguo hili ili utumie skana iliyojengwa ya Olvid.</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">Kwa kawaida, ML Kit hutumika kwa skani ya misimbo ya QR. Washa chaguo hili ikiwa una matatizo ya kuskena misimbo ya QR ndani ya Olvid.</string>
 	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Tumia kitazamaji cha PDF kilichojengwa</string>
 	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">Kwa chaguhi, faili za PDF hufunguliwa katika kitazamaji cha ndani. Zima chaguo hili ili utumie kitazamaji cha nje badala yake.</string>
@@ -1638,7 +1709,7 @@
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Kifaa %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">Kifaa hiki</string>
 	<string name="menu_action_rename_device" state="needs_review" hash="43131083">Badilisha jina la kifaa</string>
-	<string name="menu_action_trust_device" state="needs_review" hash="360435227">Idhinisha kifaa</string>
+	<string name="menu_action_trust_device" state="needs_review" hash="105728494">Ninatambua kifaa hiki</string>
 	<string name="menu_action_remove_device" state="needs_review" hash="-1485256427">Ondoa kifaa</string>
 	<string name="menu_action_refresh_device_list" state="needs_review" hash="1430227802">Sasisha orodha ya vifaa</string>
 	<string name="menu_action_recreate_channel" state="needs_review" hash="837900266">Rejesha kituo salama</string>
@@ -1706,8 +1777,9 @@
 	<string name="button_label_add_device_xxx" state="needs_review" hash="-1479212354">Ongeza kifaa \"%1$s\"</string>
 	<string name="notification_title_device_trust" state="needs_review" hash="-1568042777">Kifaa kipya: \"%1$s\"</string>
 	<string name="notification_title_unnamed_device_trust" state="needs_review" hash="1704207127">Kifaa kipya</string>
-	<string name="notification_message_device_trust" state="needs_review" hash="753501294">Kifaa kipya kimeongezwa kwenye mojawapo ya wasifu wako wa Olvid.</string>
-	<string name="notification_action_device_trust" state="needs_review" hash="1450001608">Ruhusu kifaa hiki</string>
+	<string name="notification_message_device_trust" state="needs_review" hash="-1646747013">Kifaa kipya kimeongezwa kwenye mojawapo ya wasifu wako wa Olvid. Ikiwa wewe ndiye ulifanya, iondoe kutoka kwa vifaa vyako.</string>
+	<string name="notification_action_device_trust" state="needs_review" hash="936727529">Ndiyo, mimi ndiye</string>
+	<string name="notification_action_device_see_devices" state="needs_review" hash="-1832505809">Vifaa vyangu</string>
 	<string name="notification_channel_device_name" state="needs_review" hash="1347557771">Usimamizi wa vifaa</string>
 	<string name="notification_channel_device_description" state="needs_review" hash="-36703170">Arifa kuhusu vifaa vyako</string>
 	<string name="notification_title_device_expiration" state="needs_review" hash="202400638">Kuzima „%1$s”</string>
@@ -2080,6 +2152,8 @@
 	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">Nambari ya siri inahitajika ili kufungua faili hii ya PDF.</string>
 	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">Nenosiri</string>
 	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">Nenosiri isiyo sahihi</string>
+	<string name="content_description_previous_match" state="needs_review" hash="-124264476">Tokeo lililotangulia</string>
+	<string name="content_description_next_match" state="needs_review" hash="-405381756">Tokeo linalofuata</string>
 	<string name="label_poll_create" state="needs_review" hash="-1677246175">Unda kura</string>
 	<string name="label_poll_question" state="needs_review" hash="-1615603188">Swali</string>
 	<string name="hint_poll_question" state="needs_review" hash="1961289317">Uliza swali</string>
@@ -2110,6 +2184,7 @@
 	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">Hakuna jibu kwa sasa</string>
 	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">Uanzishwaji wa kifaa</string>
 	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">Dhibiti vifaa vyangu</string>
+	<string name="tip_expiring_current_device_title" state="needs_review" hash="-2044212270">Kifaa hiki kitafutwa hivi karibuni</string>
 	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">Kifaa hakijaunganishwa</string>
 	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">Moja ya vifaa vyako haijatumika kwa **zaidi ya siku 30**.\nIkiwa huitumii tena, tunapendekeza **uiondoe** ili kuepuka matatizo ya kusawazisha.</string>
 	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">Dhibiti vifaa vyangu</string>
@@ -2185,8 +2260,15 @@
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Tumia \"kiungo cha kichawi\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Kiungo maalum halifai</string>
 	<string name="label_hanged_up" state="needs_review" hash="-1516413384">Simu ilikatika</string>
-	<string name="store_link_need_licenses" state="needs_review" hash="-1212508527">Je, unahitaji kupata usajili kwa timu yako?</string>
 	<string name="store_link_olvid_store" state="needs_review" hash="-1825630369">Tembelea Duka la Olvid</string>
+	<string name="store_link_need_more_options" state="needs_review" hash="-839181230">Je, unahitaji chaguo zaidi?</string>
+	<string name="button_label_check_all_offers_olvid_store" state="needs_review" hash="361882901">Angalia ofa zetu zote katika Duka la Olvid</string>
+	<string name="label_store_offer_individual" state="needs_review" hash="-1969313106">Mtu binafsi</string>
+	<string name="label_store_offer_individual_description" state="needs_review" hash="368977236">Leseni ya kibinafsi, ni kwa ajili yako pekee.</string>
+	<string name="label_store_offer_family" state="needs_review" hash="-2103729206">Familia</string>
+	<string name="label_store_offer_family_description" state="needs_review" hash="-1487232440">Kifurushi cha leseni 6 kwa ajili yako na familia yako.</string>
+	<string name="label_store_offer_team" state="needs_review" hash="-421568242">Timu</string>
+	<string name="label_store_offer_team_description" state="needs_review" hash="687093077">Leseni nyingi za kusambaza kwa timu yako.</string>
 	<string name="toast_message_reminder_set" state="needs_review" hash="-961055414">Kikumbusho kimewekwa</string>
 	<string name="dialog_title_keycloak_authentication_impossible" state="needs_review" hash="325273853">Haiwezekani kufanya uthibitishaji</string>
 	<string name="dialog_message_keycloak_authentication_impossible" state="needs_review" hash="-2031322232">Wasifu wako kwa sasa unadhibitiwa na shirika lako na uthibitishaji mpya unahitajika. Hata hivyo, inaonekana hakuna njia yoyote inayotumika ya uthibitishaji.\n\nTafadhali wasiliana na msimamizi wako kwa maelezo zaidi.</string>
@@ -2298,8 +2380,6 @@
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Kuchanganua maudhui</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Ninafanya uchambuzi wa mazungumzo yaliyopelekwa nje</string>
 	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">Tatizo lilitokea wakati wa kupakua faili ya mtindo wa OpenStreetMap</string>
-	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Usajili wa ndani ya programu haupatikani</string>
-	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Toleo la Olvid ambalo umesakinisha halijumuishi maktaba ya Malipo ya Google na haitumii ununuzi wa ndani ya programu.\n\nKwa habari zaidi, tafadhali wasiliana nasi kwa **feedback@olvid.io**.</string>
 	<string name="ftux_next" state="needs_review" hash="1158639077">Inayofuata</string>
 	<string name="ftux_start" state="needs_review" hash="646298532">Anza</string>
 	<string name="ftux_page_indicator" state="needs_review" hash="1987610035">Ukurasa %1$d kati ya %2$d</string>
@@ -2309,11 +2389,11 @@
 	<string name="ftux_page_private_body" state="needs_review" hash="-590644231">Katika %1$s, unaamua ni nani unataka kuzungumza naye. Hakuna ujumbe usiohitajika, hakuna mapendekezo, hakuna arifa zisizo na maana, na hakuna ujumbe kutoka kwa watu wasiojulikana.\n\nHakuna mtu anayeweza kuwasiliana nawe bila idhini yako.\n\n%1$s ni nafasi yako ya kidijitali.</string>
 	<string name="ftux_page_everyone_title" state="needs_review" hash="1506796386">Ujumbe kwa <b>wote</b></string>
 	<string name="ftux_page_everyone_body" state="needs_review" hash="-586100377">Haijalishi wewe ni nani, %1$s inakupa ulinzi bora. Hakuna haja ya anwani ya barua pepe au nambari ya simu.\n\n%1$s haitaki chochote kutoka kwako, na hilo linabadilisha kila kitu.</string>
-	<string name="ftux_page_protect_title" state="needs_review" hash="1969120191">Olvid anakulinda. Olvid analinda wale wanaokuhusu.</string>
+	<string name="ftux_page_protect_title" state="needs_review" hash="1969120191">Olvid <b>anakulinda</b>. Olvid analinda wale wanaokuhusu.</string>
 	<string name="ftux_page_protect_body" state="needs_review" hash="881847930">Hii si ahadi tu—%1$s inatoa uthibitisho wa kisayansi.\n\nIwe unaongeza mawasiliano kwa njia ya mtandao au ana kwa ana, mazungumzo yako huwekwa salama na kusimbishwa kabisa.</string>
 	<string name="ftux_page_pricing_title" state="needs_review" hash="-1948277889">Mfumo wa biashara <b>wenye uwazi</b></string>
 	<string name="ftux_page_pricing_body" state="needs_review" hash="-1064278870">%1$s haitumii data yako ya kibinafsi kwa ajili ya kujipatia fedha—kwa sababu haiomba hata kidogo!\n\nKile ambacho ni cha bure, ni cha bure. Kile ambacho hulipwa kina bei.</string>
-	<string name="ftux_page_media_title" state="needs_review" hash="558110518">Olvid ana kila kitu</string>
+	<string name="ftux_page_media_title" state="needs_review" hash="558110518">Olvid ana <b>kila kitu</b></string>
 	<string name="ftux_page_media_body" state="needs_review" hash="1807247240">Hakuna kikomo cha ukubwa wa faili unayoweza ambatisha, unaweza kushiriki picha zenye ubora wa juu, fanya kura, na pia unaweza kupiga simu za sauti na video. Unaweza kutumia programu hii kwenye vifaa vingi na pia ina kipengele cha kuonyesha eneo lako. Kila kitu unachohitaji kipo hapa!</string>
 	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">Ghairi pakia</string>
 	<string name="label_suggested_contacts" state="needs_review" hash="816810770">Wasiliani unaopendekeza</string>

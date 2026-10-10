@@ -46,6 +46,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -105,13 +106,11 @@ import androidx.preference.PreferenceManager
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.tasks.PropagatePinnedDiscussionsChangeTask
 import io.olvid.messenger.designsystem.components.DialogSecure
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
-import androidx.compose.foundation.layout.plus
 import io.olvid.messenger.designsystem.scaledDp
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
@@ -156,7 +155,7 @@ fun DiscussionListScreen(
     onClick: (discussion: Discussion) -> Unit,
     onLongClick: (discussion: Discussion) -> Unit,
     onMarkAsRead: (discussionId: Long) -> Unit,
-    onMarkAsUnread: (discussionId: Long) -> Unit,
+    onMarkAsUnread: (discussion: Discussion) -> Unit,
     invalidateActionMode: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -622,7 +621,7 @@ fun DiscussionListScreen(
                                                             if (unread) {
                                                                 onMarkAsRead.invoke(discussion.id)
                                                             } else {
-                                                                onMarkAsUnread.invoke(discussion.id)
+                                                                onMarkAsUnread.invoke(discussion)
                                                             }
                                                         },
                                                         callbackEndToStart = {
@@ -698,19 +697,9 @@ fun DiscussionListScreen(
                                                                 context,
                                                                 message
                                                             ),
-                                                            initialViewSetup = { initialView ->
-                                                                invitation?.takeIf { discussion.isPreDiscussion }
-                                                                    ?.let {
-                                                                        invitationListViewModel.initialViewSetup(
-                                                                            initialView,
-                                                                            it
-                                                                        )
-                                                                    } ifNull {
-                                                                    initialView.setDiscussion(
-                                                                        discussion
-                                                                    )
-                                                                }
-                                                            },
+                                                            avatar = invitation?.takeIf { discussion.isPreDiscussion }
+                                                                ?.let { invitationListViewModel.avatar(it) }
+                                                                ?: discussion,
                                                             customColor = discussionCustomization?.colorJson?.color?.minus(
                                                                 0x1000000
                                                             ) ?: 0x00ffffff,

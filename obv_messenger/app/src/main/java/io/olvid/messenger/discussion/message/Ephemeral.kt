@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -44,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -63,6 +65,7 @@ import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.compose.EphemeralViewModel.Companion.existenceSetting
 import io.olvid.messenger.discussion.compose.EphemeralViewModel.Companion.visibilitySetting
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun EphemeralVisibilityExplanation(
@@ -127,7 +130,13 @@ private fun EphemeralExplanationPreview() {
 }
 
 @Composable
-fun EphemeralTimer(modifier: Modifier = Modifier, expiration: MessageExpiration?, readOnce: Boolean, bookmarked: Boolean) {
+fun EphemeralTimer(
+    modifier: Modifier = Modifier,
+    expiration: MessageExpiration?,
+    readOnce: Boolean,
+    bookmarked: Boolean,
+    onClick: (() -> Unit)? = null
+) {
     val context = LocalContext.current
     var ephemeralState: EphemeralState? by remember {
         mutableStateOf(null)
@@ -137,7 +146,7 @@ fun EphemeralTimer(modifier: Modifier = Modifier, expiration: MessageExpiration?
             while (expiration.expirationTimestamp > System.currentTimeMillis()) {
                 ephemeralState =
                     expiration.getTimerResources(context, readOnce, bookmarked)
-                delay(1000)
+                delay(1000.milliseconds)
             }
         } ?: run {
             ephemeralState = null.getTimerResources(context, readOnce, bookmarked)
@@ -145,7 +154,13 @@ fun EphemeralTimer(modifier: Modifier = Modifier, expiration: MessageExpiration?
     }
     ephemeralState?.let {
         EphemeralTimerContent(
-            modifier = modifier,
+            modifier = modifier.then(
+                onClick?.let { onClick ->
+                    Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = onClick)
+                } ?: Modifier
+            ),
             text = it.text,
             color = it.color,
             icon = it.icon,
@@ -251,7 +266,7 @@ fun EphemeralJsonSharedSettings(modifier: Modifier = Modifier, message: Message)
     val jsonSharedSettings = try {
         AppSingleton.getJsonObjectMapper()
             .readValue(message.contentBody, JsonSharedSettings::class.java)
-    } catch (ignored: Exception) {
+    } catch (_: Exception) {
         null
     }
 

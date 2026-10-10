@@ -495,6 +495,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_LAST_OLVID_PLUS_TIP_TIMESTAMP: String = "pref_key_last_olvid_plus_tip_timestamp"
         const val PREF_KEY_OLVID_PLUS_REMINDER_TIMESTAMP: String = "pref_key_olvid_plus_reminder_timestamp"
 
+        const val PREF_KEY_LAST_DISCUSSION_FONT_SCALE: String = "pref_key_last_discussion_font_scale"
+        const val PREF_KEY_LAST_DISCUSSION_FONT_SCALE_DEFAULT: Float = 1.0f
+
         fun isUpdateAvailable(): Boolean {
             val prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext())
             val latestVersion = prefs.getInt(PREF_KEY_LATEST_APP_VERSION, 0)
@@ -571,11 +574,20 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         const val PREF_KEY_APP_ICON: String = "pref_key_app_icon"
 
+        const val PREF_KEY_USE_PATTERN_AVATARS: String = "pref_key_use_pattern_avatars"
+        const val PREF_KEY_USE_PATTERN_AVATARS_DEFAULT: Boolean = true
+
         const val PREF_KEY_SCREEN_SCALE: String = "pref_key_screen_scale"
         const val PREF_KEY_SCREEN_SCALE_DEFAULT: String = "1.0"
 
         const val PREF_KEY_USE_ANIMATED_EMOJIS: String = "pref_key_use_animated_emojis"
         const val PREF_KEY_USE_ANIMATED_EMOJIS_DEFAULT: String = "loop"
+
+        const val PREF_KEY_TRUNCATE_LONG_MESSAGES: String = "pref_key_truncate_long_messages"
+        const val PREF_KEY_TRUNCATE_LONG_MESSAGES_DEFAULT: String = "full_screen"
+        const val PREF_VALUE_TRUNCATE_FULL_SCREEN: String = "full_screen"
+        const val PREF_VALUE_TRUNCATE_INLINE: String = "inline"
+        const val PREF_VALUE_TRUNCATE_NEVER: String = "never"
 
         const val PREF_KEY_USE_INTERNAL_IMAGE_VIEWER: String = "pref_key_use_internal_image_viewer"
         const val PREF_KEY_USE_INTERNAL_IMAGE_VIEWER_DEFAULT: Boolean = true
@@ -784,6 +796,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_USE_LEGACY_ZXING_SCANNER: String = "pref_key_use_legacy_zxing_scanner"
         const val PREF_KEY_USE_LEGACY_ZXING_SCANNER_DEFAULT: Boolean = false
 
+        const val PREF_KEY_USE_IN_HOUSE_DOCUMENT_SCANNER: String = "pref_key_use_in_house_document_scanner"
+        const val PREF_KEY_USE_IN_HOUSE_DOCUMENT_SCANNER_DEFAULT: Boolean = false
+
         const val PREF_KEY_USE_INTERNAL_PDF_VIEWER: String = "pref_key_use_internal_pdf_viewer"
         const val PREF_KEY_USE_INTERNAL_PDF_VIEWER_DEFAULT: Boolean = true
 
@@ -830,6 +845,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_RETAIN_WIPED_OUTBOUND_MESSAGES: String =
             "pref_key_retain_wiped_outbound_messages"
         const val PREF_KEY_RETAIN_WIPED_OUTBOUND_MESSAGES_DEFAULT: Boolean = false
+
+        const val PREF_KEY_DEFAULT_REACTION: String = "pref_key_default_reaction"
+        const val PREF_KEY_DEFAULT_REACTION_DEFAULT: String = "👍"
 
         const val PREF_KEY_RETAIN_REMOTE_DELETED_MESSAGES: String =
             "pref_key_retain_remote_deleted_messages"
@@ -1107,6 +1125,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         }
 
         @JvmStatic
+        fun truncateLongMessagesSetting(): String {
+            return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(
+                PREF_KEY_TRUNCATE_LONG_MESSAGES, PREF_KEY_TRUNCATE_LONG_MESSAGES_DEFAULT
+            ) ?: PREF_KEY_TRUNCATE_LONG_MESSAGES_DEFAULT
+        }
+
+        @JvmStatic
         fun useAnimatedEmojis(): Boolean {
             return animatedEmojisSetting() in listOf("loop", "once")
         }
@@ -1347,6 +1372,25 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     }
             }
 
+        @JvmStatic
+        var lastDiscussionFontScale: Float
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getFloat(
+                        PREF_KEY_LAST_DISCUSSION_FONT_SCALE,
+                        PREF_KEY_LAST_DISCUSSION_FONT_SCALE_DEFAULT
+                    )
+            }
+            set(fontScale) {
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putFloat(
+                            PREF_KEY_LAST_DISCUSSION_FONT_SCALE,
+                            fontScale
+                        )
+                    }
+            }
+
         val sendWithHardwareEnter: Boolean
             get() {
                 return PreferenceManager.getDefaultSharedPreferences(App.getContext())
@@ -1470,6 +1514,25 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                         putBoolean(
                             PREF_KEY_RETAIN_WIPED_OUTBOUND_MESSAGES,
                             retain
+                        )
+                    }
+            }
+
+        @JvmStatic
+        var defaultReaction: String
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getString(
+                        PREF_KEY_DEFAULT_REACTION,
+                        PREF_KEY_DEFAULT_REACTION_DEFAULT
+                    ) ?: PREF_KEY_DEFAULT_REACTION_DEFAULT
+            }
+            set(emoji) {
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putString(
+                            PREF_KEY_DEFAULT_REACTION,
+                            emoji
                         )
                     }
             }
@@ -1708,6 +1771,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                         )
                     }
             }
+
+        @JvmStatic
+        fun usePatternAvatars(): Boolean {
+            return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
+                PREF_KEY_USE_PATTERN_AVATARS, PREF_KEY_USE_PATTERN_AVATARS_DEFAULT
+            )
+        }
 
         @JvmStatic
         fun showTrustLevels(): Boolean {
@@ -1973,6 +2043,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         fun useLegacyZxingScanner(): Boolean {
             return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
                 PREF_KEY_USE_LEGACY_ZXING_SCANNER, PREF_KEY_USE_LEGACY_ZXING_SCANNER_DEFAULT
+            )
+        }
+
+        @JvmStatic
+        fun useInHouseDocumentScanner(): Boolean {
+            return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
+                PREF_KEY_USE_IN_HOUSE_DOCUMENT_SCANNER, PREF_KEY_USE_IN_HOUSE_DOCUMENT_SCANNER_DEFAULT
             )
         }
 

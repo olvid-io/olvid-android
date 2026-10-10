@@ -76,6 +76,11 @@
                 android:layout_margin="8dp"
                 layout="@layout/view_message_details_status"/>
 
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/ephemeral_details_compose_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
             <io.olvid.messenger.customClasses.EmptyRecyclerView
                 android:id="@+id/message_metadata_recycler_view"
                 android:layout_width="match_parent"

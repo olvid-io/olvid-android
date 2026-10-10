@@ -86,15 +86,17 @@ import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.DiscussionAndUsage
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndOrigin
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.designsystem.components.HiddenProfilePasswordDialog
 import io.olvid.messenger.designsystem.components.OlvidActionRow
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
 import io.olvid.messenger.designsystem.components.OlvidSortButton
 import io.olvid.messenger.designsystem.components.OlvidTopAppBar
+import io.olvid.messenger.designsystem.components.OverflowIndicator
+import io.olvid.messenger.designsystem.components.OverflowItems
 import io.olvid.messenger.designsystem.components.SortMenuItem
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.gallery.getDrawableResourceForMimeType
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.storage_manager.StorageManagerViewModel.BucketDestination
 import io.olvid.messenger.storage_manager.StorageManagerViewModel.DiscussionSortKey
 import kotlinx.coroutines.delay
@@ -133,13 +135,9 @@ fun StorageManagerScreen(
                 onBackPressed = onBackPressed,
                 actions = {
                     Box {
-                        InitialView(
+                        Avatar(
                             modifier = Modifier.requiredSize(40.dp),
-                            initialViewSetup = { initialView ->
-                                ownedIdentity?.let {
-                                    initialView.setOwnedIdentity(it)
-                                }
-                            },
+                            target = ownedIdentity,
                             onClick = { showProfileMenu = true },
                             onLongClick = { showPasswordDialog = true },
                         )
@@ -161,9 +159,9 @@ fun StorageManagerScreen(
                                 DropdownMenuItem(
                                     modifier = Modifier.width(240.dp),
                                     leadingIcon = {
-                                        InitialView(
+                                        Avatar(
                                             modifier = Modifier.requiredSize(32.dp),
-                                            initialViewSetup = { it.setOwnedIdentity(identity) }
+                                            target = identity
                                         )
                                     },
                                     text = {
@@ -312,6 +310,11 @@ fun StorageManagerScreen(
                                         label = stringResource(R.string.menu_action_sort_date),
                                         isActive = currentDiscussionSortKey == DiscussionSortKey.DATE,
                                         onClick = { viewModel.setDiscussionSortKey(DiscussionSortKey.DATE) }
+                                    ),
+                                    SortMenuItem(
+                                        label = stringResource(R.string.menu_action_sort_name),
+                                        isActive = currentDiscussionSortKey == DiscussionSortKey.NAME,
+                                        onClick = { viewModel.setDiscussionSortKey(DiscussionSortKey.NAME) }
                                     ),
                                 )
                             )
@@ -570,7 +573,7 @@ private fun SmartBucketRow(
                 ((maxWidth - (columnsCount * 2 + 8).dp).value.roundToInt() / columnsCount).dp
             }
             Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                previews.take(columnsCount).forEachIndexed { index, item ->
+                OverflowItems(items = previews, maxVisible = columnsCount, totalCount = count) { _, item, hiddenCount ->
                     val mimeType = item.fyleAndStatus.fyleMessageJoinWithStatus.nonNullMimeType
                     Box(modifier = Modifier.size(itemSize)) {
                         if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(mimeType)) {
@@ -655,19 +658,8 @@ private fun SmartBucketRow(
                                 item.fyleAndStatus.fyleMessageJoinWithStatus.size
                             )
                         )
-                        if (count > columnsCount && index == columnsCount - 1) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color.Black.copy(alpha = .6f))
-                            )
-                            Text(
-                                text = "+${count - columnsCount}",
-                                style = OlvidTypography.body1,
-                                color = Color.White,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
+                        if (hiddenCount > 0) {
+                            OverflowIndicator(hiddenCount = hiddenCount, shape = RoundedCornerShape(8.dp))
                         }
                     }
                 }
@@ -694,13 +686,11 @@ private fun DiscussionStorageItem(
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        InitialView(
+        Avatar(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 4.dp)
                 .requiredSize(40.dp),
-            initialViewSetup = { initialView ->
-                initialView.setDiscussion(item.discussion)
-            }
+            target = item.discussion
         )
         Text(
             modifier = Modifier

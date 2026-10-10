@@ -62,7 +62,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.webrtc.CallData
 
 @Composable
@@ -97,9 +98,9 @@ fun CallNotification(
                 .padding(8.dp),
             verticalAlignment = CenterVertically
         ) {
-            InitialView(
+            Avatar(
                 modifier = Modifier.size(48.dp),
-                initialViewSetup = callData.initialViewSetup,
+                target = callData.avatar,
                 onCall = true
             ) {
                 callData.fullScreenIntent?.let {
@@ -178,7 +179,7 @@ fun CallNotification(
 fun CallNotificationPreview() {
     CallNotification(
         callData = CallData(
-            initialViewSetup = { it.setUnknown() },
+            avatar = AvatarSource.unknown(),
             title = "John Doe",
             subtitle = "Incoming call",
             rejectCall = {},
@@ -192,7 +193,7 @@ fun CallNotificationPreview() {
 fun DoubleCallNotificationPreview() {
     CallNotification(
         callData = CallData(
-            initialViewSetup = { it.setUnknown() },
+            avatar = AvatarSource.unknown(),
             title = "John Doe",
             subtitle = "Incoming call",
             rejectCall = {},
@@ -208,7 +209,7 @@ fun DoubleCallNotificationPreview() {
 fun OngoingCallPreview() {
     CallNotification(
         callData = CallData(
-            initialViewSetup = { it.setUnknown() },
+            avatar = AvatarSource.unknown(),
             title = "John Doe",
             subtitle = "Ongoing call",
             rejectCall = {},

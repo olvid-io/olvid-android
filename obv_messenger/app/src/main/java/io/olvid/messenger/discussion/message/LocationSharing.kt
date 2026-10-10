@@ -50,6 +50,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -89,6 +90,9 @@ import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.constantSp
+import io.olvid.messenger.designsystem.dampened
+import io.olvid.messenger.designsystem.scaled
+import io.olvid.messenger.designsystem.scaledFromDefault
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.message.attachments.Attachments
 import io.olvid.messenger.services.UnifiedForegroundService.LocationSharingSubService
@@ -378,9 +382,11 @@ private fun LocationMessageContent(
     highlighter: ((Context, AnnotatedString) -> AnnotatedString)?,
     blockClicks: Boolean,
 ) {
+    val dampenedScale = scale.dampened()
     if (message.hasAttachments()) {
         BoxWithConstraints {
             Attachments(message = message,
+                scale = scale,
                 showStatuses = false,
                 audioAttachmentServiceBinding = null,
                 onAttachmentLongClick = { _ -> onLongClick() },
@@ -449,21 +455,21 @@ private fun LocationMessageContent(
                 ) {
                     Text(
                         text = title,
-                        style = OlvidTypography.body2,
+                        style = OlvidTypography.body2.scaled(dampenedScale),
                         color = colorResource(id = R.color.primary700),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = precision,
-                        style = OlvidTypography.subtitle1,
+                        style = OlvidTypography.subtitle1.scaled(dampenedScale),
                         color = colorResource(id = R.color.greyTint),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = altitude,
-                        style = OlvidTypography.subtitle1,
+                        style = OlvidTypography.subtitle1.scaled(dampenedScale),
                         color = colorResource(id = R.color.greyTint),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -471,7 +477,7 @@ private fun LocationMessageContent(
                     lastUpdated?.let {
                         Text(
                             text = it,
-                            style = OlvidTypography.subtitle1,
+                            style = OlvidTypography.subtitle1.scaled(dampenedScale),
                             color = colorResource(id = R.color.greyTint),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -507,7 +513,7 @@ private fun LocationMessageContent(
                     Text(
                         modifier = Modifier.weight(1f),
                         text = it,
-                        style = OlvidTypography.subtitle1,
+                        style = OlvidTypography.subtitle1.scaled(dampenedScale),
                         color = colorResource(
                             id = R.color.greyTint
                         ),
@@ -553,6 +559,7 @@ private fun LocationMessageContent(
                 )
                 .padding(4.dp),
             text = stringResource(id = R.string.title_stop_sharing_location),
+            style = LocalTextStyle.current.scaledFromDefault(dampenedScale),
             color = colorResource(
                 id = R.color.red
             ),

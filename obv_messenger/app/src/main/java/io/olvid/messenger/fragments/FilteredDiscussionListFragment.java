@@ -54,7 +54,8 @@ import java.util.regex.Pattern;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
-import io.olvid.messenger.customClasses.InitialView;
+import androidx.compose.ui.platform.ComposeView;
+import io.olvid.messenger.designsystem.avatar.AvatarComposeViewKt;
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.SearchHighlightSpan;
 import io.olvid.messenger.customClasses.StringUtils2;
@@ -366,7 +367,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                 } else {
                     holder.pinnedIcon.setVisibility(View.GONE);
                 }
-                holder.initialView.setDiscussion(discussion);
+                AvatarComposeViewKt.setAvatar(holder.initialView, discussion);
 
                 if (selectable) {
                     holder.selectionCheckBox.setVisibility(View.VISIBLE);
@@ -389,7 +390,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
             final View rootView;
             final TextView discussionTitleTextView;
             final TextView discussionGroupMembersTextView;
-            final InitialView initialView;
+            final ComposeView initialView;
             final CheckBox selectionCheckBox;
             final ImageView pinnedIcon;
 

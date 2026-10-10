@@ -27,11 +27,14 @@ import androidx.lifecycle.viewModelScope
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.BytesKey
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.StringUtils2
 import io.olvid.messenger.customClasses.jsonIdentityDetails
+import io.olvid.messenger.designsystem.avatar.AvatarSource
 import io.olvid.messenger.databases.dao.Group2MemberDao.Group2MemberOrPending
 import io.olvid.messenger.databases.entity.Contact
+import io.olvid.messenger.designsystem.avatar.toAvatarSource
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel.SearchableDiscussion
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +50,7 @@ data class GroupMember(
     val pending: Boolean,
     val isAdmin: Boolean,
     val permissionSendMessage: Boolean = true,
+    val permissionRemoteDeleteAnything: Boolean = false,
     val isYou: Boolean = false,
     val removableFromRow: Boolean = true,
     var selected: Boolean,
@@ -69,6 +73,7 @@ data class GroupMember(
         if (pending != other.pending) return false
         if (isAdmin != other.isAdmin) return false
         if (permissionSendMessage != other.permissionSendMessage) return false
+        if (permissionRemoteDeleteAnything != other.permissionRemoteDeleteAnything) return false
         if (removableFromRow != other.removableFromRow) return false
         if (selected != other.selected) return false
         if (!bytesIdentity.contentEquals(other.bytesIdentity)) return false
@@ -84,14 +89,34 @@ data class GroupMember(
         var result = pending.hashCode()
         result = 31 * result + isAdmin.hashCode()
         result = 31 * result + permissionSendMessage.hashCode()
+        result = 31 * result + permissionRemoteDeleteAnything.hashCode()
         result = 31 * result + removableFromRow.hashCode()
         result = 31 * result + selected.hashCode()
         result = 31 * result + bytesIdentity.contentHashCode()
-        result = 31 * result + (contact?.hashCode() ?: 0)
-        result = 31 * result + (jsonIdentityDetails?.hashCode() ?: 0)
+        result = 31 * result + contact.hashCode()
+        result = 31 * result + jsonIdentityDetails.hashCode()
         result = 31 * result + fullSearchDisplayName.hashCode()
-        result = 31 * result + (searchableDiscussion?.discussionId?.hashCode() ?: 0)
+        result = 31 * result + searchableDiscussion?.discussionId.hashCode()
         return result
+    }
+
+    /** Avatar for the new InitialView API: you → cache, contact → contact, else initial from details. */
+    fun avatar(keycloakCertified: Boolean = false): AvatarTarget = when {
+        searchableDiscussion != null -> searchableDiscussion.toAvatarSource()
+        isYou -> AvatarSource.fromCache(bytesIdentity)
+        contact != null -> contact
+        jsonIdentityDetails != null -> AvatarSource.initial(
+            bytesIdentity,
+            StringUtils.getInitial(
+                jsonIdentityDetails.formatDisplayName(
+                    SettingsActivity.contactDisplayNameFormat,
+                    SettingsActivity.uppercaseLastName
+                )
+            ),
+            keycloakCertified = keycloakCertified,
+        )
+
+        else -> AvatarSource.unknown(keycloakCertified = keycloakCertified)
     }
 }
 
@@ -212,6 +237,7 @@ fun Group2MemberOrPending.toGroupMember(
         pending = pending,
         isAdmin = permissionAdmin,
         permissionSendMessage = permissionSendMessage,
+        permissionRemoteDeleteAnything = permissionRemoteDeleteAnything,
         removableFromRow = removableFromRow,
         selected = selected
     )
@@ -235,8 +261,13 @@ fun GroupMember.isReadOnly(nonAdminsReadOnly: Boolean): Boolean {
     return if (isYou) !permissionSendMessage else nonAdminsReadOnly || !permissionSendMessage
 }
 
+// the moderator role only exists in keycloak groups, where it kind of replaces the admin role
+fun GroupMember.isModerator(keycloakGroup: Boolean): Boolean {
+    return keycloakGroup && !isAdmin && permissionRemoteDeleteAnything
+}
+
 fun GroupMember.getDisplayName(context: Context): String {
-    searchableDiscussion?.let { return it.title }
+    searchableDiscussion?.let { return it.title.takeIf { it.isNotEmpty() } ?: context.getString(R.string.text_unnamed_discussion) }
     return contact?.customDisplayName ?: jsonIdentityDetails?.formatFirstAndLastName(
         SettingsActivity.contactDisplayNameFormat,
         SettingsActivity.uppercaseLastName

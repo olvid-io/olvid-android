@@ -80,7 +80,9 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
-import io.olvid.messenger.customClasses.InitialView;
+import androidx.compose.ui.platform.ComposeView;
+import io.olvid.messenger.designsystem.avatar.AvatarComposeViewKt;
+import io.olvid.messenger.designsystem.avatar.AvatarSource;
 import io.olvid.messenger.lock_screen.LockScreenOrNotActivity;
 import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
@@ -96,7 +98,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
     int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     ActionShortcutConfigurationViewModel viewModel;
 
-    private InitialView currentIdentityInitialView;
+    private ComposeView currentIdentityInitialView;
     private TextView currentNameTextView;
     private TextView currentNameSecondLineTextView;
     private ImageView currentIdentityMutedImageView;
@@ -105,7 +107,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
     private PopupWindow ownedIdentityPopupWindow;
 
     private TextView discussionEmptyTextView;
-    private InitialView discussionInitialView;
+    private ComposeView discussionInitialView;
     private TextView discussionTitleTextView;
     private TextView discussionGroupMembersTextView;
 
@@ -359,7 +361,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
 
 
         if (ownedIdentity == null) {
-            currentIdentityInitialView.setUnknown();
+            AvatarComposeViewKt.setAvatar(currentIdentityInitialView, AvatarSource.unknown());
             currentIdentityMutedImageView.setVisibility(View.GONE);
             return;
         }
@@ -391,7 +393,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
                 currentNameSecondLineTextView.setText(null);
             }
         }
-        currentIdentityInitialView.setOwnedIdentity(ownedIdentity);
+        AvatarComposeViewKt.setAvatar(currentIdentityInitialView, ownedIdentity);
         if (ownedIdentity.prefMuteNotifications && (ownedIdentity.prefMuteNotificationsTimestamp == null || ownedIdentity.prefMuteNotificationsTimestamp > System.currentTimeMillis())) {
             currentIdentityMutedImageView.setVisibility(View.VISIBLE);
         } else {
@@ -415,7 +417,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         discussionEmptyTextView.setVisibility(View.GONE);
 
         discussionInitialView.setVisibility(View.VISIBLE);
-        discussionInitialView.setDiscussion(discussionAndContactNames.discussion);
+        AvatarComposeViewKt.setAvatar(discussionInitialView, discussionAndContactNames.discussion);
 
         discussionTitleTextView.setVisibility(View.VISIBLE);
         if (discussionAndContactNames.discussion.title == null || discussionAndContactNames.discussion.title.isEmpty()) {

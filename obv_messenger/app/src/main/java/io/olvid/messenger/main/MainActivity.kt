@@ -82,12 +82,10 @@ import androidx.core.view.updateMargins
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import androidx.preference.PreferenceManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -105,13 +103,14 @@ import io.olvid.messenger.billing.SubscriptionRepository
 import io.olvid.messenger.contact.ContactDetailsActivity
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.ConfigurationPojo
-import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog
 import io.olvid.messenger.customClasses.OpenHiddenProfileDialog
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.onBackPressed
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.setAvatar
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.audio.AudioPlaybackNotification
 import io.olvid.messenger.discussion.location.LocationActivity
@@ -123,15 +122,18 @@ import io.olvid.messenger.history_transfer.TransferNotificationService
 import io.olvid.messenger.history_transfer.TransferService
 import io.olvid.messenger.history_transfer.components.TransferNotification
 import io.olvid.messenger.lock_screen.LockableActivity
+import io.olvid.messenger.google_services.InstallReferrerUtils
 import io.olvid.messenger.main.calls.CallLogFragment
 import io.olvid.messenger.main.contacts.ContactListFragment
 import io.olvid.messenger.main.contacts.ContactListViewModel
 import io.olvid.messenger.main.discussions.DiscussionListFragment
+import io.olvid.messenger.main.discussions.PhotoShareLauncher
 import io.olvid.messenger.main.groups.GroupListFragment
 import io.olvid.messenger.main.search.GlobalSearchViewModel
 import io.olvid.messenger.main.tips.TipsViewModel
 import io.olvid.messenger.notifications.AndroidNotificationManager
 import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity
+import io.olvid.messenger.onboarding.flow.ClipboardDeferredLink
 import io.olvid.messenger.onboarding.flow.PendingInvitationLink
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity
@@ -148,16 +150,16 @@ import io.olvid.messenger.webrtc.components.CallNotification
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.getValue
 import kotlin.time.Duration.Companion.milliseconds
 
 
-class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
+class MainActivity : LockableActivity(), OnClickListener,
+    SharedPreferences.OnSharedPreferenceChangeListener {
     private val globalSearchViewModel by viewModels<GlobalSearchViewModel>()
     private var globalSearchDebounceJob: Job? = null
     private val tipsViewModel by viewModels<TipsViewModel>()
     private val contactListViewModel by viewModels<ContactListViewModel>()
-    private val ownInitialView: InitialView by lazy { findViewById(R.id.owned_identity_initial_view) }
+    private val ownInitialView: ComposeView by lazy { findViewById(R.id.owned_identity_initial_view) }
     private val titleTextView: TextView by lazy { findViewById(R.id.main_title) }
     private var tabsPagerAdapter: TabsPagerAdapter? = null
     private val viewPager: ViewPager2 by lazy { findViewById(R.id.view_pager_container) }
@@ -169,16 +171,24 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
     private var showPlusButton by mutableStateOf(true)
     private var insets by mutableStateOf(Insets.NONE)
 
-    
+
     @JvmField
     var requestNotificationPermission = registerForActivityResult(
         RequestPermission()
     ) {}
+    private val photoShareLauncher = PhotoShareLauncher(this)
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         PreferenceManager.getDefaultSharedPreferences(this)
             .registerOnSharedPreferenceChangeListener(this)
+        // debug builds accept a raw install referrer as an intent extra to test the deferred link
+        // flow without a real Play install: a flagged referrer makes the next onboarding screen
+        // look for an Olvid link in the clipboard, exactly like after a real Play install
+//        if (BuildConfig.DEBUG) {
+//            intent?.getStringExtra(DEBUG_INSTALL_REFERRER_INTENT_EXTRA)
+//                ?.let(ClipboardDeferredLink::handleInstallReferrer)
+//        }
         App.runThread {
             val identityCount: Int = try {
                 AppSingleton.getEngine().getOwnedIdentities().size
@@ -187,8 +197,14 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                 AppDatabase.getInstance().ownedIdentityDao().countAll()
             }
             if (identityCount == 0) {
+                // a link tapped before installing from the Play Store is waiting in the clipboard
+                // when the install referrer says so: let the onboarding pick it up (#1284)
+                if (BuildConfig.USE_GOOGLE_LIBS) {
+                    InstallReferrerUtils.fetchDeferredInvitationIfNeeded(applicationContext)
+                }
                 val onboardingIntent =
                     Intent(applicationContext, OnboardingFlowActivity::class.java)
+                onboardingIntent.putExtra(OnboardingFlowActivity.FIRST_ID_INTENT_EXTRA, true)
                 startActivity(onboardingIntent)
                 finish()
             }
@@ -200,11 +216,18 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
         }
 
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+            statusBarStyle = SystemBarStyle.auto(
+                Color.Transparent.toArgb(),
+                Color.Transparent.toArgb()
+            ),
+            navigationBarStyle = SystemBarStyle.auto(
+                Color.Transparent.toArgb(),
+                ContextCompat.getColor(this, R.color.blackOverlay)
+            )
         )
 
         super.onCreate(savedInstanceState)
+        photoShareLauncher.onRestoreInstanceState(savedInstanceState)
 
         AudioPlaybackNotificationManager.bind(this)
 
@@ -215,10 +238,10 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
         }
 
         setContentView(R.layout.activity_main)
-        val root : CoordinatorLayout = findViewById(R.id.root_coordinator)
-        val bottomButtonSpacer : View = findViewById(R.id.bottom_button_spacer)
-        bottomButtonSpacer.setOnClickListener {  } // disable touch events below the buttons
-        val toolbar : Toolbar = findViewById(R.id.toolbar)
+        val root: CoordinatorLayout = findViewById(R.id.root_coordinator)
+        val bottomButtonSpacer: View = findViewById(R.id.bottom_button_spacer)
+        bottomButtonSpacer.setOnClickListener { } // disable touch events below the buttons
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
@@ -340,7 +363,8 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                 AnimatedVisibility(
                     visible = cachedOngoingTransferId != null
                 ) {
-                    val transferProgress = cachedOngoingTransferId?.let { TransferService.getTransferProgress(it)?.third }
+                    val transferProgress =
+                        cachedOngoingTransferId?.let { TransferService.getTransferProgress(it)?.third }
                     transferProgress?.let {
                         TransferNotification(
                             modifier = Modifier.padding(top = 8.dp),
@@ -354,15 +378,25 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                                         this@MainActivity,
                                         HistoryTransferActivity::class.java
                                     ).apply {
-                                        putExtra(HistoryTransferActivity.TRANSFER_ID_INTENT_EXTRA, cachedOngoingTransferId)
+                                        putExtra(
+                                            HistoryTransferActivity.TRANSFER_ID_INTENT_EXTRA,
+                                            cachedOngoingTransferId
+                                        )
                                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                     })
                             },
                             onAbort = {
-                                startService(Intent(this@MainActivity, TransferNotificationService::class.java).apply {
-                                    putExtra(TransferNotificationService.EXTRA_TRANSFER_ID, cachedOngoingTransferId)
-                                    action = TransferNotificationService.ACTION_ABORT
-                                })
+                                startService(
+                                    Intent(
+                                        this@MainActivity,
+                                        TransferNotificationService::class.java
+                                    ).apply {
+                                        putExtra(
+                                            TransferNotificationService.EXTRA_TRANSFER_ID,
+                                            cachedOngoingTransferId
+                                        )
+                                        action = TransferNotificationService.ACTION_ABORT
+                                    })
                             }
                         )
                     }
@@ -446,15 +480,16 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                     if (AppDatabase.getInstance().ownedIdentityDao().countAll() == 0) {
                         val onboardingIntent =
                             Intent(applicationContext, OnboardingFlowActivity::class.java)
+                        onboardingIntent.putExtra(OnboardingFlowActivity.FIRST_ID_INTENT_EXTRA, true)
                         startActivity(onboardingIntent)
                         finish()
                     }
                 }
-                ownInitialView.setUnknown()
+                ownInitialView.setAvatar(AvatarSource.unknown())
                 ownedIdentityMutedImageView.visibility = View.GONE
                 return@observe
             }
-            ownInitialView.setOwnedIdentity(ownedIdentity)
+            ownInitialView.setAvatar(ownedIdentity)
             App.runThread {
                 tipsViewModel.refreshTipToShow(this)
             }
@@ -470,7 +505,6 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
             }
         }
 
-        @Suppress("KotlinConstantConditions")
         if (BuildConfig.USE_BILLING_LIB) {
             SubscriptionRepository.initialize(baseContext)
         }
@@ -494,8 +528,10 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
 
         val countsLiveData = UnreadCountsSingleton.getUnreadCountsByOwnedIdentityLiveData()
         val mutedLiveData = UnreadCountsSingleton.getMutedOwnedIdentitiesLiveData()
-        val mutedExceptMentionLiveData = UnreadCountsSingleton.getMutedExceptMentionOwnedIdentitiesLiveData()
-        val nonHiddenIdentitiesLiveData = AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenLiveData()
+        val mutedExceptMentionLiveData =
+            UnreadCountsSingleton.getMutedExceptMentionOwnedIdentitiesLiveData()
+        val nonHiddenIdentitiesLiveData =
+            AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenLiveData()
 
         // discussions tab dot — fires for current identity
         combineLatest(
@@ -532,7 +568,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
             nonHidden.any { oi ->
                 val key = BytesKey(oi.bytesOwnedIdentity)
                 key != currentKey && counts[key]?.hasNotificationDot() == true
-                        && (key !in muted || (key in mutedExceptMention && counts[key]?.mentionMessageCountNonArchived?.let { it > 0} == true))
+                        && (key !in muted || (key in mutedExceptMention && counts[key]?.mentionMessageCountNonArchived?.let { it > 0 } == true))
             }
         }.distinctUntilChanged().observe(this) { hasUnread ->
             unreadMarker.visibility = if (hasUnread == true) View.VISIBLE else View.GONE
@@ -560,14 +596,18 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
             }
         }
 
-        // check notifications permissions
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        // check notifications permissions, only on first creation (launching it during a relaunch can crash in system_server)
+        if (savedInstanceState == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                try {
+                    requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } catch (e: Exception) {
+                    Logger.x(e)
+                }
             }
         }
     }
@@ -576,13 +616,18 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
         when (key) {
             SettingsActivity.PREF_KEY_LATEST_APP_VERSION,
             SettingsActivity.PREF_KEY_MIN_APP_VERSION,
-            SettingsActivity.PREF_KEY_UPDATE_AVAILABLE_TIP_DISMISSED -> App.runThread { tipsViewModel.refreshTipToShow(this) }
+            SettingsActivity.PREF_KEY_UPDATE_AVAILABLE_TIP_DISMISSED -> App.runThread {
+                tipsViewModel.refreshTipToShow(
+                    this
+                )
+            }
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean(ALREADY_CREATED_BUNDLE_EXTRA, true)
+        photoShareLauncher.onSaveInstanceState(outState)
     }
 
     private fun handleIntent(intent: Intent?) {
@@ -705,7 +750,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                         try {
                             // detect if it is a license or a keycloak
                             val configurationPojo = AppSingleton.getJsonObjectMapper().readValue(
-                                ObvBase64.decode(configurationMatcher.group(2)!!),
+                                ObvBase64.decode(configurationMatcher.group(2).orEmpty()),
                                 ConfigurationPojo::class.java
                             )
                             val dialogTitleResourceId: Int =
@@ -824,7 +869,6 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                                             this@MainActivity,
                                             OnboardingFlowActivity::class.java
                                         )
-                                            .putExtra(OnboardingFlowActivity.PROFILE_CREATION_INTENT_EXTRA, true)
 
                                         startActivity(onboardingIntent)
                                         App.toast(
@@ -910,7 +954,6 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
             notificationDots[position].visibility = View.GONE
         }
     }
-
 
 
     override fun onPause() {
@@ -1022,6 +1065,9 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
             startActivity(Intent(this, StorageManagerActivity::class.java))
         } else if (itemId == R.id.action_troubleshooting) {
             startActivity(Intent(this, TroubleshootingActivity::class.java))
+        } else if (itemId == R.id.action_photo) {
+            findViewById<View>(R.id.action_photo)?.let { photoShareLauncher.showMenu(it) }
+            return true
         } else if (itemId == R.id.menu_action_location) {
             if (viewPager.currentItem == DISCUSSIONS_TAB) {
                 when (SettingsActivity.locationIntegration) {
@@ -1180,6 +1226,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
     companion object {
         const val LINK_ACTION = "link_action"
         const val LINK_URI_INTENT_EXTRA = "link_uri"
+        const val DEBUG_INSTALL_REFERRER_INTENT_EXTRA = "debug_install_referrer"
         const val FORWARD_ACTION = "forward_action"
         const val FORWARD_TO_INTENT_EXTRA = "forward_to"
         const val OLVID_PLUS_ACTION = "olvid_plus_action"

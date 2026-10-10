@@ -39,11 +39,13 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
     public static final String AUTO_JOIN_GROUPS = "auto_join_groups";
     public static final String SEND_READ_RECEIPT = "send_read_receipt";
     public static final String UNARCHIVE_ON_NOTIFICATION = "unarchive_on_notification";
-    static HashSet<String> DEFAULT_DOMAIN = new HashSet<>(Arrays.asList(AUTO_JOIN_GROUPS, SEND_READ_RECEIPT, UNARCHIVE_ON_NOTIFICATION));
+    public static final String PREFERRED_REACTION = "preferred_reaction";
+    static HashSet<String> DEFAULT_DOMAIN = new HashSet<>(Arrays.asList(AUTO_JOIN_GROUPS, SEND_READ_RECEIPT, UNARCHIVE_ON_NOTIFICATION, PREFERRED_REACTION));
 
     public String auto_join_groups;
     public Boolean send_read_receipt;
     public Boolean unarchive_on_notification;
+    public String preferred_reaction;
     public HashSet<String> domain;
 
     public static SettingsSyncSnapshot of(OwnedIdentity ownedIdentity) {
@@ -51,6 +53,7 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
         settingsSyncSnapshot.auto_join_groups = SettingsActivity.getAutoJoinGroups().getStringValue();
         settingsSyncSnapshot.send_read_receipt = SettingsActivity.getDefaultSendReadReceipt();
         settingsSyncSnapshot.unarchive_on_notification = SettingsActivity.getUnarchiveDiscussionOnNotification();
+        settingsSyncSnapshot.preferred_reaction = SettingsActivity.getDefaultReaction();
         settingsSyncSnapshot.domain = DEFAULT_DOMAIN;
         return settingsSyncSnapshot;
     }
@@ -65,6 +68,9 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
         }
         if (domain.contains(UNARCHIVE_ON_NOTIFICATION)) {
             SettingsActivity.setUnarchiveDiscussionOnNotification(getUnarchiveOnNotification());
+        }
+        if (domain.contains(PREFERRED_REACTION) && preferred_reaction != null) {
+            SettingsActivity.setDefaultReaction(preferred_reaction);
         }
     }
 
@@ -83,6 +89,10 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
         return unarchive_on_notification == null || unarchive_on_notification;
     }
 
+    @JsonIgnore
+    public String getPreferredReaction() {
+        return preferred_reaction == null ? SettingsActivity.PREF_KEY_DEFAULT_REACTION_DEFAULT : preferred_reaction;
+    }
 
     @Override
     @JsonIgnore
@@ -111,6 +121,12 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
                 }
                 case UNARCHIVE_ON_NOTIFICATION: {
                     if (getUnarchiveOnNotification() != other.getUnarchiveOnNotification()) {
+                        return false;
+                    }
+                    break;
+                }
+                case PREFERRED_REACTION: {
+                    if (!getPreferredReaction().equals(other.getPreferredReaction())) {
                         return false;
                     }
                     break;
@@ -148,6 +164,12 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
                 case UNARCHIVE_ON_NOTIFICATION: {
                     if (getUnarchiveOnNotification() != other.getUnarchiveOnNotification()) {
                         diffs.add(ObvSyncDiff.createUnarchiveOnNotification(getUnarchiveOnNotification(), other.getUnarchiveOnNotification()));
+                    }
+                    break;
+                }
+                case PREFERRED_REACTION: {
+                    if (!getPreferredReaction().equals(other.getPreferredReaction())) {
+                        diffs.add(ObvSyncDiff.createSettingPreferredReaction(getPreferredReaction(), other.getPreferredReaction()));
                     }
                     break;
                 }

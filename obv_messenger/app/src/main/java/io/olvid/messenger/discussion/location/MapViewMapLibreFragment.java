@@ -99,6 +99,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     private static final int TRANSITION_DURATION_MS = 500;
 
     @Nullable private Runnable onMapReadyCallback = null;
+    private boolean mapReady = false;
     @Nullable private Runnable redrawMarkersCallback = null;
     @Nullable private Consumer<String> failedStyleUrlCallback = null;
     @Nullable private Consumer<Boolean> layersButtonVisibilitySetter = null;
@@ -299,7 +300,8 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
                     }
                 }
                 // if we reach this point, the download failed
-                if (failedStyleUrlCallback != null) {
+                // when a style is already set, this is a background refresh: MapLibre reports style load failures itself
+                if (noStyleLoadedYet && failedStyleUrlCallback != null) {
                     failedStyleUrlCallback.accept(url);
                 }
             } else {
@@ -431,6 +433,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         recomputePrecisionCirclesLayer();
 
 
+        mapReady = true;
         // call parent callback if set
         if (onMapReadyCallback != null) {
             onMapReadyCallback.run();
@@ -626,9 +629,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     @Override
     void setLayersButtonVisibilitySetter(Consumer<Boolean> layersButtonVisibilitySetter) {
         this.layersButtonVisibilitySetter = layersButtonVisibilitySetter;
-        if (currentStyleId != null) {
-            layersButtonVisibilitySetter.accept(osmServerStyles.size() > 1);
-        }
+        layersButtonVisibilitySetter.accept(osmServerStyles.size() > 1);
     }
 
     @Override
@@ -679,7 +680,12 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
 
     @Override
     public void setOnMapReadyCallback(@Nullable Runnable onMapReadyCallback) {
-        this.onMapReadyCallback = onMapReadyCallback;
+        if (mapReady && onMapReadyCallback != null) {
+            // the map was ready before the callback was attached (e.g. fragment restored by the FragmentManager)
+            onMapReadyCallback.run();
+        } else {
+            this.onMapReadyCallback = onMapReadyCallback;
+        }
     }
 
     @Override

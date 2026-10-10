@@ -66,10 +66,13 @@ import androidx.lifecycle.map
 import coil.compose.rememberAsyncImagePainter
 import io.olvid.messenger.App
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.MAX_BITMAP_SIZE
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
+import io.olvid.messenger.designsystem.dampened
+import io.olvid.messenger.designsystem.scaled
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionViewModel
 import io.olvid.messenger.discussion.message.attachments.Attachment
@@ -82,6 +85,7 @@ fun LinkPreview(
     message: Message,
     discussionViewModel: DiscussionViewModel?,
     linkPreviewViewModel: LinkPreviewViewModel?,
+    scale: Float = 1f,
     highlighter: ((Context, AnnotatedString) -> AnnotatedString)? = null,
     onLongClick: () -> Unit = {},
     blockClicks: Boolean,
@@ -137,8 +141,8 @@ fun LinkPreview(
             }
             linkPreviewViewModel?.linkPreviewLoader(
                 text = message.contentBody,
-                imageWidth = size,
-                imageHeight = size,
+                imageWidth = MAX_BITMAP_SIZE,
+                imageHeight = MAX_BITMAP_SIZE,
                 messageId = message.id
             ) {
                 opengraph = it
@@ -155,6 +159,7 @@ fun LinkPreview(
             LinkPreviewContent(
                 modifier = modifier,
                 openGraph = it,
+                scale = scale,
                 onLongClick = onLongClick,
                 highlighter = highlighter,
                 blockClicks = blockClicks,
@@ -168,6 +173,7 @@ fun LinkPreview(
 fun LinkPreviewContent(
     modifier: Modifier = Modifier,
     openGraph: OpenGraph,
+    scale: Float = 1f,
     onLongClick: () -> Unit = {},
     highlighter: ((Context, AnnotatedString) -> AnnotatedString)?,
     blockClicks: Boolean,
@@ -216,7 +222,7 @@ fun LinkPreviewContent(
                 else { { showMenu = true } }
                 if (openGraph.hasLargeImageToDisplay()) {
                     Column(modifier = Modifier.padding(4.dp)) {
-                        LinkTitleAndDescription(openGraph = openGraph, highlighter)
+                        LinkTitleAndDescription(openGraph = openGraph, highlighter, scale = scale)
                         LinkImage(
                             openGraph.bitmap,
                             isLarge = true,
@@ -230,7 +236,7 @@ fun LinkPreviewContent(
                             onClick = imageClick,
                             onLongClick = imageLongClick)
                         Spacer(modifier = Modifier.width(4.dp))
-                        LinkTitleAndDescription(openGraph = openGraph, highlighter)
+                        LinkTitleAndDescription(openGraph = openGraph, highlighter, scale = scale)
                     }
                 }
             }
@@ -319,6 +325,7 @@ private fun LinkImage(
 private fun LinkTitleAndDescription(
     openGraph: OpenGraph,
     highlighter: ((Context, AnnotatedString) -> AnnotatedString)?,
+    scale: Float = 1f,
 ) {
     Column(modifier = Modifier.padding(top = 2.dp, bottom = 4.dp)) {
         openGraph.title?.let {
@@ -328,7 +335,7 @@ private fun LinkTitleAndDescription(
                     AnnotatedString(it)
                 ) ?: AnnotatedString(it),
                 maxLines = if (openGraph.shouldShowCompleteDescription()) 2 else 1,
-                style = OlvidTypography.body2.copy(
+                style = OlvidTypography.body2.scaled(scale.dampened()).copy(
                     fontWeight = FontWeight.Medium
                 ),
                 color = colorResource(id = R.color.darkGrey),
@@ -342,7 +349,7 @@ private fun LinkTitleAndDescription(
                 AnnotatedString(openGraph.buildDescription())
             ) ?: AnnotatedString(openGraph.buildDescription()),
             maxLines = if (openGraph.shouldShowCompleteDescription()) 100 else 5,
-            style = OlvidTypography.body2,
+            style = OlvidTypography.body2.scaled(scale.dampened()),
             fontWeight = FontWeight.Normal,
             color = colorResource(id = R.color.greyTint),
             overflow = TextOverflow.Ellipsis

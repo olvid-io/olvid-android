@@ -44,8 +44,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -64,6 +67,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -85,7 +89,6 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.activities.ShortcutActivity
 import io.olvid.messenger.customClasses.BytesKey
-import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder.DeletionChoice
@@ -99,14 +102,17 @@ import io.olvid.messenger.designsystem.components.AlwaysShowClearButton
 import io.olvid.messenger.designsystem.components.OlvidCircularProgress
 import io.olvid.messenger.designsystem.components.SearchBar
 import io.olvid.messenger.designsystem.components.SelectionTopAppBar
+import io.olvid.messenger.designsystem.stableSystemBars
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionActivity.ScrollRequest
 import io.olvid.messenger.discussion.search.DiscussionSearchViewModel
 import io.olvid.messenger.discussion.settings.DiscussionSettingsActivity
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.main.invitations.InvitationListViewModel
+import io.olvid.messenger.designsystem.avatar.toAvatarSource
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.webrtc.WebrtcCallService
 import kotlinx.coroutines.delay
@@ -215,6 +221,7 @@ fun DiscussionTopAppBar(
     }
 
     SelectionTopAppBar(
+        windowInsets = WindowInsets.stableSystemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
         modifier = Modifier.indication(
             interactionSource = topBarRippleInteractionSource,
             indication = ripple(
@@ -275,7 +282,11 @@ fun DiscussionTopAppBar(
             } else {
                 with(sharedTransitionScope) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        var initializedInitialView by remember { mutableStateOf<InitialView?>(null) }
+                        val avatar = if (discussion?.isPreDiscussion == true && !invitations.isNullOrEmpty()) {
+                            invitations?.firstOrNull()?.let { invitationViewModel.avatar(it) }
+                        } else {
+                            discussion
+                        }
                         Box(
                             modifier = Modifier.size(40.dp)
                         ) {
@@ -284,33 +295,17 @@ fun DiscussionTopAppBar(
                                 enter = fadeIn(),
                                 exit = fadeOut()
                             ) {
-                                InitialView(
+                                Avatar(
                                     modifier = Modifier
                                         .requiredSize(40.dp)
                                         .sharedElement(
                                             sharedContentState = rememberSharedContentState(key = "profile-photo"),
                                             animatedVisibilityScope = this@AnimatedVisibility
                                         ),
-                                    initialViewSetup = { initialView ->
-                                        if (discussion?.isPreDiscussion == true && invitations.isNullOrEmpty()
-                                                .not()
-                                        ) {
-                                            invitations?.firstOrNull()?.let {
-                                                invitationViewModel.initialViewSetup(
-                                                    initialView,
-                                                    it
-                                                )
-                                            }
-                                        } else {
-                                            discussion?.let {
-                                                initialView.setDiscussion(it)
-                                            } ?: initialView.setUnknown()
-                                        }
-                                        initializedInitialView = initialView
-                                    },
+                                    target = avatar,
                                     onClick = {
                                         discussionViewModel.fullScreenPhotoUrl =
-                                            initializedInitialView?.photoUrl
+                                            (avatar?.toAvatarSource() as? AvatarSource.Single)?.photoUrl
                                     })
                             }
                         }
@@ -411,8 +406,9 @@ fun DiscussionTopAppBar(
                                 enabled = discussionSearchViewModel.hasNext
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_search_prev),
-                                    contentDescription = null
+                                    modifier = Modifier.rotate(180f),
+                                    painter = painterResource(R.drawable.ic_chevron_down),
+                                    contentDescription = stringResource(R.string.content_description_previous_match)
                                 )
                             }
                             IconButton(
@@ -429,8 +425,8 @@ fun DiscussionTopAppBar(
                                 enabled = discussionSearchViewModel.hasPrevious
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_search_next),
-                                    contentDescription = null
+                                    painter = painterResource(R.drawable.ic_chevron_down),
+                                    contentDescription = stringResource(R.string.content_description_next_match)
                                 )
                             }
                         }

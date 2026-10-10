@@ -36,6 +36,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import io.olvid.engine.engine.types.sync.ObvSyncAtom
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
@@ -60,6 +61,7 @@ import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.PropagateArchivedDiscussionsChangeTask
 import io.olvid.messenger.databases.tasks.PropagatePinnedDiscussionsChangeTask
+import io.olvid.messenger.databases.tasks.getDiscussionIdentifier
 import io.olvid.messenger.databases.tasks.propagateMuteSettings
 import io.olvid.messenger.notifications.NotificationActionService
 import io.olvid.messenger.services.MuteExpirationService
@@ -228,12 +230,26 @@ class DiscussionListViewModel : ViewModel() {
         }
     }
 
-    fun markDiscussionAsUnread(discussionId: Long) {
+    fun markDiscussionsAsUnread(discussions: List<Discussion>) {
         viewModelScope.launch(Dispatchers.IO) {
-            AppDatabase.getInstance().discussionDao().updateDiscussionUnreadStatus(
-                discussionId, true
-            )
-            UnreadCountsSingleton.discussionUnreadFlagChanged(discussionId, true)
+            discussions.forEach { discussion ->
+                AppDatabase.getInstance().discussionDao().updateDiscussionUnreadStatus(
+                    discussion.id, true
+                )
+                UnreadCountsSingleton.discussionUnreadFlagChanged(discussion.id, true)
+            }
+            runCatching {
+                discussions.firstOrNull()?.bytesOwnedIdentity?.let { bytesOwnedIdentity ->
+                    AppSingleton.getEngine()
+                        .propagateAppSyncAtomToOtherDevicesIfNeeded(
+                            bytesOwnedIdentity,
+                            ObvSyncAtom.createUnreadDiscussionsChange(
+                                discussions.map { it.getDiscussionIdentifier() },
+                                true
+                            )
+                        )
+                }
+            }
         }
     }
 
@@ -701,6 +717,18 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                 Message.TYPE_LOST_GROUP_SEND_MESSAGE -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(context.getString(string.text_you_are_no_longer_writer))
+                    }
+                }
+
+                Message.TYPE_GAINED_GROUP_MODERATOR -> {
+                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                        append(context.getString(string.text_you_became_moderator))
+                    }
+                }
+
+                Message.TYPE_LOST_GROUP_MODERATOR -> {
+                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                        append(context.getString(string.text_you_are_no_longer_moderator))
                     }
                 }
 

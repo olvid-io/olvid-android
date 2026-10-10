@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">మీ పరికరాలలో ఒకటి %1$d రోజులోపు గడువు ముగిసి, నిష్క్రియం చేయబడుతుంది.\nదీన్ని సక్రియంగా ఉంచడానికి మీరు **Olvid+** చందా కొనుగోలు చేయవచ్చు.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">మీ పరికరాలలో ఒకటి %1$d రోజుల్లో గడువు ముగిసి, నిష్క్రియం చేయబడుతుంది. దాన్ని సక్రియంగా ఉంచడానికి మీరు **Olvid+** చందా కొనుగోలు చేయవచ్చు.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">ఈ పరికరం **%1$d రోజుల్లో** காலாவతి అవుతుంది మరియు నిష్క్రియం చేయబడుతుంది.\nదీన్ని தொடர்ந்து ఉపయోగించడానికి, మీరు **Olvid+** చందా కొనుగోలు చేయవచ్చు.</item>
+		<item quantity="other" state="needs_review" hash="993103846">ఈ పరికరం **%1$d రోజుల్లో** காலாவతి అవుతుంది మరియు నిష్క్రియం చేయబడుతుంది.\nదీన్ని தொடர்ந்து ఉపయోగించడానికి, మీరు **Olvid+** చందా కొనుగోలు చేయవచ్చు.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s సమూహంలో చేరాడు</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s సమూహంలో చేరాడు</item>
@@ -80,10 +84,10 @@
 	</plurals>
 	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1772966333">సంభాషణ ఆర్కైవ్ చేయబడింది.</item>
-		<item quantity="other" state="needs_review" hash="1402495414">%1$d చర్చలు ఆర్కైవ్ చేయబడ్డాయి</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d సంభాషణలు ఆర్కైవ్ చేయబడ్డాయి</item>
 	</plurals>
 	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1312483800">చర్చను పునరుద్ధరించారు</item>
+		<item quantity="one" state="needs_review" hash="-1312483800">సంభాషణను పునరుద్ధరించారు</item>
 		<item quantity="other" state="needs_review" hash="-2093736213">%1$d సంభాషణలు ఆర్కైవ్ నుండి తొలగించబడ్డాయి</item>
 	</plurals>
 	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -116,19 +120,19 @@
 	</plurals>
 	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-606769319">మీరు ఈ సంభాషణలో ఉన్న **అందరికీ** ఒక సందేశాన్ని **శాశ్వతంగా** తొలగించబోతున్నారు. మీరు నిజంగానే అలా చేయాలనుకుంటున్నారో లేదో నిర్ధారించుకోండి.</item>
-		<item quantity="other" state="needs_review" hash="-1284393519">మీరు ఈ చర్చలో ఉన్న **అందరికీ** %1$d సందేశాలను **శాశ్వతంగా** తొలగించబోతున్నారు. మీరు నిజంగానే దీన్ని చేయాలనుకుంటున్నారో లేదో నిర్ధారించుకోండి.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">మీరు ఈ సంభాషణలో ఉన్న **అందరికీ** %1$d సందేశాలను **శాశ్వతంగా** తొలగించబోతున్నారు. మీరు నిజంగానే దీన్ని చేయాలనుకుంటున్నారో లేదో నిర్ధారించుకోండి.</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="2118446236">మీరు ఈ సంభాషణలోని **అందరికీ** ఈ సంభాషణను మరియు దానిలోని సందేశాలను **శాశ్వతంగా** తొలగించబోతున్నారు. మీరు నిజంగానే దీన్ని చేయాలనుకుంటున్నారో లేదో నిర్ధారించుకోండి.</item>
 		<item quantity="other" state="needs_review" hash="-1558931055">మీరు %1$d లోని సంభాషణలు మరియు వాటిలోని సందేశాలను **శాశ్వతంగా** తొలగించబోతున్నారు, మరియు ఈ చర్య ఈ సంభాషణలలో పాల్గొన్న **అందరికీ** వర్తిస్తుంది. మీరు నిజంగా ఇది చేయాలనుకుంటున్నారో లేదో నిర్ధారించుకోండి.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">మీరు ఒక ఛానెల్ కలిగి ఉన్న ప్రతి గ్రూప్ సభ్యుడిని (ప్రస్తుతం 1 సభ్యుడు) ఒక ప్రైవేట్ చర్చకు ఆహ్వానించబోతున్నారు.\nమీరు కొనసాగించాలనుకుంటున్నారా?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">మీరు ఒక ఛానెల్‌ను కలిగి ఉన్న ప్రతి గ్రూప్ సభ్యుడిని (ప్రస్తుతం %1$d మంది సభ్యులు) ఒక ప్రైవేట్ చర్చకు ఆహ్వానించబోతున్నారు. మీరు కొనసాగించాలనుకుంటున్నారా?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">మీరు ఒక ఛానెల్ కలిగి ఉన్న ప్రతి గ్రూప్ సభ్యుడిని (ప్రస్తుతం 1 సభ్యుడు) ఒక ప్రైవేట్ సంభాషణకు ఆహ్వానించబోతున్నారు.\nమీరు కొనసాగించాలనుకుంటున్నారా?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">మీరు ఒక ఛానెల్‌ను కలిగి ఉన్న ప్రతి గ్రూప్ సభ్యుడిని (ప్రస్తుతం %1$d మంది సభ్యులు) ఒక ప్రైవేట్ సంభాషణకు ఆహ్వానించబోతున్నారు. మీరు కొనసాగించాలనుకుంటున్నారా?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">ఒక గ్రూప్ సభ్యుడిని ఒక ప్రైవేట్ చర్చకు ఆహ్వానించవచ్చు.</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d గ్రూప్ సభ్యులను ఒక ప్రైవేట్ చర్చకు ఆహ్వానించవచ్చు</item>
+		<item quantity="one" state="needs_review" hash="-127723614">ఒక గ్రూప్ సభ్యుడిని ఒక ప్రైవేట్ సంభాషణకు ఆహ్వానించవచ్చు.</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d గ్రూప్ సభ్యులను ఒక ప్రైవేట్ సంభాషణకు ఆహ్వానించవచ్చు</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 సాధారణ సమూహం</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">%1$d సమూహానికి జోడించు</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">%1$d సమూహాలకు జోడించండి</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">మీకు ఇప్పటికే ఈ పాల్గొనే వారితో ఒక సంభాషణ ఉంది.</item>
+		<item quantity="other" state="needs_review" hash="809550612">మీకు ఇప్పటికే ఈ పాల్గొనే వారితో %1$d సంభాషణలు ఉన్నాయి.</item>
 	</plurals>
 </resources>

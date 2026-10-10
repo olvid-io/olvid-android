@@ -19,6 +19,9 @@
 
 package io.olvid.messenger.databases.tasks;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -45,6 +48,18 @@ public class PostMessageInDiscussionTask implements Runnable {
     private final OpenGraph openGraph;
     private final List<JsonUserMention> mentions;
     private final JsonPoll poll;
+
+    // resolve the expiration to apply to an outgoing message posted outside the draft flow (location messages):
+    // the ephemeral settings selected in the compose area (stored on the discussion draft) combined with the discussion default settings,
+    // exactly like the draft-consuming path in run() does
+    @Nullable
+    static JsonExpiration computeOutboundExpiration(@NonNull AppDatabase db, long discussionId) {
+        DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
+        JsonExpiration discussionDefaultJsonExpiration = discussionCustomization == null ? null : discussionCustomization.getExpirationJson();
+        Message draftMessage = db.messageDao().getDiscussionDraftMessageSync(discussionId);
+        JsonExpiration draftJsonExpiration = draftMessage == null ? null : draftMessage.getJsonMessage().getJsonExpiration();
+        return draftJsonExpiration == null ? discussionDefaultJsonExpiration : draftJsonExpiration.computeGcd(discussionDefaultJsonExpiration);
+    }
 
     public PostMessageInDiscussionTask(String body, long discussionId, boolean showToast, OpenGraph openGraph, List<JsonUserMention> mentions, JsonPoll poll) {
         this.db = AppDatabase.getInstance();
@@ -108,13 +123,10 @@ public class PostMessageInDiscussionTask implements Runnable {
             }
 
             db.runInTransaction(() -> {
-                discussion.lastOutboundMessageSequenceNumber++;
-                db.discussionDao().updateLastOutboundMessageSequenceNumber(discussion.id, discussion.lastOutboundMessageSequenceNumber);
-                discussion.updateLastMessageTimestamp(System.currentTimeMillis());
-                db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                long senderSequenceNumber = discussion.lastOutboundMessageSequenceNumber + 1;
                 Message message = new Message(
                         db,
-                        discussion.lastOutboundMessageSequenceNumber,
+                        senderSequenceNumber,
                         jsonMessage,
                         null,
                         System.currentTimeMillis(),
@@ -133,6 +145,10 @@ public class PostMessageInDiscussionTask implements Runnable {
                 if (message.isEmpty()) {
                     return;
                 }
+                discussion.lastOutboundMessageSequenceNumber = senderSequenceNumber;
+                db.discussionDao().updateLastOutboundMessageSequenceNumber(discussion.id, discussion.lastOutboundMessageSequenceNumber);
+                discussion.updateLastMessageTimestamp(System.currentTimeMillis());
+                db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                 message.id = db.messageDao().insert(message);
                 message.post(showToast, null);
             });
@@ -152,20 +168,20 @@ public class PostMessageInDiscussionTask implements Runnable {
             }
 
             db.runInTransaction(() -> {
+                draftMessage.setJsonMessage(jsonMessage);
+                draftMessage.recomputeAttachmentCount(db);
+                if (draftMessage.isEmpty()) {
+                    return;
+                }
                 discussion.lastOutboundMessageSequenceNumber++;
                 db.discussionDao().updateLastOutboundMessageSequenceNumber(discussion.id, discussion.lastOutboundMessageSequenceNumber);
                 discussion.updateLastMessageTimestamp(System.currentTimeMillis());
                 db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                 draftMessage.senderSequenceNumber = discussion.lastOutboundMessageSequenceNumber;
-                draftMessage.setJsonMessage(jsonMessage);
                 draftMessage.mentioned = JsonUserMention.isIdentityMentioned(jsonMessage.jsonUserMentions, draftMessage.senderIdentifier);
                 draftMessage.status = Message.STATUS_UNPROCESSED;
                 draftMessage.timestamp = System.currentTimeMillis();
                 draftMessage.computeOutboundSortIndex(db);
-                draftMessage.recomputeAttachmentCount(db);
-                if (draftMessage.isEmpty()) {
-                    return;
-                }
                 db.messageDao().update(draftMessage);
                 draftMessage.post(showToast, null);
             });

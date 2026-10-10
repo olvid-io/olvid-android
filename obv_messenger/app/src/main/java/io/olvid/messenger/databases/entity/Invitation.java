@@ -156,7 +156,12 @@ public class Invitation {
     }
 
     public boolean requiresAction() {
-        switch (associatedDialog.getCategory().getId()) {
+        return categoryRequiresAction(associatedDialog.getCategory().getId());
+    }
+
+    // also drives the notification dots (UnreadCountsSingleton, MessageDao.unreadMessagesOrInvitationsExist)
+    public static boolean categoryRequiresAction(int categoryId) {
+        switch (categoryId) {
             case ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY:
             case ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY:
             case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:

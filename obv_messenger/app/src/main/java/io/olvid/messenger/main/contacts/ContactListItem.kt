@@ -57,13 +57,13 @@ import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.EstablishingChannel
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.Avatar
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -73,7 +73,7 @@ fun ContactListItem(
     title: AnnotatedString,
     body: AnnotatedString?,
     onClick: () -> Unit,
-    initialViewSetup: (initialView: InitialView) -> Unit,
+    avatar: AvatarTarget?,
     publishedDetails: Boolean = false,
     publishedDetailsNotification: Boolean = false,
     startContent: (@Composable () -> Unit)? = null,
@@ -82,6 +82,7 @@ fun ContactListItem(
     onRenameContact: (() -> Unit)? = null,
     onCallContact: (() -> Unit)? = null,
     onDeleteContact: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
 ) {
     Box(
         modifier = modifier.cutoutHorizontalPadding()
@@ -97,16 +98,21 @@ fun ContactListItem(
                 onDeleteContact = onDeleteContact,
             )
         }
+        val longClick = onLongClick
+            ?: if (onRenameContact != null && onCallContact != null && onDeleteContact != null)
+                { { menuOpened = true } }
+            else
+                null
 
         Row(
             modifier = Modifier
                 .then(
-                    if (onRenameContact != null && onCallContact != null && onDeleteContact != null)
+                    if (longClick != null)
                         Modifier.combinedClickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = ripple(bounded = true, color = colorResource(R.color.greyOverlay)),
                             onClick = onClick,
-                            onLongClick = { menuOpened = true },
+                            onLongClick = longClick,
                         )
                     else
                         Modifier.clickable(
@@ -124,14 +130,14 @@ fun ContactListItem(
             startContent?.invoke()
 
             // InitialView
-            InitialView(
+            Avatar(
                 modifier = Modifier
                     .padding(
                         horizontal = 8.dp,
                         vertical = 4.dp,
                     )
                     .requiredSize(40.dp),
-                initialViewSetup = initialViewSetup,
+                target = avatar,
             )
 
             // content
@@ -256,6 +262,6 @@ private fun ContactListItemPreview() {
         publishedDetailsNotification = true,
         shouldAnimateChannel = false,
         onClick = {},
-        initialViewSetup = {},
+        avatar = null,
     )
 }

@@ -28,13 +28,14 @@ import androidx.lifecycle.viewModelScope
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.dao.CallLogItemDao.CallLogItemAndContacts
 import io.olvid.messenger.databases.entity.CallLogItem
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.avatar.AvatarSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -49,35 +50,16 @@ class CallLogViewModel : ViewModel() {
                 .getWithContactForOwnedIdentity(ownedIdentity.bytesOwnedIdentity)
         }
 
-    fun initialViewSetup(initialView: InitialView, callLogItemAndContacts: CallLogItemAndContacts) {
+    fun avatar(callLogItemAndContacts: CallLogItemAndContacts): AvatarTarget =
         if (callLogItemAndContacts.contacts.size == 1) {
-            initialView.setContact(callLogItemAndContacts.oneContact)
+            callLogItemAndContacts.oneContact
         } else {
-            if (callLogItemAndContacts.group == null) {
-                initialView.setInitial(
+            callLogItemAndContacts.group
+                ?: AvatarSource.initial(
                     ByteArray(0),
                     callLogItemAndContacts.contacts.size.toString()
                 )
-            } else {
-                initialView.setGroup(callLogItemAndContacts.group)
-            }
-            val separator: String =
-                initialView.context.getString(R.string.text_contact_names_separator)
-            val sb = StringBuilder()
-            var first = true
-            for (callLogItemContactJoin in callLogItemAndContacts.contacts) {
-                val contactDisplayName =
-                    ContactCacheSingleton.getContactCustomDisplayName(callLogItemContactJoin.bytesContactIdentity)
-                if (contactDisplayName != null) {
-                    if (!first) {
-                        sb.append(separator)
-                    }
-                    first = false
-                    sb.append(contactDisplayName)
-                }
-            }
         }
-    }
 
     fun delete(callLogItem: CallLogItem) {
         viewModelScope.launch(Dispatchers.IO) {

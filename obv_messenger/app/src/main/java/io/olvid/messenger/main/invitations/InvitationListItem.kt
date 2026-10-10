@@ -93,10 +93,11 @@ import io.olvid.engine.datatypes.Constants
 import io.olvid.engine.engine.types.ObvDialog.Category
 import io.olvid.messenger.App
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.databases.entity.Invitation
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.main.invitations.InvitationListViewModel.Action
 import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.ABORT
 import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.ACCEPT
@@ -115,7 +116,7 @@ fun InvitationListItem(
     invitation: Invitation?,
     title: AnnotatedString,
     date: AnnotatedString,
-    initialViewSetup: (initialView: InitialView) -> Unit,
+    avatar: AvatarTarget?,
     onClick: (action: Action, invitation: Invitation, lastSAS: String?) -> Unit,
 ) {
     Card(
@@ -139,7 +140,7 @@ fun InvitationListItem(
             ) {
 
                 // InitialView
-                InitialView(
+                Avatar(
                     modifier = Modifier
                         .padding(
                             top = 12.dp,
@@ -148,7 +149,7 @@ fun InvitationListItem(
                             bottom = 8.dp
                         )
                         .requiredSize(56.dp),
-                    initialViewSetup = initialViewSetup,
+                    target = avatar,
                 )
 
                 // content
@@ -644,7 +645,7 @@ private fun InvitationListItemPreview() {
         invitation = null,
         title = AnnotatedString("title"),
         date = AnnotatedString("date"),
-        initialViewSetup = {}
+        avatar = AvatarSource.unknown()
     )
 }
 

@@ -30,9 +30,7 @@ import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.customClasses.LocationShareQuality;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
-import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
-import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 import io.olvid.messenger.databases.entity.jsons.JsonMessage;
 import io.olvid.messenger.services.UnifiedForegroundService;
@@ -74,12 +72,6 @@ public class PostLocationMessageInDiscussionTask implements Runnable {
             return;
         }
 
-        JsonExpiration discussionDefaultJsonExpiration = null;
-        DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
-        if (discussionCustomization != null) {
-            discussionDefaultJsonExpiration = discussionCustomization.getExpirationJson();
-        }
-
         final JsonMessage jsonMessage = new JsonMessage();
         if (isSharingLocationMessage) {
             jsonMessage.setJsonLocation(JsonLocation.startSharingLocationMessage(shareExpirationInMs, quality, location));
@@ -87,10 +79,7 @@ public class PostLocationMessageInDiscussionTask implements Runnable {
             jsonMessage.setJsonLocation(JsonLocation.sendLocationMessage(location));
         }
         jsonMessage.setBody(jsonMessage.getJsonLocation().getLocationMessageBody());
-
-        if (discussionDefaultJsonExpiration != null) {
-            jsonMessage.setJsonExpiration(discussionDefaultJsonExpiration);
-        }
+        jsonMessage.setJsonExpiration(PostMessageInDiscussionTask.computeOutboundExpiration(db, discussionId));
 
         db.runInTransaction(() -> {
             discussion.lastOutboundMessageSequenceNumber++;

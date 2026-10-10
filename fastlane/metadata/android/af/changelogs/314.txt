@@ -1,0 +1,5 @@
+- Wys slegs die eerste 4 beelde van 'n boodskap, en voeg 'n albumansig by om al die beelde te sien.
+- 'n Dokument-skandeerder is bygevoeg.
+- Dubbeltik op 'n ontvangde boodskap om met 'n verstek-emoji te reageer.
+- Nuwe avatars vir kontakte en groepe sonder 'n profielfoto.
+- 'n Knoppie is bygevoeg om 'n foto direk vanaf die hoofskerm te stuur.

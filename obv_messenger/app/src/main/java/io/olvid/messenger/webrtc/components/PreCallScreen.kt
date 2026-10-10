@@ -42,9 +42,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 import org.webrtc.VideoTrack
 
 @Composable
@@ -55,7 +56,7 @@ fun BoxScope.PreCallScreen(
     cameraEnabled: Boolean = false,
     videoTrack: VideoTrack?,
     mirror: Boolean = true,
-    initialViewSetup: (initialView: InitialView) -> Unit = {},
+    avatar: AvatarTarget? = null,
 ) {
     videoTrack?.let {
         if (cameraEnabled) {
@@ -84,9 +85,9 @@ fun BoxScope.PreCallScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            InitialView(
+            Avatar(
                 modifier = Modifier
-                    .size(100.dp), initialViewSetup = initialViewSetup
+                    .size(100.dp), target = avatar
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
@@ -125,9 +126,9 @@ fun BoxScope.PreCallScreen(
             )
 
             Spacer(modifier = Modifier.height(32.dp))
-            InitialView(
+            Avatar(
                 modifier = Modifier
-                    .size(100.dp), initialViewSetup = initialViewSetup
+                    .size(100.dp), target = avatar
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -176,7 +177,8 @@ fun PreCallScreenScreenPreview() {
             LoremIpsum(120).values.joinToString(" "),
             "Connexion...",
             false,
-            null
-        ) { it.setInitial(byteArrayOf(0, 1, 35), "A") }
+            null,
+            avatar = AvatarSource.initial(byteArrayOf(0, 1, 35), "A"),
+        )
     }
 }

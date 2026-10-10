@@ -19,9 +19,6 @@
 
 package io.olvid.messenger.onboarding.flow.screens.backupv2
 
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -56,17 +53,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -76,7 +67,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity
 import io.olvid.messenger.onboarding.flow.BackupKeyCheckState
 import io.olvid.messenger.onboarding.flow.OnboardingAction
 import io.olvid.messenger.onboarding.flow.OnboardingRoutes

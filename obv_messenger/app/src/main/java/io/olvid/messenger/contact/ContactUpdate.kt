@@ -53,7 +53,8 @@ import androidx.compose.ui.unit.sp
 import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
@@ -180,17 +181,12 @@ internal fun ContactUpdate(
                             modifier = Modifier.padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            InitialView(
+                            Avatar(
                                 modifier = Modifier.size(56.dp),
-                                initialViewSetup = { initialView ->
-                                    if (photoUrl.isEmpty()) {
-                                        initialView.setUnknown()
-                                    } else {
-                                        initialView.setPhotoUrl(
-                                            bytesContactIdentity,
-                                            photoUrl
-                                        )
-                                    }
+                                target = if (photoUrl.isEmpty()) {
+                                    AvatarSource.unknown()
+                                } else {
+                                    AvatarSource.photo(bytesContactIdentity, photoUrl)
                                 })
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(

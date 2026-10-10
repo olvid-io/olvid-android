@@ -32,6 +32,10 @@
         <item quantity="one">L\'un de vos appareils va expirer et être désactivé dans **moins de %1$d jour**.\nVous pouvez souscrire à un abonnement **Olvid+** pour le garder actif.</item>
         <item quantity="other">L\'un de vos appareils va expirer et être désactivé dans **moins de %1$d jours**.\nVous pouvez souscrire à un abonnement **Olvid+** pour le garder actif.</item>
     </plurals>
+    <plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity">
+        <item quantity="one">Cet appareil va expirer et être désactivé dans **moins de %1$d jour**.\nVous pouvez souscrire à un abonnement **Olvid+** pour le garder actif.</item>
+        <item quantity="other">Cet appareil va expirer et être désactivé dans **moins de %1$d jours**.\nVous pouvez souscrire à un abonnement **Olvid+** pour le garder actif.</item>
+    </plurals>
     <plurals name="text_joined_the_group" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s a rejoint le groupe</item>
         <item quantity="other">%1$s ont rejoint le groupe</item>
@@ -295,8 +299,12 @@
         <item quantity="one">Partagé avec %1$d destinataire</item>
         <item quantity="other">Partagé avec %1$d destinataires</item>
     </plurals>
-    <plurals name="button_label_add_to_groups">
+    <plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity">
         <item quantity="one">Ajouter à %1$d groupe</item>
         <item quantity="other">Ajouter à %1$d groupes</item>
+    </plurals>
+    <plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Vous avez déjà une discussion avec ces participants.</item>
+        <item quantity="other">Vous avez déjà %1$d discussions avec ces participants.</item>
     </plurals>
 </resources>

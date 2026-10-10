@@ -22,13 +22,13 @@ package io.olvid.messenger.discussion.location;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class MapFragmentProvider {
-    public static MapViewAbstractFragment getMapFragmentForProvider(SettingsActivity.LocationIntegrationEnum integration) {
+    public static Class<? extends MapViewAbstractFragment> getMapFragmentClassForProvider(SettingsActivity.LocationIntegrationEnum integration) {
         switch (integration) {
             case OSM:
             case CUSTOM_OSM:
-                return new MapViewMapLibreFragment();
+                return MapViewMapLibreFragment.class;
             case MAPS:
-                return new MapViewGoogleMapsFragment();
+                return MapViewGoogleMapsFragment.class;
             case BASIC:
             case NONE:
             default:

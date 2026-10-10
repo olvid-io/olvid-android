@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">നിങ്ങളുടെ ഉപകരണങ്ങളിൽ ഒന്നു %1$d ദിവസത്തിനുള്ളിൽ കാലഹരണപ്പെട്ട് പ്രവർത്തനരഹിതമാകും.\nഅത് സജീവമായി നിലനിർത്താൻ നിങ്ങൾക്ക് ഒരു **Olvid+** സബ്സ്ക്രിപ്ഷൻ വാങ്ങാവുന്നതാണ്.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">നിങ്ങളുടെ ഉപകരണങ്ങളിൽ ഒന്നു %1$d ദിവസത്തിനുള്ളിൽ കാലഹരണപ്പെട്ട് പ്രവർത്തനരഹിതമാകും.\nഅത് സജീവമായി നിലനിർത്താൻ നിങ്ങൾക്ക് ഒരു **Olvid+** സബ്സ്ക്രിപ്ഷൻ വാങ്ങാവുന്നതാണ്.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">ഈ ഉപകരണം **%1$d ദിവസത്തിനുള്ളിൽ** കാലாவതിയായി പ്രവർത്തനരഹിതമാകും.\nഇത് സജീവമായി നിലനിർത്താൻ നിങ്ങൾക്ക് ഒരു **Olvid+** സബ്സ്ക്രിപ്ഷൻ വാങ്ങാം.</item>
+		<item quantity="other" state="needs_review" hash="993103846">ഈ ഉപകരണം **%1$d ദിവസത്തിനുള്ളിൽ** കാലாவതിയായി, പ്രവർത്തനരഹിതമാകും.\nഇത് സജീവമായി നിലനിർത്താൻ നിങ്ങൾക്ക് **Olvid+** സബ്സ്ക്രിപ്ഷൻ വാങ്ങാം.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s ഗ്രൂപ്പിൽ ചേർന്നു</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s ഗ്രൂപ്പിൽ ചേർന്നു</item>
@@ -127,8 +131,8 @@
 		<item quantity="other" state="needs_review" hash="-994717142">നിങ്ങൾ ഈ ഗ്രൂപ്പിലെ ഓരോ അംഗങ്ങളെയും (നിലവിൽ %1$d അംഗങ്ങൾ), നിങ്ങൾക്കൊരു ചാനൽ ഉള്ളതിനാൽ, ഒരു സ്വകാര്യ സംഭാഷണത്തിലേക്ക് ക്ഷണിക്കാൻ പോകുകയാണ്.\nനിങ്ങൾ മുന്നോട്ട് പോകാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">ഒരു ഗ്രൂപ്പിലെ അംഗത്തെ ഒരു സ്വകാര്യ ചർച്ചയിലേക്ക് ക്ഷണിക്കാവുന്നതാണ്</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d ഗ്രൂപ്പിലെ അംഗങ്ങളെ ഒരു സ്വകാര്യ ചർച്ചയിലേക്ക് ക്ഷണിക്കാവുന്നതാണ്</item>
+		<item quantity="one" state="needs_review" hash="-127723614">ഒരു ഗ്രൂപ്പിലെ അംഗത്തെ ഒരു സ്വകാര്യ സംഭാഷണത്തിലേക്ക് ക്ഷണിക്കാവുന്നതാണ്</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d ഗ്രൂപ്പിലെ അംഗങ്ങളെ ഒരു സ്വകാര്യ സംഭാഷണത്തിലേക്ക് ക്ഷണിക്കാവുന്നതാണ്</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 പൊതു ഗ്രൂപ്പ്</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">%1$d ഗ്രൂപ്പിലേക്ക് ചേർക്കുക</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">%1$d ഗ്രൂപ്പുകളിൽ ചേർക്കുക</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">നിങ്ങൾക്ക് ഇതിനകം തന്നെ ഈ പങ്കാളികളുമായി ഒരു സംഭാഷണം ഉണ്ട്.</item>
+		<item quantity="other" state="needs_review" hash="809550612">നിങ്ങൾക്ക് ഇതിനകം തന്നെ ഈ പങ്കാളികളുമായി %1$d സംഭാഷണങ്ങളുണ്ട്.</item>
 	</plurals>
 </resources>

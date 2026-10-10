@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">V ena iz vaših naprav bo pretekla in bo deaktivirana v **manj kot %1$d dnevu**.\nLahko kupite naročnino **Olvid+** da jo ohranite aktivno.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">V ena iz vaših naprav bo pretekla in bila deaktivirana v **manj kot %1$d dneh**.\nLahko kupite naročnino **Olvid+** za ohranitev njene aktivnosti.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Ta naprava bo prenehala veljati in bo deaktivirana v **manj kot %1$d dneh**.\nLahko kupite naročnino **Olvid+**, da jo ohranite aktivno.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Ta naprava bo prenehala veljati in bo deaktivirana v **manj kot %1$d dneh**.\nLahko kupite naročnino **Olvid+**, da jo ohranite aktivno.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s se je pridružil skupini</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s se je pridružil/pridružila skupini</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Dodaj v skupino %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Dodaj v %1$d skupine</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Že imate pogovor s temi udeleženci.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Že imate %1$d pogovorov s temi udeleženci.</item>
 	</plurals>
 </resources>

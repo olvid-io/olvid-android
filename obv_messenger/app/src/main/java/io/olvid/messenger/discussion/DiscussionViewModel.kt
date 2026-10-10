@@ -27,6 +27,11 @@ import android.text.format.DateFormat
 import android.view.Gravity
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.unit.toSize
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -104,6 +109,34 @@ class DiscussionViewModel : ViewModel(), DiscussionDelegate {
     var locked by mutableStateOf<Boolean?>(null)
     var canEdit by mutableStateOf<Boolean?>(null)
     var fullScreenPhotoUrl by mutableStateOf<String?>(null)
+
+    /** Media the in-discussion viewer shows; null while it is closed. */
+    var galleryRequest by mutableStateOf<GalleryRequest?>(null)
+
+    /** Message whose image album is expanded over the discussion; null while it is closed. */
+    var albumMessageId by mutableStateOf<Long?>(null)
+
+    /** Shared-element keys of the media flying back from the closed album to their bubble tiles, which stay hidden meanwhile. */
+    var albumFlyingKeys by mutableStateOf(emptySet<String>())
+
+    /** Shared-element key of the media the in-discussion viewer (or its morph layer) currently covers, so its tile or album cell hides. */
+    var galleryCurrentKey by mutableStateOf<String?>(null)
+
+
+    /** Composed image tiles and album cells by shared-element key; only read when a viewer morph starts, hence plain maps. */
+    val tileAnchors = HashMap<String, AttachmentAnchor>()
+    val albumCellAnchors = HashMap<String, AttachmentAnchor>()
+
+    /** Where the viewer morphs from or to: the album cell while its album is open (cells leave the map when it closes), else the bubble tile. */
+    fun viewerAnchor(sharedElementKey: String): AttachmentAnchor? =
+        albumCellAnchors[sharedElementKey] ?: tileAnchors[sharedElementKey]
+
+    /** Closes the album: its cells that have a bubble tile fly back to it. */
+    fun closeAlbum() {
+        // same snapshot as albumMessageId, so the tiles stay hidden from the frame they are visible again
+        albumFlyingKeys = albumCellAnchors.keys intersect tileAnchors.keys
+        albumMessageId = null
+    }
 
     var showCalendarView by mutableStateOf(false)
     var calendarInitialDateMillis by mutableStateOf<Long?>(null)
@@ -738,4 +771,24 @@ class DiscussionViewModel : ViewModel(), DiscussionDelegate {
     override fun messageWasSent() {
         scrollToMessageRequest = ScrollRequest.ToBottom
     }
+}
+
+/** What the in-discussion media viewer should open. */
+data class GalleryRequest(
+    val messageId: Long,
+    val fyleId: Long,
+    val showTextBlocks: Boolean = false,
+    val draft: Boolean = false,
+)
+
+/**
+ * A composed image tile or album cell: its media, the "+N" count of a bubble's last tile, and, while
+ * it is placed, its rectangles in root coordinates.
+ */
+class AttachmentAnchor(val fyleAndStatus: FyleAndStatus, val coordinates: LayoutCoordinates, val hiddenCount: Int = 0) {
+    /** The whole tile, including any part scrolled out of view. */
+    val bounds: Rect? get() = coordinates.takeIf { it.isAttached }?.let { Rect(it.positionInRoot(), it.size.toSize()) }
+
+    /** The part of the tile its scrolling parents leave visible, null when none. */
+    val visibleBounds: Rect? get() = coordinates.takeIf { it.isAttached }?.boundsInRoot()?.takeUnless { it.isEmpty }
 }

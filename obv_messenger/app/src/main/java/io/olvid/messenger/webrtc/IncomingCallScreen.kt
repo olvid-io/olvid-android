@@ -51,10 +51,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.designsystem.constantSp
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.webrtc.components.EncryptedCallNotice
 import io.olvid.messenger.webrtc.components.ExpandablePersonalNote
 
@@ -63,7 +64,7 @@ import io.olvid.messenger.webrtc.components.ExpandablePersonalNote
 @Composable
 fun IncomingCallScreen(
     name: String = "",
-    initialViewSetup: (initialView: InitialView) -> Unit = {},
+    avatar: AvatarTarget? = null,
     callRejected: Boolean,
     personalNote: String = "",
     participantCount: Int,
@@ -114,9 +115,9 @@ fun IncomingCallScreen(
                         .padding(4.dp)
 
                 ) {
-                    InitialView(
+                    Avatar(
                         modifier = Modifier.fillMaxSize(),
-                        initialViewSetup = initialViewSetup
+                        target = avatar
                     )
                     if (participantCount > 1) {
                         Text(
@@ -214,9 +215,7 @@ fun IncomingCallScreen(
 private fun IncomingCallPreview() {
     IncomingCallScreen(
         name = "John Doe",
-        initialViewSetup = {
-            it.setInitial(byteArrayOf(0), "A")
-        },
+        avatar = AvatarSource.initial(byteArrayOf(0), "A"),
         callRejected = true,
         color = Color.Red.toArgb(),
         personalNote = "This is a personal note with a long text to see how it goes",

@@ -1,0 +1,5 @@
+- Hanya tampilkan 4 gambar pertama dari sebuah pesan, dan tambahkan tampilan album untuk melihat semuanya.
+- Ditambahkan pemindai dokumen.
+- Ketuk dua kali pesan yang diterima untuk bereaksi dengan emoji default.
+- Avatar baru untuk kontak dan grup tanpa foto profil.
+- Tambahkan tombol untuk mengirim foto langsung dari layar utama.

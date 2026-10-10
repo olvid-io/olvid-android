@@ -1,0 +1,5 @@
+- Ipinapakita na lamang ang unang 4 na larawan ng isang mensahe, at magdagdag ng album view upang makita ang lahat ng ito.
+- Idinagdag ang isang document scanner.
+- I-double tap ang isang natanggap na mensahe upang mag-react gamit ang default na emoji.
+- Mga bagong avatar para sa mga contact at grupo na walang profile picture.
+- Magdagdag ng isang button upang magpadala ng larawan nang direkta mula sa pangunahing screen.

@@ -64,12 +64,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.entity.Contact
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.contacts.ContactListViewModel
 import io.olvid.messenger.webrtc.WebrtcCallService
 import io.olvid.messenger.webrtc.WebrtcCallService.AudioOutput.PHONE
@@ -259,13 +259,9 @@ fun CallBottomSheetContent(
                                 }
                             }
                             Box {
-                                InitialView(
+                                Avatar(
                                     modifier = Modifier.requiredSize(56.dp),
-                                    initialViewSetup = { initialView ->
-                                        callParticipant.contact?.let {
-                                            initialView.setContact(it)
-                                        }
-                                    })
+                                    target = callParticipant.contact)
                                 if (callParticipant.peerIsMuted) {
                                     Icon(
                                         modifier = Modifier

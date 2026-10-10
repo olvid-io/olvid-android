@@ -63,9 +63,11 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -128,7 +130,7 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.avatarTextColorArgb
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder.DeletionChoice.LOCAL
 import io.olvid.messenger.customClasses.StringUtils
@@ -151,6 +153,9 @@ import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
 import io.olvid.messenger.designsystem.components.AnimatedEmoji
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.dampened
+import io.olvid.messenger.designsystem.scaled
+import io.olvid.messenger.designsystem.scaledFromDefault
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionViewModel
@@ -158,20 +163,22 @@ import io.olvid.messenger.discussion.linkpreview.LinkPreview
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.message.attachments.Attachments
 import io.olvid.messenger.discussion.message.reactions.Reactions
+import io.olvid.messenger.discussion.message.viewer.ViewMessageActivity
 import io.olvid.messenger.discussion.poll.PollCreationViewModel.Companion.NONE_ANSWER
 import io.olvid.messenger.discussion.poll.PollMessageBody
 import io.olvid.messenger.discussion.poll.PollResultActivity
 import io.olvid.messenger.discussion.poll.PollResultViewModel
 import io.olvid.messenger.discussion.poll.postPollVote
 import io.olvid.messenger.discussion.search.DiscussionSearchViewModel
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.main.contacts.PublishedDetails
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity
 import io.olvid.messenger.settings.SettingsActivity
 import java.util.UUID
 
 @Composable
-fun MessageDisclaimer(modifier: Modifier = Modifier) {
+fun MessageDisclaimer(modifier: Modifier = Modifier, scale: Float = 1f) {
     Row(
         modifier = modifier
             .cutoutHorizontalPadding()
@@ -192,7 +199,7 @@ fun MessageDisclaimer(modifier: Modifier = Modifier) {
         Text(
             modifier = Modifier.weight(.2f, false),
             text = stringResource(id = R.string.text_discussion_end2end_disclaimer),
-            style = OlvidTypography.subtitle1,
+            style = OlvidTypography.subtitle1.scaled(scale.dampened()),
             color = Color.White
         )
     }
@@ -234,6 +241,7 @@ private fun ScrollDownButtonPreview() {
 fun DateHeader(
     date: String,
     modifier: Modifier = Modifier,
+    scale: Float = 1f,
     onClick: (() -> Unit)? = null
 ) {
     Row(
@@ -261,6 +269,7 @@ fun DateHeader(
             },
             textAlign = TextAlign.Center,
             text = date,
+            style = LocalTextStyle.current.scaledFromDefault(scale.dampened()),
             color = Color.White
         )
     }
@@ -295,6 +304,8 @@ fun Message(
     openDiscussionDetailsCallback: (() -> Unit)? = null,
     openOnClick: Boolean = true,
     openViewerCallback: (() -> Unit)? = null,
+    openImageAttachment: ((message: Message, fyleAndStatus: FyleAndStatus, showTextBlocks: Boolean, wholeMessage: Boolean) -> Unit)? = null,
+    imageTileModifier: @Composable (fyleAndStatus: FyleAndStatus, hiddenCount: Int) -> Modifier = { _, _ -> Modifier },
     onCancelAttachmentUpload: (FyleAndStatus) -> Unit = {},
     saveAttachment: () -> Unit = {},
     saveAllAttachments: () -> Unit = {},
@@ -306,6 +317,19 @@ fun Message(
     Box(modifier) {
         val maxWidth = 400.dp
         var enableSwipe by remember { mutableStateOf(true) }
+        var showEphemeralDetails by remember { mutableStateOf(false) }
+        if (showEphemeralDetails) {
+            EphemeralDetailsDialog(
+                message = message,
+                onDismiss = { showEphemeralDetails = false }
+            )
+        }
+        val onEphemeralTimerClick: (() -> Unit)? =
+            if (!blockClicks && message.hasEphemeralDetails(messageExpiration)) {
+                { showEphemeralDetails = true }
+            } else {
+                null
+            }
         SwipeForActionBox(
             modifier = if (fullWidth) Modifier.fillMaxWidth() else Modifier,
             enabledFromStartToEnd = blockSwipe.not() && enableSwipe && discussionViewModel?.isSelectingForDeletion != true && replyAction != null,
@@ -350,15 +374,18 @@ fun Message(
             ) {
                 val context = LocalContext.current
                 if (showSender) {
+                    // the avatar grows at the damped rate so it stays proportional to the (also damped) sender name
+                    val avatarSize = (32 * scale.dampened()).dp
                     if (lastFromSender) {
-                        InitialView(
-                            modifier = Modifier.size(32.dp),
-                            initialViewSetup = { it.setFromCache(message.senderIdentifier) },
+                        Avatar(
+                            modifier = Modifier.size(avatarSize),
+                            target = AvatarSource.fromCache(message.senderIdentifier),
                             onClick = {
                                 if (blockClicks) {
-                                    return@InitialView
+                                    return@Avatar
                                 }
-                                discussionViewModel?.discussion?.value?.let { discussion ->
+                                val discussion = discussionViewModel?.discussion?.value
+                                if (discussion != null) {
                                     App.runThread {
                                         val senderBytes = message.senderIdentifier
                                         val contact = AppDatabase.getInstance()
@@ -381,10 +408,9 @@ fun Message(
                                         }
                                     }
                                 }
-                            }
-                        )
+                            })
                     } else {
-                        Spacer(modifier = Modifier.width(32.dp))
+                        Spacer(modifier = Modifier.width(avatarSize))
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                 }
@@ -397,7 +423,8 @@ fun Message(
                         EphemeralTimer(
                             expiration = messageExpiration,
                             readOnce = message.wipeStatus == Message.WIPE_STATUS_WIPE_ON_READ || message.jsonMessage.jsonExpiration?.readOnce == true,
-                            bookmarked = message.bookmarked
+                            bookmarked = message.bookmarked,
+                            onClick = onEphemeralTimerClick
                         )
                     } else {
                         Spacer(modifier = Modifier.requiredWidth(32.dp))
@@ -408,6 +435,8 @@ fun Message(
                     modifier = Modifier.weight(1f, fill = false)
                 ) {
                     val interactionSource = remember { MutableInteractionSource() }
+                    // route clicks to the location handlers (map, coordinates context menu) only once the content is revealed
+                    val locationClicksEnabled = message.isLocationMessage && !message.isContentHidden
 
                     MessageInnerStack(
                         modifier = Modifier
@@ -429,7 +458,8 @@ fun Message(
                                 interactionSource = interactionSource,
                                 indication = ripple(),
                                 onClick = { },
-                                onLongClick = if (message.isLocationMessage) onLocationLongClick else onLongClick
+                                onDoubleClick = if (locationClicksEnabled) onLocationClick else onDoubleClick,
+                                onLongClick = if (locationClicksEnabled) onLocationLongClick else onLongClick
                             )
                             .then(
                                 when (message.messageType) {
@@ -513,9 +543,9 @@ fun Message(
                                     )
                                     .padding(bottom = 2.dp),
                                 text = displayName,
-                                style = OlvidTypography.h3,
+                                style = OlvidTypography.h3.scaled(scale.dampened()),
                                 color = Color(
-                                    InitialView.getTextColor(
+                                    avatarTextColorArgb(
                                         context,
                                         message.senderIdentifier,
                                         ContactCacheSingleton.getContactCustomHue(message.senderIdentifier)
@@ -529,10 +559,11 @@ fun Message(
                             message = message,
                             context = context,
                             scrollToMessage = scrollToMessage,
+                            scale = scale,
                         )
 
                         // forwarded
-                        Forwarded(message)
+                        Forwarded(message, scale = scale)
 
                         val jsonPoll = message.getPoll()
                         val pollResults = jsonPoll?.let {
@@ -553,9 +584,9 @@ fun Message(
                         // content body
                         MessageBody(
                             message = message,
-                            onClick = if (message.isLocationMessage) onLocationClick else onClick,
-                            onDoubleClick = if (message.isLocationMessage) onLocationClick else onDoubleClick,
-                            onLongClick = if (message.isLocationMessage) onLocationLongClick else onLongClick,
+                            onClick = if (locationClicksEnabled) onLocationClick else onClick,
+                            onDoubleClick = if (locationClicksEnabled) onLocationClick else onDoubleClick,
+                            onLongClick = if (locationClicksEnabled) onLocationLongClick else onLongClick,
                             onCallBackButtonClicked = onCallButtonClicked,
                             discussionViewModel = discussionViewModel,
                             discussionSearchViewModel = discussionSearchViewModel,
@@ -574,6 +605,7 @@ fun Message(
                         // message footer
                         MessageFooter(
                             message = message,
+                            scale = scale,
                             editedSeen = editedSeen,
                             directDelete = { messageId ->
                                 if (discussionViewModel?.isSelectingForDeletion == true) {
@@ -591,6 +623,7 @@ fun Message(
                                 message = message,
                                 discussionViewModel = discussionViewModel,
                                 linkPreviewViewModel = linkPreviewViewModel,
+                                scale = scale,
                                 highlighter = discussionSearchViewModel?.let {
                                     it::highlight
                                 },
@@ -606,6 +639,7 @@ fun Message(
                             ) {
                                 Attachments(
                                     message = message,
+                                    scale = scale,
                                     onEnableMessageSwipe = { enabled ->
                                         enableSwipe = enabled
                                     },
@@ -614,6 +648,8 @@ fun Message(
                                     openOnClick = openOnClick,
                                     onAttachmentLongClick = onAttachmentLongClick,
                                     openViewerCallback = openViewerCallback,
+                                    openImageAttachment = openImageAttachment,
+                                    imageTileModifier = imageTileModifier,
                                     discussionSearchViewModel = discussionSearchViewModel,
                                     onCancelAttachmentUpload = onCancelAttachmentUpload,
                                     saveAttachment = saveAttachment,
@@ -627,6 +663,7 @@ fun Message(
                     Reactions(
                         modifier = if (message.isInbound.not()) Modifier.align(Alignment.End) else Modifier,
                         message = message,
+                        scale = scale,
                         useAnimatedEmojis = useAnimatedEmojis,
                         loopAnimatedEmojis = loopAnimatedEmojis,
                         blockClicks = blockClicks
@@ -639,7 +676,8 @@ fun Message(
                             modifier = Modifier.requiredWidth(32.dp),
                             expiration = messageExpiration,
                             readOnce = message.wipeStatus == Message.WIPE_STATUS_WIPE_ON_READ,
-                            bookmarked = message.bookmarked
+                            bookmarked = message.bookmarked,
+                            onClick = onEphemeralTimerClick
                         )
                     } else {
                         Spacer(modifier = Modifier.requiredWidth(32.dp))
@@ -713,7 +751,7 @@ fun MessageInnerStack(
 
 
 @Composable
-private fun Forwarded(message: Message) {
+private fun Forwarded(message: Message, scale: Float = 1f) {
     if (message.forwarded && message.edited == Message.EDITED_NONE) {
         Row(
             modifier = Modifier
@@ -729,7 +767,7 @@ private fun Forwarded(message: Message) {
             Text(
                 text = stringResource(id = R.string.label_forwarded),
                 maxLines = 1,
-                style = OlvidTypography.subtitle1,
+                style = OlvidTypography.subtitle1.scaled(scale.dampened()),
                 fontStyle = FontStyle.Italic,
                 color = colorResource(id = R.color.greyTint)
             )
@@ -743,8 +781,10 @@ private fun MessageFooter(
     editedSeen: () -> Unit,
     directDelete: (Long) -> Unit,
     pollVoters: Int? = null,
+    scale: Float = 1f,
     context: Context
 ) {
+    val dampenedScale = scale.dampened()
     val row = Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -800,7 +840,7 @@ private fun MessageFooter(
                         }
                     ),
                 text = stringResource(id = R.string.text_edited).uppercase(),
-                fontSize = 10.sp,
+                fontSize = 10.sp * dampenedScale,
                 fontWeight = FontWeight.Medium,
                 color = if (message.edited == Message.EDITED_SEEN) colorResource(id = R.color.green) else colorResource(
                     id = R.color.almostWhite
@@ -813,11 +853,15 @@ private fun MessageFooter(
         // timestamp
         Text(
             text = StringUtils.getLongNiceDateString(context, message.timestamp).toString(),
-            style = OlvidTypography.subtitle1,
+            style = OlvidTypography.subtitle1.scaled(dampenedScale),
             color = Color(0xCC7D7D7D)
         )
         // outbound status
-        OutboundMessageStatus(modifier = Modifier.padding(start = 4.dp), message = message)
+        OutboundMessageStatus(
+            modifier = Modifier.padding(start = 4.dp),
+            size = 16.dp * dampenedScale,
+            message = message
+        )
     }
 
     pollVoters?.also { voters ->
@@ -869,8 +913,10 @@ fun OutboundMessageStatus(modifier: Modifier = Modifier, size: Dp = 16.dp, messa
 private fun Replied(
     message: Message,
     context: Context,
-    scrollToMessage: (messageId: Long) -> Unit
+    scrollToMessage: (messageId: Long) -> Unit,
+    scale: Float = 1f
 ) {
+    val dampenedScale = scale.dampened()
     val repliedToMessage: State<Message?>? = message.jsonMessage.jsonReply?.let { jsonReply ->
         AppDatabase.getInstance().messageDao()
             .getBySenderSequenceNumberAsync(
@@ -886,7 +932,7 @@ private fun Replied(
     ) {
         val color = remember {
             Color(
-                InitialView.getTextColor(
+                avatarTextColorArgb(
                     context = context,
                     message.jsonMessage.jsonReply?.senderIdentifier
                         ?: byteArrayOf(),
@@ -917,7 +963,7 @@ private fun Replied(
                 text = message.jsonMessage.jsonReply?.senderIdentifier?.let {
                     ContactCacheSingleton.getContactCustomDisplayName(it)
                 } ?: stringResource(id = R.string.text_deleted_contact),
-                style = OlvidTypography.body2.copy(
+                style = OlvidTypography.body2.scaled(dampenedScale).copy(
                     fontWeight = FontWeight.Medium
                 ),
                 color = color)
@@ -937,18 +983,18 @@ private fun Replied(
                                 )
                             )
                         ),
-                        style = OlvidTypography.body2,
+                        style = OlvidTypography.body2.scaled(dampenedScale),
                         color = colorResource(id = R.color.greyTint),
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
-                        inlineContent = inlineContentMap(.9f)
+                        inlineContent = inlineContentMap(.9f * dampenedScale)
                     )
                 }
                 if (repliedToMessage.isLocationMessage.not() && repliedToMessage.hasAttachments()) {
                     Text(
                         modifier = Modifier.padding(top = 2.dp),
                         text = repliedToMessage.getAttachmentsStringContent(context),
-                        style = OlvidTypography.body2,
+                        style = OlvidTypography.body2.scaled(dampenedScale),
                         color = colorResource(id = R.color.greyTint),
                         maxLines = if (stringContent.isEmpty()) 2 else 1,
                         overflow = TextOverflow.Ellipsis,
@@ -956,7 +1002,7 @@ private fun Replied(
                 }
             } ?: Text(
                 text = stringResource(id = R.string.text_original_message_not_found),
-                style = OlvidTypography.body2,
+                style = OlvidTypography.body2.scaled(dampenedScale),
                 fontStyle = FontStyle.Italic,
                 color = colorResource(id = R.color.greyTint),
                 maxLines = 3,
@@ -967,7 +1013,7 @@ private fun Replied(
 }
 
 @Composable
-private fun AttachmentCount(attachmentCount: Int) {
+private fun AttachmentCount(attachmentCount: Int, scale: Float = 1f) {
     Text(
         modifier = Modifier
             .padding(horizontal = 4.dp, vertical = 2.dp)
@@ -981,7 +1027,7 @@ private fun AttachmentCount(attachmentCount: Int) {
             count = attachmentCount,
             attachmentCount
         ),
-        style = OlvidTypography.subtitle1.copy(
+        style = OlvidTypography.subtitle1.scaled(scale.dampened()).copy(
             fontWeight = FontWeight.Medium
         ),
         color = colorResource(id = R.color.almostWhite)
@@ -990,6 +1036,7 @@ private fun AttachmentCount(attachmentCount: Int) {
 
 const val LINK_ANNOTATION_TAG = "LINK"
 const val MENTION_ANNOTATION_TAG = "MENTION"
+const val TRUNCATED_MESSAGE_LINE_COUNT = 10
 const val INLINE_CONTENT_TAG =
     "androidx.compose.foundation.text.inlineContent" // WARNING: this string is copied from the InlineTextContent source and may change without notice....
 const val QUOTE_BLOCK_START_ANNOTATION = "quote"
@@ -1098,10 +1145,10 @@ fun MessageBody(
             style = if (message.isInbound || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) OlvidTypography.body1.copy(
                 fontSize = (16 * scale).sp,
                 lineHeight = (16 * scale).sp
-            ) else OlvidTypography.body2
+            ) else OlvidTypography.body2.scaled(scale)
         )
         if (message.wipedAttachmentCount > 0) {
-            AttachmentCount(attachmentCount = message.wipedAttachmentCount)
+            AttachmentCount(attachmentCount = message.wipedAttachmentCount, scale = scale)
         }
     } else if (message.isLocationMessage) {
         LocationMessage(
@@ -1117,6 +1164,10 @@ fun MessageBody(
             blockClicks = blockClicks,
         )
     } else {
+        // the size-less info-message branches below (group updates, call info, ephemeral explanation…)
+        // inherit LocalTextStyle: provide a scaled one once for the whole when. The standard-message
+        // branch sets explicit styles and never reads it; at scale 1f the identical instance is provided.
+        CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.scaledFromDefault(scale)) {
         when (message.messageType) {
 
             Message.TYPE_GROUP_MEMBER_JOINED -> {
@@ -1157,7 +1208,7 @@ fun MessageBody(
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Image(
                         modifier = Modifier
-                            .size(32.dp),
+                            .size((32 * scale.dampened()).dp),
                         painter = painterResource(id = R.drawable.ic_screenshot_detected),
                         contentDescription = null
                     )
@@ -1247,7 +1298,7 @@ fun MessageBody(
                             .padding(horizontal = 16.dp),
                         maxLines = 3,
                         textAlign = TextAlign.Center,
-                        text = if (message.status == Message.STATUS_READ) {
+                        text = if (message.status == Message.STATUS_READ || message.senderIdentifier.isEmpty()) {
                             ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
                                 ?.let {
                                     stringResource(id = R.string.text_updated_shared_settings, it)
@@ -1267,12 +1318,18 @@ fun MessageBody(
             }
 
             Message.TYPE_PHONE_CALL -> {
-                PhoneCallInfo(message, onCallBackButtonClicked)
+                PhoneCallInfo(message, onCallBackButtonClicked, scale = scale)
             }
 
             // Standard message
             else -> {
                 var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                val truncationSetting = remember { SettingsActivity.truncateLongMessagesSetting() }
+                var expandedInline by remember(message.contentBody) { mutableStateOf(false) }
+                val truncatable = truncationSetting != SettingsActivity.PREF_VALUE_TRUNCATE_NEVER
+                        && !expandedInline
+                        && message.isBodyViewable
+                var truncated by remember(message.contentBody) { mutableStateOf(false) }
                 val linkUrl by remember {
                     derivedStateOf { discussionViewModel?.messageLinkPreviewUrlCache?.get(message.id) }
                 }
@@ -1293,6 +1350,7 @@ fun MessageBody(
                     PollMessageBody(
                         pollResults = pollResults,
                         jsonPoll = jsonPoll,
+                        scale = scale,
                         highlighter = discussionSearchViewModel?.let {
                             it::highlight
                         },
@@ -1373,42 +1431,7 @@ fun MessageBody(
                                                 )
                                                 .firstOrNull()
                                                 ?.let { annotation ->
-                                                    val bytesOwnedIdentity =
-                                                        AppSingleton.getBytesCurrentIdentity()
-                                                            ?: byteArrayOf()
-                                                    val userIdentifier =
-                                                        ObvBase64.decode(annotation.item)
-                                                    if (bytesOwnedIdentity.contentEquals(
-                                                            userIdentifier
-                                                        )
-                                                    ) {
-                                                        context.startActivity(
-                                                            Intent(
-                                                                context,
-                                                                OwnedIdentityDetailsActivity::class.java
-                                                            )
-                                                        )
-                                                    } else {
-                                                        // check that there is indeed a contact
-                                                        App.runThread {
-                                                            val bytesOwnedIdentity =
-                                                                AppSingleton.getBytesCurrentIdentity()
-                                                            if (bytesOwnedIdentity != null
-                                                                && AppDatabase
-                                                                    .getInstance()
-                                                                    .contactDao()[bytesOwnedIdentity, userIdentifier] != null
-                                                            ) {
-                                                                AppSingleton.getBytesCurrentIdentity()
-                                                                    ?.let {
-                                                                        App.openContactDetailsActivity(
-                                                                            context,
-                                                                            it,
-                                                                            userIdentifier
-                                                                        )
-                                                                    }
-                                                            }
-                                                        }
-                                                    }
+                                                    openMention(context, annotation.item)
                                                     return@detectTapGestures
                                                 }
                                             text
@@ -1428,21 +1451,49 @@ fun MessageBody(
                                 },
                             text = text,
                             textAlign = if (message.isInbound || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) textAlign else TextAlign.Center,
-                            onTextLayout = { layoutResult = it },
-                            overflow = TextOverflow.Visible,
+                            onTextLayout = {
+                                layoutResult = it
+                                truncated = it.hasVisualOverflow
+                            },
+                            maxLines = if (truncatable) TRUNCATED_MESSAGE_LINE_COUNT else Int.MAX_VALUE,
+                            overflow = if (truncatable) TextOverflow.Ellipsis else TextOverflow.Visible,
                             color = if (message.isInbound) colorResource(id = R.color.inboundMessageBody) else colorResource(
                                 id = R.color.primary700
                             ),
                             style = if (message.isInbound || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) OlvidTypography.body1.copy(
                                 fontSize = textSize,
                                 lineHeight = 1.1.em
-                            ) else OlvidTypography.body2,
+                            ) else OlvidTypography.body2.scaled(scale),
                             inlineContent = inlineContentMap(scale = scale)
                         )
+                        if (truncated) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth()
+                                    .clickable(
+                                        enabled = blockClicks.not(),
+                                        indication = ripple(),
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        onClick = {
+                                            if (truncationSetting == SettingsActivity.PREF_VALUE_TRUNCATE_INLINE) {
+                                                expandedInline = true
+                                            } else {
+                                                ViewMessageActivity.open(context, message.id)
+                                            }
+                                        }
+                                    )
+                                    .padding(vertical = 4.dp),
+                                text = stringResource(id = R.string.label_see_more),
+                                color = colorResource(R.color.olvid_gradient_light),
+                                textAlign = TextAlign.Start,
+                                maxLines = 1,
+                                style = OlvidTypography.body1.copy(fontWeight = FontWeight.Medium)
+                            )
+                        }
                     }
                 }
             }
         }
+        } // CompositionLocalProvider
     }
 }
 
@@ -1524,6 +1575,14 @@ private fun MessageInfo(
         color = colorResource(id = R.color.primary700)
     )
 }
+
+fun getRawStringContent(
+    context: Context,
+    message: Message,
+): AnnotatedString = AnnotatedString(message.getStringContent(context))
+
+fun openMention(context: Context, base64UserIdentifier: String) =
+    App.openProfileActivity(context, ObvBase64.decode(base64UserIdentifier))
 
 fun getAnnotatedStringContent(
     context: Context,

@@ -173,12 +173,48 @@ public class DiscussionSettingsDataStore extends PreferenceDataStore {
                 });
                 break;
             }
+            case DiscussionSettingsActivity.PREF_KEY_DISCUSSION_DEFAULT_REACTION: {
+                if (value == null) {
+                    break;
+                }
+                String emoji = "null".equals(value) ? null : value;
+                performUpdateOnPossiblyNullDiscussionCustomization((DiscussionCustomization discussionCustomization) -> discussionCustomization.prefDefaultReaction = emoji);
+                try {
+                    Discussion discussion = discussionSettingsViewModel.getDiscussionLiveData().getValue();
+                    if (discussion != null) {
+                        int type;
+                        switch (discussion.discussionType) {
+                            case Discussion.TYPE_GROUP: {
+                                type = ObvSyncAtom.DiscussionIdentifier.GROUP_V1;
+                                break;
+                            }
+                            case Discussion.TYPE_GROUP_V2: {
+                                type = ObvSyncAtom.DiscussionIdentifier.GROUP_V2;
+                                break;
+                            }
+                            case Discussion.TYPE_CONTACT:
+                            default: {
+                                type = ObvSyncAtom.DiscussionIdentifier.CONTACT;
+                                break;
+                            }
+                        }
+                        AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(discussion.bytesOwnedIdentity, ObvSyncAtom.createPreferredReaction(
+                                new ObvSyncAtom.DiscussionIdentifier(type, discussion.bytesDiscussionIdentifier),
+                                emoji
+                        ));
+                    }
+                } catch (Exception e) {
+                    Logger.w("Failed to propagate default reaction change to other devices");
+                    e.printStackTrace();
+                }
+                break;
+            }
             case DiscussionSettingsActivity.PREF_KEY_DISCUSSION_RETENTION_COUNT: {
                 if (value == null) {
                     break;
                 }
                 performUpdateOnPossiblyNullDiscussionCustomization((DiscussionCustomization discussionCustomization) -> {
-                    if ("".equals(value)) {
+                    if (value.isEmpty()) {
                         discussionCustomization.prefDiscussionRetentionCount = null;
                     } else {
                         try {

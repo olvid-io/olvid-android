@@ -277,6 +277,27 @@ fun TipItem(
             )
         }
 
+        Tip.EXPIRING_CURRENT_DEVICE -> {
+            TipBubble(
+                icon = R.drawable.ic_device,
+                title = R.string.tip_expiring_current_device_title,
+                messageString = pluralStringResource(
+                    R.plurals.tip_expiring_current_device_message,
+                    expirationDays,
+                    expirationDays
+                ),
+                tint = R.color.red,
+                action = R.string.tip_expiring_device_action,
+                onAction = {
+                    App.openCurrentOwnedIdentityDetails(context)
+                },
+                onDismiss = {
+                    SettingsActivity.lastExpiringDeviceTipTimestamp = System.currentTimeMillis()
+                    refreshTipState()
+                }
+            )
+        }
+
         Tip.OFFLINE_DEVICE -> {
             TipBubble(
                 icon = R.drawable.ic_tip_snooze,
@@ -756,6 +777,7 @@ private fun TipPreviewUpdates() {
 private fun TipPreview2() {
     Column {
         TipItem(refreshTipState = {}, tipToShow = Tip.EXPIRING_DEVICE, expirationDays = 6)
+        TipItem(refreshTipState = {}, tipToShow = Tip.EXPIRING_CURRENT_DEVICE, expirationDays = 1)
         TipItem(refreshTipState = {}, tipToShow = Tip.OFFLINE_DEVICE)
 //        TipItem(refreshTipState = {}, tipToShow = Tip.AUTHENTICATION_REQUIRED)
         TipItem(refreshTipState = {}, tipToShow = Tip.PROMPT_FOR_READ_RECEIPTS)

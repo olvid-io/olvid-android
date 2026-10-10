@@ -56,20 +56,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.databases.dao.CallLogItemDao.CallLogItemAndContacts
 import io.olvid.messenger.databases.entity.CallLogItem
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CallLogItemView(
     modifier: Modifier = Modifier,
     callLogItemAndContacts: CallLogItemAndContacts,
-    initialViewSetup: (initialView: InitialView) -> Unit,
+    avatar: AvatarTarget?,
     title: AnnotatedString,
     date: AnnotatedString,
     onClick: () -> Unit,
@@ -97,14 +98,14 @@ fun CallLogItemView(
                 ), verticalAlignment = CenterVertically
         ) {
             // InitialView
-            InitialView(
+            Avatar(
                 modifier = Modifier
                     .padding(
                         horizontal = 16.dp,
                         vertical = 8.dp,
                     )
                     .requiredSize(40.dp),
-                initialViewSetup = initialViewSetup,
+                target = avatar,
             )
 
             // content
@@ -175,7 +176,7 @@ fun CallLogMenu(
 private fun CallLogItemPreview() {
     CallLogItemView(
         callLogItemAndContacts = CallLogItemAndContacts(),
-        initialViewSetup = { initialView -> initialView.setInitial(byteArrayOf(), "A") },
+        avatar = AvatarSource.initial(byteArrayOf(), "A"),
         title = AnnotatedString("Call Title"),
         date = AnnotatedString("timestamp"),
         onClick = {},

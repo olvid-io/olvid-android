@@ -71,7 +71,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toDrawable
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import io.olvid.messenger.App
 import io.olvid.messenger.FyleProgressSingleton
 import io.olvid.messenger.ProgressStatus
@@ -87,7 +89,6 @@ import io.olvid.messenger.designsystem.constantSp
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.message.attachments.Attachment
 import io.olvid.messenger.services.AudioOutput
-import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -304,6 +305,7 @@ fun DraftAttachmentItem(
             expanded = showMenu,
             onDismiss = { showMenu = false },
             attachment = attachment,
+            onOpenClick = onClick,
             onDeleteClick = onDeleteClick
         )
     }
@@ -315,6 +317,7 @@ fun DraftPreview(
     sizePx: Int,
     isImageMode: Boolean
 ) {
+    val context = LocalContext.current
     // seed with the memory-cached preview (cheap, main-thread safe) to avoid a blank flash
     var model by remember(attachment) {
         mutableStateOf<Any?>(
@@ -333,13 +336,26 @@ fun DraftPreview(
                 attachment.fyleMessageJoinWithStatus,
                 sizePx
             )
-            model = bitmap
-                ?: PreviewUtils.getDrawableResourceForMimeType(attachment.fyleMessageJoinWithStatus.nonNullMimeType)
+            model = if (bitmap != null
+                && attachment.fyle.isComplete
+                && attachment.fyleMessageJoinWithStatus.nonNullMimeType == "image/gif"
+            ) {
+                // animate GIFs: let Coil decode the actual file (App.imageLoader has the GIF decoder),
+                // keeping the static preview as placeholder to avoid a blank flash
+                ImageRequest.Builder(context)
+                    .data(attachment.deterministicContentUriForGallery)
+                    .placeholder(bitmap.toDrawable(context.resources))
+                    .build()
+            } else {
+                bitmap
+                    ?: PreviewUtils.getDrawableResourceForMimeType(attachment.fyleMessageJoinWithStatus.nonNullMimeType)
+            }
         }
     }
 
     AsyncImage(
         model = model,
+        imageLoader = App.imageLoader,
         contentDescription = null,
         contentScale = if (isImageMode || attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith(
                 "video/"
@@ -485,6 +501,7 @@ fun DraftAttachmentContextMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     attachment: Attachment,
+    onOpenClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -498,21 +515,7 @@ fun DraftAttachmentContextMenu(
             text = stringResource(R.string.menu_action_open),
             onClick = {
                 onDismiss()
-                if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(
-                        PreviewUtils.getNonNullMimeType(
-                            attachment.fyleMessageJoinWithStatus.mimeType,
-                            attachment.fyleMessageJoinWithStatus.fileName
-                        )
-                    ) && SettingsActivity.useInternalImageViewer()
-                ) {
-                    App.openDraftGalleryActivity(
-                        context,
-                        attachment.fyleMessageJoinWithStatus.messageId,
-                        attachment.fyleMessageJoinWithStatus.fyleId
-                    )
-                } else {
-                    App.openFyleViewer(context, attachment.fyleAndStatus, null)
-                }
+                onOpenClick()
             }
         )
         OlvidDropdownMenuItem(

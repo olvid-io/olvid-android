@@ -68,11 +68,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import io.olvid.engine.engine.types.sync.ObvSyncAtom
 import io.olvid.messenger.App
+import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.UnreadCountsSingleton
 import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.tasks.getDiscussionIdentifier
 import io.olvid.messenger.designsystem.components.SelectionTopAppBar
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.discussion.message.SwipeForActionBox
@@ -149,11 +152,9 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                 })
                             } else {
                                 add(R.drawable.ic_action_mark_unread to {
-                                    discussionListViewModel.selection.forEach {
-                                        discussionListViewModel.markDiscussionAsUnread(
-                                            it.discussion.id
-                                        )
-                                    }
+                                    discussionListViewModel.markDiscussionsAsUnread(
+                                        discussionListViewModel.selection.map { it.discussion }
+                                    )
                                     discussionListViewModel.clearSelection()
                                 })
                             }
@@ -272,6 +273,16 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                                     UnreadCountsSingleton.discussionUnreadFlagChanged(
                                                         discussionAndMessage.discussion.id, true
                                                     )
+                                                    runCatching {
+                                                        AppSingleton.getEngine()
+                                                            .propagateAppSyncAtomToOtherDevicesIfNeeded(
+                                                                discussionAndMessage.discussion.bytesOwnedIdentity,
+                                                                ObvSyncAtom.createUnreadDiscussionsChange(
+                                                                    listOf(discussionAndMessage.discussion.getDiscussionIdentifier()),
+                                                                    true
+                                                                )
+                                                            )
+                                                    }
                                                 }
                                             }
                                         },
@@ -331,9 +342,7 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                                 context,
                                                 discussionAndMessage.message
                                             ),
-                                            initialViewSetup = { initialView ->
-                                                initialView.setDiscussion(discussionAndMessage.discussion)
-                                            },
+                                            avatar = discussionAndMessage.discussion,
                                             customColor = discussionAndMessage.discussionCustomization?.colorJson?.color?.minus(
                                                 0x1000000
                                             ) ?: 0x00ffffff,

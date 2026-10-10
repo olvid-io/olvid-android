@@ -24,6 +24,7 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.ConfigurationCompat
 import androidx.core.net.toUri
 import io.olvid.engine.Logger
 import io.olvid.messenger.BuildConfig
@@ -121,6 +122,13 @@ class KeycloakAuthenticationActivity : AppCompatActivity() {
                                 .setPrompt("login consent")
                                 .setNonce(nonce)
                                 .setCodeVerifier(codeVerifier)
+                                // otherwise Keycloak uses the browser language, which may differ from the app language
+                                .setUiLocales(
+                                    ConfigurationCompat.getLocales(resources.configuration)
+                                        .toLanguageTags()
+                                        .replace(',', ' ')
+                                        .takeIf { it.isNotEmpty() }
+                                )
                                 .build()
 
 

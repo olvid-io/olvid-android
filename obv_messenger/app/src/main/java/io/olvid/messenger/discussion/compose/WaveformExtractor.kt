@@ -237,7 +237,10 @@ object WaveformExtractor {
                     }
 
                     // normalize the samples
-                    val max = samples.max()
+                    val max = samples.maxOrNull() ?: return@withContext emptyList()
+                    if (max == 0f) {
+                        return@withContext samples
+                    }
                     return@withContext samples.map {
                         it / max
                     }

@@ -29,7 +29,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
@@ -74,7 +73,9 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.contact.ContactDetailsActivity;
-import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.designsystem.avatar.AvatarBitmapRenderer;
+import io.olvid.messenger.designsystem.avatar.AvatarSource;
+import io.olvid.messenger.designsystem.avatar.AvatarTarget;
 import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
@@ -578,12 +579,8 @@ public class AndroidNotificationManager {
             builder.setLights(color, 500, 2000);
         }
 
-        InitialView initialView = new InitialView(App.getContext());
         int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
-        initialView.setSize(size, size);
-        initialView.setDiscussion(discussion);
-        Bitmap largeIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        initialView.drawOnCanvas(new Canvas(largeIcon));
+        Bitmap largeIcon = AvatarBitmapRenderer.render(App.getContext(), discussion, size);
         builder.setLargeIcon(largeIcon);
 
         // CONTENT INTENT
@@ -962,16 +959,13 @@ public class AndroidNotificationManager {
 
         Collections.sort(discussionNotification.messageNotifications);
 
-        InitialView initialView = new InitialView(App.getContext());
-        if (discussionNotification.ownPhotoUrl == null) {
-            initialView.setInitial(discussionNotification.bytesOwnedIdentity, StringUtils.getInitial(discussionNotification.ownDisplayName));
-        } else {
-            initialView.setPhotoUrl(discussionNotification.bytesOwnedIdentity, discussionNotification.ownPhotoUrl);
-        }
         int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
-        initialView.setSize(size, size);
-        Bitmap personIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        initialView.drawOnCanvas(new Canvas(personIcon));
+        Bitmap personIcon;
+        if (discussionNotification.ownPhotoUrl == null) {
+            personIcon = AvatarBitmapRenderer.renderInitial(App.getContext(), discussionNotification.bytesOwnedIdentity, StringUtils.getInitial(discussionNotification.ownDisplayName), size);
+        } else {
+            personIcon = AvatarBitmapRenderer.renderPhoto(App.getContext(), discussionNotification.bytesOwnedIdentity, discussionNotification.ownPhotoUrl, size);
+        }
 
         Person.Builder myBuilder = new Person.Builder()
                 .setIcon(IconCompat.createWithBitmap(personIcon))
@@ -1038,12 +1032,8 @@ public class AndroidNotificationManager {
             builder.setOnlyAlertOnce(true);
         }
 
-        InitialView initialView = new InitialView(App.getContext());
         int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
-        initialView.setSize(size, size);
-        initialView.setDiscussion(discussion);
-        Bitmap largeIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        initialView.drawOnCanvas(new Canvas(largeIcon));
+        Bitmap largeIcon = AvatarBitmapRenderer.render(App.getContext(), discussion, size);
         builder.setLargeIcon(largeIcon);
 
         // CONTENT INTENT
@@ -1206,12 +1196,8 @@ public class AndroidNotificationManager {
                 }
             }
 
-            InitialView initialView = new InitialView(App.getContext());
             int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
-            initialView.setSize(size, size);
-            initialView.setDiscussion(discussion);
-            Bitmap largeIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-            initialView.drawOnCanvas(new Canvas(largeIcon));
+            Bitmap largeIcon = AvatarBitmapRenderer.render(App.getContext(), discussion, size);
             builder.setLargeIcon(largeIcon);
 
             String messageContent = message.getStringContent(App.getContext());
@@ -1399,12 +1385,8 @@ public class AndroidNotificationManager {
                 }
             }
 
-            InitialView initialView = new InitialView(App.getContext());
             int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
-            initialView.setSize(size, size);
-            initialView.setDiscussion(discussion);
-            Bitmap largeIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-            initialView.drawOnCanvas(new Canvas(largeIcon));
+            Bitmap largeIcon = AvatarBitmapRenderer.render(App.getContext(), discussion, size);
             builder.setLargeIcon(largeIcon);
 
             String messageContent = message.getStringContent(App.getContext(), true);
@@ -1590,7 +1572,7 @@ public class AndroidNotificationManager {
             NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion());
             publicBuilder.setSmallIcon(R.drawable.ic_o);
 
-            InitialView initialView = new InitialView(App.getContext());
+            AvatarTarget avatarTarget = AvatarSource.Companion.unknown(false);
             switch (invitation.associatedDialog.getCategory().getId()) {
                 case ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY: {
                     String displayName;
@@ -1601,7 +1583,7 @@ public class AndroidNotificationManager {
                         return;
                     }
                     // We do not have a photoUrl yet
-                    initialView.setInitial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(displayName));
+                    avatarTarget = AvatarSource.Companion.initial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(displayName), false);
                     builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_new_invitation, displayName));
                     builder.setContentText(invitation.getStatusText());
                     publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_new_invitation));
@@ -1616,7 +1598,7 @@ public class AndroidNotificationManager {
                         return;
                     }
                     // We probably do not have a photoUrl yet
-                    initialView.setInitial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(displayName));
+                    avatarTarget = AvatarSource.Companion.initial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(displayName), false);
                     builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_exchange_sas));
                     builder.setContentText(App.getContext().getResources().getString(R.string.notification_content_exchange_sas, displayName));
                     publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_exchange_sas));
@@ -1636,7 +1618,7 @@ public class AndroidNotificationManager {
                     }
                     // We do not have a photoUrl yet
                     String mediatorDisplayName = mediator.getCustomDisplayName();
-                    initialView.setInitial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(displayName));
+                    avatarTarget = AvatarSource.Companion.initial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(displayName), false);
                     builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_new_invitation, displayName));
                     builder.setContentText(App.getContext().getString(R.string.notification_content_mediator_invite, mediatorDisplayName));
                     publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_new_invitation));
@@ -1649,7 +1631,7 @@ public class AndroidNotificationManager {
                     }
                     // We do not have a photoUrl yet
                     String groupOwnerDisplayName = groupOwner.getCustomDisplayName();
-                    initialView.setGroup(invitation.associatedDialog.getCategory().getBytesGroupOwnerAndUid());
+                    avatarTarget = AvatarSource.Companion.group(invitation.associatedDialog.getCategory().getBytesGroupOwnerAndUid());
                     try {
                         JsonGroupDetails groupDetails = AppSingleton.getJsonObjectMapper().readValue(invitation.associatedDialog.getCategory().getSerializedGroupDetails(), JsonGroupDetails.class);
                         builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_group_invitation, groupDetails.getName()));
@@ -1665,7 +1647,7 @@ public class AndroidNotificationManager {
                     if (contact == null) {
                         return;
                     }
-                    initialView.setContact(contact);
+                    avatarTarget = contact;
                     builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_one_to_one_invitation, contact.getCustomDisplayName()));
                     builder.setContentText(App.getContext().getResources().getString(R.string.notification_content_one_to_one_invitation));
                     publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_one_to_one_invitation));
@@ -1677,7 +1659,7 @@ public class AndroidNotificationManager {
                         return;
                     }
                     ObvGroupV2 groupV2 = invitation.associatedDialog.getCategory().getObvGroupV2();
-                    initialView.setGroup(groupV2.groupIdentifier.getBytes());
+                    avatarTarget = AvatarSource.Companion.group(groupV2.groupIdentifier.getBytes());
                     try {
                         JsonGroupDetails groupDetails = AppSingleton.getJsonObjectMapper().readValue(groupV2.detailsAndPhotos.serializedGroupDetails, JsonGroupDetails.class);
                         if (groupDetails.getName() == null) {
@@ -1695,7 +1677,7 @@ public class AndroidNotificationManager {
                 }
                 case ObvDialog.Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY: {
                     ObvGroupV2 groupV2 = invitation.associatedDialog.getCategory().getObvGroupV2();
-                    initialView.setGroup(groupV2.groupIdentifier.getBytes());
+                    avatarTarget = AvatarSource.Companion.group(groupV2.groupIdentifier.getBytes());
                     try {
                         JsonGroupDetails groupDetails = AppSingleton.getJsonObjectMapper().readValue(groupV2.detailsAndPhotos.serializedGroupDetails, JsonGroupDetails.class);
                         if (groupDetails.getName() == null) {
@@ -1746,9 +1728,7 @@ public class AndroidNotificationManager {
             }
 
             int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
-            initialView.setSize(size, size);
-            Bitmap largeIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-            initialView.drawOnCanvas(new Canvas(largeIcon));
+            Bitmap largeIcon = AvatarBitmapRenderer.render(App.getContext(), avatarTarget, size);
             builder.setLargeIcon(largeIcon);
             builder.setPublicVersion(publicBuilder.build());
 
@@ -2119,6 +2099,7 @@ public class AndroidNotificationManager {
                     .setOngoing(true)
                     .setOnlyAlertOnce(true)
                     .setContentText(App.getContext().getString(R.string.notification_message_device_trust))
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(App.getContext().getString(R.string.notification_message_device_trust)))
                     .setVibrate(new long[0]);
 
             if (deviceDisplayName != null) {
@@ -2133,7 +2114,8 @@ public class AndroidNotificationManager {
             contentIntent.setAction(MainActivity.FORWARD_ACTION);
             contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, bytesOwnedIdentity);
             contentIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, OwnedIdentityDetailsActivity.class.getName());
-            builder.setContentIntent(PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+            PendingIntent seeDevicesPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            builder.setContentIntent(seeDevicesPendingIntent);
 
             Intent trustDeviceIntent = new Intent(App.getContext(), NotificationActionService.class);
             trustDeviceIntent.setAction(NotificationActionService.ACTION_DEVICE_TRUST);
@@ -2141,6 +2123,7 @@ public class AndroidNotificationManager {
             trustDeviceIntent.putExtra(NotificationActionService.EXTRA_DEVICE_UID, deviceUid);
             PendingIntent trustPendingIntent = PendingIntent.getService(App.getContext(), notificationId, trustDeviceIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             builder.addAction(R.drawable.ic_ok, App.getContext().getString(R.string.notification_action_device_trust), trustPendingIntent);
+            builder.addAction(R.drawable.ic_device, App.getContext().getString(R.string.notification_action_device_see_devices), seeDevicesPendingIntent);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
             notificationManager.notify(notificationId, builder.build());
@@ -2496,16 +2479,13 @@ public class AndroidNotificationManager {
             NotificationCompat.MessagingStyle.Message getMessage() {
                 SpannableStringBuilder text = (content == null) ? new SpannableStringBuilder() : Markdown.formatMarkdown(SpannableString.valueOf(content), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 if (senderByteIdentity != null && sender != null) {
-                    InitialView initialView = new InitialView(App.getContext());
-                    if (senderPhotoUrl == null) {
-                        initialView.setInitial(senderByteIdentity, StringUtils.getInitial(sender));
-                    } else {
-                        initialView.setPhotoUrl(senderByteIdentity, senderPhotoUrl);
-                    }
                     int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
-                    initialView.setSize(size, size);
-                    Bitmap personIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-                    initialView.drawOnCanvas(new Canvas(personIcon));
+                    Bitmap personIcon;
+                    if (senderPhotoUrl == null) {
+                        personIcon = AvatarBitmapRenderer.renderInitial(App.getContext(), senderByteIdentity, StringUtils.getInitial(sender), size);
+                    } else {
+                        personIcon = AvatarBitmapRenderer.renderPhoto(App.getContext(), senderByteIdentity, senderPhotoUrl, size);
+                    }
 
                     Person person = new Person.Builder()
                             .setName(sender)

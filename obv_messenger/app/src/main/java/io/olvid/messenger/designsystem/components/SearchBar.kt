@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -39,6 +40,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.TextFieldDefaults.OutlinedTextFieldDecorationBox
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,6 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -282,7 +285,13 @@ private fun SearchBarInput(
 fun ExpandableSearchBar(
     modifier: Modifier = Modifier,
     value: String = "",
-    onValueChange: (String) -> Unit = {}
+    onValueChange: (String) -> Unit = {},
+    matchCount: Int? = null, // null hides the match counter and navigation chevrons
+    currentMatchIndex: Int = -1, // 0-based, -1 when there is no current match
+    matchCountCapped: Boolean = false,
+    searchInProgress: Boolean = false,
+    onPreviousMatch: () -> Unit = {},
+    onNextMatch: () -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -324,15 +333,62 @@ fun ExpandableSearchBar(
                     value = value,
                     onValueChange = onValueChange,
                     shape = RectangleShape,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(
+                        onSearch = {
+                            onNextMatch()
+                            keyboardController?.hide()
+                        }
+                    ),
                     trailingIcon = {
-                        IconButton(onClick = {
-                            expanded = false
-                            onValueChange("")
-                        }) {
-                            Icon(
-                                imageVector = Filled.Close,
-                                contentDescription = "Close",
-                            )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (matchCount != null) {
+                                if (searchInProgress) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(14.dp),
+                                        strokeWidth = 2.dp,
+                                        color = colorResource(R.color.olvid_gradient_dark)
+                                    )
+                                    Spacer(Modifier.requiredWidth(6.dp))
+                                }
+                                Text(
+                                    text = "${(currentMatchIndex + 1).coerceAtLeast(0)}/$matchCount${if (matchCountCapped) "+" else ""}",
+                                    style = OlvidTypography.body2,
+                                    color = colorResource(R.color.greyTint),
+                                    maxLines = 1,
+                                )
+                                IconButton(
+                                    modifier = Modifier.size(32.dp),
+                                    enabled = matchCount > 0,
+                                    onClick = onPreviousMatch
+                                ) {
+                                    Icon(
+                                        modifier = Modifier.rotate(180f),
+                                        painter = painterResource(R.drawable.ic_chevron_down),
+                                        contentDescription = stringResource(R.string.content_description_previous_match)
+                                    )
+                                }
+                                IconButton(
+                                    modifier = Modifier.size(32.dp),
+                                    enabled = matchCount > 0,
+                                    onClick = onNextMatch
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_chevron_down),
+                                        contentDescription = stringResource(R.string.content_description_next_match)
+                                    )
+                                }
+                            }
+                            IconButton(onClick = {
+                                expanded = false
+                                onValueChange("")
+                            }) {
+                                Icon(
+                                    imageVector = Filled.Close,
+                                    contentDescription = "Close",
+                                )
+                            }
                         }
                     }
                 )

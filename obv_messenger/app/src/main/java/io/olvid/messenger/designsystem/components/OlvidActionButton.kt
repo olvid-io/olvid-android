@@ -39,6 +39,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -65,6 +66,7 @@ fun OlvidActionButton(
     allowTwoLines: Boolean = false,
     elevation: Dp? = null,
     enabled: Boolean = true,
+    shape: Shape = RoundedCornerShape(8.dp),
     onClick: () -> Unit
 ) {
     OutlinedButton(
@@ -92,7 +94,7 @@ fun OlvidActionButton(
             hoveredElevation = it,
             disabledElevation = it,
         ) },
-        shape = RoundedCornerShape(8.dp),
+        shape = shape,
         contentPadding = ButtonDefaults.ContentPadding -
                 PaddingValues(
                     start = if (icon != null) 4.dp else 0.dp,
@@ -144,6 +146,7 @@ fun OlvidOutlinedActionButton(
     outlinedColor: Color? = colorResource(R.color.blueOrGrey),
     contentColor: Color = colorResource(R.color.blueOrWhite),
     @DrawableRes icon: Int? = null,
+    @DrawableRes trailingIcon: Int? = null,
     text: String?,
     large: Boolean = false,
     allowTwoLines: Boolean = false,
@@ -156,6 +159,7 @@ fun OlvidOutlinedActionButton(
         containerColor = Color.Transparent,
         contentColor = contentColor,
         icon = icon,
+        trailingIcon = trailingIcon,
         text = text,
         large = large,
         allowTwoLines = allowTwoLines,

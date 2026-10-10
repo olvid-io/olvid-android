@@ -70,7 +70,7 @@ import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.OlvidOutlinedActionButton
 import io.olvid.messenger.designsystem.components.OlvidOutlinedSecondaryButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.main.contacts.suggested.MutualGroupUi
 import io.olvid.messenger.main.contacts.suggested.MutualGroupsRow
 import io.olvid.messenger.openid.KeycloakManager
@@ -143,9 +143,9 @@ fun ContactInvitationPopup(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Spacer(modifier = Modifier.height(40.dp))
-                    InitialView(
+                    Avatar(
                         modifier = Modifier.size(144.dp),
-                        initialViewSetup = contactOrKeycloakDetails.getInitialViewSetup()
+                        target = contactOrKeycloakDetails.avatar()
                     )
                     Spacer(modifier = Modifier.height(20.dp))
                     if (!inviteWasSent && inviteSent == null && addContactSuccess != true) {

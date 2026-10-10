@@ -25,8 +25,10 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,13 +37,17 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -49,11 +55,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.util.Pair
 import androidx.fragment.compose.AndroidFragment
@@ -69,6 +78,7 @@ import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.openStoreUrlOrFallback
 import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.OlvidPasswordInput
+import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.designsystem.theme.olvidDefaultTextFieldColors
 import io.olvid.messenger.onboarding.OnboardingViewModel
@@ -94,7 +104,7 @@ import org.jose4j.jwk.JsonWebKeySet
  */
 fun NavGraphBuilder.keycloakSelection(
     onboardingViewModel: OnboardingViewModel,
-    onIdentityCreation: () -> Unit, // navigate to MANAGED_IDENTITY_CREATION; always invoked on the main thread
+    onIdentityCreation: () -> Unit, // navigate to ADDITIONAL_IDENTITY_CREATION; always invoked on the main thread
     onBack: () -> Unit,
     onClose: () -> Unit,
 ) {
@@ -114,6 +124,9 @@ fun NavGraphBuilder.keycloakSelection(
         var clientId by remember { mutableStateOf(onboardingViewModel.keycloakClientId.orEmpty()) }
         val clientSecret = remember { mutableStateOf(onboardingViewModel.keycloakClientSecret.orEmpty()) }
         var autoStarted by remember { mutableStateOf(false) }
+        // deep-linked / MDM configurations hide the raw keycloak details behind a green checkmark once
+        // discovery succeeds; the user can still reveal them, and they show up if discovery fails
+        var detailsShown by remember { mutableStateOf(!onboardingViewModel.isDeepLinked) }
         // null = idle; otherwise a string res shown next to a spinner while retrieving details / checking server
         @StringRes var loadingTextRes by remember { mutableStateOf<Int?>(null) }
 
@@ -146,7 +159,10 @@ fun NavGraphBuilder.keycloakSelection(
                     }
 
                     override fun failed() {
-                        mainThread { onboardingViewModel.keycloakValidationFailed(keycloakServerUrl) }
+                        mainThread {
+                            onboardingViewModel.keycloakValidationFailed(keycloakServerUrl)
+                            detailsShown = true
+                        }
                     }
                 })
         }
@@ -323,64 +339,80 @@ fun NavGraphBuilder.keycloakSelection(
                 }
             }
 
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(
-                    if (mdm) R.string.text_explanation_onboarding_keycloak_mdm
-                    else R.string.explanation_identity_provider
-                ),
-                style = OlvidTypography.body2,
-                color = colorResource(R.color.greyTint),
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = server,
-                shape = RoundedCornerShape(12.dp),
-                enabled = !mdm,
-                onValueChange = {
-                    server = it
-                    onboardingViewModel.keycloakServer = it
-                },
-                trailingIcon = {
-                    ValidationStatusIndicator(status)
-                },
-                label = { Text(stringResource(R.string.hint_identity_provider_server)) },
-                singleLine = true,
-                colors = olvidDefaultTextFieldColors(),
-                textStyle = OlvidTypography.body1,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = clientId,
-                shape = RoundedCornerShape(12.dp),
-                enabled = !mdm,
-                onValueChange = {
-                    clientId = it
-                    onboardingViewModel.keycloakClientId = it
-                },
-                label = { Text(stringResource(R.string.hint_identity_provider_client_id)) },
-                singleLine = true,
-                colors = olvidDefaultTextFieldColors(),
-                textStyle = OlvidTypography.body1,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
             LaunchedEffect(clientSecret.value) {
                 onboardingViewModel.keycloakClientSecret = clientSecret.value
             }
-            OlvidPasswordInput(
-                modifier = Modifier.fillMaxWidth(),
-                password = clientSecret,
-                enabled = !mdm,
-                label = stringResource(R.string.hint_identity_provider_client_secret),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                ),
+
+            val validButtonLabel = stringResource(
+                if (onboardingViewModel.keycloakMagic != null) R.string.button_label_use_magic_link
+                else R.string.button_label_authenticate
             )
+
+            if (!detailsShown && status == ValidatedStatus.VALID) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    OlvidTextButton(
+                        icon = R.drawable.ic_chevron_down,
+                        text = stringResource(R.string.button_label_see_details),
+                        onClick = { detailsShown = true },
+                    )
+                }
+                Icon(
+                    modifier = Modifier
+                        .size(96.dp)
+                        .background(color = colorResource(if (mdm) R.color.orange else R.color.green), shape = CircleShape)
+                        .padding(16.dp),
+                    painter = painterResource(if (mdm) R.drawable.ic_organization else R.drawable.ic_check_thick),
+                    tint =  colorResource(R.color.alwaysWhite),
+                    contentDescription = null,
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text =
+                        when {
+                            mdm -> stringResource(R.string.text_explanation_onboarding_keycloak_mdm, validButtonLabel)
+                            onboardingViewModel.keycloakMagic != null -> stringResource(R.string.text_explanation_onboarding_keycloak_parsed_configuration_magic)
+                            else -> stringResource(R.string.text_explanation_onboarding_keycloak_parsed_configuration)
+                        }
+                    ,
+                    textAlign = TextAlign.Center,
+                    style = OlvidTypography.body2,
+                    color = colorResource(R.color.greyTint),
+                )
+            } else {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(
+                        if (mdm) R.string.explanation_identity_provider_mdm
+                        else R.string.explanation_identity_provider
+                    ),
+                    style = OlvidTypography.body2,
+                    color = colorResource(R.color.greyTint),
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                if (detailsShown) {
+                    KeycloakDetailsFields(
+                        mdm = mdm,
+                        status = status,
+                        server = server,
+                        onServerChange = {
+                            server = it
+                            onboardingViewModel.keycloakServer = it
+                        },
+                        clientId = clientId,
+                        onClientIdChange = {
+                            clientId = it
+                            onboardingViewModel.keycloakClientId = it
+                        },
+                        clientSecret = clientSecret,
+                    )
+                } else {
+                    // deep-linked discovery in progress: only the status indicator, details stay hidden
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        ValidationStatusIndicator(status)
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -388,10 +420,7 @@ fun NavGraphBuilder.keycloakSelection(
                 if (status == ValidatedStatus.VALID) {
                     OlvidActionButton(
                         modifier = Modifier.weight(1f),
-                        text = stringResource(
-                            if (onboardingViewModel.keycloakMagic != null) R.string.button_label_use_magic_link
-                            else R.string.button_label_authenticate
-                        ),
+                        text = validButtonLabel,
                         onClick = { authenticate() },
                     )
                 } else {
@@ -419,5 +448,57 @@ fun NavGraphBuilder.keycloakSelection(
                 }
             }
         }
+    }
+}
+
+/** Server / client id / client secret fields of the identity provider configuration. */
+@Composable
+private fun KeycloakDetailsFields(
+    mdm: Boolean,
+    status: ValidatedStatus?,
+    server: String,
+    onServerChange: (String) -> Unit,
+    clientId: String,
+    onClientIdChange: (String) -> Unit,
+    clientSecret: MutableState<String>,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = server,
+            shape = RoundedCornerShape(12.dp),
+            enabled = !mdm,
+            onValueChange = onServerChange,
+            trailingIcon = {
+                ValidationStatusIndicator(status)
+            },
+            label = { Text(stringResource(R.string.hint_identity_provider_server)) },
+            singleLine = true,
+            colors = olvidDefaultTextFieldColors(),
+            textStyle = OlvidTypography.body1,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = clientId,
+            shape = RoundedCornerShape(12.dp),
+            enabled = !mdm,
+            onValueChange = onClientIdChange,
+            label = { Text(stringResource(R.string.hint_identity_provider_client_id)) },
+            singleLine = true,
+            colors = olvidDefaultTextFieldColors(),
+            textStyle = OlvidTypography.body1,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OlvidPasswordInput(
+            modifier = Modifier.fillMaxWidth(),
+            password = clientSecret,
+            enabled = !mdm,
+            label = stringResource(R.string.hint_identity_provider_client_secret),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+        )
     }
 }

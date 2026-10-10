@@ -38,11 +38,9 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.AppDatabase
-import io.olvid.messenger.databases.tasks.ReplaceDiscussionDraftTask
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.lock_screen.LockScreenOrNotActivity
-import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel
 
 class ShareActivity : LockScreenOrNotActivity() {
@@ -75,10 +73,12 @@ class ShareActivity : LockScreenOrNotActivity() {
             App.runThread {
                 val discussion =
                     AppDatabase.getInstance().discussionDao().getByIdWithGroupMembersNamesIfWritable(shortcutDiscussionId)
-                if (discussion != null) {
-                   viewModel.replaceSelectedDiscussions(listOf(FilteredDiscussionListViewModel.SearchableDiscussion(discussion)))
+                runOnUiThread {
+                    if (discussion != null) {
+                        viewModel.replaceSelectedDiscussions(listOf(FilteredDiscussionListViewModel.SearchableDiscussion(discussion)))
+                    }
+                    showPicker(sharedText, sharedUris)
                 }
-                runOnUiThread { showPicker(sharedText, sharedUris) }
             }
             return
         }
@@ -87,9 +87,7 @@ class ShareActivity : LockScreenOrNotActivity() {
     }
 
     private fun showPicker(sharedText: String?, sharedUris: List<Uri>) {
-        App.runThread {
-            viewModel.initFromIntent(contentResolver, sharedText, sharedUris, resolveTypeHint(intent))
-        }
+        viewModel.initFromIntent(contentResolver, sharedText, sharedUris, resolveTypeHint(intent))
 
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(

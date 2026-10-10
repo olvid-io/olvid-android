@@ -183,6 +183,11 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
             screen.removePreference(useLegacyZxingScannerPreference);
         }
 
+        SwitchPreference useInHouseDocumentScannerPreference = screen.findPreference(SettingsActivity.PREF_KEY_USE_IN_HOUSE_DOCUMENT_SCANNER);
+        if (useInHouseDocumentScannerPreference != null && !BuildConfig.USE_GOOGLE_LIBS) {
+            screen.removePreference(useInHouseDocumentScannerPreference);
+        }
+
         SwitchPreference imageTextRecognitionPreference = screen.findPreference(SettingsActivity.PREF_KEY_IMAGE_TEXT_RECOGNITION);
         if (imageTextRecognitionPreference != null && !BuildConfig.USE_GOOGLE_LIBS) {
             screen.removePreference(imageTextRecognitionPreference);

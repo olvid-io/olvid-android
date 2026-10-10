@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -40,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -55,12 +53,10 @@ import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.designsystem.theme.olvidDefaultTextFieldColors
 import io.olvid.messenger.onboarding.OnboardingViewModel
 import io.olvid.messenger.onboarding.OnboardingViewModel.ValidatedStatus
-import io.olvid.messenger.onboarding.flow.OnboardingAction
-import io.olvid.messenger.onboarding.flow.OnboardingActionType.BUTTON
 import io.olvid.messenger.onboarding.flow.OnboardingRoutes
 import io.olvid.messenger.onboarding.flow.OnboardingScreen
-import io.olvid.messenger.onboarding.flow.screens.ValidationStatusIndicator
 import io.olvid.messenger.onboarding.flow.OnboardingStep
+import io.olvid.messenger.onboarding.flow.screens.ValidationStatusIndicator
 
 /**
  * Compose replacement for the legacy IdentityCreationOptionsFragment: lets the user enter a custom

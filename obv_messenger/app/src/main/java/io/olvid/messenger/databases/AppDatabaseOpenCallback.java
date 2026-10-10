@@ -59,8 +59,11 @@ import io.olvid.messenger.databases.entity.MessageRecipientInfo;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.PendingGroupMember;
 import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
+import io.olvid.messenger.databases.tasks.AddMultipleFylesToDraftFromUrisTask;
+import io.olvid.messenger.databases.tasks.AddMultipleFylesToDraftFromUrisTaskKt;
 import io.olvid.messenger.databases.tasks.ApplyDiscussionRetentionPoliciesTask;
 import io.olvid.messenger.databases.tasks.CreateOrUpdateGroupV2Task;
+import io.olvid.messenger.databases.tasks.DiscardInterruptedAttachmentCopiesTask;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.ResendReactionsAndPollVotesForGroupV2MemberTask;
 import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames;
@@ -122,6 +125,9 @@ public class AppDatabaseOpenCallback implements Runnable {
                 }
             }
         }
+
+        // Attachments whose copy was interrupted by a process death can never complete and would block their message
+        new DiscardInterruptedAttachmentCopiesTask().run();
 
         // Post UNPROCESSED and COMPUTING_PREVIEW messages
         List<Message> unprocessedMessages = db.messageDao().getUnprocessedAndPreviewingMessages();
@@ -906,6 +912,7 @@ public class AppDatabaseOpenCallback implements Runnable {
             }
 
             ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues();
+            GroupAvatarCacheSingleton.INSTANCE.reload();
 
             // save the last synchronization completion time
             AppSingleton.saveLastEngineSynchronisationTime(System.currentTimeMillis());

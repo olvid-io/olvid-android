@@ -122,6 +122,7 @@ class DiscussionCustomizationPojo_0 {
     public Long mute_notification_timestamp;
     public Boolean auto_open_limited_visibility;
     public Boolean retain_wiped_outbound;
+    public String default_reaction;
     public Long retention_count;
     public Long retention_duration;
     public Integer shared_settings_version;
@@ -142,6 +143,7 @@ class DiscussionCustomizationPojo_0 {
                 !mute_notifications &&
                 auto_open_limited_visibility == null &&
                 retain_wiped_outbound == null &&
+                default_reaction == null &&
                 retention_count == null &&
                 retention_duration == null &&
                 (shared_settings_version == null || (settings_existence_duration == null && settings_visibility_duration == null && !settings_read_once));
@@ -159,6 +161,7 @@ class DiscussionCustomizationPojo_0 {
             }
             discussionCustomizationPojo.auto_open_limited_visibility = discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages;
             discussionCustomizationPojo.retain_wiped_outbound = discussionCustomization.prefRetainWipedOutboundMessages;
+            discussionCustomizationPojo.default_reaction = discussionCustomization.prefDefaultReaction;
             discussionCustomizationPojo.retention_count = discussionCustomization.prefDiscussionRetentionCount;
             discussionCustomizationPojo.retention_duration = discussionCustomization.prefDiscussionRetentionDuration;
             if (backupSharedSettings) {
@@ -189,6 +192,7 @@ class DiscussionCustomizationPojo_0 {
         }
         discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages = auto_open_limited_visibility;
         discussionCustomization.prefRetainWipedOutboundMessages = retain_wiped_outbound;
+        discussionCustomization.prefDefaultReaction = default_reaction;
         discussionCustomization.prefDiscussionRetentionCount = retention_count;
         discussionCustomization.prefDiscussionRetentionDuration = retention_duration;
         if (restoreSharedSettings &&

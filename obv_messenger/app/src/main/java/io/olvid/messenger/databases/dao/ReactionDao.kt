@@ -54,9 +54,12 @@ interface ReactionDao {
     )
     fun getAllNonNullForMessageSortedByTimestampLiveData(messageId: Long): LiveData<List<Reaction>>
 
+    // a removed reaction leaves a row with a null emoji behind (its timestamp orders out-of-order
+    // reaction messages), so filter those out: this only returns a currently visible reaction
     @Query("SELECT * FROM ${Reaction.TABLE_NAME} " +
             " WHERE ${Reaction.MESSAGE_ID} = :messageId " +
-            " AND ${Reaction.BYTES_IDENTITY} IS NULL "
+            " AND ${Reaction.BYTES_IDENTITY} IS NULL " +
+            " AND ${Reaction.EMOJI} IS NOT NULL "
     )
     fun getMyReactionForMessage(messageId: Long): Reaction?
 

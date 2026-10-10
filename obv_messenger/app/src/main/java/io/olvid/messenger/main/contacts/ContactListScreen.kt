@@ -84,6 +84,7 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -108,15 +109,22 @@ import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.constantSp
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import androidx.compose.foundation.layout.plus
+import androidx.compose.foundation.lazy.LazyRow
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDetails
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
+import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.GROUP
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_MORE_RESULTS
 import io.olvid.messenger.main.contacts.suggested.SuggestedContactsBanner
+import io.olvid.messenger.main.groups.GroupListItem
+import io.olvid.messenger.main.groups.getAnnotatedMembers
+import io.olvid.messenger.main.groups.getAnnotatedName
+import io.olvid.messenger.main.groups.showPublishedDetails
+import io.olvid.messenger.main.groups.showPublishedDetailsNotification
 import io.olvid.messenger.main.contacts.suggested.SuggestedContactsOthersBanner
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.settings.SettingsActivity
@@ -163,6 +171,7 @@ fun ContactListScreen(
     contactMenu: ContactMenu? = null,
     selectable: Boolean = false,
     showOthers: Boolean = true,
+    showGroups: Boolean = false,
     emptyContactTabContent: (@Composable () -> Unit)? = null,
     applyHorizontalSafePadding: Boolean = true,
     addPlusButtonBottomPadding: Boolean = false,
@@ -175,7 +184,7 @@ fun ContactListScreen(
     val refreshState = onRefresh?.let { rememberPullRefreshState(refreshing, onRefresh) }
 
     val pages =
-        remember(contactListViewModel.keycloakManaged.value, contactListViewModel.isFiltering()) {
+        remember(contactListViewModel.keycloakManaged.value, contactListViewModel.isFiltering(), showGroups) {
             linkedMapOf<ContactListPage, (ContactOrKeycloakDetails) -> Boolean>().apply {
                 this[ContactListPage.CONTACTS] = {
                     if (showOthers) {
@@ -187,8 +196,12 @@ fun ContactListScreen(
                 if (showOthers) {
                     this[ContactListPage.OTHERS] = { it.contact?.oneToOne == false }
                 }
+                if (showGroups) {
+                    this[ContactListPage.GROUPS] = { it.contactType == GROUP }
+                }
                 if (contactListViewModel.keycloakManaged.value) {
-                    this[ContactListPage.DIRECTORY] = { it.contactType != CONTACT }
+                    this[ContactListPage.DIRECTORY] =
+                        { it.contactType == KEYCLOAK || it.contactType == KEYCLOAK_MORE_RESULTS }
                 }
             }
         }
@@ -250,7 +263,7 @@ fun ContactListScreen(
             }
             HorizontalPager(
                 state = pagerState,
-                beyondViewportPageCount = if (contactListViewModel.keycloakManaged.value) 2 else 1
+                beyondViewportPageCount = (pageTypes.size - 1).coerceAtLeast(1)
             ) { pageIndex ->
                 val page = pageTypes[pageIndex]
                 val filter =
@@ -260,7 +273,7 @@ fun ContactListScreen(
                                 true
                             } else {
                                 contactListViewModel.filteredPages.any {
-                                    pages[it]!!(contactOrKeycloakDetails)
+                                    pages[it]?.invoke(contactOrKeycloakDetails) == true
                                 }
                             }
                         if (passesPageFilter) {
@@ -386,6 +399,40 @@ fun ContactListScreen(
                                                         KeycloakMissingCount(
                                                             contactOrKeycloakDetails.additionalSearchResults
                                                         )
+                                                    }
+
+                                                    GROUP -> {
+                                                        contactOrKeycloakDetails.groupOrGroup2?.let { groupOrGroup2 ->
+                                                            GroupListItem(
+                                                                modifier = Modifier.background(
+                                                                    colorResource(id = R.color.almostWhite)
+                                                                ),
+                                                                group = groupOrGroup2,
+                                                                title = groupOrGroup2.getAnnotatedName(
+                                                                    LocalContext.current
+                                                                ).highlight(
+                                                                    SpanStyle(
+                                                                        background = colorResource(id = R.color.searchHighlightColor),
+                                                                        color = colorResource(id = R.color.black)
+                                                                    ),
+                                                                    contactListViewModel.filterPatterns
+                                                                ),
+                                                                body = groupOrGroup2.getAnnotatedMembers(
+                                                                    LocalContext.current
+                                                                ).highlight(
+                                                                    SpanStyle(
+                                                                        background = colorResource(id = R.color.searchHighlightColor),
+                                                                        color = colorResource(id = R.color.black)
+                                                                    ),
+                                                                    contactListViewModel.filterPatterns
+                                                                ),
+                                                                onClick = {
+                                                                    onClick(contactOrKeycloakDetails)
+                                                                },
+                                                                publishedDetails = groupOrGroup2.showPublishedDetails(),
+                                                                publishedDetailsNotification = groupOrGroup2.showPublishedDetailsNotification(),
+                                                            )
+                                                        }
                                                     }
 
                                                     else -> {
@@ -532,16 +579,21 @@ fun ContactListScreen(
                                                 title = R.string.explanation_no_contact_match_filter,
                                                 subtitle = null
                                             )
-                                        } else if (emptyContactTabContent == null) {
+                                        } else if (emptyContactTabContent == null || page == ContactListPage.GROUPS) {
                                             MainScreenEmptyList(
-                                                icon = R.drawable.tab_contacts,
+                                                icon = when (page) {
+                                                    ContactListPage.GROUPS -> R.drawable.tab_groups
+                                                    else -> R.drawable.tab_contacts
+                                                },
                                                 title = when (page) {
                                                     ContactListPage.CONTACTS -> R.string.explanation_empty_contact_list
+                                                    ContactListPage.GROUPS -> R.string.explanation_empty_group_list
                                                     ContactListPage.OTHERS -> R.string.explanation_empty_other_contact_list
                                                     ContactListPage.DIRECTORY -> R.string.explanation_empty_directory
                                                 },
                                                 subtitle = when (page) {
                                                     ContactListPage.CONTACTS -> R.string.explanation_empty_contact_list_sub
+                                                    ContactListPage.GROUPS -> R.string.explanation_empty_group_list_sub
                                                     ContactListPage.OTHERS -> R.string.explanation_empty_other_contact_list_sub
                                                     else -> null
                                                 }
@@ -705,7 +757,7 @@ private fun Contact(
             )
         },
         endContent = endContent,
-        initialViewSetup = contactOrKeycloakDetails.getInitialViewSetup(),
+        avatar = contactOrKeycloakDetails.avatar(),
         onRenameContact = if (contactMenu != null && contactOrKeycloakDetails.contactType != KEYCLOAK) {
             {
                 contactOrKeycloakDetails.contact?.let {
@@ -819,23 +871,27 @@ private fun FilterChipsBar(
     pages: List<ContactListPage>,
     onChipSelected: (ContactListPage) -> Unit
 ) {
-    Row(
+    LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         pages.forEach { page ->
-            FilterChip(
-                text = stringResource(id = page.labelResId),
-                selected = contactListViewModel.filteredPages.contains(page),
-                onClick = { onChipSelected(page) },
-                icon = when (page) {
-                    ContactListPage.CONTACTS -> R.drawable.ic_contacts
-                    ContactListPage.DIRECTORY -> R.drawable.ic_keycloak_directory_white
-                    else -> null
-                }
-            )
+            item {
+                FilterChip(
+                    text = stringResource(id = page.labelResId),
+                    selected = contactListViewModel.filteredPages.contains(page),
+                    onClick = { onChipSelected(page) },
+                    icon = when (page) {
+                        ContactListPage.CONTACTS -> R.drawable.ic_contacts
+                        ContactListPage.GROUPS -> R.drawable.ic_group
+                        ContactListPage.DIRECTORY -> R.drawable.ic_keycloak_directory_white
+                        else -> null
+                    }
+                )
+            }
         }
     }
 }

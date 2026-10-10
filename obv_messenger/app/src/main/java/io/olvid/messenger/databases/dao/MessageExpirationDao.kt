@@ -45,6 +45,9 @@ interface MessageExpirationDao {
     @Query("SELECT * FROM " + MessageExpiration.TABLE_NAME + " WHERE " + MessageExpiration.MESSAGE_ID + " = :messageId ORDER BY " + MessageExpiration.EXPIRATION_TIMESTAMP + " ASC LIMIT 1")
     fun getLive(messageId: Long): LiveData<MessageExpiration?>
 
+    @Query("SELECT * FROM " + MessageExpiration.TABLE_NAME + " WHERE " + MessageExpiration.MESSAGE_ID + " = :messageId ORDER BY " + MessageExpiration.EXPIRATION_TIMESTAMP + " ASC")
+    fun getAllLive(messageId: Long): LiveData<List<MessageExpiration>>
+
     @Query("DELETE FROM " + MessageExpiration.TABLE_NAME + " WHERE " + MessageExpiration.MESSAGE_ID + " = :messageId AND " + MessageExpiration.WIPE_ONLY + " = 1")
     fun deleteWipeExpiration(messageId: Long)
 }

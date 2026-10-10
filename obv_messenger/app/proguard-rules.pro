@@ -140,3 +140,10 @@
 -keepnames class * {
     native <methods>;
 }
+
+#------------------------------------------------------------------------------
+# Protobuf (javalite)
+#------------------------------------------------------------------------------
+
+# Generated messages resolve their fields by name (newMessageInfo), so field names must survive R8
+-keep class * extends com.google.protobuf.GeneratedMessageLite { *; }

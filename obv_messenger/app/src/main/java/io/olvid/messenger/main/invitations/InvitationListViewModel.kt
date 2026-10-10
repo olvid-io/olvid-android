@@ -39,13 +39,14 @@ import io.olvid.engine.engine.types.identities.ObvGroupV2
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.formatSerializedIdentityDetails
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Invitation
+import io.olvid.messenger.designsystem.avatar.AvatarSource
 import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.ABORT
 import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.GO_TO
 import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.IGNORE
@@ -77,18 +78,16 @@ class InvitationListViewModel : ViewModel() {
 
     val invitations: LiveData<List<Invitation>> = InvitationRepository.invitations
 
-    fun initialViewSetup(initialView: InitialView, invitation: Invitation) {
+    /** Avatar derivation for the Avatar composable. */
+    fun avatar(invitation: Invitation): AvatarTarget {
         val dialog = invitation.associatedDialog
-        initialView.reset()
-        when (val categoryId = dialog.category.id) {
-            Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY -> {
-                initialView.setGroup(dialog.category.bytesGroupOwnerAndUid)
-            }
+        return when (val categoryId = dialog.category.id) {
+            Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY ->
+                AvatarSource.group(dialog.category.bytesGroupOwnerAndUid)
 
             Category.GROUP_V2_INVITATION_DIALOG_CATEGORY,
-            Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY -> {
-                initialView.setGroup(dialog.category.obvGroupV2?.groupIdentifier?.bytes)
-            }
+            Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY ->
+                AvatarSource.group(dialog.category.obvGroupV2?.groupIdentifier?.bytes)
 
             Category.INVITE_SENT_DIALOG_CATEGORY,
             Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY,
@@ -101,22 +100,20 @@ class InvitationListViewModel : ViewModel() {
             Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY -> {
                 val contactIdentity = dialog.category.bytesContactIdentity
                 if (ContactCacheSingleton.getContactCustomDisplayName(contactIdentity) != null) {
-                    initialView.setFromCache(contactIdentity!!)
+                    AvatarSource.fromCache(contactIdentity!!)
                 } else {
                     val invitationName =
                         if (categoryId == Category.INVITE_SENT_DIALOG_CATEGORY) dialog.category.contactDisplayNameOrSerializedDetails.toString()
                         else getFormattedDisplayName(dialog.category.contactDisplayNameOrSerializedDetails)
-                    initialView.setInitial(contactIdentity, StringUtils.getInitial(invitationName ?: ""))
+                    AvatarSource.initial(contactIdentity, StringUtils.getInitial(invitationName ?: ""))
                 }
             }
 
             else -> {
                 val invitationName = getFormattedDisplayName(dialog.category.contactDisplayNameOrSerializedDetails)
-                initialView.setInitial(
-                    invitation.associatedDialog.category.bytesContactIdentity,
-                    StringUtils.getInitial(
-                        invitationName ?: ""
-                    )
+                AvatarSource.initial(
+                    dialog.category.bytesContactIdentity,
+                    StringUtils.getInitial(invitationName ?: "")
                 )
             }
         }

@@ -1,0 +1,5 @@
+- Visar bara de första 4 bilderna i ett meddelande och lägg till en albumvy för att se alla.
+- Lade till en dokumentskanner.
+- Dubbeltryck på ett mottaget meddelande för att reagera med en standardemoji.
+- Nya avatarer för kontakter och grupper utan profilbild.
+- Lade till en knapp för att skicka ett foto direkt från huvudskärmen.

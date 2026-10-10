@@ -53,12 +53,27 @@
     <color name="inboundMessageBody">#0C2643</color>
     <color name="alwaysWhite">#ffffff</color>
     <color name="alwaysWhiteOverlay">#bbffffff</color>
-    <color name="alwaysWhiteSubtleOverlay">#33ffffff</color>
 
     <color name="newDialogBackground">#ffffff</color>
     <color name="newDialogBorder">#00ffffff</color>
 
     <color name="trustIconBackground">#F2F2F9</color>
+    <color name="avatarClusterBadgeText">#F2F2F9</color>
+    <color name="avatarClusterBadge">#686970</color>
+    <color name="groupSectionHeader">#8B8D97</color>
+    <color name="groupSectionAdmin">#3871D5</color>
+    <color name="groupSectionJoined">#DF7266</color>
+
+    <!-- Attach menu icon tiles (same in light and dark) -->
+    <color name="attachMenuCamera">#2682eb</color>
+    <color name="attachMenuVideo">#1a61cd</color>
+    <color name="attachMenuScan">#144da3</color>
+    <color name="attachMenuImage">#c73f6e</color>
+    <color name="attachMenuFile">#b02e0c</color>
+    <color name="attachMenuPoll">#b23be0</color>
+    <color name="attachMenuLocation">#4f51de</color>
+    <color name="attachMenuEphemeral">#ea971d</color>
+    <color name="attachMenuIntroduce">#028090</color>
 
     <!-- Poll colors-->
     <color name="poll0">#E0473B</color>

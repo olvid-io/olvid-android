@@ -177,6 +177,12 @@ public interface FyleMessageJoinWithStatusDao {
     @Query("SELECT * FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " WHERE " + FyleMessageJoinWithStatus.STATUS + " = " + FyleMessageJoinWithStatus.STATUS_UPLOADING)
     List<FyleMessageJoinWithStatus> getUploading();
 
+    @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
+            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " WHERE FMjoin." + FyleMessageJoinWithStatus.STATUS + " = " + FyleMessageJoinWithStatus.STATUS_COPYING)
+    List<FyleAndStatus> getCopyingFylesAndStatus();
+
     @Query("SELECT * FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " WHERE " + FyleMessageJoinWithStatus.STATUS + " IN (" + FyleMessageJoinWithStatus.STATUS_DOWNLOADING + "," + FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE + ")")
     List<FyleMessageJoinWithStatus> getDownloading();
 
@@ -204,12 +210,19 @@ public interface FyleMessageJoinWithStatusDao {
 
 
 
+    // imageResolution is null until computed and "" when no preview can be decoded: keep image/video
+    // mime types even then, so the gallery holds every attachment shown as an image/video tile
+    String IMAGE_OR_VIDEO_CONDITION =
+            " (FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != ''" +
+            " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL" +
+            " OR FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE 'image/%'" +
+            " OR FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE 'video/%') ";
+
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
             " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
             " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
-            " AND ( FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != ''" +
-            " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL) " +
+            " AND " + IMAGE_OR_VIDEO_CONDITION +
             " ORDER BY FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " ASC")
     LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusForMessage(long messageId);
 
@@ -219,9 +232,7 @@ public interface FyleMessageJoinWithStatusDao {
             " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
             " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
             " WHERE mess." + Message.DISCUSSION_ID + " = :discussionId " +
-            " AND ( FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != '' " +
-            " OR FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " = 'image/svg+xml' " +
-            " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL) " +
+            " AND " + IMAGE_OR_VIDEO_CONDITION +
             " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
             " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT +
             " AND (fyle." + Fyle.FILE_PATH + " IS NOT NULL" +
@@ -297,8 +308,7 @@ public interface FyleMessageJoinWithStatusDao {
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
             " INNER JOIN " + Message.TABLE_NAME + " AS mess ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
             " WHERE mess." + Message.DISCUSSION_ID + " = ?" +
-            " AND (FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != ''" +
-            " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL)" +
+            " AND " + IMAGE_OR_VIDEO_CONDITION +
             " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
             " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT;
     String SORT_COLUMN_SORT_INDEX = "mess." + Message.SORT_INDEX;
@@ -379,9 +389,7 @@ public interface FyleMessageJoinWithStatusDao {
 
     // ---- Type filter conditions (no params, used with @RawQuery) ----
     String MEDIA_TYPE_CONDITION =
-            " AND (FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != ''" +
-            " OR FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " = 'image/svg+xml'" +
-            " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL)" +
+            " AND " + IMAGE_OR_VIDEO_CONDITION +
             " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'audio/%'";
     String AUDIO_TYPE_CONDITION =
             " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE 'audio/%'";
@@ -449,6 +457,9 @@ public interface FyleMessageJoinWithStatusDao {
 
     @Query(DISCUSSIONS_WITH_USAGE_QUERY + " ORDER BY disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC")
     LiveData<List<DiscussionAndUsage>> getDiscussionsWithUsageDateDesc(@NonNull byte[] bytesOwnedIdentity);
+
+    @Query(DISCUSSIONS_WITH_USAGE_QUERY + " ORDER BY disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
+    LiveData<List<DiscussionAndUsage>> getDiscussionsWithUsageNameAsc(@NonNull byte[] bytesOwnedIdentity);
 
     // ---- Total storage size for a single identity ----
     @Query("SELECT COALESCE(SUM(deduped.maxSize), 0) FROM (" +

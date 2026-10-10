@@ -20,6 +20,7 @@
 package io.olvid.messenger.main.groups
 
 import android.content.Context
+import android.util.Base64
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -46,6 +47,15 @@ class GroupListViewModel : ViewModel() {
                 .getAllGroupOrGroup2(ownedIdentity.bytesOwnedIdentity)
         }
 }
+
+/** Same criterion as the legacy crown badge: v2 admin permission, or owner of a legacy group. */
+fun GroupOrGroup2.isAdmin(): Boolean =
+    group2?.ownPermissionAdmin == true || (group != null && group.bytesGroupOwnerIdentity == null)
+
+/** Stable LazyColumn key, so expanding/collapsing a section animates item placement. */
+fun GroupOrGroup2.listKey(): String =
+    (group?.bytesGroupOwnerAndUid ?: group2?.bytesGroupIdentifier)
+        ?.let { Base64.encodeToString(it, Base64.NO_WRAP) } ?: ""
 
 fun GroupOrGroup2.getAnnotatedName(context: Context): AnnotatedString {
     return buildAnnotatedString {

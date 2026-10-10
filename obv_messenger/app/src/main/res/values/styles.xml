@@ -138,10 +138,6 @@
         <item name="colorControlHighlight">@color/whiteOverlay</item>
     </style>
 
-    <style name="AlwaysWhiteSubtleRipple" parent="AppTheme">
-        <item name="colorControlHighlight">@color/alwaysWhiteSubtleOverlay</item>
-    </style>
-
     <style name="AlwaysWhiteRipple" parent="AppTheme">
         <item name="colorControlHighlight">@color/alwaysWhiteOverlay</item>
     </style>

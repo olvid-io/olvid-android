@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">आपके डिवाइस में से एक **%1$d दिन** से कम समय में एक्सपायर हो जाएगा और निष्क्रिय हो जाएगा.\nआप इसे सक्रिय रखने के लिए **Olvid+** सदस्यता खरीद सकते हैं।</item>
 		<item quantity="other" state="needs_review" hash="-574658149">आपके डिवाइस में से एक **%1$d दिनों से कम** में समाप्त हो जाएगा और निष्क्रिय हो जाएगा.\nआप इसे सक्रिय रखने के लिए **Olvid+** सदस्यता खरीद सकते हैं।</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">यह डिवाइस **%1$d दिन** से कम समय में निष्क्रिय हो जाएगा और बंद कर दिया जाएगा।\nआप इसे सक्रिय रखने के लिए **Olvid+** सदस्यता खरीद सकते हैं।</item>
+		<item quantity="other" state="needs_review" hash="993103846">यह डिवाइस **%1$d दिनों** से कम समय में निष्क्रिय हो जाएगा और बंद कर दिया जाएगा।\nआप इसे सक्रिय रखने के लिए **Olvid+** सदस्यता खरीद सकते हैं।</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s समूह में शामिल हुए</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s समूह में शामिल हुए</item>
@@ -80,31 +84,31 @@
 	</plurals>
 	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1772966333">चर्चा संग्रहीत की गई</item>
-		<item quantity="other" state="needs_review" hash="1402495414">%1$d वार्तालाप संग्रहीत</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d चर्चाएँ संग्रहीत</item>
 	</plurals>
 	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1312483800">चर्चा अनआर्काइव कर दी गई</item>
-		<item quantity="other" state="needs_review" hash="-2093736213">%1$d संग्रहित वार्तालाप पुनर्स्थापित किए गए</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d चर्चाएँ पुनर्स्थापित की गईं</item>
 	</plurals>
 	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-2045500103">संदेश बुकमार्क से हटा दिया गया</item>
 		<item quantity="other" state="needs_review" hash="204728896">%1$d संदेश अनबुकमार्क किया गया</item>
 	</plurals>
 	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-716893580">क्या आप चयनित वार्तालाप हटाना चाहते हैं?</item>
-		<item quantity="other" state="needs_review" hash="-15840526">चयनित वार्तालाप हटाएं?</item>
+		<item quantity="one" state="needs_review" hash="-716893580">क्या आप चयनित चर्चा हटाना चाहते हैं?</item>
+		<item quantity="other" state="needs_review" hash="-15840526">चयनित चर्चाएँ हटाएं?</item>
 	</plurals>
 	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-862879351">क्या आप चयनित संदेश हटाना चाहते हैं?</item>
 		<item quantity="other" state="needs_review" hash="-2020248805">क्या आप चयनित संदेशों को हटाना चाहते हैं?</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-931157230">क्या आप वाकई में चयनित वार्तालाप और उसमें मौजूद सभी संदेशों को हटाना चाहते हैं?\nयह क्रिया अपरिवर्तनीय है।</item>
-		<item quantity="other" state="needs_review" hash="-1815739098">क्या आप वाकई में चुने हुए %1$d वार्तालापों और उनमें मौजूद सभी संदेशों को हटाना चाहते हैं?\nयह क्रिया अपरिवर्तनीय है।</item>
+		<item quantity="one" state="needs_review" hash="-931157230">क्या आप वाकई में चयनित चर्चा और उसमें मौजूद सभी संदेशों को हटाना चाहते हैं?\nयह क्रिया अपरिवर्तनीय है।</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">क्या आप वाकई में चुनी गई %1$d चर्चाओं और उनमें मौजूद सभी संदेशों को हटाना चाहते हैं?\nयह क्रिया अपरिवर्तनीय है।</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-2139168692">आपने चयनित वार्तालाप और उसमें मौजूद सभी संदेशों को कैसे हटाना चाहते हैं?\nयह क्रिया अपरिवर्तनीय है।</item>
-		<item quantity="other" state="needs_review" hash="-1430564144">आप चयनित %1$d वार्तालापों और उनमें मौजूद सभी संदेशों को कैसे हटाना चाहते हैं?\nयह क्रिया अपरिवर्तनीय है।</item>
+		<item quantity="one" state="needs_review" hash="-2139168692">आप चयनित चर्चा और उसमें मौजूद सभी संदेशों को कैसे हटाना चाहते हैं?\nयह क्रिया अपरिवर्तनीय है।</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">आप चयनित %1$d चर्चाओं और उनमें मौजूद सभी संदेशों को कैसे हटाना चाहते हैं?\nयह क्रिया अपरिवर्तनीय है।</item>
 	</plurals>
 	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-947341357">क्या आप वाकई में चयनित संदेश को हटाना चाहते हैं?\nयह क्रिया अपरिवर्तनीय है।</item>
@@ -115,7 +119,7 @@
 		<item quantity="other" state="needs_review" hash="-895867176">आप चयनित %1$d संदेशों को कैसे हटाना चाहते हैं?\nयह क्रिया अपरिवर्तनीय है।</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-606769319">आप इस बातचीत में **सबके** लिए एक संदेश को **स्थायी रूप से** हटाने वाले हैं। कृपया सुनिश्चित करें कि यह वास्तव में वही है जो आप करना चाहते हैं।</item>
+		<item quantity="one" state="needs_review" hash="-606769319">आप इस चर्चा में **सबके** लिए एक संदेश को **स्थायी रूप से** हटाने वाले हैं। कृपया सुनिश्चित करें कि यह वास्तव में वही है जो आप करना चाहते हैं।</item>
 		<item quantity="other" state="needs_review" hash="-1284393519">आप %1$d संदेशों को इस चर्चा में **सबके** लिए **स्थायी रूप से** हटाने वाले हैं। कृपया सुनिश्चित करें कि यह वास्तव में वही है जो आप करना चाहते हैं।</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -263,8 +267,8 @@
 		<item quantity="other" state="needs_review" hash="965402074">%1$d सदस्य</item>
 	</plurals>
 	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1006155949">आपके वार्तालापों में वर्तमान में एक दूरस्थ रूप से हटाया गया संदेश है। क्या आप इसे हटाना चाहते हैं?</item>
-		<item quantity="other" state="needs_review" hash="-1716115044">आपके वार्तालापों में वर्तमान में %1$d दूरस्थ रूप से हटाए गए संदेश हैं। क्या आप ऐसे सभी मार्करों को हटाना चाहते हैं?</item>
+		<item quantity="one" state="needs_review" hash="-1006155949">आपकी चर्चाओं में वर्तमान में एक दूरस्थ रूप से हटाया गया संदेश है। क्या आप इसे हटाना चाहते हैं?</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">आपकी चर्चाओं में वर्तमान में %1$d दूरस्थ रूप से हटाए गए संदेश हैं। क्या आप ऐसे सभी मार्करों को हटाना चाहते हैं?</item>
 	</plurals>
 	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1367750681">1 संपर्क अपना स्थान साझा कर रहा है</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">%1$d समूह में जोड़ें</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">%1$d समूहों में जोड़ें</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">आपके पास पहले से ही इन प्रतिभागियों के साथ एक चर्चा है।</item>
+		<item quantity="other" state="needs_review" hash="809550612">आपके पास पहले से ही इन प्रतिभागियों के साथ %1$d चर्चाएँ हैं।</item>
 	</plurals>
 </resources>

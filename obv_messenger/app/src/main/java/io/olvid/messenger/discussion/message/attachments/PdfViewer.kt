@@ -40,6 +40,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
@@ -66,7 +68,10 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -102,14 +107,22 @@ import io.olvid.messenger.designsystem.components.OlvidTextButton
 import androidx.compose.foundation.layout.plus
 import io.olvid.messenger.designsystem.theme.olvidDefaultTextFieldColors
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
-data class SearchResults(
+private const val MAX_SEARCH_MATCHES = 500
+
+data class SearchMatch(
     val page: Int,
-    val results: List<RectF>
+    val rects: List<RectF>
 )
 
+@OptIn(FlowPreview::class)
 @Composable
 fun PdfViewerScreen(
     modifier: Modifier = Modifier,
@@ -127,12 +140,16 @@ fun PdfViewerScreen(
     var renderablePages by remember {
         mutableStateOf<List<RenderablePdfPage>>(emptyList())
     }
-    var searchText by remember {
+    var searchText by rememberSaveable {
         mutableStateOf("")
     }
-    var searchResults by remember {
-        mutableStateOf(emptyList<SearchResults>())
+    var searchMatches by remember {
+        mutableStateOf(emptyList<SearchMatch>())
     }
+    var currentMatch by remember { mutableStateOf<SearchMatch?>(null) }
+    var searchInProgress by remember { mutableStateOf(false) }
+    val matchesByPage by remember { derivedStateOf { searchMatches.groupBy { it.page } } }
+    val currentMatchIndex by remember { derivedStateOf { searchMatches.indexOf(currentMatch) } }
     var pdfNotSupported by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
     var pdfPassword by remember { mutableStateOf<String?>(null) }
@@ -183,6 +200,85 @@ fun PdfViewerScreen(
             scope.launch {
                 lazyListState.animateScrollToItem(index = destination.pageNumber)
             }
+        }
+    }
+
+    val imeBottomPx by rememberUpdatedState(WindowInsets.ime.getBottom(density))
+
+    fun scrollToMatch(match: SearchMatch) {
+        scope.launch {
+            val page = renderablePages.getOrNull(match.page) ?: return@launch
+            val rect = match.rects.first()
+            // item width mirrors the layout: requiredWidth(screenWidthDp * scale) minus the
+            // LazyColumn contentPadding and PdfPage 8.dp horizontal paddings
+            val itemWidthPx = containerSize.width * scale - with(density) { 32.dp.toPx() }
+            val itemHeightPx = itemWidthPx * page.originalHeight / page.originalWidth
+            val visibleHeightPx = lazyListState.layoutInfo.viewportSize.height - imeBottomPx
+            val targetOffset = (rect.centerY() / page.originalHeight * itemHeightPx - visibleHeightPx / 2f)
+                .roundToInt().coerceAtLeast(0)
+            lazyListState.animateScrollToItem(match.page, targetOffset)
+            if (scale > 1f) {
+                val contentWidthPx = containerSize.width * scale
+                val targetX = (rect.centerX() / page.originalWidth * contentWidthPx - containerSize.width / 2f)
+                    .roundToInt().coerceIn(0, horizontalScrollState.maxValue)
+                horizontalScrollState.animateScrollTo(targetX)
+            }
+        }
+    }
+
+    fun gotoMatch(delta: Int) {
+        if (searchMatches.isEmpty()) return
+        val index = (currentMatchIndex + delta).mod(searchMatches.size)
+        currentMatch = searchMatches[index]
+        scrollToMatch(searchMatches[index])
+    }
+
+    if (Build.VERSION.SDK_INT >= 35) {
+        LaunchedEffect(renderablePages) {
+            snapshotFlow { searchText }
+                .debounce { if (it.isBlank()) 0L else 300L }
+                .collectLatest { query ->
+                    searchMatches = emptyList()
+                    currentMatch = null
+                    if (query.isBlank() || renderablePages.isEmpty()) {
+                        searchInProgress = false
+                        return@collectLatest
+                    }
+                    searchInProgress = true
+                    val pageCount = renderablePages.size
+                    val firstVisible = lazyListState.firstVisibleItemIndex.coerceIn(0, pageCount - 1)
+                    // scan visible pages first so nearby matches highlight quickly
+                    val scanOrder = (firstVisible until pageCount) + (0 until firstVisible)
+                    val matchesPerPage = arrayOfNulls<List<SearchMatch>>(pageCount)
+                    var total = 0
+                    withContext(Dispatchers.Default) {
+                        for (pageIndex in scanOrder) {
+                            ensureActive()
+                            val found = pdfBitmapConverter.searchPage(pageIndex, query)
+                                .map { SearchMatch(page = pageIndex, rects = it) }
+                            matchesPerPage[pageIndex] = found
+                            total += found.size
+                            if (found.isNotEmpty() || pageIndex == scanOrder.last()) {
+                                // flatten in page order so the global match index is stable
+                                val flattened = matchesPerPage.filterNotNull().flatten()
+                                withContext(Dispatchers.Main) {
+                                    searchMatches = flattened
+                                    if (currentMatch == null) {
+                                        (flattened.firstOrNull { it.page >= firstVisible }
+                                            ?: flattened.firstOrNull())?.let {
+                                            currentMatch = it
+                                            scrollToMatch(it)
+                                        }
+                                    }
+                                }
+                            }
+                            if (total >= MAX_SEARCH_MATCHES) {
+                                break
+                            }
+                        }
+                    }
+                    searchInProgress = false
+                }
         }
     }
 
@@ -244,7 +340,8 @@ fun PdfViewerScreen(
                     PdfPage(
                         page = page,
                         goto = ::goto,
-                        searchResults = searchResults.find { it.page == index },
+                        matches = matchesByPage[index].orEmpty(),
+                        currentMatch = currentMatch,
                         imageLoader = App.imageLoader
                     )
                 }
@@ -276,6 +373,7 @@ fun PdfViewerScreen(
             androidx.compose.animation.AnimatedVisibility(
                 modifier = Modifier
                     .navigationBarsPadding()
+                    .imePadding()
                     .displayCutoutPadding()
                     .padding(start = 20.dp, bottom = 8.dp)
                     .align(Alignment.BottomStart),
@@ -285,31 +383,13 @@ fun PdfViewerScreen(
             ) {
                 ExpandableSearchBar(
                     value = searchText,
-                    onValueChange = { newSearchText ->
-                        searchText = newSearchText
-                        pdfBitmapConverter.renderer?.let { renderer ->
-                            scope.launch(Dispatchers.Default) {
-                                searchResults = (0 until renderer.pageCount).map { index ->
-                                    renderer.openPage(index).use { page ->
-                                        val results = page.searchText(newSearchText)
-
-                                        val matchedRects = results.map {
-                                            it.bounds.first()
-                                        }
-                                        SearchResults(
-                                            page = index,
-                                            results = matchedRects
-                                        )
-                                    }
-                                }
-                                searchResults.firstOrNull()?.page?.let {
-                                    if (searchText.isEmpty().not()) {
-                                        scope.launch { lazyListState.animateScrollToItem(it) }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    onValueChange = { searchText = it },
+                    matchCount = searchMatches.size.takeIf { searchText.isNotBlank() },
+                    currentMatchIndex = currentMatchIndex,
+                    matchCountCapped = searchMatches.size >= MAX_SEARCH_MATCHES,
+                    searchInProgress = searchInProgress,
+                    onPreviousMatch = { gotoMatch(-1) },
+                    onNextMatch = { gotoMatch(1) },
                 )
             }
         }
@@ -410,7 +490,8 @@ fun PdfPage(
     modifier: Modifier = Modifier,
     page: RenderablePdfPage,
     goto: (PdfPageGotoLinkContent.Destination) -> Unit,
-    searchResults: SearchResults? = null,
+    matches: List<SearchMatch> = emptyList(),
+    currentMatch: SearchMatch? = null,
     imageLoader: ImageLoader
 ) {
     val context = LocalContext.current
@@ -457,26 +538,26 @@ fun PdfPage(
             .drawWithContent {
                 drawContent()
 
-                searchResults?.results?.forEach { rect ->
-                    val adjustedRect = RectF(
-                        rect.left * scaleFactorX,
-                        rect.top * scaleFactorY,
-                        rect.right * scaleFactorX,
-                        rect.bottom * scaleFactorY
-                    )
-
-                    drawRoundRect(
-                        color = Color.Yellow.copy(alpha = 0.5f),
-                        topLeft = Offset(
-                            x = adjustedRect.left,
-                            y = adjustedRect.top
-                        ),
-                        size = Size(
-                            width = adjustedRect.width(),
-                            height = adjustedRect.height()
-                        ),
-                        cornerRadius = CornerRadius(4.dp.toPx())
-                    )
+                matches.forEach { match ->
+                    val color = if (match === currentMatch) {
+                        Color(0xFFFF9800).copy(alpha = 0.6f)
+                    } else {
+                        Color.Yellow.copy(alpha = 0.35f)
+                    }
+                    match.rects.forEach { rect ->
+                        drawRoundRect(
+                            color = color,
+                            topLeft = Offset(
+                                x = rect.left * scaleFactorX,
+                                y = rect.top * scaleFactorY
+                            ),
+                            size = Size(
+                                width = rect.width() * scaleFactorX,
+                                height = rect.height() * scaleFactorY
+                            ),
+                            cornerRadius = CornerRadius(4.dp.toPx())
+                        )
+                    }
                 }
             }
     )

@@ -93,6 +93,7 @@ public class SettingsPojo_0 {
     public Boolean send_read_receipt; // sync
     public Boolean auto_open_limited_visibility;
     public Boolean retain_wiped_outbound;
+    public String default_reaction;
     public Long default_retention_count;
     public Long default_retention_duration;
     public Boolean default_read_once;
@@ -191,6 +192,7 @@ public class SettingsPojo_0 {
         settingsPojo.send_read_receipt = SettingsActivity.getDefaultSendReadReceipt();
         settingsPojo.auto_open_limited_visibility = SettingsActivity.getDefaultAutoOpenLimitedVisibilityInboundMessages();
         settingsPojo.retain_wiped_outbound = SettingsActivity.getDefaultRetainWipedOutboundMessages();
+        settingsPojo.default_reaction = SettingsActivity.getDefaultReaction();
         settingsPojo.default_retention_count = SettingsActivity.getDefaultDiscussionRetentionCount();
         settingsPojo.default_retention_duration = SettingsActivity.getDefaultDiscussionRetentionDuration();
         settingsPojo.default_read_once = SettingsActivity.getDefaultDiscussionReadOnce();
@@ -336,6 +338,7 @@ public class SettingsPojo_0 {
         }
         if (auto_open_limited_visibility != null) { SettingsActivity.setDefaultAutoOpenLimitedVisibilityInboundMessages(auto_open_limited_visibility); }
         if (retain_wiped_outbound != null) { SettingsActivity.setDefaultRetainWipedOutboundMessages(retain_wiped_outbound); }
+        if (default_reaction != null) { SettingsActivity.setDefaultReaction(default_reaction); }
         if (default_retention_count != null) { SettingsActivity.setDefaultDiscussionRetentionCount(default_retention_count); }
         if (default_retention_duration != null) { SettingsActivity.setDefaultDiscussionRetentionDuration(default_retention_duration); }
         if (default_read_once != null) { SettingsActivity.setDefaultDiscussionReadOnce(default_read_once); }

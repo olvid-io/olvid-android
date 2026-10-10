@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Ang isa sa iyong mga device ay malapit nang mag-expire at hindi na magagamit sa loob ng **mas mababa sa %1$d araw**.\nMaaari kang bumili ng subscription sa **Olvid+** upang panatilihin itong aktibo.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Ang isa sa iyong mga device ay malapit nang mag-expire at hindi na magagamit sa loob ng **%1$d na araw**.\nMaaari kang bumili ng isang **Olvid+** subscription upang panatilihin itong aktibo.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Ang device na ito ay malapit nang mag-expire at made-deactivate sa loob ng **hindi hihigit sa %1$d araw**. \nMaaari kang bumili ng subscription sa **Olvid+** upang panatilihin itong aktibo.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Ang device na ito ay malapit nang mag-expire at made-deactivate sa loob ng **hindi hihigit sa %1$d araw**. \nMaaari kang bumili ng subscription sa **Olvid+** upang panatilihin itong aktibo.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s ay sumali sa grupo</item>
 		<item quantity="other" state="needs_review" hash="51603026">Sumali si %1$s sa grupo</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Idagdag sa grupong %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Idagdag sa mga grupong %1$d</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Mayroon ka nang pag-uusap sa mga kalahok na ito.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Mayroon ka nang %1$d pag-uusap sa mga kalahok na ito.</item>
 	</plurals>
 </resources>

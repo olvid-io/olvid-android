@@ -1,0 +1,5 @@
+- Prikazujte samo prve 4 slike u poruci i dodajte prikaz albuma za pregled svih slika.
+- Dodan skener dokumenata.
+- Dvaput dodirnite primljenu poruku da biste reagirali zadanim emojijem.
+- Novi avatari za kontakte i grupe bez profilne slike.
+- Dodan gumb za slanje fotografije izravno s glavnog zaslona.

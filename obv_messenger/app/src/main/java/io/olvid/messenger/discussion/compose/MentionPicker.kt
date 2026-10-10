@@ -41,8 +41,8 @@ import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.DiscussionInputEditText
-import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.databases.ContactCacheSingleton
+import io.olvid.messenger.designsystem.avatar.avatarTextColorArgb
 import io.olvid.messenger.discussion.DiscussionViewModel
 import io.olvid.messenger.discussion.mention.MentionUrlSpan
 import io.olvid.messenger.discussion.mention.MentionViewModel
@@ -77,7 +77,7 @@ fun ColumnScope.MentionPicker(
                 filteredContactListViewModel.setSearchFilter(null)
                 val mention = status.mention
                 val contact = status.contact
-                val color = InitialView.getTextColor(
+                val color = avatarTextColorArgb(
                     context,
                     mention.userIdentifier,
                     ContactCacheSingleton.getContactCustomHue(mention.userIdentifier)
@@ -154,9 +154,7 @@ fun ColumnScope.MentionPicker(
                     onClick = {
                         contact?.let { mentionViewModel.validateMention(it) }
                     },
-                    initialViewSetup = { initialView ->
-                        contact?.let { initialView.setContact(it) }
-                    }
+                    avatar = contact,
                 )
             }
         }

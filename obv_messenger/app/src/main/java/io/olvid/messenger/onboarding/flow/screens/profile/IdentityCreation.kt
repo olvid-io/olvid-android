@@ -61,14 +61,14 @@ import io.olvid.messenger.onboarding.flow.OnboardingRoutes
 import io.olvid.messenger.onboarding.flow.OnboardingScreen
 import io.olvid.messenger.onboarding.flow.OnboardingStep
 
-fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowViewModel,
-                                     onIdentityCreated : () -> Unit,
-                                     onManagedProfile : () -> Unit,
-                                     onBack : () -> Unit,
-                                     onClose : () -> Unit,
+fun NavGraphBuilder.firstIdentityCreation(onboardingFlowViewModel: OnboardingFlowViewModel,
+                                          onIdentityCreated : () -> Unit,
+                                          onManagedProfile : () -> Unit,
+                                          onBack : () -> Unit,
+                                          onClose : () -> Unit,
                                      ) {
     composable(
-        OnboardingRoutes.IDENTITY_CREATION,
+        OnboardingRoutes.FIRST_IDENTITY_CREATION,
         enterTransition = { slideIntoContainer(SlideDirection.Start) },
         exitTransition = { slideOutOfContainer(SlideDirection.Start) },
         popEnterTransition = { slideIntoContainer(SlideDirection.End) },
@@ -181,8 +181,8 @@ fun ProfileManagedByOrganization(
 private fun IdentityCreationPreview() {
     NavHost(
         navController = rememberNavController(),
-        startDestination = OnboardingRoutes.IDENTITY_CREATION,
+        startDestination = OnboardingRoutes.FIRST_IDENTITY_CREATION,
     ) {
-        identityCreation(OnboardingFlowViewModel(), {}, {}, {}, {})
+        firstIdentityCreation(OnboardingFlowViewModel(), {}, {}, {}, {})
     }
 }

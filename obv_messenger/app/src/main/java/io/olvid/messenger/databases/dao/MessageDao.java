@@ -404,6 +404,13 @@ public interface MessageDao {
     @Query("SELECT MAX(" + Message.SORT_INDEX + ") FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId")
     @Nullable Double getDiscussionMaxSortIndex(long discussionId);
 
+    @Query("SELECT * FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND " + Message.MESSAGE_TYPE + " = :messageType " +
+            " ORDER BY " + Message.SORT_INDEX + " DESC " +
+            " LIMIT 1")
+    @Nullable Message getLatestMessageOfType(long discussionId, int messageType);
+
     @Query("SELECT id FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
             " AND " + Message.TIMESTAMP + " >= :timestamp " +
@@ -601,6 +608,7 @@ public interface MessageDao {
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
             " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
+            " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
             " AND " + Message.DISCUSSION_ID + " = :discussionId " +
             " ORDER BY " + Message.SORT_INDEX + " ASC ")
     LiveData<List<Message>> getCurrentlySharingLocationMessagesInDiscussionLiveData(long discussionId);
@@ -610,6 +618,7 @@ public interface MessageDao {
             " ON m." + Message.DISCUSSION_ID + " = disc.id " +
             " WHERE m." + Message.JSON_LOCATION + " NOT NULL " +
             " AND m." + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
+            " AND m." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " ORDER BY " + Message.TIMESTAMP + " ASC ")
     LiveData<List<Message>> getCurrentlySharingLocationMessagesForOwnedIdentityLiveData(@NonNull byte[] bytesOwnedIdentity);
@@ -621,6 +630,7 @@ public interface MessageDao {
             " ON m." + Message.DISCUSSION_ID + " = disc.id " +
             " WHERE m." + Message.JSON_LOCATION + " NOT NULL " +
             " AND m." + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
+            " AND m." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity)")
     LiveData<Boolean> hasLocationSharing(@NonNull byte[] bytesOwnedIdentity);
 
@@ -643,6 +653,7 @@ public interface MessageDao {
             " ORDER BY " + Message.SORT_INDEX + " ASC ")
     List<Message> getCurrentlySharingOutboundLocationMessagesInDiscussion(long discussionId);
 
+    // deliberately includes ephemeral (not yet opened) messages: a superseded sharing message must be marked as finished even while still hidden
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
             " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
@@ -676,10 +687,10 @@ public interface MessageDao {
             " " +
             " UNION " +
             " SELECT 1 FROM " + Invitation.TABLE_NAME + " AS inv " +
+            // keep aligned with Invitation.categoryRequiresAction()
             " WHERE inv." + Invitation.CATEGORY_ID + " IN ( " +
             ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY + ", " +
             ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY + ", " +
             ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY + ", " +
             ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY + ", " +
             ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY + ", " +
@@ -697,7 +708,8 @@ public interface MessageDao {
 
     @Query("SELECT id, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME +
             " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
-            " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE)
+            " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
+            " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE)
     List<LocationMessageStub> getAllLocationMessageStubs();
 
     class UnreadCountAndFirstMessage {

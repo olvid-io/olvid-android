@@ -28,15 +28,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,8 +49,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.avatar.Avatar
+import io.olvid.messenger.designsystem.avatar.AvatarSource
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel.SearchableDiscussion
 
 @Composable
@@ -106,11 +104,9 @@ private fun FromRow(
             text = stringResource(R.string.share_label_from),
             style = OlvidTypography.body2.copy(color = colorResource(R.color.greyTint)),
         )
-        InitialView(
+        Avatar(
+            target = ownedIdentity ?: AvatarSource.unknown(),
             modifier = Modifier.size(32.dp),
-            initialViewSetup = { initialView ->
-                ownedIdentity?.let { initialView.setOwnedIdentity(it) } ?: initialView.setUnknown()
-            },
         )
         Text(
             modifier = Modifier.weight(1f),
@@ -153,11 +149,9 @@ private fun ToRow(
         )
         // if there is a single recipient, show their profile picture, otherwise show a generic icon
         if (selectedDiscussions.size == 1) {
-            InitialView(
+            Avatar(
+                target = selectedDiscussions.firstOrNull() ?: AvatarSource.unknown(),
                 modifier = Modifier.size(32.dp),
-                initialViewSetup = { initialView ->
-                    selectedDiscussions.firstOrNull()?.let { initialView.setDiscussion(it) } ?: initialView.setUnknown()
-                },
             )
         } else {
             Box(
@@ -184,7 +178,7 @@ private fun ToRow(
                 stringResource(R.string.share_label_choose_recipients)
 
             selectedDiscussions.size == 1 ->
-                selectedDiscussions.first().title
+                selectedDiscussions.first().title.takeIf { it.isNotEmpty() } ?: stringResource(R.string.text_unnamed_discussion)
 
             else -> pluralStringResource(
                 R.plurals.label_share_destinations_count,

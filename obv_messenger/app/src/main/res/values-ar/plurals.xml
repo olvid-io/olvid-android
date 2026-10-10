@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">سيتم انتهاء صلاحية أحد أجهزتك وتعطيله في **أقل من %1$d يوم**.\nيمكنك شراء اشتراك **Olvid+** للحفاظ على نشاطه.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">سيتم انتهاء صلاحية أحد أجهزتك وتعطيله في **أقل من %1$d يوم**.\nيمكنك شراء اشتراك **Olvid+** لإبقائه نشطًا.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">سيُصبح هذا الجهاز غير صالح وسيتم إلغاء تنشيطه في غضون **أقل من %1$d يوم**.\nيمكنك شراء اشتراك **Olvid+** للحفاظ على تفعيله.</item>
+		<item quantity="other" state="needs_review" hash="993103846">سيُصبح هذا الجهاز غير صالح وسيتم إلغاء تنشيطه في غضون **أقل من %1$d يوم**.\nيمكنك شراء اشتراك **Olvid+** للحفاظ على تفعيله.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s انضم إلى المجموعة</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s انضم إلى المجموعة</item>
@@ -104,7 +108,7 @@
 	</plurals>
 	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-2139168692">كيف تريد حذف المحادثة المحددة وجميع الرسائل التي تحتوي عليها؟\nلا يمكن التراجع عن هذا الإجراء.</item>
-		<item quantity="other" state="needs_review" hash="-1430564144">كيف تريد حذف %1$d المناقشات المحددة وجميع الرسائل التي تحتوي عليها؟\nلا يمكن التراجع عن هذا الإجراء.</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">كيف تريد حذف %1$d المحادثات المحددة وجميع الرسائل التي تحتوي عليها؟\nلا يمكن التراجع عن هذا الإجراء.</item>
 	</plurals>
 	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-947341357">هل أنت متأكد حقًا من أنك تريد حذف الرسالة المحددة؟\nلا يمكن التراجع عن هذا الإجراء.</item>
@@ -115,16 +119,16 @@
 		<item quantity="other" state="needs_review" hash="-895867176">كيف تريد حذف رسائل %1$d المحددة؟\nلا يمكن التراجع عن هذا الإجراء.</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-606769319">أنت على وشك حذف رسالة **بشكل دائم** للجميع في هذا النقاش. يرجى التأكد من أن هذا هو ما تريده حقًا.</item>
-		<item quantity="other" state="needs_review" hash="-1284393519">أنت على وشك حذف %1$d رسالة **بشكل دائم** للجميع في هذا النقاش. يرجى التأكد من أن هذا هو ما تريد فعله حقًا.</item>
+		<item quantity="one" state="needs_review" hash="-606769319">أنت على وشك حذف رسالة **بشكل دائم** للجميع في هذه المحادثة. يرجى التأكد من أن هذا هو ما تريده حقًا.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">أنت على وشك حذف %1$d رسالة **بشكل دائم** للجميع في هذه المحادثة. يرجى التأكد من أن هذا هو ما تريد فعله حقًا.</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="2118446236">أنت على وشك حذف محادثة والرسائل التي تحتوي عليها **بشكل دائم** لـ **الجميع** في هذه المحادثة. يرجى التأكد من أن هذا هو ما تريد فعله حقًا.</item>
 		<item quantity="other" state="needs_review" hash="-1558931055">أنت على وشك حذف %1$d من المحادثات والرسائل التي تحتوي عليها **بشكل دائم** لـ **الجميع** في هذه المحادثات. يرجى التأكد من أن هذا هو ما تريده حقًا.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">أنت على وشك دعوة كل عضو في المجموعة لديك قناة معه (عضو واحد حاليًا) إلى نقاش خاص.\nهل ترغب في المتابعة؟</item>
-		<item quantity="other" state="needs_review" hash="-994717142">أنت على وشك دعوة كل عضو في المجموعة لديك قناة معه (حالياً %1$d عضو) إلى نقاش خاص.\nهل تريد المتابعة؟</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">أنت على وشك دعوة كل عضو في المجموعة لديك قناة معه (عضو واحد حاليًا) إلى محادثة خاصة.\nهل ترغب في المتابعة؟</item>
+		<item quantity="other" state="needs_review" hash="-994717142">أنت على وشك دعوة كل عضو في المجموعة لديك قناة معه (حالياً %1$d عضو) إلى محادثة خاصة.\nهل تريد المتابعة؟</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-127723614">يمكن دعوة عضو واحد من المجموعة إلى محادثة خاصة</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">أضف إلى مجموعة %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">أضف إلى مجموعات %1$d</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">لديك بالفعل محادثة مع هؤلاء المشاركين.</item>
+		<item quantity="other" state="needs_review" hash="809550612">لديك بالفعل %1$d محادثات مع هؤلاء المشاركين.</item>
 	</plurals>
 </resources>

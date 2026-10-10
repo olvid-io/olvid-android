@@ -1,0 +1,5 @@
+- Toon nu slechts de eerste 4 afbeeldingen van een bericht en voeg een albumweergave toe om ze allemaal te bekijken.
+- Documentenscanner toegevoegd.
+- Dubbeltik op een ontvangen bericht om te reageren met een standaardemoji.
+- Nieuwe avatars voor contacten en groepen zonder profielfoto.
+- Knop toegevoegd om direct vanaf het hoofdscherm een foto te verzenden.

@@ -49,6 +49,17 @@
 
     <color name="trustIconBackground">#323232</color>
 
+    <!-- Attach menu icon tiles (same in light and dark) -->
+    <color name="attachMenuCamera">#2682eb</color>
+    <color name="attachMenuVideo">#1a61cd</color>
+    <color name="attachMenuScan">#144da3</color>
+    <color name="attachMenuImage">#c73f6e</color>
+    <color name="attachMenuFile">#b02e0c</color>
+    <color name="attachMenuPoll">#b23be0</color>
+    <color name="attachMenuLocation">#4f51de</color>
+    <color name="attachMenuEphemeral">#ea971d</color>
+    <color name="attachMenuIntroduce">#028090</color>
+
     <!-- Poll colors-->
     <color name="poll0">#EBBD57</color>
     <color name="poll1">#B6EBEB</color>

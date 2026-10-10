@@ -21,7 +21,6 @@ package io.olvid.messenger.main.contacts.suggested
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -49,11 +48,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
@@ -93,17 +89,17 @@ import io.olvid.messenger.R
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Invitation
+import io.olvid.messenger.designsystem.avatar.Avatar
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.designsystem.components.AnimatedEmoji
 import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.OlvidDragHandle
-import io.olvid.messenger.designsystem.components.OlvidOutlinedActionButton
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
+import io.olvid.messenger.designsystem.components.OlvidOutlinedActionButton
 import io.olvid.messenger.designsystem.components.OlvidOutlinedSecondaryButton
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.customClasses.InitialView as InitialViewClass
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.launch
 
@@ -433,7 +429,7 @@ private fun ContactRow(cardState: SuggestedContactUiState, contact: Contact) {
     val context = LocalContext.current
 
     SuggestedRowLayout(
-        initialViewSetup = cardState.initialViewSetup,
+        avatar = cardState.avatar,
         title = cardState.name,
         subtitle = cardState.description,
         onClick = {
@@ -481,7 +477,7 @@ private fun ContactRow(cardState: SuggestedContactUiState, contact: Contact) {
 
 @Composable
 private fun SuggestedRowLayout(
-    initialViewSetup: (InitialViewClass) -> Unit,
+    avatar: AvatarTarget?,
     title: String,
     subtitle: String?,
     onClick: (() -> Unit)? = null,
@@ -503,9 +499,9 @@ private fun SuggestedRowLayout(
             .heightIn(min = 56.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        InitialView(
+        Avatar(
             modifier = Modifier.size(40.dp),
-            initialViewSetup = initialViewSetup,
+            target = avatar,
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {

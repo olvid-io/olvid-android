@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">یکی از دستگاه‌های شما در **کمتر از %1$d روز** منقضی و غیرفعال می‌شود.\nمی‌توانید با خرید اشتراک **Olvid+** آن را فعال نگه دارید.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">یکی از دستگاه‌های شما در **کمتر از %1$d روز** منقضی و غیرفعال می‌شود.\nمی‌توانید با خرید اشتراک **Olvid+** آن را فعال نگه دارید.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">این دستگاه در **کمتر از %1$d روز** منقضی شده و غیرفعال می‌شود.\nمی‌توانید اشتراک **Olvid+** را خریداری کنید تا فعال باقی بماند.</item>
+		<item quantity="other" state="needs_review" hash="993103846">این دستگاه در **کمتر از %1$d روز** منقضی شده و غیرفعال می‌شود.\nمی‌توانید اشتراک **Olvid+** را خریداری کنید تا فعال باقی بماند.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s به گروه پیوست</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s به گروه پیوست</item>
@@ -91,15 +95,15 @@
 		<item quantity="other" state="needs_review" hash="204728896">%1$d پیام از لیست نشان شده‌ها حذف شد</item>
 	</plurals>
 	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-716893580">آیا بحث انتخاب‌شده را حذف کنم؟</item>
-		<item quantity="other" state="needs_review" hash="-15840526">آیا بحث‌های انتخاب‌شده را حذف کنم؟</item>
+		<item quantity="one" state="needs_review" hash="-716893580">آیا گفتگو انتخاب‌شده را حذف کنم؟</item>
+		<item quantity="other" state="needs_review" hash="-15840526">آیا گفتگوهای انتخاب‌شده را حذف کنم؟</item>
 	</plurals>
 	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-862879351">آیا پیام انتخاب‌شده را حذف کنم؟</item>
 		<item quantity="other" state="needs_review" hash="-2020248805">آیا پیام‌های انتخاب‌شده را حذف کنم؟</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-931157230">آیا واقعاً می‌خواهید این مکالمه‌ی انتخاب‌شده و تمام پیام‌های آن را حذف کنید؟\nاین عمل قابل برگشت نیست.</item>
+		<item quantity="one" state="needs_review" hash="-931157230">آیا واقعاً می‌خواهید این گفتگوهای انتخاب‌شده و تمام پیام‌های آن را حذف کنید؟\nاین عمل قابل برگشت نیست.</item>
 		<item quantity="other" state="needs_review" hash="-1815739098">آیا واقعاً می‌خواهید %1$d گفتگوهای انتخاب‌شده و تمام پیام‌های موجود در آن‌ها را حذف کنید؟\nاین عمل قابل برگشت نیست.</item>
 	</plurals>
 	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -119,16 +123,16 @@
 		<item quantity="other" state="needs_review" hash="-1284393519">شما در حال حذف دائمی %1$d پیام برای **همه** در این گفتگو هستید. لطفاً مطمئن شوید که این همان کاری است که می‌خواهید انجام دهید.</item>
 	</plurals>
 	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="2118446236">شما در حال حذف **دائمی** یک مکالمه و تمام پیام‌های موجود در آن برای **همه** شرکت‌کنندگان در این مکالمه هستید. لطفاً مطمئن شوید که این همان کاری است که می‌خواهید انجام دهید.</item>
+		<item quantity="one" state="needs_review" hash="2118446236">شما در حال حذف **دائمی** یک گفتگوی و تمام پیام‌های موجود در آن برای **همه** شرکت‌کنندگان در این گفتگو هستید. لطفاً مطمئن شوید که این همان کاری است که می‌خواهید انجام دهید.</item>
 		<item quantity="other" state="needs_review" hash="-1558931055">شما در حال حذف **دائمی** %1$d گفتگو و پیام‌های موجود در آن‌ها برای **همه**‌ی شرکت‌کنندگان هستید. لطفاً مطمئن شوید که این همان کاری است که می‌خواهید انجام دهید.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">در حال دعوت از هر یک از اعضای گروهی هستید که کانالی با آن‌ها دارید (در حال حاضر ۱ عضو) به یک بحث خصوصی.\nآیا می‌خواهید ادامه دهید؟</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">در حال دعوت از هر یک از اعضای گروهی هستید که کانالی با آن‌ها دارید (در حال حاضر ۱ عضو) به یک گفتگو خصوصی.\nآیا می‌خواهید ادامه دهید؟</item>
 		<item quantity="other" state="needs_review" hash="-994717142">در حال دعوت از تک‌تک اعضای گروهی هستید که کانالی با آن‌ها دارید (در حال حاضر %1$d عضو).\nآیا می‌خواهید ادامه دهید؟</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">یک عضو گروه می‌تواند به یک بحث خصوصی دعوت شود</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d اعضای گروه می‌توانند به یک بحث خصوصی دعوت شوند</item>
+		<item quantity="one" state="needs_review" hash="-127723614">یک عضو گروه می‌تواند به یک گفتگو خصوصی دعوت شود</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d اعضای گروه می‌توانند به یک گفتگو خصوصی دعوت شوند</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">۱ گروه مشترک</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">اضافه کردن به گروه %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">اضافه کردن به گروه‌های %1$d</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">شما قبلاً یک گفتگو با این شرکت‌کنندگان داشته‌اید.</item>
+		<item quantity="other" state="needs_review" hash="809550612">شما در حال حاضر %1$d گفتگو با این شرکت‌کنندگان دارید.</item>
 	</plurals>
 </resources>

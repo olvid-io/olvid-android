@@ -382,6 +382,16 @@
         <item>1080</item>
     </string-array>
 
+    <string-array name="truncate_long_messages">
+        <item>@string/pref_truncate_long_messages_full_screen</item>
+        <item>@string/pref_truncate_long_messages_inline</item>
+        <item>@string/pref_truncate_long_messages_never</item>
+    </string-array>
+    <string-array name="truncate_long_messages_values">
+        <item>full_screen</item>
+        <item>inline</item>
+        <item>never</item>
+    </string-array>
     <string-array name="emoji_animation">
         <item>@string/pref_emoji_animation_loop</item>
         <item>@string/pref_emoji_animation_once</item>

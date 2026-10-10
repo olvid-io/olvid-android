@@ -58,6 +58,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -86,16 +87,17 @@ import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.map
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import io.olvid.engine.Logger
+import io.olvid.engine.engine.types.sync.ObvSyncAtom
 import io.olvid.messenger.App
-import io.olvid.messenger.UnreadCountsSingleton
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
+import io.olvid.messenger.UnreadCountsSingleton
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
-import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.SecureUriHandler
@@ -114,8 +116,10 @@ import io.olvid.messenger.databases.tasks.ReplaceDiscussionDraftTask
 import io.olvid.messenger.databases.tasks.SaveDraftTask
 import io.olvid.messenger.databases.tasks.SaveMultipleAttachmentsTask
 import io.olvid.messenger.databases.tasks.SetDraftJsonExpirationTask
+import io.olvid.messenger.databases.tasks.getDiscussionIdentifier
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
+import io.olvid.messenger.designsystem.theme.ProvideOlvidRipple
 import io.olvid.messenger.discussion.compose.ComposeMessageArea
 import io.olvid.messenger.discussion.compose.ComposeMessageViewModel
 import io.olvid.messenger.discussion.compose.EphemeralSettingsGroup
@@ -124,14 +128,18 @@ import io.olvid.messenger.discussion.compose.MessageEditHandler
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.mention.MentionViewModel
 import io.olvid.messenger.discussion.message.MessageActionMenu
+import io.olvid.messenger.discussion.message.attachments.DiscussionGalleryOverlay
+import io.olvid.messenger.discussion.message.attachments.MessageAlbumOverlay
 import io.olvid.messenger.discussion.search.DiscussionCalendarDialog
 import io.olvid.messenger.discussion.search.DiscussionSearchViewModel
+import io.olvid.messenger.gallery.GalleryViewModel
+import io.olvid.messenger.gallery.saveAttachmentTo
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.notifications.AndroidNotificationManager
-import io.olvid.messenger.services.AudioPlaybackNotificationManager
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel
+import io.olvid.messenger.services.AudioPlaybackNotificationManager
 import io.olvid.messenger.settings.SettingsActivity
-import java.io.FileInputStream
 import java.io.IOException
 
 class DiscussionActivity : LockableActivity() {
@@ -139,6 +147,7 @@ class DiscussionActivity : LockableActivity() {
     private val discussionSearchViewModel: DiscussionSearchViewModel by viewModels()
     private val composeMessageViewModel: ComposeMessageViewModel by viewModels { FACTORY }
     private val linkPreviewViewModel: LinkPreviewViewModel by viewModels()
+    private val galleryViewModel: GalleryViewModel by viewModels()
     private val mentionViewModel: MentionViewModel by viewModels()
     private val ephemeralViewModel: EphemeralViewModel by viewModels()
     private val invitationViewModel: InvitationListViewModel by viewModels()
@@ -220,7 +229,9 @@ class DiscussionActivity : LockableActivity() {
             val discussionAndGroupMembersCount by discussionViewModel.discussionGroupMemberCountLiveData.observeAsState()
 
             BackHandler {
-                if (discussionViewModel.fullScreenPhotoUrl != null) {
+                if (discussionViewModel.albumMessageId != null) {
+                    discussionViewModel.closeAlbum()
+                } else if (discussionViewModel.fullScreenPhotoUrl != null) {
                     discussionViewModel.fullScreenPhotoUrl = null
                 } else if (discussionViewModel.selectedMessageInfo != null) {
                     discussionViewModel.selectedMessageInfo = null
@@ -239,6 +250,30 @@ class DiscussionActivity : LockableActivity() {
             val context = LocalContext.current
             val view = LocalView.current
 
+            var lastDarkOverlayOpened by remember { mutableStateOf<Boolean?>(null) }
+
+            DisposableEffect(discussionViewModel.albumMessageId, discussionViewModel.galleryRequest) {
+                val darkOverlayOpened = discussionViewModel.albumMessageId != null || discussionViewModel.galleryRequest != null
+                if (darkOverlayOpened != lastDarkOverlayOpened) {
+                    lastDarkOverlayOpened = darkOverlayOpened
+                    if (darkOverlayOpened) {
+                        (context.getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager)
+                            ?.hideSoftInputFromWindow(view.windowToken, 0)
+                        enableEdgeToEdge(
+                            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
+                            navigationBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb())
+                        )
+                    } else {
+                        enableEdgeToEdge(
+                            statusBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+                            navigationBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), ContextCompat.getColor(this@DiscussionActivity, R.color.blackOverlay))
+                        )
+                    }
+                }
+
+                onDispose {  }
+            }
+
             LaunchedEffect(messageListState.isScrollInProgress) {
                 if (messageListState.isScrollInProgress) {
                     (context.getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager)
@@ -247,268 +282,294 @@ class DiscussionActivity : LockableActivity() {
                 }
             }
 
-            val fontScale = remember { mutableFloatStateOf(1f) }
+            val fontScale = remember { mutableFloatStateOf(SettingsActivity.lastDiscussionFontScale) }
+            LifecycleResumeEffect(Unit) {
+                fontScale.floatValue = SettingsActivity.lastDiscussionFontScale
+
+                onPauseOrDispose {
+                    SettingsActivity.lastDiscussionFontScale = fontScale.floatValue
+                }
+            }
+
 
             SharedTransitionLayout {
-                CompositionLocalProvider(LocalUriHandler provides SecureUriHandler(this@DiscussionActivity)) {
-                    Scaffold(
-                        containerColor = when (discussionBackground) {
-                            is DiscussionBackground.Color -> Color((discussionBackground as DiscussionBackground.Color).color)
-                            DiscussionBackground.Default -> colorResource(id = R.color.almostWhite)
-                            else -> Color.Transparent // Image background or no background
-                        },
-                        topBar = {
-                            DiscussionTopAppBar(
-                                discussion = discussion,
-                                discussionViewModel = discussionViewModel,
-                                discussionSearchViewModel = discussionSearchViewModel,
-                                invitationViewModel = invitationViewModel,
-                                lazyListState = messageListState,
-                                supportFragmentManager = supportFragmentManager,
-                                toolbarClickedCallback = toolbarClickedCallback,
-                                finishAndClearViewModel = ::finishAndClearViewModel,
-                                onBackPressed = {
-                                    onBackPressedDispatcher.onBackPressed()
-                                },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                            )
-                        }
-                    ) { contentPadding ->
-
-                        // discussion custom background
-                        AsyncImage(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(
-                                    top = contentPadding.calculateTopPadding(),
-                                    bottom = 0.dp,
-                                ),
-                            model = when (discussionBackground) {
-                                is DiscussionBackground.Image -> (discussionBackground as DiscussionBackground.Image).bitmap
-                                else -> null
+                ProvideOlvidRipple {
+                    CompositionLocalProvider(LocalUriHandler provides SecureUriHandler(this@DiscussionActivity)) {
+                        Scaffold(
+                            containerColor = when (discussionBackground) {
+                                is DiscussionBackground.Color -> Color((discussionBackground as DiscussionBackground.Color).color)
+                                DiscussionBackground.Default -> colorResource(id = R.color.almostWhite)
+                                else -> Color.Transparent // Image background or no background
                             },
-                            contentScale = ContentScale.Crop,
-                            contentDescription = null,
-                            imageLoader = App.imageLoader
-                        )
+                            topBar = {
+                                DiscussionTopAppBar(
+                                    discussion = discussion,
+                                    discussionViewModel = discussionViewModel,
+                                    discussionSearchViewModel = discussionSearchViewModel,
+                                    invitationViewModel = invitationViewModel,
+                                    lazyListState = messageListState,
+                                    supportFragmentManager = supportFragmentManager,
+                                    toolbarClickedCallback = toolbarClickedCallback,
+                                    finishAndClearViewModel = ::finishAndClearViewModel,
+                                    onBackPressed = {
+                                        onBackPressedDispatcher.onBackPressed()
+                                    },
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                )
+                            }
+                        ) { contentPadding ->
+
+                            // discussion custom background
+                            AsyncImage(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(
+                                        top = contentPadding.calculateTopPadding(),
+                                        bottom = 0.dp,
+                                    ),
+                                model = when (discussionBackground) {
+                                    is DiscussionBackground.Image -> (discussionBackground as DiscussionBackground.Image).bitmap
+                                    else -> null
+                                },
+                                contentScale = ContentScale.Crop,
+                                contentDescription = null,
+                                imageLoader = App.imageLoader
+                            )
 
 
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(top = contentPadding.calculateTopPadding())
-                                .pointerInput(Unit) {
-                                    var initialSize: Float? = null
-                                    var initialScale = 1f
-                                    awaitPointerEventScope {
-                                        while (true) {
-                                            val event = awaitPointerEvent(PointerEventPass.Initial)
-                                            if (event.changes.size == 2) {
-                                                event.changes.forEach { it.consume() }
-                                                if (event.type == PointerEventType.Press) {
-                                                    initialSize = null
-                                                } else if (event.type == PointerEventType.Move) {
-                                                    val initSize = initialSize
-                                                    if (initSize == null) {
-                                                        initialSize =
-                                                            event.calculateCentroidSize(true)
-                                                        initialScale = fontScale.floatValue
-                                                    } else {
-                                                        fontScale.floatValue =
-                                                            (initialScale * event.calculateCentroidSize(
-                                                                true
-                                                            ) / initSize).coerceIn(1f, 3f)
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(top = contentPadding.calculateTopPadding())
+                                    .pointerInput(Unit) {
+                                        var initialSize: Float? = null
+                                        var initialScale = 1f
+                                        awaitPointerEventScope {
+                                            while (true) {
+                                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                                if (event.changes.size == 2) {
+                                                    event.changes.forEach { it.consume() }
+                                                    if (event.type == PointerEventType.Press) {
+                                                        initialSize = null
+                                                    } else if (event.type == PointerEventType.Move) {
+                                                        val initSize = initialSize
+                                                        if (initSize == null) {
+                                                            // a zero centroid size would make the scale NaN/infinite on the next move
+                                                            initialSize =
+                                                                event.calculateCentroidSize(true)
+                                                                    .takeIf { it > 0f }
+                                                            initialScale = fontScale.floatValue
+                                                        } else {
+                                                            fontScale.floatValue =
+                                                                (initialScale * event.calculateCentroidSize(
+                                                                    true
+                                                                ) / initSize).coerceIn(1f, 3f)
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                }
-                        ) {
-                            MessageList(
-                                modifier = Modifier
-                                    .weight(1f, true)
-                                    .zIndex(if (discussionViewModel.selectedMessageInfo != null) 1f else 0f),
-                                fontScale = fontScale.floatValue,
-                                lazyListState = messageListState,
-                                discussionViewModel = discussionViewModel,
-                                discussionSearchViewModel = discussionSearchViewModel,
-                                linkPreviewViewModel = linkPreviewViewModel,
-                                invitationViewModel = invitationViewModel,
-                                locationMessageHandler = locationMessageHandler,
-                                callHandler = callHandler,
-                                messageEditHandler = messageEditHandler,
-                                composeMessageViewModel = composeMessageViewModel,
-                                sendReadReceipt = sendReadReceipt,
-                                messageClicked = ::messageClicked,
-                                onCancelAttachmentUpload = ::cancelAttachmentUpload,
-                                saveAttachment = ::saveAttachment,
-                                saveAllAttachments = ::saveAllAttachments,
-                                openMap = locationMessageHandler::openMap,
-                                openDiscussionDetailsCallback = {
-                                    toolbarClickedCallback?.run()
-                                },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                            )
+                            ) {
+                                MessageList(
+                                    modifier = Modifier
+                                        .weight(1f, true)
+                                        .zIndex(if (discussionViewModel.selectedMessageInfo != null) 1f else 0f),
+                                    fontScale = fontScale.floatValue,
+                                    lazyListState = messageListState,
+                                    discussionViewModel = discussionViewModel,
+                                    discussionSearchViewModel = discussionSearchViewModel,
+                                    linkPreviewViewModel = linkPreviewViewModel,
+                                    invitationViewModel = invitationViewModel,
+                                    locationMessageHandler = locationMessageHandler,
+                                    callHandler = callHandler,
+                                    messageEditHandler = messageEditHandler,
+                                    composeMessageViewModel = composeMessageViewModel,
+                                    sendReadReceipt = sendReadReceipt,
+                                    messageClicked = ::messageClicked,
+                                    onCancelAttachmentUpload = ::cancelAttachmentUpload,
+                                    saveAttachment = ::saveAttachment,
+                                    saveAllAttachments = ::saveAllAttachments,
+                                    openMap = locationMessageHandler::openMap,
+                                    openDiscussionDetailsCallback = {
+                                        toolbarClickedCallback?.run()
+                                    },
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                )
 
-                            // footers
-                            val lightGreyColor = colorResource(R.color.lightGrey)
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(colorResource(R.color.almostWhite))
-                                    .drawBehind {
-                                        drawLine(
-                                            color = lightGreyColor,
-                                            strokeWidth = 1.dp.toPx(),
-                                            start = Offset(0f, 0f),
-                                            end = Offset(size.width, 0f),
+                                // footers
+                                val lightGreyColor = colorResource(R.color.lightGrey)
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(colorResource(R.color.almostWhite))
+                                        .drawBehind {
+                                            drawLine(
+                                                color = lightGreyColor,
+                                                strokeWidth = 1.dp.toPx(),
+                                                start = Offset(0f, 0f),
+                                                end = Offset(size.width, 0f),
+                                            )
+                                        }
+                                ) {
+                                    if (discussion?.discussionType == Discussion.TYPE_CONTACT
+                                        && showChannelCreationSpinner == true
+                                        && discussion?.active == true
+                                    ) {
+                                        val messages =
+                                            discussionViewModel.pagedMessages.collectAsLazyPagingItems()
+                                        val hasMessages = messages.itemSnapshotList.any { message -> message?.status == Message.STATUS_PROCESSING }
+                                        if (hasMessages) {
+                                            DiscussionNoChannel(messageRes = R.string.message_discussion_no_channel)
+                                        }
+                                    } else if (discussionAndGroupMembersCount?.discussion != null
+                                        && discussionAndGroupMembersCount?.discussion?.discussionType == Discussion.TYPE_GROUP_V2
+                                        && discussionAndGroupMembersCount?.updating != 0
+                                    ) {
+                                        DiscussionNoChannel(
+                                            messageRes =
+                                                if (discussionAndGroupMembersCount?.updating == Group2.UPDATE_SYNCING)
+                                                    R.string.message_discussion_group_v2_updating
+                                                else
+                                                    R.string.message_discussion_group_v2_creating
                                         )
                                     }
-                            ) {
-                                if (discussion?.discussionType == Discussion.TYPE_CONTACT
-                                    && showChannelCreationSpinner == true
-                                    && discussion?.active == true
-                                ) {
-                                    val messages =
-                                        discussionViewModel.pagedMessages.collectAsLazyPagingItems()
-                                    val hasMessages = messages.itemSnapshotList.any { message -> message?.status == Message.STATUS_PROCESSING }
-                                    if (hasMessages) {
-                                        DiscussionNoChannel(messageRes = R.string.message_discussion_no_channel)
+                                    lockedState?.let {
+                                        DiscussionLocked(state = it)
+                                    } ?: run {
+                                        ComposeMessageArea(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .cutoutHorizontalPadding()
+                                                .systemBarsHorizontalPadding()
+                                                .padding(4.dp),
+                                            fontScale = fontScale.floatValue,
+                                            audioAttachmentServiceBinding = audioAttachmentServiceBinding,
+                                            discussionViewModel = discussionViewModel,
+                                            composeMessageViewModel = composeMessageViewModel,
+                                            linkPreviewViewModel = linkPreviewViewModel,
+                                            mentionViewModel = mentionViewModel,
+                                            ephemeralViewModel = ephemeralViewModel
+                                        )
                                     }
-                                } else if (discussionAndGroupMembersCount?.discussion != null
-                                    && discussionAndGroupMembersCount?.discussion?.discussionType == Discussion.TYPE_GROUP_V2
-                                    && discussionAndGroupMembersCount?.updating != 0
-                                ) {
-                                    DiscussionNoChannel(
-                                        messageRes =
-                                            if (discussionAndGroupMembersCount?.updating == Group2.UPDATE_SYNCING)
-                                                R.string.message_discussion_group_v2_updating
-                                            else
-                                                R.string.message_discussion_group_v2_creating
-                                    )
-                                }
-                                lockedState?.let {
-                                    DiscussionLocked(state = it)
-                                } ?: run {
-                                    ComposeMessageArea(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .cutoutHorizontalPadding()
-                                            .systemBarsHorizontalPadding()
-                                            .padding(4.dp),
-                                        fontScale = fontScale.floatValue,
-                                        audioAttachmentServiceBinding = audioAttachmentServiceBinding,
-                                        discussionViewModel = discussionViewModel,
-                                        composeMessageViewModel = composeMessageViewModel,
-                                        linkPreviewViewModel = linkPreviewViewModel,
-                                        mentionViewModel = mentionViewModel,
-                                        ephemeralViewModel = ephemeralViewModel
-                                    )
                                 }
                             }
                         }
                     }
-                }
-                // intercept taps outside the popup (caused by focusable false and useSystemWidth constraints)
-                if (composeMessageViewModel.menuExpanded) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(Unit) {
-                                detectTapGestures { composeMessageViewModel.menuExpanded = false }
-                            }
-                    )
-                }
-                // Ephemeral settings
-                if (composeMessageViewModel.openEphemeralSettings) {
-                    EphemeralSettingsGroup(
-                        modifier = Modifier.safeDrawingPadding(),
-                        ephemeralViewModel = ephemeralViewModel,
-                        expanded = composeMessageViewModel.openEphemeralSettings,
-                    ) {
-                        if (ephemeralViewModel.getValid()
-                                .value == true
+                    // intercept taps outside the popup (caused by focusable false and useSystemWidth constraints)
+                    if (composeMessageViewModel.menuExpanded) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .pointerInput(Unit) {
+                                    detectTapGestures { composeMessageViewModel.menuExpanded = false }
+                                }
+                        )
+                    }
+                    // Ephemeral settings
+                    if (composeMessageViewModel.openEphemeralSettings) {
+                        EphemeralSettingsGroup(
+                            modifier = Modifier.safeDrawingPadding(),
+                            ephemeralViewModel = ephemeralViewModel,
+                            expanded = composeMessageViewModel.openEphemeralSettings,
                         ) {
-                            val jsonExpiration = JsonExpiration()
-                            if (ephemeralViewModel.getReadOnce()) {
-                                jsonExpiration.setReadOnce(true)
-                            }
-                            jsonExpiration.setVisibilityDuration(ephemeralViewModel.getVisibility())
-                            jsonExpiration.setExistenceDuration(ephemeralViewModel.getExistence())
-                            App.runThread(
-                                SetDraftJsonExpirationTask(
-                                    discussionViewModel.discussionId!!,
-                                    jsonExpiration
+                            if (ephemeralViewModel.getValid()
+                                    .value == true
+                            ) {
+                                val jsonExpiration = JsonExpiration()
+                                if (ephemeralViewModel.getReadOnce()) {
+                                    jsonExpiration.setReadOnce(true)
+                                }
+                                jsonExpiration.setVisibilityDuration(ephemeralViewModel.getVisibility())
+                                jsonExpiration.setExistenceDuration(ephemeralViewModel.getExistence())
+                                App.runThread(
+                                    SetDraftJsonExpirationTask(
+                                        discussionViewModel.discussionId!!,
+                                        jsonExpiration
+                                    )
                                 )
+                            }
+                            composeMessageViewModel.openEphemeralSettings = false
+                        }
+                    }
+                    AnimatedVisibility(
+                        visible = discussionViewModel.fullScreenPhotoUrl != null,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.8f))
+                                .clickable(
+                                    interactionSource = null,
+                                    indication = null,
+                                ) { discussionViewModel.fullScreenPhotoUrl = null }
+                                .safeDrawingPadding(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AsyncImage(
+                                model = discussionViewModel.fullScreenPhotoUrl,
+                                contentDescription = "profile photo",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .sharedElement(
+                                        sharedContentState = rememberSharedContentState(key = "profile-photo"),
+                                        animatedVisibilityScope = this@AnimatedVisibility
+                                    ),
+                                imageLoader = App.imageLoader
                             )
                         }
-                        composeMessageViewModel.openEphemeralSettings = false
                     }
-                }
-                AnimatedVisibility(
-                    visible = discussionViewModel.fullScreenPhotoUrl != null,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.8f))
-                            .clickable(
-                                interactionSource = null,
-                                indication = null,
-                            ) { discussionViewModel.fullScreenPhotoUrl = null }
-                            .safeDrawingPadding(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        AsyncImage(
-                            model = discussionViewModel.fullScreenPhotoUrl,
-                            contentDescription = "profile photo",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .sharedElement(
-                                    sharedContentState = rememberSharedContentState(key = "profile-photo"),
-                                    animatedVisibilityScope = this@AnimatedVisibility
-                                ),
-                            imageLoader = App.imageLoader
-                        )
-                    }
-                }
 
-
-                discussionViewModel.selectedMessageInfo?.let { message ->
-                    val discussion by discussionViewModel.discussion.observeAsState()
-                    discussion?.let {
-                        MessageActionMenu(
-                            message = message,
-                            fontScale = fontScale.floatValue,
-                            discussion = it,
-                            onDismiss = { discussionViewModel.selectedMessageInfo = null },
-                            sharedTransitionScope = this,
-                            discussionViewModel = discussionViewModel,
-                            messageEditHandler = messageEditHandler,
-                            linkPreviewViewModel = linkPreviewViewModel,
-                        )
-                    }
-                }
-
-                if (discussionViewModel.showCalendarView) {
-                    val galleryMediasGroupedByDate by discussionViewModel.galleryMediasGroupedByDate.observeAsState(emptyMap())
-                    DiscussionCalendarDialog(
-                        initialDateMillis = discussionViewModel.calendarInitialDateMillis,
-                        attachmentsByDate = galleryMediasGroupedByDate,
-                        onDateSelected = { dateMillis ->
-                            discussionViewModel.scrollToDate(dateMillis)
-                            discussionViewModel.showCalendarView = false
-                        },
-                        onMessageSelected = { messageId ->
-                            discussionViewModel.scrollToMessageRequest = ScrollRequest(messageId = messageId, highlight = true, triggeredBySearch = true)
-                            discussionViewModel.showCalendarView = false
-                        },
-                        onDismissRequest = { discussionViewModel.showCalendarView = false }
+                    MessageAlbumOverlay(
+                        discussionViewModel = discussionViewModel,
+                        onCancelAttachmentUpload = ::cancelAttachmentUpload,
+                        saveAttachment = ::saveAttachment,
+                        saveAllAttachments = ::saveAllAttachments,
                     )
+                    DiscussionGalleryOverlay(
+                        discussionViewModel = discussionViewModel,
+                        galleryViewModel = galleryViewModel,
+                        applyFlagSecure = {
+                            discussionViewModel.screenShotBlockedForEphemeral = true
+                            window.setFlags(LayoutParams.FLAG_SECURE, LayoutParams.FLAG_SECURE)
+                        },
+                    )
+
+                    discussionViewModel.selectedMessageInfo?.let { message ->
+                        val discussion by discussionViewModel.discussion.observeAsState()
+                        discussion?.let {
+                            MessageActionMenu(
+                                message = message,
+                                fontScale = fontScale.floatValue,
+                                discussion = it,
+                                onDismiss = { discussionViewModel.selectedMessageInfo = null },
+                                sharedTransitionScope = this,
+                                discussionViewModel = discussionViewModel,
+                                messageEditHandler = messageEditHandler,
+                                linkPreviewViewModel = linkPreviewViewModel,
+                            )
+                        }
+                    }
+
+                    if (discussionViewModel.showCalendarView) {
+                        val galleryMediasGroupedByDate by discussionViewModel.galleryMediasGroupedByDate.observeAsState(emptyMap())
+                        DiscussionCalendarDialog(
+                            initialDateMillis = discussionViewModel.calendarInitialDateMillis,
+                            attachmentsByDate = galleryMediasGroupedByDate,
+                            onDateSelected = { dateMillis ->
+                                discussionViewModel.scrollToDate(dateMillis)
+                                discussionViewModel.showCalendarView = false
+                            },
+                            onMessageSelected = { messageId ->
+                                discussionViewModel.scrollToMessageRequest = ScrollRequest(messageId = messageId, highlight = true, triggeredBySearch = true)
+                                discussionViewModel.showCalendarView = false
+                            },
+                            onDismissRequest = { discussionViewModel.showCalendarView = false }
+                        )
+                    }
                 }
             }
         }
@@ -628,6 +689,17 @@ class DiscussionActivity : LockableActivity() {
                     AppDatabase.getInstance().discussionDao()
                         .updateDiscussionUnreadStatus(discussion.id, false)
                     UnreadCountsSingleton.discussionUnreadFlagChanged(discussion.id, false)
+
+                    runCatching {
+                        AppSingleton.getEngine()
+                            .propagateAppSyncAtomToOtherDevicesIfNeeded(
+                                discussion.bytesOwnedIdentity,
+                                ObvSyncAtom.createUnreadDiscussionsChange(
+                                    listOf(discussion.getDiscussionIdentifier()),
+                                    false
+                                )
+                            )
+                    }
                 }
             }
         }
@@ -910,48 +982,12 @@ class DiscussionActivity : LockableActivity() {
 
     private val saveAttachmentLauncher =
         registerForActivityResult(StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                result.data?.let { data ->
-                    val uri = data.data
-                    if (StringUtils.validateUri(uri)) {
-                        App.runThread {
-                            try {
-                                this@DiscussionActivity.contentResolver.openOutputStream(
-                                    uri!!
-                                ).use { os ->
-                                    if (os == null) {
-                                        throw Exception("Unable to write to provided Uri")
-                                    }
-                                    if (discussionViewModel.longClickedFyleAndStatus == null) {
-                                        throw Exception()
-                                    }
-                                    // attachment was saved --> mark it as opened
-                                    discussionViewModel.longClickedFyleAndStatus?.fyleMessageJoinWithStatus?.markAsOpened()
-                                    FileInputStream(
-                                        App.absolutePathFromRelative(
-                                            discussionViewModel.longClickedFyleAndStatus?.fyle?.filePath
-                                        )
-                                    ).use { fis ->
-                                        val buffer = ByteArray(262144)
-                                        var c: Int
-                                        while ((fis.read(buffer).also { c = it }) != -1) {
-                                            os.write(buffer, 0, c)
-                                        }
-                                    }
-                                    App.toast(
-                                        R.string.toast_message_attachment_saved,
-                                        Toast.LENGTH_SHORT
-                                    )
-                                }
-                            } catch (_: Exception) {
-                                App.toast(
-                                    R.string.toast_message_failed_to_save_attachment,
-                                    Toast.LENGTH_SHORT
-                                )
-                            }
-                        }
-                    }
-                }
+            val uri = result.data?.data
+            val fyleAndStatus = discussionViewModel.longClickedFyleAndStatus
+            if (result.resultCode == RESULT_OK && uri != null && fyleAndStatus != null) {
+                // attachment was saved --> mark it as opened
+                App.runThread { fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened() }
+                saveAttachmentTo(this, uri, fyleAndStatus)
             }
         }
 

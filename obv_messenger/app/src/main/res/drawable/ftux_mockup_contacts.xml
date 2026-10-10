@@ -4,7 +4,8 @@
     android:width="203dp"
     android:height="222dp"
     android:viewportWidth="203"
-    android:viewportHeight="222">
+    android:viewportHeight="222"
+    android:autoMirrored="true">
 
     <group>
         <clip-path android:pathData="M36.393,8.539 h179.934 a28.474,28.474 0 0 1 28.474,28.474 v459.14 a28.474,28.474 0 0 1 -28.474,28.474 h-179.934 a28.474,28.474 0 0 1 -28.474,-28.474 v-459.14 a28.474,28.474 0 0 1 28.474,-28.474 Z"/>

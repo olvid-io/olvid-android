@@ -75,7 +75,9 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.EmptyRecyclerView
-import io.olvid.messenger.customClasses.InitialView
+import androidx.compose.ui.platform.ComposeView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.setAvatar
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
@@ -101,7 +103,7 @@ import io.olvid.messenger.webrtc.WebrtcCallService
 class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotificationListener {
     private val groupDetailsViewModel: GroupDetailsViewModel by viewModels()
     private var mainConstraintLayout: ConstraintLayout? = null
-    private val groupInitialView: InitialView by lazy { findViewById(R.id.group_details_initial_view) }
+    private val groupInitialView: ComposeView by lazy { findViewById(R.id.group_details_initial_view) }
     private var groupNameTextView: TextView? = null
     private var groupOwnerTextView: TextView? = null
     private var groupPersonalNoteTextView: TextView? = null
@@ -110,8 +112,8 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
     private var secondDetailsCardView: CardView? = null
     private var firstDetailsTextViews: LinearLayout? = null
     private var secondDetailsTextViews: LinearLayout? = null
-    private val firstDetailsInitialView: InitialView by lazy { findViewById(R.id.first_details_initial_view) }
-    private val secondDetailsInitialView: InitialView by lazy { findViewById(R.id.second_details_initial_view) }
+    private val firstDetailsInitialView: ComposeView by lazy { findViewById(R.id.first_details_initial_view) }
+    private val secondDetailsInitialView: ComposeView by lazy { findViewById(R.id.second_details_initial_view) }
     private var firstDetailsTitle: TextView? = null
     private var secondDetailsTitle: TextView? = null
     private var firstDetailsButtons: LinearLayout? = null
@@ -290,7 +292,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
         groupIsOwned = group.bytesGroupOwnerIdentity == null
         invalidateOptionsMenu()
         groupNameTextView!!.text = group.getCustomName()
-        groupInitialView.setGroup(group)
+        groupInitialView.setGroupAvatar(group.bytesGroupOwnerAndUid, group.getCustomPhotoUrl())
         if (groupIsOwned) {
             groupOwnerTextView!!.visibility = View.GONE
             groupManagementButtons!!.visibility = View.VISIBLE
@@ -326,12 +328,9 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 publishedDetails = jsons[0] ?: return
                 latestDetails = publishedDetails
                 if (publishedDetails.photoUrl != null) {
-                    firstDetailsInitialView.setPhotoUrl(
-                        group.bytesGroupOwnerAndUid,
-                        publishedDetails.photoUrl
-                    )
+                    firstDetailsInitialView.setGroupAvatar(group.bytesGroupOwnerAndUid, publishedDetails.photoUrl)
                 } else {
-                    firstDetailsInitialView.setGroup(group.bytesGroupOwnerAndUid)
+                    firstDetailsInitialView.setGroupAvatar(group.bytesGroupOwnerAndUid, null)
                 }
                 run {
                     val tv = this.textView
@@ -376,12 +375,9 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                     firstDetailsButtons!!.visibility = View.VISIBLE
                     publishedDetails = jsons[0] ?: return
                     if (publishedDetails.photoUrl != null) {
-                        secondDetailsInitialView.setPhotoUrl(
-                            group.bytesGroupOwnerAndUid,
-                            publishedDetails.photoUrl
-                        )
+                        secondDetailsInitialView.setGroupAvatar(group.bytesGroupOwnerAndUid, publishedDetails.photoUrl)
                     } else {
-                        secondDetailsInitialView.setGroup(group.bytesGroupOwnerAndUid)
+                        secondDetailsInitialView.setGroupAvatar(group.bytesGroupOwnerAndUid, null)
                     }
                     run {
                         val tv = this.textView
@@ -396,12 +392,9 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                     }
                     latestDetails = jsons[1] ?: return
                     if (latestDetails!!.photoUrl != null) {
-                        firstDetailsInitialView.setPhotoUrl(
-                            group.bytesGroupOwnerAndUid,
-                            latestDetails!!.photoUrl
-                        )
+                        firstDetailsInitialView.setGroupAvatar(group.bytesGroupOwnerAndUid, latestDetails!!.photoUrl)
                     } else {
-                        firstDetailsInitialView.setGroup(group.bytesGroupOwnerAndUid)
+                        firstDetailsInitialView.setGroupAvatar(group.bytesGroupOwnerAndUid, null)
                     }
                     run {
                         val tv = this.textView
@@ -448,12 +441,9 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                     firstDetailsButtons!!.visibility = View.GONE
                     val trustedDetails = jsons[1] ?: return
                     if (trustedDetails.photoUrl != null) {
-                        secondDetailsInitialView.setPhotoUrl(
-                            group.bytesGroupOwnerAndUid,
-                            trustedDetails.photoUrl
-                        )
+                        secondDetailsInitialView.setGroupAvatar(group.bytesGroupOwnerAndUid, trustedDetails.photoUrl)
                     } else {
-                        secondDetailsInitialView.setGroup(group.bytesGroupOwnerAndUid)
+                        secondDetailsInitialView.setGroupAvatar(group.bytesGroupOwnerAndUid, null)
                     }
                     run {
                         val tv = this.textView
@@ -468,12 +458,9 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                     }
                     publishedDetails = jsons[0] ?: return
                     if (publishedDetails.photoUrl != null) {
-                        firstDetailsInitialView.setPhotoUrl(
-                            group.bytesGroupOwnerAndUid,
-                            publishedDetails.photoUrl
-                        )
+                        firstDetailsInitialView.setGroupAvatar(group.bytesGroupOwnerAndUid, publishedDetails.photoUrl)
                     } else {
-                        firstDetailsInitialView.setGroup(group.bytesGroupOwnerAndUid)
+                        firstDetailsInitialView.setGroupAvatar(group.bytesGroupOwnerAndUid, null)
                     }
                     run {
                         val tv = this.textView
@@ -666,8 +653,8 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                         )
                     }
                 }
-            } else if (view is InitialView) {
-                val photoUrl = view.photoUrl
+            } else if (view is ComposeView) {
+                val photoUrl = view.tag as? String
                 if (photoUrl != null) {
                     val fullScreenImageFragment = FullScreenImageFragment.newInstance(photoUrl)
                     supportFragmentManager.beginTransaction()
@@ -939,7 +926,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                     R.string.text_joined_group,
                     StringUtils.getNiceDateString(this@GroupDetailsActivity, contact.timestamp)
                 )
-                holder.groupMemberInitialView.setContact(contact.contact)
+                holder.groupMemberInitialView.setAvatar(contact.contact)
                 if (contact.contact.bytesContactIdentity.contentEquals(byteGroupOwnerIdentity)) {
                     holder.groupMemberOwnerCrownImageView.visibility = View.VISIBLE
                 } else {
@@ -991,7 +978,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
             OnClickListener {
             val groupMemberNameTextView: TextView
             val groupMemberJoinTimestampTextView: TextView
-            val groupMemberInitialView: InitialView
+            val groupMemberInitialView: ComposeView
             val groupMemberEstablishingChannelGroup: ViewGroup
             val groupMemberEstablishingChannelImageView: ImageView
             val groupMemberOwnerCrownImageView: ImageView
@@ -1056,15 +1043,17 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 if (pendingGroupMember!!.contact == null) {
                     holder.pendingGroupMemberNameTextView.text =
                         pendingGroupMember.pendingGroupMember.displayName
-                    holder.pendingGroupMemberInitialView.setInitial(
-                        ByteArray(0), StringUtils.getInitial(
-                            pendingGroupMember.pendingGroupMember.displayName
+                    holder.pendingGroupMemberInitialView.setAvatar(
+                        AvatarSource.initial(
+                            ByteArray(0), StringUtils.getInitial(
+                                pendingGroupMember.pendingGroupMember.displayName
+                            )
                         )
                     )
                 } else {
                     holder.pendingGroupMemberNameTextView.text =
                         pendingGroupMember.contact.getCustomDisplayName()
-                    holder.pendingGroupMemberInitialView.setContact(pendingGroupMember.contact)
+                    holder.pendingGroupMemberInitialView.setAvatar(pendingGroupMember.contact)
                 }
                 holder.invitationDeclinedTextView.visibility =
                     if (pendingGroupMember.pendingGroupMember.declined) View.VISIBLE else View.GONE
@@ -1080,7 +1069,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
         internal inner class PendingGroupMemberViewHolder(itemView: View) : ViewHolder(itemView),
             OnClickListener {
             val pendingGroupMemberNameTextView: TextView
-            val pendingGroupMemberInitialView: InitialView
+            val pendingGroupMemberInitialView: ComposeView
             val invitationDeclinedTextView: TextView
 
             init {
@@ -1130,4 +1119,16 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
         const val BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA = "group_id"
         const val FULL_SCREEN_IMAGE_FRAGMENT_TAG = "full_screen_image"
     }
+}
+/**
+ * Binds a group avatar to a hosting [ComposeView] and stashes the absolute photo path in the
+ * view tag, so the avatar-click handler can still open the photo full-screen (the legacy
+ * InitialView exposed photoUrl directly; ComposeView does not).
+ */
+private fun ComposeView.setGroupAvatar(bytes: ByteArray, relativePhotoUrl: String?) {
+    setAvatar(
+        if (relativePhotoUrl != null) AvatarSource.photo(bytes, relativePhotoUrl)
+        else AvatarSource.group(bytes)
+    )
+    tag = App.absolutePathFromRelative(relativePhotoUrl)
 }

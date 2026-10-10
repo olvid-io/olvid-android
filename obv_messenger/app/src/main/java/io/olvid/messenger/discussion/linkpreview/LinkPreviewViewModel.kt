@@ -31,6 +31,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration.Companion.milliseconds
 
 class LinkPreviewViewModel : ViewModel() {
 
@@ -45,7 +46,7 @@ class LinkPreviewViewModel : ViewModel() {
             if (url == openGraph.value?.url) return // link already present
             if (url == null) return
             findLinkJob = viewModelScope.launch {
-                delay(300) //debounce
+                delay(300.milliseconds) //debounce
                 openGraph.value =
                     linkPreviewRepository.fetchOpenGraph(url, imageWidth, imageHeight).apply { originalUrl = original }
             }
@@ -99,7 +100,7 @@ class LinkPreviewViewModel : ViewModel() {
     fun waitForPreview(block: () -> Unit) {
         viewModelScope.launch {
             try {
-                withTimeout(2000) {
+                withTimeout(2000.milliseconds) {
                     findLinkJob?.join()
                 }
             } catch (_: TimeoutCancellationException) {}

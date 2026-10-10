@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Viena no jūsu ierīcēm drīz beigs darboties un tiks deaktivizēta – tas notiks **mazāk nekā %1$d dienas laikā**.\nJūs varat iegādāties **„Olvid+“** abonementu, lai tā turpinātu darboties.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Viena no jūsu ierīcēm drīz beigsies un tiks deaktivizēta **mazāk nekā %1$d dienu laikā**.\nJūs varat iegādāties **„Olvid+“** abonementu, lai tā turpinātu darboties.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Šī ierīce drīz beigs darboties un tiks deaktivizēta **mazāk nekā pēc %1$d dienas**.\nJūs varat iegādāties **Olvid+** abonementu, lai tā turpinātu darboties.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Šī ierīce drīz beigs darboties un tiks deaktivizēta **mazāk nekā pēc %1$d dienām**.\nJūs varat iegādāties **Olvid+** abonementu, lai tā turpinātu darboties.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s pievienojās grupai</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s pievienojās grupai</item>
@@ -128,7 +132,7 @@
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-127723614">1 grupas dalībnieks var tikt uzaicināts uz privātu sarunu</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d grupas dalībnieki var tikt uzaicināti uz privātu diskusiju</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d grupas dalībnieki var tikt uzaicināti uz privātu sarunu</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 kopīga grupa</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Pievienot grupai %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Pievienot %1$d grupām</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Jums jau ir izveidota saruna ar šiem dalībniekiem.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Jums jau ir %1$d sarunas ar šiem dalībniekiem.</item>
 	</plurals>
 </resources>

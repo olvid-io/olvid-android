@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">Um dos seus dispositivos irá expirar e ser desativado em **menos de %1$d dia**.\nVocê pode adquirir uma assinatura **Olvid+** para mantê-lo ativo.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Um dos seus dispositivos irá expirar e ser desativado em **menos de %1$d dias**.\nVocê pode adquirir uma assinatura **Olvid+** para mantê-lo ativo.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Este dispositivo será desativado e deixará de funcionar em **menos de %1$d dia**.\nVocê pode adquirir uma assinatura **Olvid+** para mantê-lo ativo.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Este dispositivo será desativado e deixará de funcionar em **menos de %1$d dias**.\nVocê pode adquirir uma assinatura **Olvid+** para mantê-lo ativo.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s entrou no grupo</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s entrou no grupo</item>
@@ -123,12 +127,12 @@
 		<item quantity="other" state="needs_review" hash="-1558931055">Você está prestes a excluir **permanentemente** %1$d conversas e as mensagens que elas contêm para **todos** os participantes nessas conversas. Tenha certeza de que é exatamente isso que você deseja.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">Você está prestes a convidar cada membro do grupo com quem você tem um canal (atualmente 1 membro) para uma discussão privada.\nDeseja prosseguir?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">Você está prestes a convidar cada membro do grupo com o qual você tem um canal (atualmente %1$d membros) para uma discussão privada.\nDeseja prosseguir?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">Você está prestes a convidar cada membro do grupo com quem você tem um canal (atualmente 1 membro) para uma conversa privada.\nDeseja prosseguir?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Você está prestes a convidar cada membro do grupo com o qual você tem um canal (atualmente %1$d membros) para uma conversa privada.\nDeseja prosseguir?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-127723614">1 membro do grupo pode ser convidado para uma conversa privada</item>
-		<item quantity="other" state="needs_review" hash="-496794154">Os membros do %1$d podem ser convidados para uma discussão privada</item>
+		<item quantity="other" state="needs_review" hash="-496794154">Os membros do %1$d podem ser convidados para uma conversa privada</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 grupo comum</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Adicionar ao grupo %1$d</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Adicionar aos grupos %1$d</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Você já tem uma conversa com esses participantes.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Você já tem %1$d conversas com esses participantes.</item>
 	</plurals>
 </resources>

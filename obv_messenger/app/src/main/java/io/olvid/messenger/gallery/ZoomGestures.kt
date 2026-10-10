@@ -33,6 +33,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.pow
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val ZOOM_ANIMATION_DURATION_MS = 200
 private const val CLICK_DURATION_MS = 200L
@@ -248,7 +249,7 @@ internal suspend fun PointerInputScope.detectZoomPanGestures(
                                     singleTapPending = true
                                     val tapToken = eventTimeMs
                                     launch {
-                                        delay(DOUBLE_CLICK_DURATION_MS)
+                                        delay(DOUBLE_CLICK_DURATION_MS.milliseconds)
                                         if (singleTapPending && lastUpTime == tapToken) {
                                             singleTapPending = false
                                             onSingleTap()

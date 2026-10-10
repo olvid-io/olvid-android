@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
+import io.olvid.messenger.designsystem.avatar.AvatarTarget;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
@@ -63,7 +64,7 @@ import io.olvid.messenger.settings.SettingsActivity;
                 @Index(Discussion.TITLE),
         }
 )
-public class Discussion {
+public class Discussion implements AvatarTarget {
     public static final String TABLE_NAME = "discussion_table";
 
     public static final String TITLE = "title";

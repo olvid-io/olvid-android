@@ -81,7 +81,7 @@ class StorageManagerViewModel : ViewModel() {
 
     // ---- Discussion sort ----
 
-    enum class DiscussionSortKey { SIZE, DATE }
+    enum class DiscussionSortKey { SIZE, DATE, NAME }
 
     val discussionSortKeyLiveData: MutableLiveData<DiscussionSortKey> =
         MutableLiveData(DiscussionSortKey.SIZE)
@@ -119,6 +119,9 @@ class StorageManagerViewModel : ViewModel() {
                     DiscussionSortKey.DATE ->
                         AppDatabase.getInstance().fyleMessageJoinWithStatusDao()
                             .getDiscussionsWithUsageDateDesc(ident.bytesOwnedIdentity)
+                    DiscussionSortKey.NAME ->
+                        AppDatabase.getInstance().fyleMessageJoinWithStatusDao()
+                            .getDiscussionsWithUsageNameAsc(ident.bytesOwnedIdentity)
                 }
                 currentSource = newSource
                 mediator.addSource(newSource) { mediator.value = it }

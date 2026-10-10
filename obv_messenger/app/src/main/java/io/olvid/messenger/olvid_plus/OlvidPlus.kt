@@ -23,10 +23,9 @@ import android.content.res.Configuration
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,36 +43,31 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import androidx.core.net.toUri
 
 @Composable
-fun OlvidPlusDetails(modifier: Modifier = Modifier, price : String = "") {
+fun OlvidPlusDetails(
+    modifier: Modifier = Modifier,
+    price: String = "",
+    showStoreLink: Boolean = true
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -94,31 +88,11 @@ fun OlvidPlusDetails(modifier: Modifier = Modifier, price : String = "") {
                 textAlign = TextAlign.Center
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        val context = LocalContext.current
-        Text(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .clickable(
-                    indication = ripple(color = colorResource(R.color.olvid_gradient_light)),
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = {
-                        App.openLink(context, "https://store.olvid.io".toUri())
-                    }
-                )
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            text = buildAnnotatedString {
-                append(stringResource(R.string.store_link_need_licenses))
-                append(" ")
-                withStyle(SpanStyle(color =colorResource(R.color.olvid_gradient_light))) {
-                    append(stringResource(R.string.store_link_olvid_store))
-                }
-            },
-            style = OlvidTypography.subtitle1,
-            color = colorResource(R.color.greyTint),
-            textAlign = TextAlign.Center
-        )
+        if (showStoreLink) {
+            Spacer(modifier = Modifier.height(16.dp))
+            OlvidStoreLinkChip()
+        }
+        Spacer(modifier = Modifier.height(16.dp))
         Column(verticalArrangement = spacedBy(12.dp)) {
             OlvidPlusItem(
                 icon = { OlvidPlusMultiDevice(modifier = it) },
@@ -256,12 +230,11 @@ fun OlvidPlusDialogContent(
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.verticalScroll(state = rememberScrollState())) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             ) {
                 IconButton(
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.padding(end = 8.dp).align(Alignment.TopEnd),
                     onClick = onDismiss
                 ) {
                     Icon(
@@ -270,11 +243,10 @@ fun OlvidPlusDialogContent(
                         contentDescription = stringResource(R.string.content_description_close_button)
                     )
                 }
+                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp), horizontalArrangement = Arrangement.Center) {
+                    icon()
+                }
             }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                icon()
-            }
-            Spacer(modifier = Modifier.height(24.dp))
             Text(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -57,8 +57,8 @@ import io.olvid.messenger.R
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
 import io.olvid.messenger.databases.dao.Group2Dao.GroupOrGroup2
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -70,17 +70,19 @@ fun GroupListItem(
     onClick: () -> Unit,
     publishedDetails : Boolean = false,
     publishedDetailsNotification : Boolean = false,
-    groupMenu: GroupMenu,
+    groupMenu: GroupMenu? = null,
 ) {
     Box(modifier = modifier) {
         // menu
         var menuOpened by remember { mutableStateOf(false) }
-        GroupMenu(
-            menuOpened = menuOpened,
-            onDismissRequest = { menuOpened = false },
-            group = group,
-            groupMenu = groupMenu
-        )
+        groupMenu?.let {
+            GroupMenu(
+                menuOpened = menuOpened,
+                onDismissRequest = { menuOpened = false },
+                group = group,
+                groupMenu = it
+            )
+        }
 
         Row(
             modifier = Modifier
@@ -88,23 +90,19 @@ fun GroupListItem(
                 .fillMaxWidth()
                 .combinedClickable(
                     onClick = onClick,
-                    onLongClick = { menuOpened = true },
+                    onLongClick = groupMenu?.let { { menuOpened = true } },
                 ), verticalAlignment = CenterVertically
         ) {
 
             // InitialView
-            InitialView(
+            Avatar(
                 modifier = Modifier
                     .padding(
                         horizontal = 16.dp,
                         vertical = 4.dp,
                     )
                     .requiredSize(40.dp),
-                initialViewSetup = { initialView ->
-                    group.group?.let { initialView.setGroup(it) }
-                    group.group2?.let { initialView.setGroup2(it) }
-                },
-                admin = group.group2?.ownPermissionAdmin == true || group.group != null && group.group.bytesGroupOwnerIdentity == null,
+                target = group.group ?: group.group2,
             )
 
             // content

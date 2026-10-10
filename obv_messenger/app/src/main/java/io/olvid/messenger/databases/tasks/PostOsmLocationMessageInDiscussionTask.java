@@ -34,9 +34,7 @@ import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
-import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
-import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 import io.olvid.messenger.databases.entity.jsons.JsonMessage;
 
@@ -63,12 +61,6 @@ public class PostOsmLocationMessageInDiscussionTask implements Runnable {
             return;
         }
 
-        JsonExpiration discussionDefaultJsonExpiration = null;
-        DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
-        if (discussionCustomization != null) {
-            discussionDefaultJsonExpiration = discussionCustomization.getExpirationJson();
-        }
-
         final JsonMessage jsonMessage = new JsonMessage();
         JsonLocation jsonLocation = JsonLocation.sendLocationMessage(location);
         if (address != null) {
@@ -76,10 +68,7 @@ public class PostOsmLocationMessageInDiscussionTask implements Runnable {
         }
         jsonMessage.setJsonLocation(jsonLocation);
         jsonMessage.setBody(jsonMessage.getJsonLocation().getLocationMessageBody());
-
-        if (discussionDefaultJsonExpiration != null) {
-            jsonMessage.setJsonExpiration(discussionDefaultJsonExpiration);
-        }
+        jsonMessage.setJsonExpiration(PostMessageInDiscussionTask.computeOutboundExpiration(db, discussionId));
 
         // first, copy file locally
         File imageTmpFile = null;

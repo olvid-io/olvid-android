@@ -31,6 +31,10 @@
 		<item quantity="one" state="needs_review" hash="-1156880361">En av dina enheter kommer att löpa ut och bli inaktiverad om **mindre än %1$d dag**.\nDu kan köpa en **Olvid+** prenumeration för att hålla den aktiv.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">En av dina enheter kommer att löpa ut och bli inaktiverad om **mindre än %1$d dagar**.\nDu kan köpa en **Olvid+** prenumeration för att hålla den aktiv.</item>
 	</plurals>
+	<plurals name="tip_expiring_current_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1590483686">Den här enheten kommer att inaktiveras och sluta fungera om **mindre än %1$d dag**.\nDu kan köpa ett **Olvid+** abonnemang för att fortsätta använda den.</item>
+		<item quantity="other" state="needs_review" hash="993103846">Den här enheten kommer att inaktiveras och sluta fungera om **mindre än %1$d dagar**.\nDu kan köpa ett **Olvid+** abonnemang för att fortsätta använda den.</item>
+	</plurals>
 	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-683497602">%1$s gick med i gruppen</item>
 		<item quantity="other" state="needs_review" hash="51603026">%1$s gick med i gruppen</item>
@@ -79,11 +83,11 @@
 		<item quantity="other" state="needs_review" hash="1022571360">%1$d kontakter</item>
 	</plurals>
 	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="1772966333">Diskussionen är arkiverad</item>
-		<item quantity="other" state="needs_review" hash="1402495414">%1$d diskussioner arkiverade</item>
+		<item quantity="one" state="needs_review" hash="1772966333">Konversationen är arkiverad</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d konversationer arkiverade</item>
 	</plurals>
 	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1312483800">Diskussionen är återställd</item>
+		<item quantity="one" state="needs_review" hash="-1312483800">Konversationen är återställd</item>
 		<item quantity="other" state="needs_review" hash="-2093736213">%1$d konversationer återställda</item>
 	</plurals>
 	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
@@ -123,12 +127,12 @@
 		<item quantity="other" state="needs_review" hash="-1558931055">Du är på väg att **permanent** radera %1$d konversationer och alla meddelanden de innehåller för **alla** deltagare i dessa konversationer. Kontrollera att det verkligen är det du vill göra.</item>
 	</plurals>
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-1306576418">Du är på väg att bjuda in varje gruppmedlem som du har en kanal med (för närvarande 1 medlem) till en privat diskussion.\nVill du fortsätta?</item>
-		<item quantity="other" state="needs_review" hash="-994717142">Du är på väg att bjuda in varje gruppmedlem som du har en kanal med (för närvarande %1$d medlemmar) till en privat diskussion.\nVill du fortsätta?</item>
+		<item quantity="one" state="needs_review" hash="-1306576418">Du är på väg att bjuda in varje gruppmedlem som du har en kanal med (för närvarande 1 medlem) till en privat konversation.\nVill du fortsätta?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Du är på väg att bjuda in varje gruppmedlem som du har en kanal med (för närvarande %1$d medlemmar) till en privat konversation.\nVill du fortsätta?</item>
 	</plurals>
 	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
-		<item quantity="one" state="needs_review" hash="-127723614">1 gruppmedlem kan bjudas in till en privat diskussion</item>
-		<item quantity="other" state="needs_review" hash="-496794154">%1$d gruppmedlemmar kan bjudas in till en privat diskussion</item>
+		<item quantity="one" state="needs_review" hash="-127723614">1 gruppmedlem kan bjudas in till en privat konversation</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d gruppmedlemmar kan bjudas in till en privat konversation</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 gemensam grupp</item>
@@ -297,5 +301,9 @@
 	<plurals name="button_label_add_to_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1622654043">Lägg till i %1$d-gruppen</item>
 		<item quantity="other" state="needs_review" hash="-1655824151">Lägg till i %1$d-grupper</item>
+	</plurals>
+	<plurals name="explanation_existing_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="112394303">Du har redan en konversation med dessa deltagare.</item>
+		<item quantity="other" state="needs_review" hash="809550612">Du har redan %1$d konversationer med dessa deltagare.</item>
 	</plurals>
 </resources>

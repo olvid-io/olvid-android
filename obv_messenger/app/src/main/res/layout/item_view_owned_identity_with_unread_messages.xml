@@ -9,7 +9,7 @@
     android:background="?attr/selectableItemBackground"
     android:theme="@style/SubtleGreyRipple">
 
-    <io.olvid.messenger.customClasses.InitialView
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/initial_view"
         android:layout_width="36dp"
         android:layout_height="36dp"

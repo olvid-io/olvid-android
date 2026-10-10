@@ -103,6 +103,7 @@ import io.olvid.messenger.designsystem.components.SortMenuItem
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
+import io.olvid.messenger.designsystem.avatar.AvatarSource
 import io.olvid.messenger.main.contacts.ContactListItem
 import java.util.UUID
 
@@ -222,7 +223,7 @@ fun SelectedAnswerVotersList(
                     body = ContactCacheSingleton.getContactDetailsSecondLine(pollVote.voter)?.let {
                         AnnotatedString(it)
                     },
-                    initialViewSetup = { it.setFromCache(pollVote.voter) },
+                    avatar = AvatarSource.fromCache(pollVote.voter),
                     endContent = {
                         Text(
                             text = StringUtils.getNiceDateString(
@@ -452,7 +453,7 @@ fun PollOverview(
                                         body = ContactCacheSingleton.getContactDetailsSecondLine(pollVote.voter)?.let {
                                             AnnotatedString(it)
                                         },
-                                        initialViewSetup = { it.setFromCache(pollVote.voter) },
+                                        avatar = AvatarSource.fromCache(pollVote.voter),
                                         endContent = {
                                             Text(
                                                 text = StringUtils.getNiceDateString(
@@ -570,11 +571,8 @@ fun PollOverview(
                                 body = ContactCacheSingleton.getContactDetailsSecondLine(pollVoter.bytesContactIdentity)?.let {
                                     AnnotatedString(it)
                                 },
-                                initialViewSetup = { initialView ->
-                                    runCatching {
-                                        initialView.setFromCache(pollVoter.bytesContactIdentity)
-                                    }.onFailure { initialView.setUnknown() }
-                                }, onClick = {})
+                                avatar = AvatarSource.fromCache(pollVoter.bytesContactIdentity),
+                                onClick = {})
                             if (pollVoter != pendingVoters.last()) {
                                 HorizontalDivider(
                                     modifier = Modifier.padding(horizontal = 12.dp),

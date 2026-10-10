@@ -23,9 +23,11 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -93,22 +95,22 @@ import io.olvid.engine.engine.types.JsonGroupDetails
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.StringUtils
-import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.customClasses.linkify
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Group2
+import io.olvid.messenger.designsystem.avatar.Avatar
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.components.BaseDialogContent
+import io.olvid.messenger.designsystem.components.DialogSecure
 import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.OlvidActionRow
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.group.GroupV2DetailsViewModel
 import io.olvid.messenger.group.SimpleGroup
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.contacts.ContactListItem
-import io.olvid.messenger.settings.SettingsActivity
 import java.io.File
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -154,17 +156,13 @@ fun GroupDetailsScreen(
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
-                        InitialView(
+                        Avatar(
                             modifier = Modifier
                                 .sharedElement(
                                     sharedContentState = rememberSharedContentState(key = "profile-photo"),
                                     animatedVisibilityScope = this
                                 ),
-                            initialViewSetup = { initialView ->
-                                group?.let {
-                                    initialView.setGroup2(it)
-                                }
-                            }
+                            target = group,
                         )
                     }
                 }
@@ -371,15 +369,47 @@ fun GroupDetailsScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
         members?.let {
-            Text(
+            var showRolesDialog by remember { mutableStateOf(false) }
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp, bottom = 6.dp, start = 8.dp),
-                text = stringResource(R.string.label_group_members) + " (${it.size + 1})",
-                style = OlvidTypography.h3.copy(color = colorResource(R.color.almostBlack)),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    modifier = Modifier.weight(1f, fill = false),
+                    text = stringResource(R.string.label_group_members) + " (${it.size + 1})",
+                    style = OlvidTypography.h3.copy(color = colorResource(R.color.almostBlack)),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Icon(
+                    modifier = Modifier
+                        .padding(start = 4.dp, top = 2.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(
+                                bounded = false,
+                                color = colorResource(R.color.greyOverlay)
+                            ),
+                        ) { showRolesDialog = true }
+                        .padding(horizontal = 4.dp)
+                        .size(20.dp),
+                    painter = painterResource(R.drawable.ic_info),
+                    tint = colorResource(R.color.greyTint),
+                    contentDescription = stringResource(R.string.content_description_group_roles)
+                )
+            }
+            if (showRolesDialog) {
+                val keycloakGroup = group?.keycloakManaged == true
+                val nonAdminsReadOnly = groupV2DetailsViewModel.groupType.areNonAdminsReadOnly()
+                GroupRolesDialog(
+                    showAdmin = !keycloakGroup || group?.ownPermissionAdmin == true || it.any { member -> member.permissionAdmin },
+                    showModerator = keycloakGroup,
+                    showReadOnly = keycloakGroup || nonAdminsReadOnly || group?.ownPermissionSendMessage == false,
+                    onDismiss = { showRolesDialog = false },
+                )
+            }
             Column(
                 modifier = Modifier
                     .background(
@@ -399,19 +429,22 @@ fun GroupDetailsScreen(
                             fullSearchDisplayName = "",
                             isAdmin = group?.ownPermissionAdmin == true,
                             permissionSendMessage = group?.ownPermissionSendMessage != false,
+                            permissionRemoteDeleteAnything = group?.ownPermissionRemoteDeleteAnything == true,
                             isYou = true,
                             pending = false,
                             selected = false
                         ),
                         keycloakManaged = it.keycloakManaged,
                         nonAdminsReadOnly = nonAdminsReadOnly,
+                        keycloakGroup = group?.keycloakManaged == true,
                     )
                 }
                 it.take(5).forEach { member ->
                     GroupMemberItem(
                         member = member.toGroupMember(),
                         keycloakManaged = member.contact?.keycloakManaged == true,
-                        nonAdminsReadOnly = nonAdminsReadOnly
+                        nonAdminsReadOnly = nonAdminsReadOnly,
+                        keycloakGroup = group?.keycloakManaged == true,
                     )
                 }
                 if (it.size > 5) {
@@ -723,17 +756,12 @@ private fun GroupUpdate(
                             modifier = Modifier.padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            InitialView(
+                            Avatar(
                                 modifier = Modifier.size(56.dp),
-                                initialViewSetup = { initialView ->
-                                    if (photoUrl.isEmpty()) {
-                                        initialView.setGroup(bytesGroupIdentifier)
-                                    } else {
-                                        initialView.setPhotoUrl(
-                                            bytesGroupIdentifier,
-                                            it
-                                        )
-                                    }
+                                target = if (photoUrl.isEmpty()) {
+                                    AvatarSource.group(bytesGroupIdentifier)
+                                } else {
+                                    AvatarSource.photo(bytesGroupIdentifier, it)
                                 })
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(text = stringResource(R.string.explanation_new_group_v2_card_photo))
@@ -756,6 +784,7 @@ fun GroupMemberItem(
     member: GroupMember,
     keycloakManaged: Boolean,
     nonAdminsReadOnly: Boolean,
+    keycloakGroup: Boolean = false,
     onInvite: ((contact: Contact) -> Unit)? = null
 ) {
     val context = LocalContext.current
@@ -788,30 +817,7 @@ fun GroupMemberItem(
                 }
             }
         },
-        initialViewSetup = { initialView ->
-            if (member.isYou) {
-                initialView.setFromCache(member.bytesIdentity)
-            } else {
-                member.contact?.let {
-                    initialView.setContact(member.contact)
-                } ifNull {
-                    member.jsonIdentityDetails?.let {
-                        initialView.setInitial(
-                            member.bytesIdentity,
-                            StringUtils.getInitial(
-                                it.formatDisplayName(
-                                    SettingsActivity.contactDisplayNameFormat,
-                                    SettingsActivity.uppercaseLastName
-                                )
-                            )
-                        )
-                    } ifNull {
-                        initialView.setUnknown()
-                    }
-                    initialView.setKeycloakCertified(keycloakCertified = keycloakManaged)
-                }
-            }
-        },
+        avatar = member.avatar(keycloakCertified = keycloakManaged),
         endContent = {
             onInvite?.let {
                 member.contact?.let { contact ->
@@ -837,6 +843,7 @@ fun GroupMemberItem(
                 admin = member.isAdmin,
                 pending = member.pending,
                 readOnly = member.isReadOnly(nonAdminsReadOnly),
+                moderator = member.isModerator(keycloakGroup),
             )
         }
     )
@@ -844,14 +851,67 @@ fun GroupMemberItem(
 
 
 @Composable
+private fun GroupRolesDialog(
+    showAdmin: Boolean,
+    showModerator: Boolean,
+    showReadOnly: Boolean,
+    onDismiss: () -> Unit,
+) {
+    DialogSecure(onDismissRequest = onDismiss) {
+        BaseDialogContent(
+            title = stringResource(R.string.dialog_title_group_roles),
+            content = {
+                if (showAdmin) {
+                    GroupRoleExplanation(R.string.label_admin, R.string.explanation_group_role_admin)
+                }
+                if (showModerator) {
+                    GroupRoleExplanation(R.string.label_moderator, R.string.explanation_group_role_moderator)
+                }
+                if (showReadOnly) {
+                    GroupRoleExplanation(R.string.label_read_only, R.string.explanation_group_role_read_only)
+                }
+                GroupRoleExplanation(R.string.label_pending, R.string.explanation_group_role_pending)
+            },
+            actions = {
+                Spacer(Modifier.weight(1f, true))
+                OlvidTextButton(
+                    text = stringResource(R.string.button_label_ok),
+                    onClick = onDismiss
+                )
+            }
+        )
+    }
+}
+
+@Composable
+private fun GroupRoleExplanation(@StringRes role: Int, @StringRes explanation: Int) {
+    Column(modifier = Modifier.padding(bottom = 12.dp)) {
+        Text(
+            text = stringResource(role),
+            style = OlvidTypography.body1.copy(fontWeight = FontWeight.SemiBold),
+            color = colorResource(R.color.almostBlack)
+        )
+        Spacer(Modifier.height(2.dp))
+        Text(
+            text = stringResource(explanation),
+            style = OlvidTypography.body2,
+            color = colorResource(R.color.greyTint)
+        )
+    }
+}
+
+@Composable
 fun AdminEndLabel(
     admin: Boolean,
     pending: Boolean,
     readOnly: Boolean,
+    moderator: Boolean = false,
 ) {
     when {
         admin && pending -> AnnotatedString(stringResource(R.string.label_pending_admin))
         admin -> AnnotatedString(stringResource(R.string.label_admin))
+        moderator && pending -> AnnotatedString(stringResource(R.string.label_pending_moderator))
+        moderator -> AnnotatedString(stringResource(R.string.label_moderator))
         readOnly && pending -> AnnotatedString(stringResource(R.string.label_pending_read_only))
         readOnly -> AnnotatedString(stringResource(R.string.label_read_only))
         pending -> AnnotatedString(stringResource(R.string.label_pending))
@@ -912,7 +972,7 @@ fun GroupUpdatePreview() {
 //            style = OlvidTypography.caption.copy(color = colorResource(R.color.almostWhite))
 //        )
 //        Row(modifier = Modifier.padding(4.dp), verticalAlignment = Alignment.CenterVertically) {
-//            InitialView(initialViewSetup = { initialView ->
+//            Avatar(initialViewSetup = { initialView ->
 //                photoUrl?.let {
 //                    initialView.setPhotoUrl(
 //                        bytesGroupIdentifier,
@@ -962,7 +1022,7 @@ fun GroupUpdatePreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun GroupDetailsScreenPreview() {
-    SharedTransitionScope {
+    SharedTransitionLayout {
         GroupDetailsScreen(sharedTransitionScope = this)
     }
 }

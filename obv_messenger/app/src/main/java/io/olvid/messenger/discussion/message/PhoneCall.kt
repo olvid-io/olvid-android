@@ -51,12 +51,14 @@ import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.dao.CallLogItemDao.CallLogItemAndContacts
 import io.olvid.messenger.databases.entity.CallLogItem
 import io.olvid.messenger.databases.entity.Message
+import io.olvid.messenger.designsystem.dampened
+import io.olvid.messenger.designsystem.scaled
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
-fun PhoneCallInfo(message: Message, callBack: (callLogId : Long) -> Unit) {
+fun PhoneCallInfo(message: Message, callBack: (callLogId : Long) -> Unit, scale: Float = 1f) {
     val (callStatus, callLogItemId) = parsePhoneCallInfoContent(message.contentBody)
 
     var callDescription by remember { mutableStateOf<String?>(null) }
@@ -69,7 +71,7 @@ fun PhoneCallInfo(message: Message, callBack: (callLogId : Long) -> Unit) {
     ) {
         Image(
             modifier = Modifier
-                .size(32.dp)
+                .size((32 * scale.dampened()).dp)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = ripple(bounded = false),
@@ -86,10 +88,11 @@ fun PhoneCallInfo(message: Message, callBack: (callLogId : Long) -> Unit) {
                 maxLines = 3,
                 textAlign = TextAlign.Start,
                 text = callDescription ?: stringResource(id = getCallStatusText(callStatus)),
+                // no explicit style: inherits the already-scaled LocalTextStyle provided by MessageBody
                 color = colorResource(id = R.color.primary700)
             )
             formattedCallDuration?.let {
-                Text(text = it, style = OlvidTypography.subtitle1, color = colorResource(R.color.greyTint))
+                Text(text = it, style = OlvidTypography.subtitle1.scaled(scale.dampened()), color = colorResource(R.color.greyTint))
             }
         }
     }

@@ -53,8 +53,10 @@ import io.olvid.messenger.databases.tasks.PropagateBookmarkedMessageChangeTask
 import io.olvid.messenger.databases.tasks.ShareSelectedMessageTask
 import io.olvid.messenger.discussion.DiscussionDelegate
 import io.olvid.messenger.discussion.compose.MessageEditHandler
+import io.olvid.messenger.discussion.message.viewer.ViewMessageActivity
 
 enum class MessageActionType(val stringRes: Int) {
+    VIEW_MESSAGE(R.string.menu_action_view_message),
     REPLY(R.string.label_swipe_reply),
     SHARE(R.string.menu_action_share),
     FORWARD(R.string.menu_action_forward),
@@ -145,6 +147,8 @@ fun MessageActionItemsList(
                 }
             }
 
+            MessageActionType.VIEW_MESSAGE -> ViewMessageActivity.open(context, message.id)
+
             MessageActionType.DELETE -> SecureDeleteEverywhereDialogBuilder.openForSingleMessage(
                 context,
                 message,
@@ -161,6 +165,7 @@ fun MessageActionItemsList(
         discussion.isNormal
     ) {
         mutableListOf<MessageActionType>().apply {
+            if (message.isBodyViewable) add(MessageActionType.VIEW_MESSAGE)
             if (canEdit && message.isEditable) add(MessageActionType.EDIT)
             if (discussion.isNormal && message.isReplyable) add(MessageActionType.REPLY)
             if (message.isForwardable) {
@@ -216,6 +221,7 @@ private fun ActionMenuItem(
         leadingIcon = {
             val iconInfo = remember(action, message.bookmarked) {
                 when (action) {
+                    MessageActionType.VIEW_MESSAGE -> R.drawable.ic_settings_eye
                     MessageActionType.REPLY -> R.drawable.ic_swipe_reply
                     MessageActionType.SHARE -> R.drawable.ic_swipe_share
                     MessageActionType.FORWARD -> R.drawable.ic_swipe_forward

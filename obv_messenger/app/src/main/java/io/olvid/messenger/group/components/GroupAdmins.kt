@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.widthIn
@@ -68,18 +69,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.StringUtils
-import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.SearchBar
-import androidx.compose.foundation.layout.plus
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.group.GroupCreationViewModel
 import io.olvid.messenger.group.GroupV2DetailsViewModel
 import io.olvid.messenger.main.contacts.ContactListItem
 import io.olvid.messenger.main.contacts.highlight
-import io.olvid.messenger.settings.SettingsActivity
 import java.util.regex.Pattern
 
 @Composable
@@ -367,29 +364,7 @@ fun GroupAdminsSelection(
                                 }
                             }
                         },
-                        initialViewSetup = { initialView ->
-                            if (member.isYou) {
-                                initialView.setFromCache(member.bytesIdentity)
-                            } else {
-                                member.contact?.let {
-                                    initialView.setContact(member.contact)
-                                } ?: run {
-                                    member.jsonIdentityDetails?.let {
-                                        initialView.setInitial(
-                                            member.bytesIdentity,
-                                            StringUtils.getInitial(
-                                                it.formatDisplayName(
-                                                    SettingsActivity.contactDisplayNameFormat,
-                                                    SettingsActivity.uppercaseLastName
-                                                )
-                                            )
-                                        )
-                                    } ifNull {
-                                        initialView.setUnknown()
-                                    }
-                                }
-                            }
-                        },
+                        avatar = member.avatar(),
                         endContent = {
                             Box(
                                 contentAlignment = Alignment.CenterEnd

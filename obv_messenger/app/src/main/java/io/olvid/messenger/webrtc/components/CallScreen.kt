@@ -77,11 +77,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.avatar.AvatarSource
 import io.olvid.messenger.main.contacts.ContactListViewModel
 import io.olvid.messenger.webrtc.WebrtcCallService
 import io.olvid.messenger.webrtc.WebrtcCallService.State.CALL_ENDED
@@ -285,8 +286,8 @@ fun CallScreen(
                             pipAspectCallback = pipAspectCallback
                         )
                     } else {
-                        var initialViewSetup: (InitialView) -> Unit by remember {
-                            mutableStateOf({})
+                        var avatar: AvatarTarget? by remember {
+                            mutableStateOf(null)
                         }
                         var name by rememberSaveable {
                             mutableStateOf("")
@@ -309,18 +310,14 @@ fun CallScreen(
                                                     }
                                                 }
                                                 group?.getCustomPhotoUrl()?.let {
-                                                    initialViewSetup = { initialView: InitialView ->
-                                                        initialView.setPhotoUrl(
-                                                            bytesGroupOwnerAndUidOrIdentifier,
-                                                            it
-                                                        )
-                                                    }
+                                                    avatar = AvatarSource.photo(
+                                                        bytesGroupOwnerAndUidOrIdentifier,
+                                                        it
+                                                    )
                                                 } ifNull {
-                                                    initialViewSetup = { initialView ->
-                                                        initialView.setGroup(
-                                                            bytesGroupOwnerAndUidOrIdentifier
-                                                        )
-                                                    }
+                                                    avatar = AvatarSource.group(
+                                                        bytesGroupOwnerAndUidOrIdentifier
+                                                    )
                                                 }
                                                 name = getString(
                                                     R.string.text_count_contacts_from_group,
@@ -337,18 +334,14 @@ fun CallScreen(
                                                     }
                                                 }
                                                 group?.getCustomPhotoUrl()?.let {
-                                                    initialViewSetup = { initialView ->
-                                                        initialView.setPhotoUrl(
-                                                            bytesGroupOwnerAndUidOrIdentifier,
-                                                            it
-                                                        )
-                                                    }
+                                                    avatar = AvatarSource.photo(
+                                                        bytesGroupOwnerAndUidOrIdentifier,
+                                                        it
+                                                    )
                                                 } ifNull {
-                                                    initialViewSetup = { initialView ->
-                                                        initialView.setGroup(
-                                                            bytesGroupOwnerAndUidOrIdentifier
-                                                        )
-                                                    }
+                                                    avatar = AvatarSource.group(
+                                                        bytesGroupOwnerAndUidOrIdentifier
+                                                    )
                                                 }
                                                 name = getString(
                                                     R.string.text_count_contacts_from_group,
@@ -361,13 +354,7 @@ fun CallScreen(
                                         }
                                     }
                                 } else {
-                                    initialViewSetup = { initialView: InitialView ->
-                                        contact?.let {
-                                            initialView.setContact(
-                                                contact
-                                            )
-                                        }
-                                    }
+                                    avatar = contact
                                     name = if (callParticipants?.value.orEmpty().size > 1) {
                                         webrtcCallService.resources.getQuantityString(
                                             R.plurals.text_outgoing_group_call_with_contacts,
@@ -390,7 +377,7 @@ fun CallScreen(
                             } else {
                                 formatDuration(callDuration?.value ?: 0)
                             },
-                            initialViewSetup = initialViewSetup,
+                            avatar = avatar,
                             cameraEnabled = webrtcCallService.cameraEnabled,
                             videoTrack = localVideoTrack?.takeIf { callState?.value != CALL_ENDED },
                             mirror = selectedCamera?.mirror == true

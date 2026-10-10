@@ -116,7 +116,8 @@ import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.OlvidCircularProgress
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.Avatar
 import io.olvid.messenger.plus_button.PlusButtonViewModel
 import io.olvid.messenger.plus_button.ScanUiState
 import io.olvid.messenger.plus_button.configuration.ConfigurationScannedScreen
@@ -537,7 +538,7 @@ fun BottomSheetContent(
                                             contentDescription = "QR Code"
                                         )
                                     }
-                                    InitialView(
+                                    Avatar(
                                         modifier = Modifier
                                             .size((70 * qrCodeScale).dp)
                                             .align(Alignment.TopCenter)
@@ -547,10 +548,8 @@ fun BottomSheetContent(
                                                 color = colorResource(R.color.alwaysWhite),
                                                 shape = CircleShape
                                             ),
-                                        initialViewSetup = {
-                                            it.setShowBadges(false)
-                                            it.setOwnedIdentity(currentIdentity)
-                                        }
+                                        target = currentIdentity,
+                                        showBadges = false
                                     )
                                 }
                             }
@@ -575,11 +574,9 @@ fun BottomSheetContent(
                                                 Row(
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
-                                                    InitialView(
+                                                    Avatar(
                                                         modifier = Modifier.size(40.dp),
-                                                        initialViewSetup = { initialView ->
-                                                            initialView.setInitial(invitationScanned.contactUrlIdentity.getBytesIdentity()!!, StringUtils.getInitial(invitationScanned.contactUrlIdentity.displayName))
-                                                        }
+                                                        target = AvatarSource.initial(invitationScanned.contactUrlIdentity.getBytesIdentity()!!, StringUtils.getInitial(invitationScanned.contactUrlIdentity.displayName))
                                                     )
                                                     Text(
                                                         modifier = Modifier

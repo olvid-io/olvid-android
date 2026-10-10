@@ -44,6 +44,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -85,24 +86,20 @@ import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.StringUtils
-import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.avatar.Avatar
+import io.olvid.messenger.designsystem.components.AlwaysShowClearButton
 import io.olvid.messenger.designsystem.components.CircleCheckBox
 import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.SearchBar
 import io.olvid.messenger.designsystem.constantSp
-import androidx.compose.foundation.layout.plus
-import io.olvid.messenger.designsystem.components.AlwaysShowClearButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.group.GroupV2DetailsViewModel
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.contacts.ContactListItem
 import io.olvid.messenger.main.contacts.highlight
-import io.olvid.messenger.settings.SettingsActivity
 
 data class GroupMemberAction(
     val onContactClick: ((GroupMember) -> Unit)? = null,
@@ -122,6 +119,7 @@ fun MembersScreenContainer(
     nonAdminsReadOnly: Boolean,
     groupMemberAction: GroupMemberAction? = null,
     allowEmptyGroup: Boolean = false,
+    requestSearchFocus: Boolean = false,
     viewModelKey: String? = null,
     ignoreBottomSafeDrawingPadding: Boolean = false,
     content: @Composable (groupMembersViewModel: GroupMembersViewModel) -> Unit = {},
@@ -158,6 +156,7 @@ fun MembersScreenContainer(
             alwaysShowClearButton = AlwaysShowClearButton.IF_NOT_EMPTY,
             placeholderText = stringResource(R.string.hint_search_contact_name),
             onSearchTextChanged = { groupMembersViewModel.setSearchFilter(it) },
+            requestFocus = requestSearchFocus,
             onClearClick = { groupMembersViewModel.setSearchFilter(null) },
             selectAllBeacon = selectAllBeacon
         )
@@ -169,7 +168,9 @@ fun MembersScreenContainer(
             content(groupMembersViewModel)
 
             Box(modifier = Modifier.weight(1f)) {
-                groupMembersViewModel.filteredMembers.takeIf { it.isNotEmpty() }?.let { filteredMembers ->
+                val filteredMembers = groupMembersViewModel.filteredMembers
+                val displayedMembers = ownGroupMember?.let { listOf(it) }.orEmpty() + filteredMembers
+                if (displayedMembers.isNotEmpty()) {
                     LazyColumn(
                         contentPadding = if (ignoreBottomSafeDrawingPadding)
                             PaddingValues(bottom = if (groupMemberAction == null) 16.dp else 64.dp)
@@ -177,7 +178,7 @@ fun MembersScreenContainer(
                             WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom).asPaddingValues() + PaddingValues(bottom = if (groupMemberAction == null) 16.dp else 64.dp)
                     ) {
                         itemsIndexed(
-                            items = ownGroupMember?.let { listOf(it)}.orEmpty() + filteredMembers,
+                            items = displayedMembers,
                             key = {_, member -> member.bytesIdentity }) { index, member ->
                             ContactListItem(
                                 modifier = Modifier
@@ -188,11 +189,11 @@ fun MembersScreenContainer(
                                                 RoundedCornerShape(
                                                     topStart = 16.dp,
                                                     topEnd = 16.dp,
-                                                    bottomStart = if (filteredMembers.lastIndex == 0) 16.dp else 0.dp,
-                                                    bottomEnd = if (filteredMembers.lastIndex == 0) 16.dp else 0.dp,
+                                                    bottomStart = if (displayedMembers.lastIndex == 0) 16.dp else 0.dp,
+                                                    bottomEnd = if (displayedMembers.lastIndex == 0) 16.dp else 0.dp,
                                                 )
                                             )
-                                            filteredMembers.lastIndex -> Modifier.clip(
+                                            displayedMembers.lastIndex -> Modifier.clip(
                                                 RoundedCornerShape(
                                                     bottomStart = 16.dp,
                                                     bottomEnd = 16.dp,
@@ -204,7 +205,7 @@ fun MembersScreenContainer(
                                     .background(colorResource(R.color.lighterGrey)),
                                 padding = PaddingValues(4.dp),
                                 title = AnnotatedString(
-                                    member.searchableDiscussion?.title
+                                    member.searchableDiscussion?.title?.takeIf { it.isNotEmpty() }
                                         ?: ContactCacheSingleton.getContactDetailsFirstLine(member.bytesIdentity)
                                         ?: member.getDisplayName(context = context)
                                 )
@@ -236,34 +237,7 @@ fun MembersScreenContainer(
                                     }
                                     selectAllBeacon++
                                 },
-                                initialViewSetup = { initialView ->
-                                    when {
-                                        member.isYou -> initialView.setFromCache(member.bytesIdentity)
-                                        member.searchableDiscussion != null ->
-                                            initialView.setDiscussion(member.searchableDiscussion)
-                                        else -> member.contact?.let { contact ->
-                                            initialView.setContact(
-                                                contact
-                                            )
-                                        }
-                                            ?: run {
-                                                member.jsonIdentityDetails?.let {
-                                                    initialView.setInitial(
-                                                        member.bytesIdentity,
-                                                        StringUtils.getInitial(
-                                                            it.formatDisplayName(
-                                                                SettingsActivity.contactDisplayNameFormat,
-                                                                SettingsActivity.uppercaseLastName
-                                                            )
-                                                        )
-                                                    )
-                                                } ifNull {
-                                                    initialView.setUnknown()
-                                                }
-                                                initialView.setKeycloakCertified(keycloakCertified = keycloakCertified)
-                                            }
-                                    }
-                                },
+                                avatar = member.avatar(keycloakCertified = keycloakCertified),
                                 startContent = {
                                     if (groupMemberAction?.onActionClick != null && groupMemberAction.startGravity) {
                                         Spacer(modifier = Modifier.width(8.dp))
@@ -304,19 +278,14 @@ fun MembersScreenContainer(
                                 }
                             )
                         }
+                        if (filteredMembers.isEmpty() && groupMembersViewModel.currentFilter.isNullOrEmpty().not()) {
+                            item(key = "no_match") {
+                                NoContactMatchFilter(modifier = Modifier.padding(top = 8.dp))
+                            }
+                        }
                     }
-                } ?: run {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                color = colorResource(R.color.lighterGrey),
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .padding(vertical = 20.dp),
-                        text = stringResource(R.string.explanation_no_contact_match_filter),
-                        textAlign = TextAlign.Center
-                    )
+                } else {
+                    NoContactMatchFilter()
                 }
                 @Suppress("RemoveRedundantQualifierName")
                 androidx.compose.animation.AnimatedVisibility(
@@ -416,31 +385,11 @@ fun MembersRow(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Box {
-                            InitialView(
+                            Avatar(
                                 modifier = Modifier
                                     .align(Alignment.Center)
                                     .size(40.dp),
-                                initialViewSetup = { initialView ->
-                                    when {
-                                        member.searchableDiscussion != null ->
-                                            initialView.setDiscussion(member.searchableDiscussion)
-                                        else -> member.contact?.let { initialView.setContact(it) } ?: run {
-                                            member.jsonIdentityDetails?.let {
-                                                initialView.setInitial(
-                                                    member.bytesIdentity,
-                                                    StringUtils.getInitial(
-                                                        it.formatDisplayName(
-                                                            SettingsActivity.contactDisplayNameFormat,
-                                                            SettingsActivity.uppercaseLastName
-                                                        )
-                                                    )
-                                                )
-                                            } ifNull {
-                                                initialView.setUnknown()
-                                            }
-                                        }
-                                    }
-                                }
+                                target = member.avatar(),
                             )
                             onMemberRemoved?.let {
                                 if (member.removableFromRow) {
@@ -574,6 +523,21 @@ fun RemoveMembersScreen(
 }
 
 @Composable
+private fun NoContactMatchFilter(modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = colorResource(R.color.lighterGrey),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(vertical = 20.dp),
+        text = stringResource(R.string.explanation_no_contact_match_filter),
+        textAlign = TextAlign.Center
+    )
+}
+
+@Composable
 fun EditMembersNavigationRow(
     text: String,
     @DrawableRes icon: Int,
@@ -652,12 +616,14 @@ fun MembersMainScreen(
             ) {
                 gotoAddMembers()
             }
-            EditMembersNavigationRow(
-                text = stringResource(R.string.button_label_remove_members),
-                icon = R.drawable.ic_remove_member,
-                textColor = colorResource(R.color.red)
-            ) {
-                gotoRemoveMembers()
+            if (contacts.isNotEmpty()) {
+                EditMembersNavigationRow(
+                    text = stringResource(R.string.button_label_remove_members),
+                    icon = R.drawable.ic_remove_member,
+                    textColor = colorResource(R.color.red)
+                ) {
+                    gotoRemoveMembers()
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
         }

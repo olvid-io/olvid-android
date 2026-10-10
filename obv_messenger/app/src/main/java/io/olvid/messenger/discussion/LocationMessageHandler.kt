@@ -61,18 +61,12 @@ class LocationMessageHandler(
                                 .fyleMessageJoinWithStatusDao()
                                 .getFylesAndStatusForMessageSync(message.id)
 
-                        discussionViewModel.markAsReadOnPause = false
                         if (fyleAndStatuses.size == 1) {
-                            App.openDiscussionGalleryActivity(
-                                activity,
-                                discussionViewModel.discussionId ?: -1,
-                                message.id,
-                                fyleAndStatuses[0].fyle.id,
-                                null,
-                                true,
-                                false
-                            )
+                            activity.runOnUiThread {
+                                discussionViewModel.galleryRequest = GalleryRequest(message.id, fyleAndStatuses[0].fyle.id)
+                            }
                         } else {
+                            discussionViewModel.markAsReadOnPause = false
                             // in case we don't have a single attachment, simply open the message gallery... This should never happen :)
                             App.openMessageGalleryActivity(
                                 activity,
@@ -129,18 +123,12 @@ class LocationMessageHandler(
         App.runThread {
             val fyleAndStatuses = AppDatabase.getInstance().fyleMessageJoinWithStatusDao()
                 .getFylesAndStatusForMessageSync(message.id)
-            discussionViewModel.markAsReadOnPause = false
             if (fyleAndStatuses.size == 1) {
-                App.openDiscussionGalleryActivity(
-                    activity,
-                    discussionViewModel.discussionId ?: -1,
-                    message.id,
-                    fyleAndStatuses[0].fyle.id,
-                    null,
-                    true,
-                    false
-                )
+                activity.runOnUiThread {
+                    discussionViewModel.galleryRequest = GalleryRequest(message.id, fyleAndStatuses[0].fyle.id)
+                }
             } else {
+                discussionViewModel.markAsReadOnPause = false
                 // in case we don't have a single attachment, simply open the message gallery... This should never happen :)
                 App.openMessageGalleryActivity(activity, message.id, -1, false)
             }
@@ -148,6 +136,7 @@ class LocationMessageHandler(
     }
 
     fun openMap(message: Message? = null) {
+        discussionViewModel.markAsReadOnPause = false
         // if a map integration is configured: open fullscreen map (behaviour will change depending on message.locationType)
         LocationActivity.start(
             activity,

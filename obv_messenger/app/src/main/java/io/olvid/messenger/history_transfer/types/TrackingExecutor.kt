@@ -19,7 +19,6 @@
 
 package io.olvid.messenger.history_transfer.types
 
-import io.olvid.engine.Logger
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor
 
 // This class is a NoExceptionSingleThreadExecutor that provides an additional executeTracked() method to be able to detect that

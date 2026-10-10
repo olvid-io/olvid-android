@@ -20,6 +20,7 @@
 package io.olvid.messenger.viewModels;
 
 import androidx.annotation.NonNull;
+import io.olvid.messenger.designsystem.avatar.AvatarTarget;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -160,7 +161,7 @@ public class FilteredDiscussionListViewModel extends ViewModel {
 
 
 
-    public static class SearchableDiscussion {
+    public static class SearchableDiscussion implements AvatarTarget {
         public final long discussionId;
         public final boolean isGroupDiscussion;
         @NonNull

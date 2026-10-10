@@ -24,10 +24,10 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import io.olvid.engine.engine.types.ObvDialog
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.OwnedIdentityDao
+import io.olvid.messenger.databases.entity.Invitation
 import io.olvid.messenger.databases.entity.Message
 import java.util.UUID
 
@@ -84,18 +84,6 @@ internal fun computeOwnedIdentityCounts(
 
 
 object UnreadCountsSingleton {
-    // Categories of invitations that should drive a notification dot/counter.
-    // Keep aligned with Invitation.requiresAction() — anything that warrants a dot is in here.
-    private val INVITATION_NOTIFICATION_CATEGORIES = setOf(
-        ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY,
-        ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY,
-        ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY,
-        ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY,
-        ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY,
-        ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY,
-        ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY,
-    )
-
     private val unreadMessageIdsByDiscussionId: MutableMap<Long, MutableMap<Long, Long>> = mutableMapOf()
     private val mentionMessageIdsByDiscussionId: MutableMap<Long, MutableSet<Long>> = mutableMapOf()
     private val locationsSharedMessageIdsByDiscussionId: MutableMap<Long, MutableSet<Long>> = mutableMapOf()
@@ -170,10 +158,10 @@ object UnreadCountsSingleton {
                     .add(it.messageId)
             }
 
-            // Pending invitations in the "right" categories (see INVITATION_NOTIFICATION_CATEGORIES).
+            // Only invitations requiring an action drive the dot.
             val invitationStubs = db.invitationDao().getAllStubs()
             invitationStubs.forEach { stub ->
-                if (stub.categoryId in INVITATION_NOTIFICATION_CATEGORIES) {
+                if (Invitation.categoryRequiresAction(stub.categoryId)) {
                     val owner = BytesKey(stub.bytesOwnedIdentity)
                     invitationsByOwnedIdentity.getOrPut(owner) { mutableSetOf() }.add(stub.dialogUuid)
                     invitationOwners[stub.dialogUuid] = owner
@@ -312,9 +300,11 @@ object UnreadCountsSingleton {
 
     fun newLocationSharingMessage(discussionId: Long, messageId: Long) {
         synchronized(UnreadCountsSingleton) {
-            locationsSharedMessageIdsByDiscussionId.getOrPut(discussionId) { mutableSetOf() }
-                .add(messageId)
-            locationsSharedDiscussionsLiveData.postValue(locationsSharedMessageIdsByDiscussionId.keys)
+            val messageIds = locationsSharedMessageIdsByDiscussionId.getOrPut(discussionId) { mutableSetOf() }
+            val discussionAdded = messageIds.isEmpty()
+            if (messageIds.add(messageId) && discussionAdded) {
+                locationsSharedDiscussionsLiveData.postValue(locationsSharedMessageIdsByDiscussionId.keys)
+            }
         }
     }
 
@@ -498,7 +488,7 @@ object UnreadCountsSingleton {
                     }
                 }
             }
-            if (categoryId in INVITATION_NOTIFICATION_CATEGORIES) {
+            if (Invitation.categoryRequiresAction(categoryId)) {
                 val owner = BytesKey(bytesOwnedIdentity)
                 invitationsByOwnedIdentity.getOrPut(owner) { mutableSetOf() }.add(dialogUuid)
                 invitationOwners[dialogUuid] = owner

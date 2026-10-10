@@ -1,0 +1,5 @@
+- Prikazuje samo prvih 4 slike u poruci, a dodato je i prikaz svih slika u albumu.
+- Dodat skener dokumenata.
+- Dvaput dodirnite primljenu poruku da biste reagovali podrazumevanim emotikonom.
+- Nove ikone za kontakte i grupe bez profilne slike.
+- Dodato dugme za direktno slanje fotografije sa glavnog ekrana.

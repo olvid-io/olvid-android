@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Objects;
 
 import io.olvid.engine.engine.types.EngineAPI;
+import io.olvid.messenger.designsystem.avatar.AvatarTarget;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.AppSingleton;
@@ -41,7 +42,7 @@ import io.olvid.messenger.settings.SettingsActivity;
 @Entity(
         tableName = OwnedIdentity.TABLE_NAME
 )
-public class OwnedIdentity {
+public class OwnedIdentity implements AvatarTarget {
     public static final String TABLE_NAME = "identity_table";
 
     public static final String BYTES_OWNED_IDENTITY = "bytes_owned_identity";

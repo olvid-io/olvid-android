@@ -23,9 +23,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import io.olvid.messenger.App
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.StringUtils
-import io.olvid.messenger.customClasses.ifNull
+import io.olvid.messenger.designsystem.avatar.AvatarSource
+import io.olvid.messenger.designsystem.avatar.AvatarTarget
 import io.olvid.messenger.webrtc.WebrtcCallService
 import io.olvid.messenger.webrtc.WebrtcCallService.CallParticipantPojo
 import io.olvid.messenger.webrtc.WebrtcCallService.FailReason
@@ -169,16 +169,5 @@ fun VideoTrack?.isEnabledSafe() = try {
     false
 }
 
-fun CallParticipantPojo.initialViewSetup(): (InitialView) -> Unit = { view ->
-    contact?.let {
-        view.setContact(it)
-    } ifNull {
-        with(view) {
-            reset()
-            setInitial(
-                bytesContactIdentity,
-                StringUtils.getInitial(displayName)
-            )
-        }
-    }
-}
+fun CallParticipantPojo.avatar(): AvatarTarget =
+    contact ?: AvatarSource.initial(bytesContactIdentity, StringUtils.getInitial(displayName))

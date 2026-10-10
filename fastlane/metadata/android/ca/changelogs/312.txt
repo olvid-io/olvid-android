@@ -1,0 +1,5 @@
+- Només es mostren les 4 primeres imatges d'un missatge i s'ha afegit una vista d'àlbum per veure-les totes.
+- S'ha afegit un escàner de documents.
+- Toqueu dues vegades un missatge rebut per reaccionar amb un emoji predeterminat.
+- S'han afegit nous avatars per als contactes i grups sense foto de perfil.
+- S'ha afegit un botó per enviar una foto directament des de la pantalla principal.
