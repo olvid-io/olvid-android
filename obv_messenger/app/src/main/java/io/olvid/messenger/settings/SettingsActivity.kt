@@ -631,6 +631,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_PREVENT_SCREEN_CAPTURE: String = "pref_key_prevent_screen_capture"
         const val PREF_KEY_PREVENT_SCREEN_CAPTURE_DEFAULT: Boolean = true
 
+        const val PREF_KEY_ALLOW_OVERLAY_WINDOWS: String = "pref_key_allow_overlay_windows"
+        const val PREF_KEY_ALLOW_OVERLAY_WINDOWS_DEFAULT: Boolean = false
+
         const val PREF_KEY_HIDDEN_PROFILE_CLOSE_POLICY: String =
             "pref_key_hidden_profile_close_policy"
         const val HIDDEN_PROFILE_CLOSE_POLICY_SCREEN_LOCK: Int = 1
@@ -1947,6 +1950,14 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
                 putBoolean(PREF_KEY_PREVENT_SCREEN_CAPTURE, preventScreenCapture)
             }
+        }
+
+        @JvmStatic
+        fun allowOverlayWindows(): Boolean {
+            if (MDMConfigurationSingleton.areOverlayWindowsDisabled()) return false
+            return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
+                PREF_KEY_ALLOW_OVERLAY_WINDOWS, PREF_KEY_ALLOW_OVERLAY_WINDOWS_DEFAULT
+            )
         }
 
         @JvmStatic

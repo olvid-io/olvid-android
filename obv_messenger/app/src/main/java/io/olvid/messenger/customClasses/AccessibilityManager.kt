@@ -45,14 +45,11 @@ object AccessibilityManager {
         val userWhitelist = getWhitelist(context)
 
         untrustedAccessibilityServices = enabledServices.filter { serviceInfo ->
-            runCatching {
-                val isSystemApp = context.packageManager.getApplicationInfo(
-                    serviceInfo.resolveInfo.serviceInfo.packageName,
-                    0
-                ).flags and ApplicationInfo.FLAG_SYSTEM != 0
-                val isUserTrusted = userWhitelist.contains(serviceInfo.id)
-                !isSystemApp && !isUserTrusted
-            }.getOrDefault(false)
+            // use the embedded ApplicationInfo: getApplicationInfo() throws for packages hidden by package visibility
+            val flags = serviceInfo.resolveInfo?.serviceInfo?.applicationInfo?.flags
+            val isSystemApp = flags != null && flags and ApplicationInfo.FLAG_SYSTEM != 0
+            val isUserTrusted = userWhitelist.contains(serviceInfo.id)
+            !isSystemApp && !isUserTrusted
         }.map { it.id }
         return untrustedAccessibilityServices.firstOrNull()
     }

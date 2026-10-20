@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">ನೀವು ನಿಜವಾಗಿಯೂ ಈ ಸಾಧನದಲ್ಲಿ ನಿಮ್ಮ ಓಲ್ವಿಡ್ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಮರು-ಸಕ್ರಿಯಗೊಳಿಸಲು ಬಯಸುತ್ತೀರಾ?\n\nನೀವು ಇತರ ಸಕ್ರಿಯ ಸಾಧನಗಳನ್ನು ಹೊಂದಿದ್ದರೆ, ಇದು ಅವುಗಳಲ್ಲಿ ಒಂದನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಬಹುದು.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತಡೆಯಿರಿ</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">ಇದು ಆನ್ ಆಗಿರುವಾಗ, ಒಲ್ವಿಡ್ ಮತ್ತು ಇತ್ತೀಚಿನ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಪಟ್ಟಿಯಲ್ಲಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳುವುದನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗುತ್ತದೆ.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಂದ ಪರಾವರ್ತನೆಯನ್ನು ಅನುಮತಿಸು</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">ನಿಮ್ಮ ಸಂಸ್ಥೆಯಿಂದ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">ಉದಾಹರಣೆಗೆ, ಧ್ವನಿ ಗುರುತಿಸುವಿಕೆ ಅಥವಾ ಪರದೆಯ ಫಿಲ್ಟರ್‌ಗಳಂತಹ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು Olvid ಮೇಲೆ ಪ್ರದರ್ಶಿತವಾಗಲು ಅನುಮತಿಸುತ್ತದೆ. ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನಂಬಿದರೆ ಮಾತ್ರ ಇದನ್ನು ಆನ್ ಮಾಡಿ: ಒಂದು ಓವರ್‌ಲೇ Olvid ತೋರಿಸುವ ವಿಷಯವನ್ನು ಮರೆಮಾಡಬಹುದು ಅಥವಾ ಅನುಕರಿಸಬಹುದು.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">ಫೈಲ್‌ಗೆ ರಫ್ತು ಮಾಡಿ</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">ಕ್ಲೌಡ್ ಬ್ಯಾಕಪ್‌ಗಳು</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">ನೀವು ಹೊಸ ಬ್ಯಾಕಪ್ ಕೀಯನ್ನು ರಚಿಸಿದ್ದೀರಿ. ಈಗ ಬ್ಯಾಕಪ್ ಅನ್ನು ಫೈಲ್‌ಗೆ ರಫ್ತು ಮಾಡುವುದು ಅಥವಾ ಕ್ಲೌಡ್‌ಗೆ ಸ್ವಯಂಚಾಲಿತ ಬ್ಯಾಕಪ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುವುದು ಸೂಕ್ತ ಸಮಯ.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">ಶಾಶ್ವತ ವೆಬ್‌ಸಾಕೆಟ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">ಪುಶ್ સૂચનાಗಳನ್ನು ನಿಷ್ક્રિયಗೊಳಿಸಿ</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">ನೀವು Google ಪುಶ್ ಅಧिसूಚನೆಗಳನ್ನು ಮಾತ್ರ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿದರೆ, ಹೊಸ ಸಂದೇಶಗಳ ಬಗ್ಗೆ ನಿಮಗೆ ತಕ್ಷಣವೇ ಅಧಿಸೂಚನೆ ಬರುವುದಿಲ್ಲ.\n\nಬದಲಾಗಿ, ನೀವು Olvid ನ ಸರ್ವರ್‌ಗಳಿಗೆ ಶಾಶ್ವತ WebSocket ಸಂಪರ್ಕವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ಬಯಸಬಹುದು, ಅದು ಅದೇ ಉದ್ದೇಶವನ್ನು ಪೂರೈಸುತ್ತದೆ (ಆದರೆ ನಿಮ್ಮ ಬ್ಯಾಟರಿಯನ್ನು ಬೇಗ ಖಾಲಿಯಾಗಿಸಬಹುದು).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಂದ ಪರಾವರ್ತನೆಯನ್ನು ಅನುಮತಿಸಬೇಕೆ?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">ಓವರ್‌ಲೇ ವಿಂಡೋಗಳನ್ನು ಕೆಲವೊಮ್ಮೆ ದುರುದ್ದೇಶಪೂರಿತ ಸಾಫ್ಟ್‌ವೇರ್ ಬಳಕೆದಾರರನ್ನು ಮೋಸಗೊಳಿಸಲು ಅಥವಾ ಅವರು ಟೈಪ್ ಮಾಡುವದನ್ನು ಬೇಹುತಿ ಮಾಡಲು ಬಳಸಲಾಗುತ್ತದೆ.\n\nನೀವು Olvid ಮೇಲೆ ಪ್ರದರ್ಶಿಸಬೇಕೆಂದು ಬಯಸುವ ವಿಶ್ವಾಸಾರ್ಹ ಅಪ್ಲಿಕೇಶನ್ (ಉದಾಹರಣೆಗೆ, ಧ್ವನಿ ಟೈಪಿಂಗ್ ಅಪ್ಲಿಕೇಶನ್) ಇದ್ದಾಗ ಮಾತ್ರ ಅವುಗಳನ್ನು ಅನುಮತಿಸಿ.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">ಅನುಮತಿಸು</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">ಮುಂಭಾಗದ ಸೇವೆಯನ್ನು ಬಳಸಿ</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">ಮುಂಭಾಗದ ಸೇವೆಯನ್ನು ಬಳಸುವುದರಿಂದ, ಸಿಸ್ಟಮ್‌ನಿಂದ Olvid ಅನ್ನು ನಿಲ್ಲಿಸುವುದನ್ನು ತಡೆಯಬಹುದು. ಒಂದು ಚಿಕ್ಕ ಐಕಾನ್ ನಿಮ್ಮ ಅಧिसूಚನೆಗಳ ಪ್ರದೇಶದಲ್ಲಿ ಪ್ರದರ್ಶಿತವಾಗುತ್ತದೆ ಮತ್ತು ಅದನ್ನು ಸಿಸ್ಟಮ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ 숨ಗಿಸಬಹುದು.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">ಒಲ್ವಿಡ್‌ನೊಂದಿಗೆ ಅಪ್ಲಿಕೇಶನ್ ಮತ್ತು OS ಆವೃತ್ತಿಯನ್ನು ಹಂಚಿಕೊಳ್ಳಿ</string>

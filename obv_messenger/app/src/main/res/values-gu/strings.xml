@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">શું તમે ખરેખર આ ઉપકરણ પર તમારી ઓલ્વિડ પ્રોફાઇલને ફરીથી સક્રિય કરવા માંગો છો?\n\nજો તમારી પાસે અન્ય સક્રિય ઉપકરણો હોય, તો આનાથી તેમાંથી એક નિષ્ક્રિય થઈ શકે છે.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">સ્ક્રીનશોટ લેવાનું અટકાવો</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">જ્યારે આ સક્રિય હોય, ત્યારે ઓલ્વિડ અને તાજેતરના એપ્લિકેશન્સની સૂચિમાં સ્ક્રીનશોટ લેવાનું અક્ષમ કરવામાં આવે છે.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">અન્ય એપ્લિકેશન્સમાંથી ઓવરલેને મંજૂરી આપો</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">તમારી સંસ્થા દ્વારા અક્ષમ કરવામાં આવી છે.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">ડિક્ટેશન ટૂલ્સ અથવા સ્ક્રીન ફિલ્ટર્સ જેવા એપ્લિકેશન્સને ઓલ્વિડની ઉપર પ્રદર્શિત કરવાની મંજૂરી આપે છે. આ વિકલ્પ ફક્ત ત્યારે જ સક્રિય કરો જો તમે આ એપ્લિકેશન્સ પર વિશ્વાસ કરો: ઓવરલે ઓલ્વિડમાં જે બતાવે છે તેને છુપાવી અથવા તેનું અનુકરણ કરી શકે છે.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">ફાઇલમાં નિકાસ કરો</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">ક્લાઉડ બેકઅપ્સ</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">તમે એક નવી બેકઅપ કી જનરેટ કરી છે. આ સમયે બેકઅપને ફાઇલમાં એક્સપોર્ટ કરવું અથવા ક્લાઉડમાં આપોઆપ બેકઅપ સક્રિય કરવું એ યોગ્ય રહેશે.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">કાયમી વેબસોકેટને સક્ષમ કરો</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">પુશ સૂચનાઓ બંધ કરો</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">જો તમે ફક્ત Google પુશ સૂચનાઓ બંધ કરો છો, તો તમને નવા સંદેશાઓની તાત્કાલિક સૂચના નહીં મળે.\n\nતમે તેના બદલે Olvidના સર્વર્સ સાથે કાયમી WebSocket કનેક્શન સક્ષમ કરવાનું વિચારી શકો છો, જે સમાન હેતુ પૂરો પાડે છે (પરંતુ તેનાથી તમારી બેટરી ઝડપથી વપરાઈ શકે છે).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">શું અન્ય એપ્લિકેશનોને આ એપ્લિકેશન પર દેખાવાની મંજૂરી આપવી?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">ઓવરલે વિન્ડોનો ઉપયોગ કેટલીકવાર માલવેર દ્વારા તમને કંઈક પર ટેપ કરવા માટે છેતરવા અથવા તમે જે લખો છો તેના પર જાસૂસી કરવા માટે કરવામાં આવે છે.\n\nતેમને ફક્ત ત્યારે જ મંજૂરી આપો જો તમને કોઈ વિશ્વસનીય એપ્લિકેશનની જરૂર હોય (ઉદાહરણ તરીકે, ડિક્ટેશન ટૂલ) જે ઓલ્વિડની ટોચ પર પ્રદર્શિત થાય.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">અનુમતિ આપો</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">ફોરગ્રાઉન્ડ સેવા વાપરો</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">ફોરગ્રાઉન્ડ સેવા ચલાવવાથી સિસ્ટમ દ્વારા ઓલ્વિડને બંધ થતું અટકાવી શકાય છે. એક નાનું ચિહ્ન તમારી સૂચનાઓ (નોટિફિકેશન) વિસ્તારમાં દેખાશે અને તેને સિસ્ટમ સેટિંગ્સમાં છુપાવી શકાય છે.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">ઓલ્વિડ સાથે એપ્લિકેશન અને ઓએસ સંસ્કરણ શેર કરો</string>

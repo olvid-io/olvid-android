@@ -68,6 +68,7 @@ import androidx.core.content.ContextCompat
 import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.hideOverlayWindows
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.designsystem.components.BaseDialogContent
@@ -136,9 +137,7 @@ class WebrtcCallActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        if (VERSION.SDK_INT >= VERSION_CODES.S) {
-            window.setHideOverlayWindows(true)
-        }
+        window.hideOverlayWindows(sensitive = true)
 
         val intent = intent
         if (CALL_BACK_ACTION == intent.action) {
@@ -259,7 +258,7 @@ class WebrtcCallActivity : AppCompatActivity() {
                         }
 
                         is GoToDiscussion -> {
-                            openDiscussion()
+                            openDiscussion(callAction.contact)
                         }
 
                         ShareScreen -> {
@@ -439,7 +438,9 @@ class WebrtcCallActivity : AppCompatActivity() {
             val callParticipants = webrtcCallService?.getCallParticipantsLiveData()?.value
             if (webrtcCallService?.bytesOwnedIdentity != null && callParticipants != null) {
                 val discussionIntent: Intent
-                when (webrtcCallService?.discussionType) {
+                // a participant's chat button opens their one-to-one discussion, even in a group call
+                val discussionType = if (oneToOneContact == null) webrtcCallService?.discussionType else Discussion.TYPE_CONTACT
+                when (discussionType) {
                     Discussion.TYPE_GROUP -> {
                         if (webrtcCallService?.bytesGroupOwnerAndUidOrIdentifier == null) {
                             return
@@ -512,7 +513,7 @@ class WebrtcCallActivity : AppCompatActivity() {
                         )
                         discussionIntent.putExtra(
                             DiscussionActivity.BYTES_CONTACT_IDENTITY_INTENT_EXTRA,
-                            callParticipants[0].bytesContactIdentity
+                            contact.bytesContactIdentity
                         )
                     }
                 }

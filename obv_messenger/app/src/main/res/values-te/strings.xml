@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">మీరు ఈ పరికరంలో మీ Olvid ప్రొఫైల్‌ను తిరిగి సక్రియం చేయాలనుకుంటున్నారా?\n\nమీకు ఇతర క్రియాశీల పరికరాలు ఉంటే, ఇది వాటిలో మరొకదానిని నిష్క్రియం చేయవచ్చు.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">స్క్రీన్షాట్‌లను నిరోధించండి</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">దీనిని ఆన్ చేసినప్పుడు, Olvid మరియు ఇటీవల ఉపయోగించిన యాప్‌ల జాబితాలో స్క్రీన్‌షాట్‌లు తీయడం నిలిపివేయబడుతుంది.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">ఇతర అనువర్తనాల నుండి ఓవర్‌లేలను అనుమతించండి</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">మీ సంస్థ ద్వారా నిలిపివేయబడింది.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">డిక్టేషన్ సాధనాలు లేదా స్క్రీన్ ఫిల్టర్‌ల వంటి యాప్‌లు ఒల్విడ్‌పై ప్రదర్శించబడేలా అనుమతిస్తుంది. మీరు ఈ యాప్‌లను విశ్వసిస్తే మాత్రమే దీన్ని ఆన్ చేయండి: ఒక ఓవర్‌లే, ఒల్విడ్ చూపే వాటిని దాచవచ్చు లేదా అనుకరించవచ్చు.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">ఫైల్‌కు ఎగుమతి చేయండి</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">క్లౌడ్ బ్యాకప్‌లు</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">మీరు కొత్త బ్యాకప్ కీని రూపొందించారు. ఇది బ్యాకప్‌ను ఫైల్‌కు ఎగుమతి చేయడానికి లేదా క్లౌడ్‌కు ఆటోమేటిక్ బ్యాకప్‌లను ప్రారంభించడానికి సరైన సమయం కావచ్చు.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">శాశ్వత వెబ్‌సాకెట్‌ను ప్రారంభించండి</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">పుష్ నోటిఫికేషన్‌లను నిలిపివేయండి</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">మీరు Google నుండి వచ్చే పుష్ నోటిఫికేషన్‌లను మాత్రమే నిలిపివేస్తే, కొత్త సందేశాల గురించి మీకు తక్షణమే తెలియజేయబడదు.\n\nబదులుగా, మీరు Olvid సర్వర్‌లకు శాశ్వత WebSocket కనెక్షన్‌ను ప్రారంభించడాన్ని పరిగణించవచ్చు, ఇది అదే ప్రయోజనాన్ని అందిస్తుంది (కానీ మీ బ్యాటరీని మరింత త్వరగా అయిపోయేలా చేస్తుంది).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">ఇతర యాప్‌ల నుండి ఓవర్‌లేలను అనుమతించాలా?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">కొన్నిసార్లు, మాల్వేర్ ఓవర్‌లే విండోలను ఉపయోగించి మీరు ఏదైనా దానిపై నొక్కేలా మిమ్మల్ని మోసం చేయడానికి లేదా మీరు టైప్ చేసే వాటిని గూఢచర్యం చేయడానికి ప్రయత్నించవచ్చు.\n\nమీకు నమ్మకమైన యాప్ (ఉదాహరణకు, డిక్టేషన్ టూల్) Olvid పైన కనిపించేలా అవసరమైతే మాత్రమే వాటిని అనుమతించండి.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">అనుమతించు</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">ఒక ఫోర్‌గ్రౌండ్ సేవను ఉపయోగించండి</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">ముందుభాగ సేవను ఉపయోగించడం వలన, ఆల్విడ్‌ను సిస్టమ్ ద్వారా ఆపకుండా నిరోధించవచ్చు. మీ నోటిఫికేషన్ ప్రాంతంలో ఒక చిన్న చిహ్నం ప్రదర్శించబడుతుంది మరియు దీనిని సిస్టమ్ సెట్టింగ్‌లలో దాచవచ్చు.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">ఓల్విడ్‌తో యాప్ మరియు OS వెర్షన్‌ను పంచుకోండి.</string>

@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">இந்த சாதனத்தில் உங்கள் Olvid சுயவிவரத்தை மீண்டும் செயல்படுத்துவதை நீங்கள் உறுதிப்படுத்த விரும்புகிறீர்களா?\n\nஉங்களிடம் வேறு செயல்படும் சாதனங்கள் இருந்தால், அது மற்றொன்றை செயலிழக்கச் செய்யலாம்.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">திரைக்காட்சிகளைத் தடுக்கவும்</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">இது இயக்கப்பட்டிருக்கும்போது, ஓல்விட் மற்றும் சமீபத்திய பயன்பாடுகள் பட்டியலில் ஸ்கிரீன்ஷாட்கள் முடக்கப்படும்.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">பிற பயன்பாடுகளிலிருந்து மேலடுக்குகளை அனுமதிக்கவும்</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">உங்கள் நிறுவனத்தால் முடக்கப்பட்டது.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">ஒலிவிட் பயன்பாட்டின் மேல், டிக்டேஷன் கருவிகள் அல்லது திரை வடிகட்டிகள் போன்ற பயன்பாடுகள் காண்பிக்க அனுமதிக்கிறது. இந்த பயன்பாடுகளை நீங்கள் நம்பினால் மட்டுமே இதை இயக்கவும்: ஒரு மேலடுக்கு, ஒலிவிட் காண்பிக்கும் உள்ளடக்கத்தை மறைக்கலாம் அல்லது போலியாகக் காட்டலாம்.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">கோப்பிற்கு ஏற்றுமதி செய்</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">கிளவுட் காப்புப்பிரதிகள்</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">நீங்கள் ஒரு புதிய காப்புப் பிரதியை உருவாக்கியுள்ளீர்கள். காப்புப் பிரதியை ஒரு கோப்பில் ஏற்றுமதி செய்யவோ அல்லது கிளவுடுக்கு தானியங்கி காப்புப் பிரதிகளை இயக்கவோ இது சரியான நேரமாக இருக்கலாம்.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">நிரந்தர WebSocket-ஐ இயக்கவும்</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">புஷ் அறிவிப்புகளை முடக்கு</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">நீங்கள் கூகிள் புஷ் அறிவிப்புகளை மட்டும் முடக்கியிருந்தால், புதிய செய்திகள் வரும்போது உடனடியாக உங்களுக்கு அறிவிக்கப்படாது.\n\nஅதற்கு பதிலாக, ஒல்விட் சேவையகங்களுக்கு ஒரு நிரந்தர WebSocket இணைப்பை இயக்கலாம், இது அதே நோக்கத்திற்காக செயல்படும் (ஆனால் உங்கள் பேட்டரியை வேகமாக வெளியேற்றக்கூடும்).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">பிற செயலிகளிலிருந்து மேலடுக்குகளை அனுமதிக்கவா?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">சில நேரங்களில் தீம்பொருள்கள், திரையின் மேல் தோன்றும் சாளரங்களைப் பயன்படுத்தி, நீங்கள் எதையாவது தட்டும்படி உங்களை ஏமாற்றலாம் அல்லது நீங்கள் தட்டச்சு செய்வதை உளவு பார்க்க பயன்படுத்தலாம்.\n\nநீங்கள் நம்பும் ஒரு பயன்பாடு (உதாரணமாக, ஒரு டிக்டேஷன் கருவி) Olvid-ன் மேல் தோன்றும் வகையில் இருந்தால் மட்டுமே அதை அனுமதிக்கவும்.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">அனுமதி</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">முன்னணி சேவையைப் பயன்படுத்தவும்</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">முன்புறச் சேவையைப் பயன்படுத்துவதன் மூலம், ஓல்விட் பயன்பாட்டை சிஸ்டம் நிறுத்தாமல் தடுக்கலாம். ஒரு சிறிய ஐகான் உங்கள் அறிவிப்புப் பகுதியில் காட்டப்படும், மேலும் அதை சிஸ்டம் அமைப்புகளில் மறைக்கலாம்.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">ஒலிவிட் உடன் பயன்பாடு மற்றும் இயக்க முறைமையின் பதிப்பை பகிரவும்</string>

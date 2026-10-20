@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Estàs segur que vols reactivar el teu perfil d\'Olvid en aquest dispositiu?\n\nSi tens altres dispositius actius, això podria desactivar-ne un altre.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Evitar captures de pantalla</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Quan aquesta opció està activada, les captures de pantalla estan desactivades a Olvid i a la llista d\'aplicacions recents.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Permetre superposicions d\'altres aplicacions</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Desactivat per la vostra organització.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Permet que aplicacions com ara eines de dictat o filtres de pantalla es mostrin per sobre d\'Olvid. Activa aquesta opció només si confies en aquestes aplicacions: una capa superposada pot amagar o imitar el que mostra Olvid.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Exportar a fitxer</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Còpies de seguretat al núvol</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Has generat una nova clau de còpia de seguretat. Aquest és probablement el moment adequat per exportar una còpia de seguretat a un fitxer o per activar les còpies de seguretat automàtiques al núvol.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Habilitar WebSocket permanent</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Desactivar les notificacions push</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Si només desactives les notificacions push de Google, no rebràs notificacions instantànies de nous missatges.\n\nEn lloc d\'això, pots activar una connexió WebSocket permanent als servidors d\'Olvid que pot servir per al mateix propòsit (però podria esgotar la bateria més ràpidament).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Permetre que altres aplicacions es superposin a aquesta?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">De vegades, els programes maliciosos utilitzen finestres superposades per fer que feu clic en alguna cosa sense voler, o per espiar el que escriviu.\n\nNomés permeteu-les si necessiteu que una aplicació de confiança (per exemple, una eina de dictat) es mostri per sobre d\'Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Permetre</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Utilitzar un servei en primer pla</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Mantenir un servei en primer pla evita que el sistema aturi Olvid. Es mostra una petita icona a la zona de notificacions i es pot amagar a la configuració del sistema.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Compartir la versió de l\'app i del sistema operatiu amb Olvid</string>

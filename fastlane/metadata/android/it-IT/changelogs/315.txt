@@ -1,0 +1,3 @@
+- Aggiunta un'impostazione per consentire la sovrapposizione di finestre (utile per alcuni strumenti di dettatura).
+- Corretto un problema nell'aggiunta di contatti Keycloak.
+- Risolti alcuni piccoli bug.

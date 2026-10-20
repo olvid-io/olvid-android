@@ -1,0 +1,3 @@
+- Tumefanya marekebisho ili kuruhusu madirisha ya juu (yanafaa kwa baadhi ya zana za kuandika kwa sauti).
+- Tumerekebisha tatizo katika kuongeza anwani ya Keycloak.
+- Tumerekebisha hitilafu kadhaa ndogo.

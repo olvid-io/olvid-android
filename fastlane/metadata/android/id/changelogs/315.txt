@@ -1,0 +1,3 @@
+- Menambahkan pengaturan untuk mengizinkan jendela overlay (berguna untuk beberapa alat dikte).
+- Memperbaiki masalah dalam penambahan kontak Keycloak.
+- Memperbaiki beberapa bug kecil.

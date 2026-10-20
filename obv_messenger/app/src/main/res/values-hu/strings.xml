@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Biztos vagy benne, hogy újraaktiválni szeretnéd az Olvid profilodat ezen az eszközön?\n\nHa vannak más aktív eszközeid, ez deaktiválhat egyet közülük.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">A képernyőképek megakadályozása</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Ha ez be van kapcsolva, a képernyőképek letiltásra kerülnek az Olvidban és a legutóbbi alkalmazások listájában.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Engedélyezze más alkalmazások által használt átfedéseket</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">A szervezet által letiltva.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Engedélyezze, hogy olyan alkalmazások, mint például a diktálóeszközök vagy a képernyőfilterek, a Olvid fölé jelenjenek meg. Csak akkor kapcsolja be, ha megbízik ezekben az alkalmazásokban: egy átfedés elrejtheti vagy utánozhatja a Olvid által megjelenített tartalmat.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Exportálás fájlba</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Felhőalapú biztonsági másolatok</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Létrehozott egy új biztonsági mentési kulcsot. Ez valószínűleg a megfelelő pillanat egy biztonsági mentés exportálására egy fájlba, vagy az automatikus felhőalapú biztonsági mentések aktiválására.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Állandó WebSocket engedélyezése</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Push értesítések kikapcsolása</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Ha csak a Google push értesítéseit kapcsolja ki, nem fogja azonnal tudni az új üzeneteket.\n\nEhelyett bekapcsolhat egy állandó WebSocket-kapcsolatot az Olvid szervereivel, amely ugyanazt a célt szolgálhatja (de gyorsabban lemerítheti az akkumulátort).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Engedélyezzem, hogy más alkalmazások átfedéseket jelenítsenek meg?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">A felugró ablakokat néha rosszindulatú programok használják, hogy rávegyenek téged arra, hogy megérintsd valamit, vagy hogy kémkedjenek a beírt szövegeidben.\nCsak akkor engedd meg, ha szükséged van egy megbízható alkalmazásra (például egy diktáló eszközre), amely a Olvid fölött jelenik meg.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Engedélyez</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Előterv szolgáltatás használata</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Egy háttérszolgáltatás fenntartása megakadályozza, hogy a rendszer leállítsa az Olvid alkalmazást. Egy kis ikon jelenik meg az értesítési területen, és elrejthető a rendszerbeállításokban.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Oszd meg az alkalmazás és az operációs rendszer verzióját az Olvid-dal</string>

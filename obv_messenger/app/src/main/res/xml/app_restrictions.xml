@@ -59,4 +59,10 @@
         android:title="@string/restriction_allow_disable_lock_screen_title"
         android:description="@string/restriction_allow_disable_lock_screen_description"
         android:restrictionType="string" />
+    <restriction
+        android:key="disable_overlay_windows"
+        android:title="@string/restriction_disable_overlay_windows_title"
+        android:description="@string/restriction_disable_overlay_windows_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
 </restrictions>

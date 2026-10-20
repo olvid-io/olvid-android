@@ -1,0 +1,3 @@
+- Dodana postavka za omogućavanje prikaza iznad drugih aplikacija (korisno za neke alate za diktiranje).
+- Ispravljen problem pri dodavanju kontakta u Keycloak.
+- Uklonjeno nekoliko manjih pogrešaka.

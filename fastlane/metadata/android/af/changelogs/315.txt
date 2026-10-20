@@ -1,0 +1,3 @@
+- 'n Instelling bygevoeg om oorlappende vensters toe te laat (handig vir sommige spraakherkenningstelsels).
+- 'n Probleem met Keycloak-kontakbyvoeging is reggestel.
+- 'n Paar klein foutjies is reggestel.

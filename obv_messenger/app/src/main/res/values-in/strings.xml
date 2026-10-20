@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Apakah Anda yakin ingin mengaktifkan kembali profil Olvid Anda di perangkat ini?\n\nJika Anda memiliki perangkat aktif lainnya, ini dapat menonaktifkan salah satunya.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Cegah tangkapan layar</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Saat opsi ini diaktifkan, tangkapan layar dinonaktifkan di Olvid dan di daftar aplikasi terbaru.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Izinkan aplikasi lain untuk ditampilkan di atas aplikasi ini</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Dinonaktifkan oleh organisasi Anda.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Izinkan aplikasi seperti alat dikte atau filter layar untuk ditampilkan di atas Olvid. Aktifkan ini hanya jika Anda mempercayai aplikasi ini: lapisan dapat menyembunyikan atau meniru apa yang ditampilkan Olvid.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Ekspor ke file</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Cadangan cloud</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Anda telah membuat kunci cadangan baru. Mungkin ini adalah waktu yang tepat untuk mengekspor cadangan ke file, atau untuk mengaktifkan cadangan otomatis ke cloud.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Aktifkan WebSocket permanen</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Nonaktifkan notifikasi push</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Jika Anda hanya menonaktifkan notifikasi push Google, Anda tidak akan segera mendapatkan pemberitahuan tentang pesan baru.\n\nSebagai gantinya, Anda mungkin ingin mengaktifkan koneksi WebSocket permanen ke server Olvid yang dapat berfungsi untuk tujuan yang sama (tetapi mungkin menghabiskan baterai Anda lebih cepat).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Izinkan aplikasi lain untuk ditampilkan di atas aplikasi ini?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Jendela overlay terkadang digunakan oleh malware untuk menipu Anda agar mengetuk sesuatu, atau untuk memata-matai apa yang Anda ketik.\n\nIzinkan hanya jika Anda memerlukan aplikasi yang Anda percayai (misalnya, alat dikte) untuk ditampilkan di atas Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Izinkan</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Gunakan layanan latar depan</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Menggunakan layanan latar depan mencegah Olvid dihentikan oleh sistem. Ikon kecil ditampilkan di area notifikasi Anda dan dapat disembunyikan di pengaturan sistem.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Bagikan versi aplikasi dan OS dengan Olvid</string>

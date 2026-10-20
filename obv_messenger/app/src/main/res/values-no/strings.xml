@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Er du sikker på at du vil reaktivere din Olvid-profil på denne enheten?\n\nHvis du har andre aktive enheter, kan dette deaktivere en av dem.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Forhindre skjermbilder</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Når dette er på, er skjermbilder deaktivert i Olvid og i listen over nylige apper.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Tillat overlegg fra andre apper</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Deaktivert av organisasjonen din.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">La apper som dikteringsverktøy eller skjermfiltre vise over Olvid. Slå dette bare på hvis du stoler på disse appene: et overlegg kan skjule eller etterligne det Olvid viser.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Eksporter til fil</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Skybaserte sikkerhetskopier</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Du har generert en ny sikkerhetskopieringsnøkkel. Dette er sannsynligvis det rette tidspunktet for å eksportere en sikkerhetskopi til en fil eller aktivere automatiske sikkerhetskopier til skyen.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Aktiver permanent WebSocket</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Deaktiver pushvarsler</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Hvis du bare deaktiverer Google push-varsler, vil du ikke bli varslet umiddelbart om nye meldinger.\n\nDu kan i stedet aktivere en permanent WebSocket-tilkobling til Olvids servere som kan tjene samme formål (men kan tømme batteriet raskere).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Tillat at andre apper kan vises over denne appen?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Overlappende vinduer brukes noen ganger av skadelig programvare for å lure deg til å trykke på noe, eller for å spionere på hva du skriver.\n\nTillat dem bare hvis du trenger en app du stoler på (for eksempel et dikteringsverktøy) for å vises over Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Tillat</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Bruk en forgrunnstjeneste</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Å ha en forgrunnstjeneste hindrer at Olvid stoppes av systemet. Et lite ikon vises i varslingsområdet ditt og kan skjules i systeminnstillingene.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Del app- og OS-versjonen med Olvid</string>

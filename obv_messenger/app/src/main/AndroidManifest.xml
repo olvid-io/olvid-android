@@ -615,6 +615,7 @@
         <activity android:name=".storage_manager.StorageManagerActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".discussion.scan.DocumentScannerActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".discussion.poll.PollCreationActivity"
             android:theme="@style/AppTheme.NoActionBar"

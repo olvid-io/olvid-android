@@ -1,0 +1,3 @@
+- Er is een instelling toegevoegd om overlay-vensters toe te staan (handig voor sommige dictatietools).
+- Een probleem bij het toevoegen van Keycloak-contacten is opgelost.
+- Een paar kleine bugs zijn verholpen.

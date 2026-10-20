@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Vai tiešām vēlaties atkārtoti aktivizēt savu Olvid profilu šajā ierīcē?\n\nJa jums ir citas aktīvas ierīces, tas var deaktivizēt kādu no tām.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Aizliegt ekrānšāviņus</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Kad šī funkcija ir ieslēgta, Olvid lietotnē un nesen izmantoto lietotņu sarakstā nav iespējams veidot ekrāna attēlus.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Atļaut citu lietotņu pārklājumus</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Atslēgts jūsu organizācijas līmenī.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Atļaujiet tādām lietotnēm kā balss ievades rīki vai ekrāna filtri parādīties virs Olvid. Ieslēdziet šo opciju tikai tad, ja uzticaties šīm lietotnēm: pārklājums var paslēpt vai imitēt to, ko Olvid rāda.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Eksportēt uz failu</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Mākoņu dublējumi</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Jūs esat izveidojis jaunu rezerves atslēgu. Iespējams, tagad ir īstais laiks, lai eksportētu rezerves kopiju uz failu vai aktivizētu automātisko rezerves kopiju izveidi mākonī.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Iespējojiet pastāvīgu WebSocket savienojumu</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Atspējot paziņojumus</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Ja jūs vienkārši atslēgsiet Google paziņojumus, jūs netiksiet nekavējoties informēts par jaunām ziņām.\n\nVarat arī aktivizēt pastāvīgu WebSocket savienojumu ar Olvid serveriem, kas varētu pildīt to pašu funkciju (bet var ātrāk iztērēt akumulatora enerģiju).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Atļaut citu lietotņu pārklājumus?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Pārklājošos logus dažreiz izmanto ļaunprātīgas programmas, lai jūs neapzināti piespiestu pieskarties kaut kam vai lai izsekotu, ko jūs rakstat.\n\nAtļaujiet tos tikai tad, ja jums nepieciešama uzticama lietotne (piemēram, diktēšanas rīks), lai tā tiktu rādīta virs Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Atļaut</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Izmantojiet pirmplāna pakalpojumu</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Fona režīma pakalpojums neļauj sistēmai apturēt lietotni Olvid. Neliela ikona tiek parādīta jūsu paziņojumu apgabalā, un to var paslēpt sistēmas iestatījumos.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Koplietojiet lietotnes un operētājsistēmas versijas ar „Olvid\"</string>

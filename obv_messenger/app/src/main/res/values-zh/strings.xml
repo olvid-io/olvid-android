@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">您确定要在此设备上重新激活您的 Olvid 个人资料吗？\n\n如果您有其他已激活的设备，这可能会停用其中一个设备。</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">禁止截屏</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">开启此功能后，Olvid 应用内以及最近应用列表中将禁止截屏。</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">允许其他应用程序覆盖显示</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">您的组织已禁用此功能。</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">允许诸如语音输入工具或屏幕滤镜之类的应用程序在 Olvid 应用程序之上显示。 仅在您信任这些应用程序时才启用此选项：叠加层可能会隐藏或模仿 Olvid 显示的内容。</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">导出到文件</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">云备份</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">您已生成新的备份密钥。现在可能是将备份导出到文件或激活自动备份到云端的最佳时机。</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">启用永久 WebSocket 连接</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">关闭推送通知</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">如果您仅禁用 Google 推送通知，您将无法立即收到新消息的通知。\n\n您可能需要启用与 Olvid 服务器的永久 WebSocket 连接，它可以实现相同的功能（但可能会消耗更多电池电量）。</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">允许其他应用程序覆盖显示？</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">有时，恶意软件会使用叠加窗口来诱骗您点击某些内容，或监视您输入的内容。\n\n只有在您需要使用受信任的应用程序（例如语音输入工具）时，才允许其在 Olvid 窗口之上显示。</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">允许</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">使用前台服务</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">使用前台服务可以防止系统停止 Olvid。一个小图标会显示在您的通知区域，并且可以通过系统设置隐藏。</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">与Olvid分享应用和操作系统版本</string>

@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">آیا مطمئن هستید که می‌خواهید پروفایل Olvid خود را در این دستگاه دوباره فعال کنید؟\n\nاگر دستگاه‌های فعال دیگری دارید، ممکن است یکی از آن‌ها غیرفعال شود.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">جلوگیری از اسکرین‌شات</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">وقتی این گزینه فعال باشد، گرفتن اسکرین‌شات در Olvid و لیست برنامه‌های اخیر غیرفعال می‌شود.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">اجازه نمایش لایه‌های برنامه‌های دیگر را بدهید</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">توسط سازمان شما غیرفعال شده است.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">به برنامه‌هایی مانند ابزارهای دیکته یا فیلترهای صفحه اجازه می‌دهد تا روی Olvid نمایش داده شوند. این گزینه را فقط در صورتی فعال کنید که به این برنامه‌ها اعتماد دارید: یک لایه می‌تواند محتوای نمایش داده شده توسط Olvid را پنهان یا تقلید کند.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">ذخیره به فایل</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">پشتیبان‌گیری ابری</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">شما یک کلید پشتیبان جدید ایجاد کردید. احتمالا الان بهترین زمان برای ذخیره پشتیبان در یک فایل یا فعال‌سازی پشتیبان‌گیری خودکار به فضای ابری است.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">فعال‌سازی WebSocket دائمی</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">غیرفعال کردن نوتیفیکیشن‌های پوش</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">اگر فقط نوتیفیکیشن‌های پوش گوگل را غیرفعال کنید، از پیام‌های جدید به‌صورت فوری مطلع نخواهید شد.\n\nشاید بخواهید یک اتصال دائمی WebSocket به سرورهای Olvid فعال کنید که می‌تواند همان هدف را برآورده کند (اما ممکن است باتری شما را زودتر تخلیه کند).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">آیا اجازه می‌دهید برنامه‌های دیگر روی صفحه نمایش لایه ایجاد کنند؟</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">برخی از بدافزارها از پنجره‌های لایه‌ای برای فریب دادن شما و وادار کردن به کلیک روی چیزی یا جاسوسی از آنچه تایپ می‌کنید، استفاده می‌کنند.\n\nفقط در صورتی به آن‌ها اجازه دهید که به برنامه‌ای نیاز داشته باشید که به آن اعتماد دارید (به عنوان مثال، یک ابزار دیکته) تا روی Olvid نمایش داده شود.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">اجازه بده</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">از یک سرویس پیش‌زمینه استفاده کنید</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">استفاده از یک سرویس پیش‌زمینه از توقف Olvid توسط سیستم جلوگیری می‌کند. یک آیکون کوچک در ناحیه اعلان‌های شما نمایش داده می‌شود و می‌تواند در تنظیمات سیستم پنهان شود.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">به اشتراک‌گذاری نسخه برنامه و سیستم‌عامل با Olvid</string>

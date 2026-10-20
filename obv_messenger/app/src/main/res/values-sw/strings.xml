@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Je, uko hakika unataka kuwezesha tena wasifu wako wa Olvid kwenye kifaa hiki?\n\nIkiwa una vifaa vingine vinavyotumika, hii inaweza kuzima moja ya vifaa hivyo.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Zuia picha za skrini</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Wakati kipengele hiki kimewashwa, picha za skrini haziruhusiwi katika Olvid na katika orodha ya programu za hivi majuzi.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Ruhusu programu zingine kuonyeshwa juu ya programu hii</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Imezimwa na shirika lako.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Ruhusu programu kama vile zana za kuandika kwa sauti au vichungi vya skrini kuonyeshwa juu ya Olvid. Washa hii tu ikiwa unaamini programu hizi: safu ya juu inaweza kuficha au kuiga kile ambacho Olvid inaonyesha.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Hamisha kwenye faili</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Nakala za kuhifadhiwa kwenye wingu</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Umeunda ufunguo mpya wa nakala rudufu. Labda huu ndio wakati mzuri wa kuuza nakala rudufu kwenye faili, au kuwezesha nakala rudufu otomatiki kwenye wingu.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Wezesha muunganisho wa WebSocket wa kudumu</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Zima arifa</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Ikiwa utazima tuarifu za Google, hautapokea arifa za ujumbe mpya mara moja.\n\nBadala yake, unaweza kuwezesha muunganisho wa WebSocket wa kudumu kwa seva za Olvid, ambayo inaweza kutumika kwa madhumuni yale yale (lakini inaweza kutumia betri yako kwa haraka zaidi).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Ruhusu programu zingine kuonyeshwa juu ya programu hii?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Madirisha yanayoonekana juu ya madirisha mengine wakati mwingine hutumiwa na programu hasi ili kukudanganya ukagusa kitu, au kuwachunguza unachokita.\n\nRuhusu tu ikiwa unahitaji programu unayoamini (kwa mfano, zana ya kuandika kwa sauti) ionekane juu ya Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Ruhusu</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Tumia huduma inayofanya kazi angani</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Kuendesha huduma katika mandhari ya mbele kuzuia mfumo kusimamisha Olvid. Aikoni ndogo huonyeshwa katika eneo lako la arifa na inaweza kufichwa katika mipangilio ya mfumo.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Shiriki toleo la programu na mfumo wa uendeshaji na Olvid</string>

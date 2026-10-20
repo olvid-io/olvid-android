@@ -500,6 +500,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Ви впевнені, що хочете реактивувати свій профіль Olvid на цьому пристрої?\n\nЯкщо у вас є інші активні пристрої, це може призвести до деактивації одного з них.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Запобігання скріншотів</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Коли ця опція ввімкнена, скріншоти вимкнено в Olvid та у списку нещодавніх додатків.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Дозволити відображення інших програм поверх</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Вимкнено вашою організацією.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Дозвольте таким програмам, як інструменти голосового введення або фільтри екрана, відображатися поверх Olvid. Увімкніть цю опцію лише в тому випадку, якщо ви довіряєте цим програмам: шар може приховувати або імітувати те, що відображає Olvid.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Експортувати у файл</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Хмарні резервні копії</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Ви згенерували новий ключ резервної копії. Ймовірно, зараз найкращий момент, щоб експортувати резервну копію у файл або активувати автоматичне резервне копіювання в хмару.</string>
@@ -1043,6 +1046,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Увімкнути постійний WebSocket</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Вимкнути push-сповіщення</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Якщо ви вимкнете лише push-сповіщення від Google, ви не будете отримувати миттєві сповіщення про нові повідомлення.\n\nЗамість цього ви можете увімкнути постійне з’єднання WebSocket із серверами Olvid, яке може виконувати ту саму функцію (але може швидше розряджати акумулятор).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Дозволити іншим програмам відображати вміст поверх?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Іноді вікна накладання використовуються шкідливим програмним забезпеченням, щоб змусити вас випадково натискати на щось або шпигувати за тим, що ви набираєте.\n\nДозволяйте їх лише в тому випадку, якщо вам потрібна програма, якій ви довіряєте (наприклад, інструмент для голосового введення), щоб вона відображалася поверх Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Дозволити</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Використовуйте фонову службу</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Запуск служби у фоновому режимі запобігає зупинці Olvid системою. Невелика іконка відображається у вашій області сповіщень і може бути прихована в налаштуваннях системи.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Поділіться версією програми та ОС з Olvid</string>

@@ -1,0 +1,3 @@
+- Üzerine bindirme pencerelerinin gelmesine izin veren bir ayar eklendi (bazı dikte araçları için kullanışlı).
+- Keycloak kişi ekleme işlemindeki bir sorun düzeltildi.
+- Birkaç küçük hata düzeltildi.

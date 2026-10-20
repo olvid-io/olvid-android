@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">کیا آپ یقین رکھتے ہیں کہ آپ اس ڈیوائس پر اپنے Olvid پروفائل کو دوبارہ فعال کرنا چاہتے ہیں؟\n\nاگر آپ کے پاس دیگر فعال آلات ہیں، تو یہ ان میں سے کسی ایک کو غیر فعال کر سکتا ہے۔</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">اسکرین شاٹس کو روکیں</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">جب یہ آن ہوگا، تو Olvid اور حالیہ ایپس کی فہرست میں اسکرین شاٹس معطل کر دیے جائیں گے۔</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">دوسرے ایپس سے اوورلے کی اجازت دیں</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">آپ کی تنظیم کی جانب سے معطل کر دیا گیا۔</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">اولویڈ کے اوپر ڈکٹیٹیشن ٹولز یا اسکرین فلٹرز جیسے ایپس کو دکھانے کی اجازت دیں۔ صرف اس وقت اس آپشن کو آن کریں جب آپ ان ایپس پر بھروسہ کرتے ہوں: ایک اوورلے اولویڈ میں جو کچھ دکھاتا ہے اسے چھپا یا نقل کر سکتا ہے۔</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">فائل میں ایکسپورٹ کریں</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">کلاؤڈ بیک اپ</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">آپ نے ایک نئی بیک اپ کی تیار کی ہے۔ یہ غالباً بیک اپ کو فائل میں ایکسپورٹ کرنے یا کلاؤڈ میں خودکار بیک اپ کو فعال کرنے کا صحیح وقت ہے۔</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">پائیدار WebSocket کو فعال کریں۔</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">پش نوٹیفیکیشنز بند کریں</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">اگر آپ صرف گوگل پش نوٹیفیکیشنز کو غیر فعال کرتے ہیں، تو آپ کو نئے پیغامات کی فوری اطلاع نہیں دی جائے گی۔\n\nاس کے بجائے، آپ Olvid کے سرورز سے مستقل WebSocket کنیکشن کو فعال کرنا چاہ سکتے ہیں جو اسی مقصد کو پورا کر سکتا ہے (لیکن اس سے آپ کی بیٹری تیزی سے ختم ہو سکتی ہے)۔</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">کیا دوسرے ایپس کو اوورلے کرنے کی اجازت دیں؟</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">اوورلے ونڈوز بعض اوقات میل ویئر کے ذریعے استعمال کیے جاتے ہیں تاکہ آپ کو کسی چیز پر ٹیپ کرنے کے لیے دھوکا دیا جا سکے، یا آپ جو کچھ بھی ٹائپ کرتے ہیں اس پر نظر رکھی جا سکے۔\n\nان کی صرف تب ہی اجازت دیں جب آپ کو کسی ایسے ایپ کی ضرورت ہو جس پر آپ بھروسہ کرتے ہیں (مثلاً ڈکٹیٹیشن ٹول) تاکہ وہ اولوڈ کے اوپر ظاہر ہو۔</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">اجازت دیں</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">فرنٹ گراؤنڈ سروس استعمال کریں۔</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">ایک فورگرائونڈ سروس کا استعمال Olvid کو سسٹم کے ذریعے بند ہونے سے روکتا ہے۔ ایک چھوٹا سا آئیکن آپ کے نوٹیفیکیشن ایریا میں دکھایا جاتا ہے اور اسے سسٹم کی ترتیبات میں چھپایا جا سکتا ہے۔</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">اولویڈ کے ساتھ ایپ اور او ایس ورژن شیئر کریں۔</string>

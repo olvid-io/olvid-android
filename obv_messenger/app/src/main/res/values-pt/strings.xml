@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Tem certeza de que deseja reativar seu perfil Olvid neste dispositivo?\n\nSe você tiver outros dispositivos ativos, isso poderá desativar um deles.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Impedir capturas de tela</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Quando esta opção estiver ativada, as capturas de tela serão desativadas no Olvid e na lista de aplicativos recentes.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Permitir sobreposições de outros aplicativos</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Desativado pela sua organização.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Permite que aplicativos como ferramentas de ditado ou filtros de tela sejam exibidos sobre o Olvid. Ative isso apenas se você confiar nesses aplicativos: uma sobreposição pode ocultar ou imitar o que o Olvid exibe.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Exportar para arquivo</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Backups na nuvem</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Geraste uma nova chave de backup. Este é provavelmente o momento certo para exportar um backup para um arquivo ou para ativar backups automáticos para a nuvem.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Ativar WebSocket permanente</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Desativar notificações push</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Se apenas desativar as notificações push do Google, não será notificado instantaneamente de novas mensagens.\n\nEm vez disso, pode ativar uma ligação WebSocket permanente aos servidores de Olvid que pode servir para o mesmo fim (mas pode esgotar a bateria mais rapidamente).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Permitir a sobreposição de outras aplicações?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">As janelas sobrepostas são, por vezes, utilizadas por malware para o enganar e levá-lo a tocar em algo, ou para espiar o que escreve.\n\nPermita-as apenas se precisar de uma aplicação de confiança (por exemplo, uma ferramenta de ditado) para ser exibida sobre o Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Permitir</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Usar um serviço em primeiro plano</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Manter um serviço em primeiro plano impede que o sistema pare Olvid. Um pequeno ícone é exibido na sua área de notificações e pode ser ocultado nas preferências do sistema.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Partilhar a versão da app e do sistema operativo com a Olvid</string>

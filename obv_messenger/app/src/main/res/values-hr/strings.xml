@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Jeste li sigurni da želite ponovno aktivirati svoj Olvid profil na ovom uređaju?\n\nAko imate druge aktivne uređaje, to bi moglo deaktivirati jedan od njih.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Sprečavanje snimanja zaslona</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Kada je ovo uključeno, snimke zaslona su onemogućene u Olvidu i na popisu nedavnih aplikacija.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Dopusti prikaz drugih aplikacija iznad ove</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Onemogućeno od strane vaše organizacije.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Dopustite aplikacijama poput alata za diktiranje ili filtara za zaslon da se prikazuju iznad Olvida. Uključite ovu opciju samo ako vjerujete tim aplikacijama: sloj može sakriti ili oponašati ono što Olvid prikazuje.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Izvoz u datoteku</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Sigurnosno kopiranje u oblaku</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Generirali ste novi ključ za sigurnosnu kopiju. Vjerojatno je ovo pravi trenutak da izvezete sigurnosnu kopiju u datoteku ili da aktivirate automatske sigurnosne kopije u oblak.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Omogući trajni WebSocket</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Isključite push obavijesti</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Ako samo isključite Google push obavijesti, nećete biti trenutno obaviješteni o novim porukama.\n\nMožda ćete umjesto toga htjeti omogućiti trajnu WebSocket vezu sa Olvidovim poslužiteljima koja može poslužiti istu svrhu (ali može brže potrošiti bateriju).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Dopusti prikaz drugih aplikacija iznad ove?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Ponekad zlonamjerni softver koristi preklapajuće prozore kako bi vas namamio da dodirnete nešto ili kako bi špijunirao što tipkate.\n\nOmogućite ih samo ako vam je potrebna aplikacija kojoj vjerujete (na primjer, aplikacija za diktiranje) da se prikazuje iznad Olvida.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Dopusti</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Koristite prednji servis</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Korištenje pozadinske usluge sprječava da Olvid sustav zaustavi. Mali se ikona prikazuje u vašem području obavijesti i može se sakriti u postavkama sustava.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Podijeli verziju aplikacije i OS-a s Olvidom</string>

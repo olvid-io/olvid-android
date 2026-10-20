@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Sigurado ka bang gusto mong i-reactivate ang iyong Olvid profile sa device na ito?\n\nKung mayroon kang iba pang aktibong device, maaari itong mag-deactivate ng isa sa mga ito.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Pigilan ang mga screenshot</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Kapag naka-on ito, hindi papayagan ang mga screenshot sa Olvid at sa listahan ng mga kamakailang app.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Payagan ang mga overlay mula sa ibang app</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Hindi pinagana ng iyong organisasyon.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Pinapayagan ang mga app tulad ng mga tool sa pagdidikta o mga filter ng screen na magpakita sa ibabaw ng Olvid. I-on lamang ito kung pinagkakatiwalaan mo ang mga app na ito: ang isang overlay ay maaaring itago o gayahin ang ipinapakita ng Olvid.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">I-export sa file</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Mga backup sa cloud</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Gumawa ka ng bagong backup key. Malamang na ito na ang tamang oras para i-export ang backup sa isang file, o para i-activate ang awtomatikong backup sa cloud.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">I-enable ang permanenteng WebSocket</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Huwag paganahin ang mga push notification</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Kung i-disable mo lang ang mga push notification ng Google, hindi ka agad maaabisuhan tungkol sa mga bagong mensahe.\n\nMaaari mong subukang i-enable ang isang permanenteng koneksyon sa WebSocket sa mga server ng Olvid na maaaring magsilbi sa parehong layunin (ngunit maaaring maubos ang iyong baterya).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Payagan ba ang pagpapakita ng iba pang app sa ibabaw ng app na ito?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Minsan, ginagamit ng mga malware ang mga overlay window para linlangin ka na i-tap ang isang bagay, o para espiya ang iyong tina-type.\n\nPayagan lamang ito kung kailangan mo ng isang app na pinagkakatiwalaan mo (halimbawa, isang tool para sa pagdidikta) upang ipakita sa ibabaw ng Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Payagan</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Gumamit ng serbisyo sa harapan</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Ang pagkakaroon ng isang foreground service ay pumipigil sa Olvid na mapahinto ng sistema. Isang maliit na icon ang ipinapakita sa iyong lugar ng mga notification at maaaring itago sa mga setting ng sistema.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Ibahagi ang bersyon ng app at OS sa Olvid</string>

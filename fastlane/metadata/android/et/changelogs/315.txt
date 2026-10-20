@@ -1,0 +1,3 @@
+- Lisatud seade, mis lubab ekraanile jäävate akende kasutamist (kasulik mõnede dikteerimisrakenduste jaoks).
+- Parandatud viga Keycloak kontaktide lisamisel.
+- Parandatud mõned väiksemad vead.

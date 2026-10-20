@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Bu cihazda Olvid profilinizi yeniden etkinleştirmek istediğinizden emin misiniz?\n\nBaşka etkin cihazlarınız varsa, bu diğerlerinden birini devre dışı bırakabilir.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Ekran görüntüsü engelle</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Bu özellik açık olduğunda, Olvid içinde ve son uygulamalar listesinde ekran görüntüleri devre dışı bırakılır.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Diğer uygulamalardan gelen katmanlı görüntülemeye izin ver</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Kuruluşunuz tarafından devre dışı bırakıldı.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Olvid üzerinde dikte araçları veya ekran filtreleri gibi uygulamaların görüntülenmesine izin verin. Bu uygulamalara güveniyorsanız bunu açın: bir üst katman, Olvid\'in gösterdiği içeriği gizleyebilir veya taklit edebilir.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Dosyaya aktar</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Bulut Yedeklemeleri</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Yeni bir yedekleme anahtarı oluşturdunuz. Muhtemelen şimdi bir dosyaya yedekleme dışa aktarmak veya buluta otomatik yedeklemeleri etkinleştirmek için doğru zaman.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Kalıcı WebSocket\'i Etkinleştir</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Push bildirimlerini devre dışı bırak</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Yalnızca Google push bildirimlerini devre dışı bırakırsanız, yeni mesajlardan anında haberdar edilmezsiniz.\n\nBunun yerine, aynı amaca hizmet edebilecek kalıcı bir WebSocket bağlantısı kurmak isteyebilirsiniz (ancak pilinizi daha hızlı tüketebilir).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Diğer uygulamaların ekran üstüne yerleşmesine izin ver?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Ekran üstü pencereler bazen kötü amaçlı yazılımlar tarafından sizi bir şeye tıklamaya veya yazdıklarınızı gözetlemeye yönlendirmek için kullanılır.\n\nYalnızca güvendiğiniz bir uygulamanın (örneğin, bir dikte aracı) Olvid\'in üzerinde görüntülenmesi gerekiyorsa izin verin.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">İzin Ver</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Ön plan hizmeti kullanın</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Ön plan hizmeti kullanmak, Olvid\'in sistem tarafından durdurulmasını engeller. Bildirim alanınızda küçük bir simge görüntülenir ve sistem ayarlarında gizlenebilir.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Uygulama ve İşletim Sistemi sürümünü Olvid ile paylaş</string>

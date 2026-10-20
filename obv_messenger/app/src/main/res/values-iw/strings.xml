@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">האם אתה בטוח שברצונך להפעיל מחדש את פרופיל Olvid שלך במכשיר זה?\n\nאם יש לך מכשירים פעילים אחרים, הדבר עלול לבטל מכשיר אחר מביניהם.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">מניעת צילומי מסך</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">כאשר אפשרות זו מופעלת, צילומי מסך מושבתים ב-Olvid וברשימת האפליקציות האחרונות.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">אפשר הצגת שכבות של אפליקציות אחרות</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">הושבת על ידי הארגון שלך.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">אפשר לאפליקציות כמו כלי דיבור או מסנני מסך להופיע מעל Olvid. הפעל את האפשרות הזו רק אם אתה סומך על האפליקציות האלה: שכבה יכולה להסתיר או לחקות את מה ש-Olvid מציג.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">ייצא לקובץ</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">גיבויים בענן</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">יצרת מפתח גיבוי חדש. זה כנראה הרגע הנכון לייצא גיבוי לקובץ, או להפעיל גיבויים אוטומטיים לענן.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">הפעל WebSocket קבוע</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">כבה התראות דחיפה</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">אם תכבה רק את התראות ה-Push של Google, לא תקבל התראה מיידית על הודעות חדשות.\n\nייתכן שתרצה במקום זאת להפעיל חיבור WebSocket קבוע לשרתי Olvid שיכול לשרת את אותה מטרה (אך עלול לרוקן את הסוללה שלך).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">האם לאפשר הצגת שכבות של אפליקציות אחרות?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">חלונות שכבה משמשים לעיתים על ידי תוכנות זדוניות כדי לגרום לך ללחוץ על משהו, או כדי לרגל אחר מה שאתה מקליד.\n\nאפשר אותם רק אם אתה צריך שאפליקציה שאתה סומך עליה (למשל, כלי לדיבור) תוצג מעל Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">אפשר</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">השתמש בשירות רקע</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">הפעלת שירות רקע מונעת מ-Olvid להיעצר על ידי המערכת. סמל קטן מוצג באזור ההתראות וניתן להסתיר אותו בהגדרות המערכת.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">שתף את גרסת האפליקציה ואת גרסת מערכת ההפעלה עם Olvid</string>

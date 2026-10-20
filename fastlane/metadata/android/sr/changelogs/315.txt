@@ -1,0 +1,3 @@
+- Dodato podešavanje za omogućavanje preklapanja prozora (korisno za neke alate za diktiranje).
+- Rešen problem pri dodavanju kontakata u Keycloak-u.
+- Ispravljeno nekoliko manjih grešaka.

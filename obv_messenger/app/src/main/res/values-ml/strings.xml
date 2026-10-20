@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">ഈ ഉപകരണത്തിൽ നിങ്ങളുടെ Olvid പ്രൊഫൈൽ വീണ്ടും സജീവമാക്കാൻ നിങ്ങൾ ശരിക്കും ആഗ്രഹിക്കുന്നുണ്ടോ?\n\nനിങ്ങൾക്ക് മറ്റ് സജീവ ഉപകരണങ്ങൾ ഉണ്ടെങ്കിൽ, അത് മറ്റൊന്ന് നിർജ്ജീവമാക്കിയേക്കാം.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">സ്ക്രീൻഷോട്ടുകൾ തടയുക</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">ഇത് ഓണാക്കുമ്പോൾ, ഒൽവിഡിലും, സമീപകാല ആപ്ലിക്കേഷനുകളുടെ ലിസ്റ്റിലും സ്ക്രീൻഷോട്ടുകൾ എടുക്കുന്നതിനുള്ള അനുമതി നിഷേധിക്കപ്പെടും.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">മറ്റ് ആപ്ലിക്കേഷനുകളിൽ നിന്നുള്ള ഓവർലേകൾ അനുവദിക്കുക</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">നിങ്ങളുടെ ഓർഗനൈസേഷനിൽ നിന്ന് പ്രവർത്തനരഹിതമാക്കി.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">ഡിക്റ്റേഷൻ ടൂളുകൾ അല്ലെങ്കിൽ സ്‌ക്രീൻ ഫിൽട്ടറുകൾ പോലുള്ള ആപ്ലിക്കേഷനുകൾ Olvid-ന് മുകളിൽ പ്രദർശിപ്പിക്കാൻ ഇത് അനുവദിക്കുന്നു. ഈ ആപ്ലിക്കേഷനുകളെ നിങ്ങൾ വിശ്വസിക്കുന്നുവെങ്കിൽ മാത്രം ഈ ഓപ്ഷൻ പ്രവർത്തനക്ഷമമാക്കുക: ഒരു ഓവർലേ Olvid കാണിക്കുന്നതിനെ മറയ്ക്കുകയോ അനുകരിക്കുകയോ ചെയ്യാം.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">ഒരു ഫയലിലേക്ക് കയറ്റുക</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">ക്ലൗഡ് ബാക്കപ്പുകൾ</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">നിങ്ങൾ ഒരു പുതിയ ബാക്കപ്പ് കീ ഉണ്ടാക്കി. ഒരു ബാക്കപ്പ് ഫയലിലേക്ക് എക്സ്പോർട്ട് ചെയ്യാനോ, ക്ലൗഡിലേക്ക് സ്വയമേവ ബാക്കപ്പ് ചെയ്യുന്നതിനായി സജ്ജമാക്കാനോ ഇത് നല്ല സമയമായിരിക്കാം.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">സ്ഥിരമായ വെബ് സോക്കറ്റ് പ്രവർത്തനക്ഷമമാക്കുക</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">പുഷ് അറിയിപ്പുകൾ പ്രവർത്തനരഹിതമാക്കുക</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">നിങ്ങൾ Google പുഷ് അറിയിപ്പുകൾ മാത്രം പ്രവർത്തനരഹിതമാക്കിയാൽ, പുതിയ സന്ദേശങ്ങളെക്കുറിച്ച് നിങ്ങൾക്ക് തൽക്ഷണം അറിയിപ്പ് ലഭിക്കില്ല.\n\nഇതിനുപകരം, Olvid-ന്റെ സെർവറുകളിലേക്ക് ഒരു സ്ഥിരമായ വെബ് സോക്കറ്റ് കണക്ഷൻ സജ്ജമാക്കുന്നതിനെക്കുറിച്ച് നിങ്ങൾ പരിഗണിക്കാവുന്നതാണ്, ഇത് ഒരേ ഉദ്ദേശ്യം നിറവേറ്റാൻ സഹായിക്കും (എന്നാൽ ഇത് നിങ്ങളുടെ ബാറ്ററിയെ കൂടുതൽ വേഗത്തിൽ ഉപയോഗിച്ചേക്കാം).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">മറ്റ് ആപ്ലിക്കേഷനുകളിൽ നിന്നുള്ള ഓവർലേകൾ അനുവദിക്കണോ?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">ചിലപ്പോൾ, മാൽവെയറുകൾക്ക് നിങ്ങളെ എന്തെങ്കിലും ഒന്നിന്മേൽ അമർത്താൻ അല്ലെങ്കിൽ നിങ്ങൾ ടൈപ്പ് ചെയ്യുന്ന കാര്യങ്ങൾ ചാരപ്പാർക്കാൻ, ഓവർലേ വിൻഡോകൾ ഉപയോഗിക്കാറുണ്ട്.\n\nനിങ്ങൾക്ക് വിശ്വസനീയമായ ഒരു ആപ്പ് (ഉദാഹരണത്തിന്, ഒരു ഡിക്റ്റേഷൻ ടൂൾ) Olvid-ന് മുകളിൽ പ്രദർശിപ്പിക്കേണ്ടതുണ്ടെങ്കിൽ മാത്രം അവ അനുവദിക്കുക.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">അനുവദിക്കുക</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">ഫോർഗ്രൗണ്ട് സേവനം ഉപയോഗിക്കുക</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">ഫോർഗ്രൗണ്ട് സേവനം ഉപയോഗിക്കുന്നത്, സിസ്റ്റം Olvid-നെ നിർത്തിയിടുന്നതിൽ നിന്ന് തടയുന്നു. ഒരു ചെറിയ ഐക്കൺ നിങ്ങളുടെ അറിയിപ്പ് ഭാഗത്ത് കാണിക്കുകയും, സിസ്റ്റം ക്രമീകരണങ്ങളിൽ നിന്ന് ഇത് മറയ്ക്കാൻ സാധിക്കുകയും ചെയ്യും.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">ഒൽവിഡുമായി ആപ്പ്, ഓപ്പറേറ്റിംഗ് സിസ്റ്റം പതിപ്പ് പങ്കിടുക</string>

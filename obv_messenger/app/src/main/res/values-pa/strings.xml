@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">ਕੀ ਤੁਸੀਂ ਯਕੀਨੀ ਹੋ ਕਿ ਤੁਸੀਂ ਇਸ ਡਿਵਾਈਸ \'ਤੇ ਆਪਣੀ ਓਲਵੀਡ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਦੁਬਾਰਾ ਸਰਗਰਮ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?\n\nਜੇਕਰ ਤੁਹਾਡੇ ਕੋਲ ਹੋਰ ਸਰਗਰਮ ਡਿਵਾਈਸ ਹਨ, ਤਾਂ ਇਹ ਉਨ੍ਹਾਂ ਵਿੱਚੋਂ ਕਿਸੇ ਇੱਕ ਨੂੰ ਬੰਦ ਕਰ ਸਕਦਾ ਹੈ।</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">ਸਕ੍ਰੀਨਸ਼ਾਟ ਰੋਕੋ</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">ਜਦੋਂ ਇਹ ਚਾਲੂ ਹੁੰਦਾ ਹੈ, ਤਾਂ ਓਲਵੀਡ ਅਤੇ ਹਾਲ ਹੀ ਵਿੱਚ ਵਰਤੇ ਗਏ ਐਪਾਂ ਦੀ ਸੂਚੀ ਵਿੱਚ ਸਕ੍ਰੀਨਸ਼ੌਟ ਲੈਣ ਦੀ ਵਿਸ਼ੇਸ਼ਤਾ ਬੰਦ ਹੋ ਜਾਂਦੀ ਹੈ।</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">ਦੂਜੇ ਐਪਾਂ ਤੋਂ ਓਵਰਲੇਅ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">ਤੁਹਾਡੇ ਸੰਗਠਨ ਦੁਆਰਾ ਅਯੋਗ ਕਰ ਦਿੱਤਾ ਗਿਆ।</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">ਓਲਵੀਡ ਦੇ ਉੱਪਰ ਡਿਕਟੇਸ਼ਨ ਟੂਲ ਜਾਂ ਸਕ੍ਰੀਨ ਫਿਲਟਰ ਵਰਗੇ ਐਪਾਂ ਨੂੰ ਦਿਖਾਉਣ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਸਿਰਫ਼ ਉਦੋਂ ਹੀ ਚਾਲੂ ਕਰੋ ਜੇਕਰ ਤੁਸੀਂ ਇਹਨਾਂ ਐਪਾਂ \'ਤੇ ਭਰੋਸਾ ਕਰਦੇ ਹੋ: ਇੱਕ ਓਵਰਲੇਅ ਓਲਵੀਡ ਵਿੱਚ ਦਿਖਾਈ ਦੇਣ ਵਾਲੀ ਚੀਜ਼ ਨੂੰ ਛੁਪਾ ਸਕਦਾ ਹੈ ਜਾਂ ਉਸਦੀ ਨਕਲ ਕਰ ਸਕਦਾ ਹੈ।</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">ਫਾਈਲ ਵਿੱਚ ਨਿਰਯਾਤ ਕਰੋ</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">ਕਲਾਉਡ ਬੈਕਅੱਪ</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">ਤੁਸੀਂ ਇੱਕ ਨਵੀਂ ਬੈਕਅੱਪ ਕੁੰਜੀ ਤਿਆਰ ਕੀਤੀ ਹੈ। ਇਹ ਸ਼ਾਇਦ ਬੈਕਅੱਪ ਨੂੰ ਇੱਕ ਫਾਈਲ ਵਿੱਚ ਐਕਸਪੋਰਟ ਕਰਨ ਜਾਂ ਕਲਾਉਡ ਵਿੱਚ ਆਟੋਮੈਟਿਕ ਬੈਕਅੱਪ ਨੂੰ ਐਕਟੀਵੇਟ ਕਰਨ ਦਾ ਸਹੀ ਸਮਾਂ ਹੈ।</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">ਪੱਕਾ WebSocket ਚਾਲੂ ਕਰੋ</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">ਪੁਸ਼ ਨੋਟੀਫਿਕੇਸ਼ਨਾਂ ਨੂੰ ਬੰਦ ਕਰੋ</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">ਜੇ ਤੁਸੀਂ ਸਿਰਫ਼ Google ਪੁਸ਼ ਨੋਟੀਫਿਕੇਸ਼ਨਾਂ ਨੂੰ ਬੰਦ ਕਰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਨੂੰ ਨਵੇਂ ਸੁਨੇਹਿਆਂ ਬਾਰੇ ਤੁਰੰਤ ਸੂਚਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾਵੇਗਾ।\n\nਤੁਸੀਂ ਇਸਦੀ ਬਜਾਏ Olvid ਦੇ ਸਰਵਰਾਂ ਨਾਲ ਇੱਕ ਸਥਾਈ WebSocket ਕਨੈਕਸ਼ਨ ਨੂੰ ਸਮਰੱਥ ਕਰਨ ਬਾਰੇ ਵਿਚਾਰ ਕਰ ਸਕਦੇ ਹੋ, ਜੋ ਕਿ ਉਹੀ ਉਦੇਸ਼ ਪੂਰਾ ਕਰ ਸਕਦਾ ਹੈ (ਪਰ ਇਸ ਨਾਲ ਤੁਹਾਡੀ ਬੈਟਰੀ ਜਲਦੀ ਖ਼ਤਮ ਹੋ ਸਕਦੀ ਹੈ)।</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">ਕੀ ਦੂਜੇ ਐਪਾਂ ਤੋਂ ਓਵਰਲੇਅ ਦੀ ਇਜਾਜ਼ਤ ਦਿੱਤੀ ਜਾਵੇ?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">ਓਵਰਲੇ ਵਿੰਡੋਜ਼ ਕਈ ਵਾਰ ਮਾਲਵੇਅਰ ਦੁਆਰਾ ਤੁਹਾਨੂੰ ਕਿਸੇ ਚੀਜ਼ \'ਤੇ ਟੈਪ ਕਰਨ ਲਈ ਧੋਖਾ ਦੇਣ ਜਾਂ ਤੁਸੀਂ ਜੋ ਕੁਝ ਵੀ ਟਾਈਪ ਕਰਦੇ ਹੋ, ਉਸ \'ਤੇ ਜਾਸੂਸੀ ਕਰਨ ਲਈ ਵਰਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।\n\nਇਨ੍ਹਾਂ ਨੂੰ ਸਿਰਫ਼ ਉਦੋਂ ਹੀ ਆਗਿਆ ਦਿਓ ਜੇਕਰ ਤੁਹਾਨੂੰ ਕਿਸੇ ਭਰੋਸੇਯੋਗ ਐਪ (ਜਿਵੇਂ ਕਿ ਡਿਕਟੇਸ਼ਨ ਟੂਲ) ਦੀ ਲੋੜ ਹੈ ਤਾਂ ਜੋ ਇਹ ਓਲਵਿਡ ਦੇ ਉੱਪਰ ਦਿਖਾਈ ਦੇ।</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">ਇਜਾਜ਼ਤ ਦਿਓ</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">ਇੱਕ ਫੋਰਗਰਾਊਂਡ ਸੇਵਾ ਦੀ ਵਰਤੋਂ ਕਰੋ</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">ਫੋਰਗਰਾਊਂਡ ਸੇਵਾ ਦੀ ਵਰਤੋਂ ਕਰਨ ਨਾਲ, ਓਲਵੀਡ ਨੂੰ ਸਿਸਟਮ ਦੁਆਰਾ ਰੋਕਣ ਤੋਂ ਰੋਕਿਆ ਜਾਂਦਾ ਹੈ। ਤੁਹਾਡੇ ਨੋਟੀਫਿਕੇਸ਼ਨ ਖੇਤਰ ਵਿੱਚ ਇੱਕ ਛੋਟਾ ਆਈਕਨ ਦਿਖਾਈ ਦਿੰਦਾ ਹੈ ਅਤੇ ਇਸਨੂੰ ਸਿਸਟਮ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਛੁਪਾਇਆ ਜਾ ਸਕਦਾ ਹੈ।</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">ਓਲਵੀਡ ਨਾਲ ਐਪ ਅਤੇ ਓਐਸ ਸੰਸਕਰਣ ਸਾਂਝਾ ਕਰੋ।</string>

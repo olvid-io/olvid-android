@@ -1,0 +1,3 @@
+- Hozzáadtunk egy beállítást, amely lehetővé teszi az átfedő ablakok használatát (hasznos bizonyos diktálóeszközökhöz).
+- Javítottunk egy hibát a Keycloak kapcsolattartók hozzáadásában.
+- Néhány kisebb hiba javítva.

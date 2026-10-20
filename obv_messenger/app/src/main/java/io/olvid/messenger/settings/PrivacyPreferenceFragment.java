@@ -47,6 +47,7 @@ import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.SelectableArrayAdapter;
 import io.olvid.messenger.google_services.GoogleServicesUtils;
 import io.olvid.messenger.main.MainActivity;
+import io.olvid.messenger.services.MDMConfigurationSingleton;
 import io.olvid.messenger.services.UnifiedForegroundService;
 
 public class PrivacyPreferenceFragment extends PreferenceFragmentCompat {
@@ -87,7 +88,51 @@ public class PrivacyPreferenceFragment extends PreferenceFragmentCompat {
             });
         }
 
-        SwitchPreference exposeRecentDiscussionsPreference = screen.findPreference(SettingsActivity.PREF_KEY_EXPOSE_RECENT_DISCUSSIONS);
+        SwitchPreference allowOverlayWindowsPreference = screen.findPreference(SettingsActivity.PREF_KEY_ALLOW_OVERLAY_WINDOWS);
+        if (allowOverlayWindowsPreference != null) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                screen.removePreference(allowOverlayWindowsPreference);
+            } else if (MDMConfigurationSingleton.areOverlayWindowsDisabled()) {
+                allowOverlayWindowsPreference.setChecked(false);
+                allowOverlayWindowsPreference.setEnabled(false);
+                allowOverlayWindowsPreference.setSummary(R.string.pref_allow_overlay_windows_disabled_by_mdm);
+            } else {
+                allowOverlayWindowsPreference.setOnPreferenceChangeListener((Preference pref, Object checked) -> {
+                    if (activity != null && checked instanceof Boolean) {
+                        Window window = activity.getWindow();
+                        if (window != null) {
+                            window.setHideOverlayWindows(!(Boolean) checked);
+                        }
+                    }
+                    return true;
+                });
+                allowOverlayWindowsPreference.setOnPreferenceClickListener((Preference pref) -> {
+                    if (pref instanceof NoClickSwitchPreference) {
+                        NoClickSwitchPreference preference = (NoClickSwitchPreference) pref;
+                        if (preference.isChecked()) {
+                            if (preference.callChangeListener(false)) {
+                                preference.setChecked(false);
+                            }
+                        } else {
+                            AlertDialog dialog = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                                    .setTitle(R.string.dialog_title_allow_overlay_windows_confirmation)
+                                    .setMessage(R.string.dialog_message_allow_overlay_windows_confirmation)
+                                    .setNegativeButton(R.string.button_label_cancel, null)
+                                    .setPositiveButton(R.string.button_label_allow, (DialogInterface dialogInterface, int which) -> {
+                                        if (preference.callChangeListener(true)) {
+                                            preference.setChecked(true);
+                                        }
+                                    })
+                                    .create();
+                            dialog.show();
+                        }
+                    }
+                    return true;
+                });
+            }
+        }
+
+        SwitchPreference exposeRecentDiscussionsPreference =screen.findPreference(SettingsActivity.PREF_KEY_EXPOSE_RECENT_DISCUSSIONS);
         if (exposeRecentDiscussionsPreference != null) {
             exposeRecentDiscussionsPreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
                 App.runThread(() -> {

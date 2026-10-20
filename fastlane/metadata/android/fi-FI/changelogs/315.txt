@@ -1,0 +1,3 @@
+- Lisätty asetus, joka sallii päällekkäisten ikkunoiden käytön (hyödyllinen joissakin saneluohjelmissa).
+- Korjattu ongelma Keycloak-yhteystietojen lisäämisessä.
+- Muutama pieni virhe korjattu.

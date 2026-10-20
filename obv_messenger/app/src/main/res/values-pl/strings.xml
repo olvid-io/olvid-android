@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Czy na pewno chcesz ponownie aktywować swój profil Olvid na tym urządzeniu?\n\nJeśli masz inne aktywne urządzenia, może to dezaktywować jedno z nich.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Zablokuj zrzuty ekranu</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Gdy ta opcja jest włączona, zrzuty ekranu są wyłączone w Olvid i na liście ostatnich aplikacji.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Zezwól na wyświetlanie nakładek z innych aplikacji</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Wyłączone przez Twoją organizację.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Pozwól aplikacjom, takim jak narzędzia do dyktowania lub filtry ekranowe, wyświetlać się na wierzchu aplikacji Olvid. Włącz tę opcję tylko wtedy, gdy ufasz tym aplikacjom: nakładka może ukrywać lub imitować to, co wyświetla Olvid.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Eksport do pliku</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Kopie zapasowe w chmurze</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Wygenerowano nowy klucz kopii zapasowej. To prawdopodobnie odpowiedni moment, aby wyeksportować kopię zapasową do pliku lub włączyć automatyczne kopie zapasowe do chmury.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Włącz trwałe WebSocket</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Wyłącz powiadomienia push</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Jeśli wyłączysz tylko powiadomienia push Google, nie będziesz natychmiast powiadamiany o nowych wiadomościach.\n\nZamiast tego możesz włączyć stałe połączenie WebSocket z serwerami Olvid, które może służyć do tego samego celu (ale może szybciej rozładować baterię).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Zezwól na wyświetlanie nakładek z innych aplikacji?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Okna nakładane są czasami wykorzystywane przez złośliwe oprogramowanie, aby oszukać użytkownika i skłonić go do dotknięcia określonego elementu lub do śledzenia tego, co pisze.\n\nZezwalaj na nie tylko wtedy, gdy potrzebujesz aplikacji, której ufasz (np. narzędzia do dyktowania), aby wyświetlała się na wierzchu Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Zezwól</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Użyj usługi działającej w tle</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Uruchomienie usługi działającej w tle zapobiega zatrzymaniu Olvid przez system. Mała ikona jest wyświetlana w obszarze powiadomień i może zostać ukryta w ustawieniach systemu.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Udostępnij Olvid wersję aplikacji i systemu operacyjnego</string>

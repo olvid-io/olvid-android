@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">क्या आप इस डिवाइस पर अपनी Olvid प्रोफ़ाइल को फिर से सक्रिय करना चाहते हैं?\n\nयदि आपके पास अन्य सक्रिय डिवाइस हैं, तो यह उनमें से किसी एक को निष्क्रिय कर सकता है।</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">स्क्रीनशॉट रोकें</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">जब यह चालू है, तो Olvid और हाल ही में ऐप्स सूची में स्क्रीनशॉट अक्षम कर दिए जाते हैं।</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">अन्य ऐप्स से ओवरले की अनुमति दें</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">आपके संगठन द्वारा अक्षम किया गया।</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">ऐसे ऐप्स को अनुमति दें, जैसे कि वॉयस रिकॉग्निशन टूल या स्क्रीन फ़िल्टर, जो ओल्विड के ऊपर प्रदर्शित हों। इसे केवल तभी चालू करें जब आप इन ऐप्स पर भरोसा करते हों: एक ओवरले ओल्विड में जो कुछ भी प्रदर्शित होता है, उसे छिपा या उसकी नकल कर सकता है।</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">फ़ाइल में निर्यात करें</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">क्लाउड बैकअप</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">आपने एक नई बैकअप कुंजी उत्पन्न की है। यह शायद एक बैकअप को फ़ाइल में निर्यात करने या क्लाउड में स्वचालित बैकअप को सक्रिय करने का सही समय है।</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">स्थायी WebSocket सक्षम करें</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">पुश नोटिफिकेशन बंद करें</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">यदि आप केवल Google पुश सूचनाओं को अक्षम करते हैं, तो आपको नए संदेशों की तुरंत सूचना नहीं मिलेगी।\n\nइसके बजाय, आप Olvid के सर्वर से एक स्थायी WebSocket कनेक्शन सक्षम करना चाह सकते हैं जो समान उद्देश्य को पूरा कर सकता है (लेकिन आपकी बैटरी को खत्म कर सकता है)।</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">क्या अन्य ऐप्स से ओवरले की अनुमति दें?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">कभी-कभी मैलवेयर ओवरले विंडो का उपयोग आपको किसी चीज़ पर टैप करने के लिए धोखा देने या आपके द्वारा टाइप किए जा रहे टेक्स्ट पर नज़र रखने के लिए करते हैं।\n\nकेवल तभी अनुमति दें जब आपको किसी विश्वसनीय ऐप (जैसे कि एक डिक्टेशन टूल) की आवश्यकता हो जो ओल्विड के ऊपर प्रदर्शित हो।</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">अनुमति दें</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">एक अग्रभूमि सेवा का उपयोग करें</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">एक अग्रभूमि सेवा चलाने से Olvid को सिस्टम द्वारा बंद होने से रोका जा सकता है। आपके सूचना क्षेत्र में एक छोटा आइकन प्रदर्शित होता है और इसे सिस्टम प्राथमिकताओं में छिपाया जा सकता है।</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Olvid के साथ ऐप और OS संस्करण साझा करें</string>

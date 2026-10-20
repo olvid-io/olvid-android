@@ -1,0 +1,3 @@
+- Pievienota iestatne, kas atļauj izmantot pārklājošus logus (noderīgi dažiem diktēšanas rīkiem).
+- Labots Keycloak kontaktu pievienošanas defekts.
+- Veiktas dažas nelielas izmaiņas.

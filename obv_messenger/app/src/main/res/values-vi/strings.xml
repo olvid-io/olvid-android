@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Bạn có chắc muốn kích hoạt lại hồ sơ Olvid của mình trên thiết bị này không?\n\nNếu bạn có các thiết bị đang hoạt động khác, điều này có thể vô hiệu hóa một trong số chúng.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Ngăn chặn chụp ảnh màn hình</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Khi bật tính năng này, chụp màn hình sẽ bị tắt trong Olvid và danh sách ứng dụng gần đây.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Cho phép hiển thị nội dung từ các ứng dụng khác</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Đã bị tổ chức của bạn vô hiệu hóa.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Cho phép các ứng dụng như công cụ đọc chính tả hoặc bộ lọc màn hình hiển thị trên Olvid. Chỉ bật tùy chọn này nếu bạn tin tưởng các ứng dụng này: một lớp phủ có thể ẩn hoặc bắt chước những gì Olvid hiển thị.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Xuất ra file</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Sao lưu đám mây</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Bạn đã tạo một khóa sao lưu mới. Có lẽ đây là thời điểm thích hợp để xuất bản sao lưu vào một tệp hoặc kích hoạt sao lưu tự động lên đám mây.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Bật WebSocket vĩnh viễn</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Tắt thông báo đẩy</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Nếu bạn chỉ tắt thông báo đẩy của Google, bạn sẽ không được thông báo ngay lập tức về các tin nhắn mới.\n\nThay vào đó, bạn có thể muốn bật kết nối WebSocket vĩnh viễn đến máy chủ của Olvid, có thể phục vụ cùng một mục đích (nhưng có thể làm hao pin nhanh hơn).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Cho phép các ứng dụng khác hiển thị lớp phủ không?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Đôi khi, các cửa sổ lớp phủ được phần mềm độc hại sử dụng để lừa bạn nhấn vào một thứ gì đó hoặc để theo dõi những gì bạn nhập.\n\nChỉ cho phép chúng nếu bạn cần một ứng dụng đáng tin cậy (ví dụ: công cụ đọc chính tả) hiển thị trên Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Cho phép</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Sử dụng một dịch vụ nền trước</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Việc sử dụng một dịch vụ nền sẽ ngăn Olvid bị hệ thống dừng. Một biểu tượng nhỏ sẽ hiển thị trong khu vực thông báo của bạn và có thể được ẩn trong cài đặt hệ thống.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Chia sẻ phiên bản ứng dụng và hệ điều hành với Olvid</string>

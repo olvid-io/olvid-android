@@ -1,0 +1,3 @@
+- Ajout d'un paramètre pour autoriser la supperposition de fenêtres (utile pour certains outils de dictée).
+- Correction d'un problème dans l'ajout de contact Keycloak.
+- Quelques corrections mineures.

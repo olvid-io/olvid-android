@@ -19,6 +19,9 @@
 
 package io.olvid.messenger.share.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,6 +32,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -37,16 +41,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.designsystem.avatar.Avatar
@@ -63,6 +73,7 @@ fun FromToCard(
     onPickIdentityLongClick: () -> Unit,
     onPickRecipients: () -> Unit,
     hasOtherIdentities: Boolean,
+    recipientsNudge: Int = 0,
 ) {
     Column(
         modifier = modifier
@@ -77,6 +88,7 @@ fun FromToCard(
         ToRow(
             selectedDiscussions = selectedDiscussions,
             onClick = onPickRecipients,
+            nudge = recipientsNudge,
         )
     }
 }
@@ -133,11 +145,36 @@ private fun FromRow(
 private fun ToRow(
     selectedDiscussions: List<SearchableDiscussion>,
     onClick: () -> Unit,
+    nudge: Int,
 ) {
+    // each increment of nudge shakes the row and flashes its background
+    val shake = remember { Animatable(0f) }
+    val flash = remember { Animatable(0f) }
+    val haptic = LocalHapticFeedback.current
+    LaunchedEffect(nudge) {
+        if (nudge == 0) return@LaunchedEffect
+        haptic.performHapticFeedback(HapticFeedbackType.Reject)
+        launch {
+            shake.animateTo(0f, keyframes {
+                durationMillis = 400
+                -10f at 50
+                10f at 120
+                -7f at 190
+                7f at 260
+                -3f at 330
+            })
+        }
+        flash.snapTo(.3f)
+        flash.animateTo(0f, tween(durationMillis = 900, delayMillis = 300))
+    }
+    val flashColor = colorResource(R.color.olvid_gradient_light)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(flashColor.copy(alpha = flash.value))
             .clickable(onClick = onClick)
+            .offset { IntOffset(shake.value.dp.roundToPx(), 0) }
             .padding(start = 12.dp, end = 12.dp, bottom = 12.dp, top = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),

@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Сигурни ли сте, че искате да активирате отново профила си в Olvid на това устройство?\n\nАко имате други активни устройства, това може да деактивира едно от тях.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Забрана на екранни снимки</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Когато тази опция е активирана, правенето на екранни снимки е забранено в Olvid и в списъка с последните приложения.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Разрешаване на наслагвания от други приложения</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Деактивирано от вашата организация.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Позволете на приложения като инструменти за диктовка или филтри за екрана да се показват над Olvid. Активирайте тази опция само ако имате доверие на тези приложения: наслагване може да скрие или да имитира това, което показва Olvid.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Експортиране във файл</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Облачни резервни копия</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Генерирахте нов ключ за архивиране. Вероятно сега е подходящият момент да експортирате архива в файл или да активирате автоматични архиви в облака.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Активиране на постоянна WebSocket връзка</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Деактивиране на известията</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Ако просто деактивирате известията от Google, няма да бъдете уведомявани незабавно за нови съобщения.\n\nВместо това може да искате да активирате постоянна WebSocket връзка към сървърите на Olvid, която може да изпълнява същата функция (но може да изтощи батерията ви по-бързо).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Разрешавате ли показването на съдържание от други приложения върху екрана?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Понякога злонамерен софтуер използва наслагващи се прозорци, за да ви подмами да докоснете нещо или да шпионира какво пишете.\n\nРазрешавайте ги само ако имате нужда от надеждно приложение (например инструмент за диктовка), което да се показва над Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Разрешаване</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Използвайте фонова услуга</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Използването на фонов процес предотвратява спирането на Olvid от системата. Малка икона се показва във вашата област за известия и може да бъде скрита в системните настройки.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Споделете версията на приложението и операционната система с Olvid.</string>

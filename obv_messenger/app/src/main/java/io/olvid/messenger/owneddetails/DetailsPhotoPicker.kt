@@ -31,6 +31,7 @@ import androidx.activity.result.contract.ActivityResultContracts.TakePicture
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -59,7 +60,7 @@ class DetailsPhotoPicker internal constructor(
 @Composable
 fun rememberDetailsPhotoPicker(onCropped: (absolutePhotoUrl: String) -> Unit): DetailsPhotoPicker {
     val context = LocalContext.current
-    val photoUri = remember {
+    val photoUri = rememberSaveable {
         val photoDir = File(context.cacheDir, App.CAMERA_PICTURE_FOLDER)
         val photoFile = File(
             photoDir,

@@ -1,0 +1,3 @@
+- Thêm một cài đặt cho phép sử dụng cửa sổ chồng lớp (hữu ích cho một số công cụ đọc chính tả).
+- Sửa một lỗi trong quá trình thêm liên hệ Keycloak.
+- Sửa một vài lỗi nhỏ.

@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Bist du sicher, dass du dein Olvid-Profil auf diesem Gerät reaktivieren möchtest?\n\nWenn du andere aktive Geräte hast, könnte dies ein anderes davon deaktivieren.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Screenshots verhindern</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Wenn diese Option aktiviert ist, sind Screenshots in Olvid und in der Liste der letzten Apps deaktiviert.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Erlaube, dass andere Apps Inhalte über dieser App anzeigen</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Von Ihrer Organisation deaktiviert.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Erlauben Sie, dass Apps wie Diktierwerkzeuge oder Bildschirmfilter über Olvid angezeigt werden. Aktivieren Sie diese Option nur, wenn Sie diesen Apps vertrauen: Ein Overlay kann das, was Olvid anzeigt, verdecken oder imitieren.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">In Datei exportieren</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Cloud-Backups</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Sie haben einen neuen Backup-Schlüssel generiert. Dies ist wahrscheinlich der richtige Zeitpunkt, um ein Backup in eine Datei zu exportieren oder automatische Backups in die Cloud zu aktivieren.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Permanente WebSocket aktivieren</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Push-Benachrichtigungen deaktivieren</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Wenn Sie nur die Google Push-Benachrichtigungen deaktivieren, werden Sie nicht sofort über neue Nachrichten benachrichtigt.\n\nSie können stattdessen eine permanente WebSocket-Verbindung zu den Olvid-Servern aktivieren, die den gleichen Zweck erfüllen kann (dies kann jedoch Ihren Akku schneller entladen).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Sollen andere Apps Inhalte über dieser App anzeigen dürfen?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Overlay-Fenster werden manchmal von Malware verwendet, um Sie dazu zu bringen, auf etwas zu tippen, oder um auszuspionieren, was Sie tippen.\n\nErlauben Sie dies nur, wenn Sie eine App benötigen, der Sie vertrauen (z. B. ein Diktierwerkzeug), um sie über Olvid anzuzeigen.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Erlauben</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Einen Vordergrunddienst verwenden</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Das Ausführen eines Vordergrunddienstes verhindert, dass Olvid vom System gestoppt wird. Ein kleines Symbol wird in Ihrem Benachrichtigungsbereich angezeigt und kann in den Systemeinstellungen ausgeblendet werden.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">App- und Betriebssystemversion mit Olvid teilen</string>

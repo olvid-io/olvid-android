@@ -90,6 +90,7 @@ import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AccessibilityManager
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.hideOverlayWindows
 import io.olvid.messenger.customClasses.openStoreUrlOrFallback
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.AppDatabaseOpenCallback
@@ -114,9 +115,7 @@ class TroubleshootingActivity : AppCompatActivity() {
         )
         super.onCreate(savedInstanceState)
 
-        if (VERSION.SDK_INT >= VERSION_CODES.S) {
-            window?.setHideOverlayWindows(true)
-        }
+        window?.hideOverlayWindows(sensitive = true)
         setContent {
             val context = LocalContext.current
             val coroutineScope = rememberCoroutineScope()

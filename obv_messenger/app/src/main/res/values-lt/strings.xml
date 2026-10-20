@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Ar tikrai norite iš naujo aktyvuoti savo „Olvid“ profilį šiame įrenginyje?\n\nJei naudojate kitus įrenginius, tai gali išaktyvinti vieną iš jų.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Užblokuoti ekrano kopijas</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Kai ši funkcija įjungta, Olvid programoje ir naujausių programų sąraše negalima daryti ekrano kopijų.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Leisti kitų programų perdengimą</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Jūsų organizacijos nustatyta, kad ši funkcija neaktyvi.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Leidžia tokioms programėlėms kaip diktavimo įrankiai ar ekrano filtrai rodyti turinį virš „Olvid“. Įjunkite šią funkciją tik tada, jei pasitikite šiomis programėlėmis: pertekstinis vaizdas gali paslėpti arba imituoti tai, ką rodo „Olvid“.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Eksportuoti į failą</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Atsarginės kopijos debesyje</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Jūs sukūrėte naują atsarginės kopijos raktą. Greičiausiai dabar yra tinkamas laikas eksportuoti atsarginę kopiją į failą arba įjungti automatinį atsarginių kopijų kūrimą debesyje.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Įjunkite nuolatinį WebSocket ryšį</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Išjungti pranešimus</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Jei tik išjungsite „Google“ tiesioginių pranešimų paslaugą, nebus nedelsiant pranešama apie naujas žinutes.\n\nVietoj to galite įjungti nuolatinį „WebSocket“ ryšį su „Olvid“ serveriais, kuris atliktų tą patį tikslą (tačiau gali greičiau išnaudoti akumuliatoriaus energiją).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Ar leisti kitų programų perdengimui?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Kartais kenkėjiškos programos naudoja permatomus langus, kad apgautų jus ir priverstų spustelėti kažką, arba šniukštinėtų, ką rašote.\nLeiskite jiems veikti tik tada, kai jums reikia patikimos programos (pvz., diktavimo įrankio), kuri būtų rodoma virš „Olvid“.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Leisti</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Naudokite pirm plano paslaugą</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Fono režimo paslauga užtikrina, kad sistema negalėtų sustabdyti „Olvid“. Maža piktograma rodoma jūsų pranešimų srityje ir gali būti paslėpta sistemos nustatymuose.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Pasidalinkite programėlės ir operacinės sistemos versijomis su „Olvid\"</string>

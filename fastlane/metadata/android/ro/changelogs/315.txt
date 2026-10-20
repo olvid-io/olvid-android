@@ -1,0 +1,3 @@
+- Adăugat un setar pentru a permite ferestrele suprapuse (util pentru unele aplicații de dictare).
+- Corectată o problemă la adăugarea contactelor Keycloak.
+- Corectate câteva erori minore.

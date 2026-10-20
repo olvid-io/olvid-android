@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">このデバイスでOlvidプロファイルを再アクティブしますか？\n\n他のアクティブなデバイスがある場合、別のデバイスが非アクティブになる可能性があります。</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">スクリーンショットを防止</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">この設定をオンにすると、Olvidと最近使ったアプリのリストでスクリーンショットが無効になります。</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">他のアプリからのオーバーレイを許可する</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">あなたの組織によって無効になっています。</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">音声入力ツールや画面フィルターなどのアプリが、Olvid の上に表示されるようにします。これらのアプリを信頼できる場合にのみ、この機能をオンにしてください。オーバーレイ表示は、Olvid に表示されている内容を隠したり、模倣したりする可能性があります。</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">ファイルにエクスポート</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">クラウドバックアップ</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">新しいバックアップキーを生成しました。おそらく、ファイルをバックアップとしてエクスポートするか、クラウドへの自動バックアップを有効にするのに最適なタイミングです。</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">永続的なWebSocketを有効にする</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">プッシュ通知を無効にする</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Googleのプッシュ通知のみを無効にした場合、新しいメッセージの通知は即座には届きません。\n\n代わりに、Olvidのサーバーへの永続的なWebSocket接続を有効にすると、同じ目的を達成できます（ただし、バッテリーの消耗が早くなる可能性があります）。</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">他のアプリからのオーバーレイを許可しますか？</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">オーバーレイウィンドウは、マルウェアによって、ユーザーが意図しないものをタップさせたり、ユーザーが入力した内容を監視したりするために使用されることがあります。\n\n信頼できるアプリ（音声入力ツールなど）をOlvidの上に表示する必要がある場合にのみ、許可してください。</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">許可する</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">フォアグラウンドサービスを使用する</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">フォアグラウンドサービスを実行することで、Olvidがシステムによって停止されるのを防ぎます。通知領域に小さなアイコンが表示され、システム設定で非表示にすることができます。</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">OlvidとアプリとOSのバージョンを共有する</string>

@@ -22,7 +22,6 @@ package io.olvid.messenger.history_transfer
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager.LayoutParams
 import androidx.activity.SystemBarStyle
@@ -56,6 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.hideOverlayWindows
 import io.olvid.messenger.designsystem.components.CustomDialogContent
 import io.olvid.messenger.designsystem.components.DialogSecure
 import io.olvid.messenger.designsystem.components.OlvidActionButton
@@ -91,9 +91,7 @@ class WebrtcIncomingTransferActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            window.setHideOverlayWindows(true)
-        }
+        window.hideOverlayWindows(sensitive = true)
 
         transferId = intent?.getStringExtra(TRANSFER_ID_INTENT_EXTRA) ?: run {
             finish()

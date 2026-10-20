@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Ești sigur că dorești să reactivezi profilul tău Olvid pe acest dispozitiv?Dacă ai alte dispozitive active, acesta ar putea dezactiva unul dintre ele.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Împiedică capturile de ecran</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Când această opțiune este activată, capturile de ecran sunt dezactivate în Olvid și în lista de aplicații recente.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Permite afișarea de elemente de interfață de la alte aplicații</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Dezactivat de organizația dumneavoastră.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Permite ca aplicații precum instrumentele de dictare sau filtrele de ecran să fie afișate peste Olvid. Activați această opțiune numai dacă aveți încredere în aceste aplicații: o suprapunere poate ascunde sau imita ceea ce afișează Olvid.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Exportă în fișier</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Copii de rezervă în cloud</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Ați generat o nouă cheie de backup. Acesta este probabil momentul potrivit pentru a exporta o copie de rezervă într-un fișier sau pentru a activa backup-urile automate în cloud.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Activați WebSocket permanent</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Dezactivează notificările push</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Dacă dezactivați doar notificările push Google, nu veți fi notificat instantaneu despre mesajele noi.În schimb, puteți activa o conexiune WebSocket permanentă la serverele Olvid, care poate servi aceluiași scop (dar poate consuma mai repede bateria).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Permiteți afișarea de elemente de la alte aplicații peste această aplicație?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Ferestrele suprapuse sunt uneori folosite de programe malware pentru a vă păcăli să atingeți ceva sau pentru a vă spiona ceea ce tastați.\n\nPermiteți-le doar dacă aveți nevoie de o aplicație de încredere (de exemplu, un instrument de dictare) pentru a afișa informații peste Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Permite</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Utilizați un serviciu de prim plan</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Menținerea unui serviciu în prim-plan împiedică oprirea Olvid de către sistem. O pictogramă mică este afișată în zona de notificări și poate fi ascunsă în setările sistemului.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Partajează versiunea aplicației și a sistemului de operare cu Olvid</string>

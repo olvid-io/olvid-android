@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Oletko varma, että haluat aktivoida Olvid-profiilisi uudelleen tässä laitteessa?\n\nJos sinulla on muita aktiivisia laitteita, se voi poistaa toisen käytöstä.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Estä kuvakaappaukset</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Kun tämä on päällä, kuvakaappaukset ovat poissa käytöstä Olvidissa ja viimeisimmät sovellukset -luettelossa.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Salli muiden sovellusten päällekkäisyys</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Organisaatiosi on poistanut tämän käytöstä.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Salli sovellusten, kuten saneluohjelmien tai näytönsuodattimien, näkyä Olvidin päällä. Ota tämä asetus käyttöön vain, jos luotat näihin sovelluksiin: päällekkäinen sovellus voi piilottaa tai jäljitellä Olvidin näyttämää sisältöä.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Vie tiedostoon</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Pilvitallennukset</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Olet luonut uuden varmuuskopiointiavaimen. Tämä on todennäköisesti oikea hetki viedä varmuuskopio tiedostoon tai ottaa käyttöön automaattiset varmuuskopiot pilveen.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Ota pysyvä WebSocket käyttöön</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Poista push-ilmoitukset käytöstä</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Jos poistat käytöstä vain Googlen push-ilmoitukset, et saa välitöntä ilmoitusta uusista viesteistä.\n\nVoit sen sijaan ottaa käyttöön pysyvän WebSocket-yhteyden Olvidin palvelimiin, joka voi palvella samaa tarkoitusta (mutta voi tyhjentää akkusi nopeammin).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Salliiko muiden sovellusten näkyä tämän sovelluksen päällä?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Päällekkäisiä ikkunoita käytetään joskus haittaohjelmien avulla saadaksesi sinut napauttamaan jotain tai vakoilemaan mitä kirjoitat.\n\nSalli ne vain, jos tarvitset luotettavaa sovellusta (esimerkiksi saneluohjelmaa), jonka haluat näyttää Olvidin päällä.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Salli</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Käytä taustapalvelua</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Taustapalvelun ylläpitäminen estää Olvidin pysäyttämisen järjestelmän toimesta. Pieni kuvake näkyy ilmoitusalueellasi ja sen voi piilottaa järjestelmäasetuksista.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Jaa sovelluksen ja käyttöjärjestelmän versio Olvidin kanssa</string>

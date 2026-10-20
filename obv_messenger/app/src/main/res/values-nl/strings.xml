@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Ben je zeker dat je je Olvid-profiel op dit apparaat wilt reactiveren?\n\nAls je andere actieve apparaten hebt, kan dit een ander apparaat deactiveren.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Voorkom screenshots</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Wanneer deze optie is ingeschakeld, zijn screenshots uitgeschakeld in Olvid en in de lijst met recente apps.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Sta toe dat andere apps over elkaar heen worden weergegeven.</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Uitgeschakeld door uw organisatie.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Sta toe dat apps zoals dictatietools of schermfilters boven Olvid worden weergegeven. Schakel dit alleen in als je deze apps vertrouwt: een overlay kan verbergen of nabootsen wat Olvid weergeeft.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Exporteer naar bestand</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Cloudback-ups</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Je hebt een nieuwe back-upsleutel gegenereerd. Dit is waarschijnlijk het juiste moment om een back-up naar een bestand te exporteren of automatische back-ups naar de cloud te activeren.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Permanente WebSocket inschakelen</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Pushmeldingen uitschakelen</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Als je alleen de Google pushmeldingen uitschakelt, word je niet direct op de hoogte gesteld van nieuwe berichten.\n\nJe kunt in plaats daarvan een permanente WebSocket-verbinding met de Olvid-servers inschakelen die hetzelfde doel kan dienen (maar kan je batterij sneller leegmaken).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Overlays van andere apps toestaan?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Overlay-vensters worden soms gebruikt door malware om je te laten tikken op iets, of om te spioneren op wat je typt.\n\nSta ze alleen toe als je een app nodig hebt die je vertrouwt (bijvoorbeeld een dictatietool) en die boven Olvid moet worden weergegeven.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Toestaan</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Een voorgrondservice gebruiken</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Het gebruik van een voorgrondservice voorkomt dat Olvid door het systeem wordt gestopt. Een klein pictogram wordt weergegeven in uw notificatiegebied en kan worden verborgen in de systeeminstellingen.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Deel de app- en OS-versie met Olvid</string>

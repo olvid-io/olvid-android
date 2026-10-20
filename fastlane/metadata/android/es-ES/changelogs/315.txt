@@ -1,0 +1,3 @@
+- Se agregó una configuración para permitir ventanas superpuestas (útil para algunas herramientas de dictado).
+- Se corrigió un problema en la adición de contactos de Keycloak.
+- Se corrigieron algunos errores menores.

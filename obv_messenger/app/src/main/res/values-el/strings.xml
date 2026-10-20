@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Είστε σίγουροι ότι θέλετε να επαναενεργοποιήσετε το προφίλ σας Olvid σε αυτή τη συσκευή;\n\nΕάν έχετε άλλες ενεργές συσκευές, αυτό μπορεί να απενεργοποιήσει μία από αυτές.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Αποτρέψτε τις λήψεις οθόνης</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Όταν αυτό είναι ενεργοποιημένο, οι στιγμιότυπα οθόνης είναι απενεργοποιημένα στο Olvid και στη λίστα των πρόσφατων εφαρμογών.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Επιτρέψτε την εμφάνιση άλλων εφαρμογών πάνω από αυτήν</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Απενεργοποιήθηκε από τον οργανισμό σας.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Επιτρέπει σε εφαρμογές όπως εργαλεία φωνητικής εισαγωγής ή φίλτρα οθόνης να εμφανίζονται πάνω από το Olvid. Ενεργοποιήστε αυτήν την επιλογή μόνο εάν εμπιστεύεστε αυτές τις εφαρμογές: μια επικαλυπτόμενη εφαρμογή μπορεί να αποκρύψει ή να μιμηθεί αυτό που εμφανίζει το Olvid.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Εξαγωγή σε αρχείο</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Αντίγραφα ασφαλείας στο cloud</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Δημιουργήσατε ένα νέο κλειδί δημιουργίας αντιγράφων ασφαλείας. Αυτή είναι πιθανώς η κατάλληλη στιγμή για να εξαγάγετε ένα αντίγραφο ασφαλείας σε ένα αρχείο ή να ενεργοποιήσετε αυτόματα αντίγραφα ασφαλείας στο cloud.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Ενεργοποίηση μόνιμου WebSocket</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Απενεργοποίηση ειδοποιήσεων push</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Εάν απενεργοποιήσετε μόνο τις ειδοποιήσεις push της Google, δεν θα ειδοποιηθείτε άμεσα για νέα μηνύματα.\n\nΑντί αυτού, μπορείτε να ενεργοποιήσετε μια μόνιμη σύνδεση WebSocket στους διακομιστές του Olvid, η οποία μπορεί να εξυπηρετήσει τον ίδιο σκοπό (αλλά μπορεί να αποφορτίσει την μπαταρία σας πιο γρήγορα).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Να επιτρέπεται η εμφάνιση άλλων εφαρμογών πάνω από αυτήν;</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Οι επικαλυπτικές οθόνες χρησιμοποιούνται μερικές φορές από κακόβουλο λογισμικό για να σας εξαπατήσουν και να σας κάνουν να πατήσετε σε κάτι, ή για να κατασκοπεύσουν τι πληκτρολογείτε.\n\nΝα τις επιτρέπετε μόνο εάν χρειάζεστε μια εφαρμογή στην οποία εμπιστεύεστε (όπως ένα εργαλείο φωνητικής εισαγωγής) για να εμφανίζεται πάνω από το Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Επιτρέψτε</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Χρήση υπηρεσίας πρώτου πλάνου</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Η διατήρηση μιας υπηρεσίας σε πρώτο πλάνο αποτρέπει τη διακοπή λειτουργίας του Olvid από το σύστημα. Ένα μικρό εικονίδιο εμφανίζεται στην περιοχή ειδοποιήσεων και μπορεί να κρυφτεί στις ρυθμίσεις του συστήματος.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Κοινοποίηση της έκδοσης της εφαρμογής και του λειτουργικού συστήματος με το Olvid</string>

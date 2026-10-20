@@ -509,6 +509,9 @@
     <string name="dialog_message_identity_reactivation_confirmation_unknown">Are you sure you wish to reactivate your Olvid profile on this device?\n\nIf you have other active devices, this could deactivate another one of them.</string>
     <string name="pref_prevent_screen_capture_title">Prevent screenshots</string>
     <string name="pref_prevent_screen_capture_summary">When this is on, screenshots are disabled in Olvid and in the recent apps list.</string>
+    <string name="pref_allow_overlay_windows_title">Allow overlays from other apps</string>
+    <string name="pref_allow_overlay_windows_disabled_by_mdm">Disabled by your organization.</string>
+    <string name="pref_allow_overlay_windows_summary">Lets apps such as dictation tools or screen filters display over Olvid. Only turn this on if you trust these apps: an overlay can hide or imitate what Olvid shows.</string>
     <string name="button_label_to_file">Export to file</string>
     <string name="button_label_to_cloud">Cloud backups</string>
     <string name="explanation_backup_key_generated_choose_how_to_backup">You generated a new backup key. This is probably the right moment to export a backup to a file, or to activate automatic backups to the cloud.</string>
@@ -1053,6 +1056,9 @@
     <string name="button_label_enable_permanent_websocket">Enable permanent WebSocket</string>
     <string name="dialog_title_disable_push_confirmation">Disable push notifications</string>
     <string name="dialog_message_disable_push_confirmation">If you only disable Google push notifications, you will not be notified instantly of new messages.\n\nYou may instead want to enable a permanent WebSocket connection to Olvid\'s servers that can serve the same purpose (but may drain your battery).</string>
+    <string name="dialog_title_allow_overlay_windows_confirmation">Allow overlays from other apps?</string>
+    <string name="dialog_message_allow_overlay_windows_confirmation">Overlay windows are sometimes used by malware to trick you into tapping on something, or to spy on what you type.\n\nOnly allow them if you need an app you trust (a dictation tool for example) to display over Olvid.</string>
+    <string name="button_label_allow">Allow</string>
     <string name="pref_permanent_foreground_service_title">Use a foreground service</string>
     <string name="pref_permanent_foreground_service_summary">Having a foreground service prevents Olvid from being stopped by the system. A small icon is displayed in your notifications area and can be hidden in the system preferences.</string>
     <string name="pref_share_app_version_title">Share app and OS version with Olvid</string>
@@ -2034,6 +2040,8 @@
     <string name="restriction_require_lock_screen_description" translatable="false">When set to true, users will be required to set up a lock screen in Olvid.</string>
     <string name="restriction_allow_disable_lock_screen_title" translatable="false">Lock screen bypass nonce</string>
     <string name="restriction_allow_disable_lock_screen_description" translatable="false">If users have configured a lock screen in Olvid (or if the \"Require lock screen\" option is on) and they have forgotten their PIN or password, setting a value here will allow them to reset their PIN. Every time this value changes the PIN can be reset once. We recommend setting it to \"1\" the first time and incrementing this as a counter each time a lock screen bypass is needed.</string>
+    <string name="restriction_disable_overlay_windows_title" translatable="false">Forbid overlays from other apps</string>
+    <string name="restriction_disable_overlay_windows_description" translatable="false">When set to true, users cannot allow other apps (dictation tools, screen filters…) to display over Olvid: the \"Allow overlays from other apps\" privacy setting is turned off and locked.</string>
     <string name="onboarding_transfer_restricted_title">Profile transfer restriction</string>
     <string name="explanation_transfer_restriction_title_1">Important</string>
     <string name="explanation_transfer_restriction_text_1">Your company requires you to authenticate with their identity provider on your new device to access your profile.</string>

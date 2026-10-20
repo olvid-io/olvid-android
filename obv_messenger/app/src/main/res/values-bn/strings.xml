@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">আপনি কি নিশ্চিত যে আপনি এই ডিভাইসে আপনার Olvid প্রোফাইলটি পুনরায় সক্রিয় করতে চান?\n\nযদি আপনার অন্যান্য সক্রিয় ডিভাইস থাকে, তবে এটি তাদের মধ্যে অন্য একটিকে নিষ্ক্রিয় করতে পারে।</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">স্ক্রিনশট নেওয়া বন্ধ করুন</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">যখন এই অপশনটি চালু করা হয়, তখন Olvid এবং সাম্প্রতিক অ্যাপ্লিকেশনের তালিকায় স্ক্রিনশট নেওয়া বন্ধ করা হয়।</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">অন্যান্য অ্যাপ থেকে ওভারলে ব্যবহারের অনুমতি দিন</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">আপনার সংস্থা দ্বারা নিষ্ক্রিয় করা হয়েছে।</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">ডিকটেশন সরঞ্জাম বা স্ক্রিন ফিল্টারের মতো অ্যাপ্লিকেশনগুলিকে Olvid-এর উপরে প্রদর্শিত হতে দিন। শুধুমাত্র এই অ্যাপ্লিকেশনগুলির উপর আপনার আস্থা থাকলে এই অপশনটি চালু করুন: একটি ওভারলে Olvid-এ যা দেখায় তা লুকাতে বা নকল করতে পারে।</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">ফাইলে রপ্তানি করুন</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">ক্লাউড ব্যাকআপ</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">আপনি একটি নতুন ব্যাকআপ কী তৈরি করেছেন। সম্ভবত এটি একটি ব্যাকআপ ফাইল হিসাবে সংরক্ষণ করার বা স্বয়ংক্রিয়ভাবে ক্লাউডে ব্যাকআপ করার সঠিক সময়।</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">স্থায়ী ওয়েবসকেট সক্রিয় করুন</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">পুশ বিজ্ঞপ্তি নিষ্ক্রিয় করুন</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">আপনি যদি শুধুমাত্র Google-এর পুশ বিজ্ঞপ্তিগুলি নিষ্ক্রিয় করেন, তাহলে নতুন বার্তার জন্য আপনাকে তাৎক্ষণিকভাবে জানানো হবে না।\n\nপরিবর্তে, আপনি Olvid-এর সার্ভারের সাথে একটি স্থায়ী WebSocket সংযোগ সক্রিয় করতে পারেন যা একই উদ্দেশ্যে কাজ করতে পারে (তবে এটি আপনার ব্যাটারি দ্রুত শেষ করে দিতে পারে)।</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">অন্যান্য অ্যাপ থেকে ওভারলে ব্যবহারের অনুমতি দিন?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">কিছু ক্ষেত্রে, ম্যালওয়্যার ওভারলে উইন্ডো ব্যবহার করে আপনাকে কোনো কিছুতে ট্যাপ করতে প্ররোচিত করে অথবা আপনি কী টাইপ করছেন তা দেখে নেয়।\n\nএগুলো শুধুমাত্র তখনই ব্যবহারের অনুমতি দিন, যখন আপনার এমন কোনো নির্ভরযোগ্য অ্যাপের (যেমন, একটি ডিকটেশন টুল) প্রয়োজন হয়, যা Olvid-এর উপরে প্রদর্শিত হবে।</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">অনুমতি দিন</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">একটি ফোরগ্রাউন্ড পরিষেবা ব্যবহার করুন</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">একটি ফোরগ্রাউন্ড পরিষেবা ব্যবহার করলে Olvid-কে সিস্টেম দ্বারা বন্ধ করা থেকে আটকানো যায়। একটি ছোট আইকন আপনার নোটিফিকেশন এলাকায় প্রদর্শিত হবে এবং এটি সিস্টেমের সেটিংসে লুকানো যেতে পারে।</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">অলভিডের সাথে অ্যাপ এবং অপারেটিং সিস্টেমের সংস্করণ শেয়ার করুন।</string>

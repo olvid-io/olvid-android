@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Ste si istý, že chcete znovu aktivovať svoj profil Olvid na tomto zariadení?\n\nAk máte ďalšie aktívne zariadenia, môže to deaktivovať jedno z nich.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Zabrániť snímkam obrazovky</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Keď je táto možnosť zapnutá, snímky obrazovky sú zakázané v Olvid a v zozname posledných aplikácií.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Povoliť prekrytie iných aplikácií</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Zakázané vašou organizáciou.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Umožňuje aplikáciám, ako sú nástroje na rozpoznávanie hlasu alebo filtre obrazovky, zobrazovať sa nad aplikáciou Olvid. Zapnite túto možnosť iba vtedy, ak dôverujete týmto aplikáciám: prekrytie môže skryť alebo napodobniť to, čo Olvid zobrazuje.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Exportovať do súboru</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Zálohy v cloude</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Vytvorili ste nový kľúč na zálohovanie. Pravdepodobne je to správny čas na export zálohy do súboru alebo na aktiváciu automatických záloh do cloudu.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Povoliť permanentné WebSocket</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Zakázať push notifikácie</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Ak vypnete iba push notifikácie od spoločnosti Google, nebudete okamžite upozornení na nové správy.\n\nMiesto toho môžete povoliť trvalé pripojenie WebSocket k serverom Olvid, ktoré môže slúžiť rovnakému účelu (ale môže rýchlejšie vybíjať batériu).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Povoliť prekrytie iných aplikácií?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Okná prekrytia sa niekedy používajú škodlivým softvérom na to, aby vás oklamali a prinútili vás kliknúť na niečo, alebo aby špehovali, čo píšete.\n\nPovolenie by ste mali udeliť iba vtedy, ak potrebujete, aby aplikácia, ktorej dôverujete (napríklad nástroj na diktovanie), sa zobrazovala nad aplikáciou Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Povoliť</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Použiť službu na popredí</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Udržiavanie služby na popredí zabraňuje systému zastaviť Olvid. Malá ikona sa zobrazuje vo vašej oblasti upozornení a dá sa skryť v nastaveniach systému.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Zdieľajte verziu aplikácie a operačného systému s Olvid</string>

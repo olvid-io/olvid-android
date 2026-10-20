@@ -1,0 +1,3 @@
+- Tilføjet en indstilling, der tillader overlappende vinduer (nyttigt for nogle dikteringsværktøjer).
+- Rettet et problem med tilføjelse af kontakter fra Keycloak.
+- Rettet et par mindre fejl.

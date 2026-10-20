@@ -22,7 +22,6 @@ package io.olvid.messenger.widget;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -46,6 +45,7 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonMessage;
+import io.olvid.messenger.customClasses.OverlayWindows;
 
 public class ActionShortcutSendMessageActivity extends AppCompatActivity {
     public static final String APP_WIDGET_ID_INTENT_EXTRA = "app_widget_id";
@@ -54,11 +54,9 @@ public class ActionShortcutSendMessageActivity extends AppCompatActivity {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Window window = getWindow();
-            if (window != null) {
-                window.setHideOverlayWindows(true);
-            }
+        Window window = getWindow();
+        if (window != null) {
+            OverlayWindows.hideOverlayWindows(window, true);
         }
 
         int appWidgetId = getIntent().getIntExtra(APP_WIDGET_ID_INTENT_EXTRA, AppWidgetManager.INVALID_APPWIDGET_ID);

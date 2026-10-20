@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Kas olete kindel, et soovite oma Olvid profiili selles seadmes uuesti aktiveerida?\n\nKui teil on muid aktiivseid seadmeid, võib see ühe neist deaktiveerida.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Ekraanipiltide tegemise blokeerimine</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Kui see valik on sisse lülitatud, on Olvidis ja hiljutiste rakenduste loendis ekraanipiltide tegemine keelatud.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Luba teistel rakendustel ekraani peal kuvada</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Teie organisatsioon on selle keelanud.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Luba rakendustel, nagu näiteks dikteerimisrakendused või ekraanifiltrid, olla Olvidi peal kuvatud. Lülita see sisse ainult siis, kui sa nendesse rakendustesse usaldad: ekraani peal olev element võib varjata või jäljendada Olvidi kuvatavat sisu.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Ekspordi faili</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Pilvevarukoopiad</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Olete loonud uue varukoodi. See on tõenäoliselt õige hetk, et eksportida varukoopia faili või aktiveerida automaatsed varukoopiad pilves.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Lülita püsiv WebSocket sisse</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Keela tõukemärguanded välja</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Kui keelate lihtsalt Google\'i push-teavitused, siis te ei saa uutest sõnumitest kohe teada.\n\nVõite selle asemel lubada püsiva WebSocket-ühenduse Olvid\'i serveritega, mis võib täita sama funktsiooni (kuid võib ka aku kiiremini tühjendada).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Kas lubata teistel rakendustel ekraani peal kuvada?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Hüppekvadraate kasutavad mõnikord pahavara, et petta sind klõpsama millelegi või luurata, mida sa kirjutad.\n\nLuba neid ainult siis, kui sul on vaja usaldusväärset rakendust (näiteks dikteerimisrakendus), mis kuvatakse Olvidi peal.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Luba</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Kasuta taustateenust</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">Taustateenuse kasutamine takistab Olvidil süsteemi poolt peatamist. Väike ikoon kuvatakse teie teavituste alal ja selle saab peita süsteemi seadetes.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Jaga rakenduse ja operatsioonisüsteemi versiooni Olvidiga</string>

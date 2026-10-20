@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">คุณแน่ใจหรือไม่ว่าต้องการเปิดใช้งานโปรไฟล์ Olvid ของคุณบนอุปกรณ์นี้อีกครั้ง?\n\nหากคุณมีอุปกรณ์อื่นที่ใช้งานอยู่ อาจทำให้เครื่องอื่นถูกปิดใช้งานได้</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">ป้องกันการจับภาพหน้าจอ</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">เมื่อเปิดใช้งานฟีเจอร์นี้ การจับภาพหน้าจอจะถูกปิดใช้งานใน Olvid และในรายการแอปพลิเคชันล่าสุด</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">อนุญาตให้แอปอื่นแสดงผลทับ</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">ถูกปิดใช้งานโดยองค์กรของคุณ</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">อนุญาตให้แอปพลิเคชันต่างๆ เช่น แอปเครื่องมือสั่งงานด้วยเสียง หรือแอปปรับแสงหน้าจอ แสดงผลบน Olvid เปิดใช้งานตัวเลือกนี้เฉพาะเมื่อคุณไว้วางใจแอปเหล่านั้น เนื่องจากแอปที่แสดงผลซ้อนทับอาจซ่อนหรือเลียนแบบสิ่งที่ Olvid แสดงได้</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">ส่งออกไปยังไฟล์</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">การสำรองข้อมูลบนคลาวด์</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">คุณสร้างคีย์สำรองข้อมูลใหม่แล้ว ตอนนี้อาจเป็นเวลาที่เหมาะสมในการส่งออกข้อมูลสำรองไปยังไฟล์ หรือเปิดใช้งานการสำรองข้อมูลอัตโนมัติไปยังคลาวด์</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">เปิดใช้งาน WebSocket แบบถาวร</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">ปิดการแจ้งเตือนแบบพุช</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">หากคุณปิดการแจ้งเตือนแบบพุชของ Google คุณจะไม่ได้รับการแจ้งเตือนเกี่ยวกับข้อความใหม่ทันที\n\nคุณอาจต้องการเปิดใช้งานการเชื่อมต่อ WebSocket แบบถาวรกับเซิร์ฟเวอร์ของ Olvid ซึ่งจะทำหน้าที่เดียวกันได้ (แต่ก็อาจทำให้แบตเตอรี่ของคุณหมดเร็วขึ้น)</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">อนุญาตให้แอปอื่นแสดงผลทับได้หรือไม่?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">บางครั้งโปรแกรมที่เป็นอันตรายจะใช้หน้าต่างซ้อนทับเพื่อหลอกให้คุณแตะที่บางอย่าง หรือเพื่อแอบดูสิ่งที่คุณพิมพ์\n\nอนุญาตเฉพาะเมื่อคุณต้องการให้แอปที่คุณไว้ใจ (เช่น แอปสำหรับพิมพ์ด้วยเสียง) แสดงผลบน Olvid เท่านั้น</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">อนุญาต</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">ใช้บริการแบบ foreground</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">การใช้บริการพื้นหลังจะป้องกันไม่ให้ระบบหยุดการทำงานของ Olvid จะมีไอคอนขนาดเล็กแสดงในพื้นที่การแจ้งเตือนของคุณ และสามารถซ่อนได้ในการตั้งค่าระบบ</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">แชร์เวอร์ชันแอปและระบบปฏิบัติการกับ Olvid</string>

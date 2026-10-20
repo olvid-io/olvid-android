@@ -23,7 +23,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.view.WindowManager.LayoutParams
@@ -45,6 +44,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.core.app.NotificationManagerCompat
 import io.olvid.engine.Logger
+import io.olvid.messenger.customClasses.hideOverlayWindows
 import io.olvid.messenger.settings.SettingsActivity.Companion.overrideContextScales
 import io.olvid.messenger.webrtc.WebrtcCallService.Call
 import io.olvid.messenger.webrtc.WebrtcCallService.WebrtcCallServiceBinder
@@ -92,9 +92,7 @@ class WebrtcIncomingCallActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            window.setHideOverlayWindows(true)
-        }
+        window.hideOverlayWindows(sensitive = true)
 
         setContent {
             val currentCallState = webrtcCallService?.getCurrentIncomingCallLiveData()?.observeAsState()

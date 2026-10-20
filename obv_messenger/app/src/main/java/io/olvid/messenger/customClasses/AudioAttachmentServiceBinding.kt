@@ -39,6 +39,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.common.util.Util
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
@@ -157,6 +158,14 @@ class AudioAttachmentServiceBinding(private val activity: AppCompatActivity) {
 
         override fun onPlaybackStateChanged(playbackState: Int) {
             buffering = playbackState == Player.STATE_BUFFERING
+            if (playbackState == Player.STATE_IDLE && playing) {
+                // an error while buffering skips onIsPlayingChanged(false)
+                stopProgressPolling()
+                mediaController?.let {
+                    updatePlayTimeMs(it.getCurrentPosition(), false)
+                }
+                playing = false
+            }
             if (playbackState == Player.STATE_ENDED) {
                 playing = false
                 stopProgressPolling()
@@ -339,16 +348,19 @@ class AudioAttachmentServiceBinding(private val activity: AppCompatActivity) {
         }
     }
 
+    @OptIn(markerClass = [UnstableApi::class])
     fun playPause(fyleAndStatus: FyleAndStatus, discussionId: Long?) {
         if (mediaController == null) return
 
         val key = BytesKey(fyleAndStatus.fyle.sha256)
 
         if (key == nowPlaying) {
-            if (playing) {
-                mediaController?.pause()
-            } else {
-                mediaController?.play()
+            mediaController?.let { controller ->
+                if (controller.playbackState == Player.STATE_IDLE) {
+                    clearFailed(key)
+                }
+                // reads the live player state, and prepares an idle player (e.g. after an error) before playing
+                Util.handlePlayPauseButtonAction(controller)
             }
         } else {
             // Load new media
@@ -406,25 +418,30 @@ class AudioAttachmentServiceBinding(private val activity: AppCompatActivity) {
         }
     }
 
-    private fun onFail(key: BytesKey?) {
-        val audioInfo = loadedAttachments[key]
-        if (audioInfo != null) {
-            audioInfo.failed = true
-            App.toast(
-                activity.getString(R.string.toast_message_unable_to_play_audio),
-                Toast.LENGTH_SHORT,
-                Gravity.BOTTOM
-            )
-
-            val associatedViewHolders = viewHolderAssociation[key] ?: return
-            for (weakReference in associatedViewHolders) {
-                val vh = weakReference.get()
-                if (vh != null) {
-                    vh.setFailed(true)
-                    vh.bindAudioInfo(audioInfo, audioOutput, 0f) // Speed 0 on fail
-                }
+    private fun updateFailed(key: BytesKey, audioInfo: AudioInfo, failed: Boolean, playbackSpeed: Float) {
+        audioInfo.failed = failed
+        viewHolderAssociation[key]?.forEach { weakReference ->
+            weakReference.get()?.let { vh ->
+                vh.setFailed(failed)
+                vh.bindAudioInfo(audioInfo, audioOutput, playbackSpeed)
             }
         }
+    }
+
+    private fun clearFailed(key: BytesKey) {
+        loadedAttachments[key]?.takeIf { it.failed }?.let { audioInfo ->
+            updateFailed(key, audioInfo, false, mediaController?.getPlaybackParameters()?.speed ?: 0f)
+        }
+    }
+
+    private fun onFail(key: BytesKey?) {
+        val audioInfo = key?.let { loadedAttachments[it] } ?: return
+        App.toast(
+            activity.getString(R.string.toast_message_unable_to_play_audio),
+            Toast.LENGTH_SHORT,
+            Gravity.BOTTOM
+        )
+        updateFailed(key, audioInfo, true, 0f) // Speed 0 on fail
     }
 
     private fun onPlaybackSpeedChangeInternal(playbackSpeed: Float) {

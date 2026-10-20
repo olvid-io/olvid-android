@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">هل أنت متأكد من رغبتك في إعادة تنشيط ملفك الشخصي على Olvid على هذا الجهاز؟\n\nإذا كان لديك أجهزة أخرى نشطة، فقد يؤدي ذلك إلى إلغاء تنشيط أحدها.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">منع لقطات الشاشة</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">عند تفعيل هذا الخيار، يتم تعطيل لقطات الشاشة في Olvid وفي قائمة التطبيقات الحديثة.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">السماح بعرض طبقات من تطبيقات أخرى</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">تم تعطيله من قبل مؤسستك.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">يسمح هذا للبرامج مثل أدوات الإملاء أو مرشحات الشاشة بالظهور فوق تطبيق Olvid. قم بتشغيل هذا الخيار فقط إذا كنت تثق في هذه التطبيقات: يمكن أن تخفي طبقة التراكب أو تحاكي ما يعرضه تطبيق Olvid.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">تصدير إلى ملف</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">نسخ احتياطية سحابية</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">لقد قمت بتوليد مفتاح نسخ احتياطي جديد. هذه هي اللحظة المناسبة على الأرجح لتصدير نسخة احتياطية إلى ملف، أو لتفعيل النسخ الاحتياطي التلقائي إلى السحابة.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">تمكين WebSocket دائم</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">إيقاف إشعارات الدفع</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">إذا قمت بتعطيل إشعارات الدفع من Google فقط، فلن يتم إعلامك فورًا بالرسائل الجديدة.\n\nقد ترغب بدلاً من ذلك في تمكين اتصال WebSocket دائم بخوادم Olvid الذي يمكن أن يخدم نفس الغرض (ولكن قد يستنزف بطاريتك).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">السماح بعرض طبقات من تطبيقات أخرى؟</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">تُستخدم النوافذ المتراكبة أحيانًا بواسطة البرامج الضارة لخداعك للنقر على شيء ما، أو للتجسس على ما تكتب.\n\nاسمح بها فقط إذا كنت بحاجة إلى تطبيق تثق به (مثل أداة الإملاء) ليتم عرضه فوق Olvid.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">السماح</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">استخدم خدمة في المقدمة</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">تشغيل خدمة في الخلفية يمنع تطبيق Olvid من الإيقاف من قبل النظام. يتم عرض رمز صغير في منطقة الإشعارات ويمكن إخفاؤه في تفضيلات النظام.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">شارك إصدار التطبيق ونظام التشغيل مع Olvid</string>

@@ -21,7 +21,6 @@ package io.olvid.messenger.openid
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.ConfigurationCompat
@@ -29,6 +28,7 @@ import androidx.core.net.toUri
 import io.olvid.engine.Logger
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.customClasses.NoExceptionConnectionBuilder
+import io.olvid.messenger.customClasses.hideOverlayWindows
 import io.olvid.messenger.settings.SettingsActivity.Companion.preferredKeycloakBrowser
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
@@ -52,9 +52,7 @@ class KeycloakAuthenticationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            window?.setHideOverlayWindows(true)
-        }
+        window?.hideOverlayWindows(sensitive = true)
 
         val appAuthConfigBuilder = AppAuthConfiguration.Builder()
             .setConnectionBuilder(NoExceptionConnectionBuilder())

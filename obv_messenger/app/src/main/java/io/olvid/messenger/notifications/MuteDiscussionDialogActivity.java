@@ -42,6 +42,7 @@ import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.tasks.ApplySyncAtomTaskKt;
 import io.olvid.messenger.services.MuteExpirationService;
 import io.olvid.messenger.settings.SettingsActivity;
+import io.olvid.messenger.customClasses.OverlayWindows;
 
 public class MuteDiscussionDialogActivity extends AppCompatActivity {
     private Long discussionId = null;
@@ -66,17 +67,15 @@ public class MuteDiscussionDialogActivity extends AppCompatActivity {
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Window window = getWindow();
-            if (window != null) {
-                window.setHideOverlayWindows(true);
-            }
+        Window window = getWindow();
+        if (window != null) {
+            OverlayWindows.hideOverlayWindows(window);
         }
 
         if (discussionId == null) {
             finish();
         } else {
-            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                 sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
             }
             AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussionId);

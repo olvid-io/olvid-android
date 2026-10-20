@@ -35,6 +35,7 @@ object MDMConfigurationSingleton {
     private const val USER_AGENT_OVERRIDE_FOR_LINK_PREVIEWS = "user_agent_override_for_link_previews"
     private const val REQUIRE_LOCK_SCREEN = "require_lock_screen"
     private const val ALLOW_DISABLE_LOCK_SCREEN = "allow_disable_lock_screen"
+    private const val DISABLE_OVERLAY_WINDOWS = "disable_overlay_windows"
 
     @Volatile
     private var config: Config? = null
@@ -73,6 +74,9 @@ object MDMConfigurationSingleton {
     @JvmStatic
     fun getAllowDisableLockScreenString(): String? = config().allowDisableLockScreenString
 
+    @JvmStatic
+    fun areOverlayWindowsDisabled(): Boolean = config().disableOverlayWindows
+
 
     private class Config {
         val keycloakConfigurationUri: String?
@@ -85,6 +89,7 @@ object MDMConfigurationSingleton {
         val userAgentOverrideForLinkPreviews: Boolean
         val requireLockScreen: Boolean
         val allowDisableLockScreenString: String?
+        val disableOverlayWindows: Boolean
 
         init {
             val restrictionsManager = App.getContext().getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
@@ -112,6 +117,7 @@ object MDMConfigurationSingleton {
                 }
                 requireLockScreen = restrictions.containsKey(REQUIRE_LOCK_SCREEN) && restrictions.getBoolean(REQUIRE_LOCK_SCREEN, false)
                 allowDisableLockScreenString = restrictions.getString(ALLOW_DISABLE_LOCK_SCREEN, null)
+                disableOverlayWindows = restrictions.containsKey(DISABLE_OVERLAY_WINDOWS) && restrictions.getBoolean(DISABLE_OVERLAY_WINDOWS, false)
             } else {
                 keycloakConfigurationUri = null
                 disableNewVersionNotification = false
@@ -123,6 +129,7 @@ object MDMConfigurationSingleton {
                 userAgentOverrideForLinkPreviews = false
                 requireLockScreen = false
                 allowDisableLockScreenString = null
+                disableOverlayWindows = false
             }
         }
     }

@@ -1,0 +1,3 @@
+- Adicionado um ajuste para permitir janelas sobrepostas (útil para alguns aplicativos de ditado).
+- Corrigido um problema na adição de contatos do Keycloak.
+- Corrigidos alguns pequenos erros.

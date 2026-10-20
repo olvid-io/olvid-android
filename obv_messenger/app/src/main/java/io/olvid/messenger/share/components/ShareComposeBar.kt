@@ -90,12 +90,14 @@ fun ShareComposeBar(
     hasEphemeralSettings: Boolean,
     onPickEphemeralSettings: () -> Unit,
     onSend: () -> Unit,
+    onBlockedSend: () -> Unit,
 ) {
     // The listeners below are attached once in factory but must see the latest lambdas/flags on
     // every keystroke, so capture them through rememberUpdatedState rather than the initial values.
     val currentOnTextChange by rememberUpdatedState(onTextChange)
     val currentOnSend by rememberUpdatedState(onSend)
     val currentCanSend by rememberUpdatedState(canSend)
+    val currentOnBlockedSend by rememberUpdatedState(onBlockedSend)
 
     Row(
         modifier = modifier
@@ -192,7 +194,7 @@ fun ShareComposeBar(
                         setOnEditorActionListener(
                             TextView.OnEditorActionListener { _, actionId, _ ->
                                 if (actionId == EditorInfo.IME_ACTION_SEND) {
-                                    if (currentCanSend) currentOnSend()
+                                    if (currentCanSend) currentOnSend() else currentOnBlockedSend()
                                     return@OnEditorActionListener true
                                 }
                                 false
@@ -204,7 +206,7 @@ fun ShareComposeBar(
                                     && event.action == KeyEvent.ACTION_DOWN
                                     && !event.isShiftPressed
                                 ) {
-                                    if (currentCanSend) currentOnSend()
+                                    if (currentCanSend) currentOnSend() else currentOnBlockedSend()
                                     return@OnKeyListener true
                                 }
                                 false
@@ -283,10 +285,7 @@ fun ShareComposeBar(
                     if (canSend) colorResource(R.color.olvid_gradient_light)
                     else colorResource(R.color.lightGrey)
                 )
-                .then(
-                    if (canSend) Modifier.clickable(onClick = onSend)
-                    else Modifier
-                ),
+                .clickable(onClick = if (canSend) onSend else onBlockedSend),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

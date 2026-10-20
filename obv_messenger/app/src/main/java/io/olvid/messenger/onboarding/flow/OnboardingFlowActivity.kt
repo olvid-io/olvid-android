@@ -76,6 +76,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.activities.ObvLinkActivity
 import io.olvid.messenger.customClasses.DeviceBackupProfile
 import io.olvid.messenger.customClasses.ProfileBackupSnapshot
+import io.olvid.messenger.customClasses.hideOverlayWindows
 import io.olvid.messenger.designsystem.theme.ProvideOlvidRipple
 import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.onboarding.OnboardingViewModel
@@ -209,9 +210,7 @@ class OnboardingFlowActivity : AppCompatActivity() {
         window?.apply {
             addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                setHideOverlayWindows(true)
-            }
+            hideOverlayWindows(sensitive = true)
         }
 
         val transferSource = intent.getBooleanExtra(TRANSFER_SOURCE_INTENT_EXTRA, false)

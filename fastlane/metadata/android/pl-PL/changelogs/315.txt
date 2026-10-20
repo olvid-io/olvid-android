@@ -1,0 +1,3 @@
+- Dodano ustawienie umożliwiające wyświetlanie okien nakładających się (przydatne dla niektórych narzędzi do dyktowania).
+- Naprawiono problem z dodawaniem kontaktów Keycloak.
+- Usunięto kilka drobnych błędów.

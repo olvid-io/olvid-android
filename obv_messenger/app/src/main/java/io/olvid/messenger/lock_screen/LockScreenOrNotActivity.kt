@@ -45,6 +45,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.hideOverlayWindows
 import io.olvid.messenger.lock_screen.LockScreenActivity.Companion.generateFingerprintAdditionDetectionKey
 import io.olvid.messenger.services.MDMConfigurationSingleton
 import io.olvid.messenger.services.UnifiedForegroundService
@@ -87,11 +88,7 @@ abstract class LockScreenOrNotActivity : AppCompatActivity() {
 
         if (UnifiedForegroundService.LockSubService.isApplicationLocked()) {
             delegate.localNightMode = AppCompatDelegate.MODE_NIGHT_NO
-            window?.let { w ->
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    w.setHideOverlayWindows(true)
-                }
-            }
+            window?.hideOverlayWindows(sensitive = true)
 
             val isNeutral = SettingsActivity.lockScreenNeutral()
 

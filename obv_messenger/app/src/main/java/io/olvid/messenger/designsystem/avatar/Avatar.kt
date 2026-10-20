@@ -253,6 +253,8 @@ private fun rememberAvatarPhoto(photoUrl: String?, avatarSize: Dp): ImageBitmap?
 private const val CLUSTER_MEMBER_SIZE = .58f
 private const val CLUSTER_BADGE_SIZE = .32f
 private val CLUSTER_BADGE_MIN_SIZE = 20.dp
+// below this, the min-size badge hides too much of the cluster
+private val CLUSTER_BADGE_MIN_AVATAR_SIZE = 40.dp
 
 // transparent gap punched between overlapping cluster members (replaced by the border when set)
 private val CLUSTER_MEMBER_GAP = 1.5.dp
@@ -386,7 +388,7 @@ private fun GroupClusterAvatar(
             // totalCount includes yourself, so only show the badge when some OTHER members are
             // actually hidden — never a lone "+1" that would just be you
             val overflow = source.totalCount - members.size
-            if (showMemberCount && source.totalCount - 1 > members.size) {
+            if (showMemberCount && avatarSize >= CLUSTER_BADGE_MIN_AVATAR_SIZE && source.totalCount - 1 > members.size) {
                 // enforce a minimum badge size and keep it inside the avatar bounds
                 val badgeSize = maxOf(avatarSize * CLUSTER_BADGE_SIZE, CLUSTER_BADGE_MIN_SIZE)
                 val badgeText = "+$overflow"

@@ -9,7 +9,7 @@ protobuf-javalite = "4.36.2" # used for both protoc and the javalite runtime (pr
 oss-licenses-plugin = "0.13.0"
 
 # Engine
-olvid-engine = "1.2.3"
+olvid-engine = "1.3.0"
 
 # Libraries
 androidx-core = "1.19.0"

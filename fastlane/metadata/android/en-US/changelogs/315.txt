@@ -1,0 +1,3 @@
+- Added a setting to allow overlay windows (useful for some dictation tools).
+- Fixed an issue in Keycloak contact addition.
+- Fix a few minor bugs.

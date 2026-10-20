@@ -500,6 +500,9 @@
     <string name="dialog_message_identity_reactivation_confirmation_unknown">Souhaitez-vous réellement réactiver votre profil Olvid sur cet appareil\u00a0?\n\nSi vous avez d\'autres appareils actifs, cela pourrait desactiver l\'un d\'eux.</string>
     <string name="pref_prevent_screen_capture_title">Interdire les captures d\'écran</string>
     <string name="pref_prevent_screen_capture_summary">Quand cette option est activée, les captures d\'écran sont interdites dans Olvid et dans la liste d\'applications récentes.</string>
+    <string name="pref_allow_overlay_windows_title">Autoriser la superposition d\'autres applications</string>
+    <string name="pref_allow_overlay_windows_disabled_by_mdm">Désactivé par votre organisation.</string>
+    <string name="pref_allow_overlay_windows_summary">Permet à des applications comme les outils de dictée ou les filtres d\'écran de s\'afficher par-dessus Olvid. N\'activez cette option que si vous leur faites confiance : une superposition peut masquer ou imiter ce qu\'affiche Olvid.</string>
     <string name="button_label_to_file">Export fichier</string>
     <string name="button_label_to_cloud">Sauvegardes cloud</string>
     <string name="explanation_backup_key_generated_choose_how_to_backup">Vous avez généré une clé de sauvegarde. C\'est probablement le bon moment pour effectuer une sauvegarde vers un fichier ou pour activer les sauvegardes automatiques vers le cloud.</string>
@@ -1043,6 +1046,9 @@
     <string name="button_label_enable_permanent_websocket">Activer une WebSocket permanente</string>
     <string name="dialog_title_disable_push_confirmation">Désactiver les notifications push</string>
     <string name="dialog_message_disable_push_confirmation">Si vous désactivez les notifications push de Google, vous ne serez plus notifié instantanément des nouveaux messages.\n\nVous pouvez à la place activer une connexion WebSocket permanente aux serveurs d\'Olvid qui pourra jouer le même rôle (mais risque de vider votre batterie plus vite).</string>
+    <string name="dialog_title_allow_overlay_windows_confirmation">Autoriser la superposition d\'autres applications\u00a0?</string>
+    <string name="dialog_message_allow_overlay_windows_confirmation">Les fenêtres superposées sont parfois utilisées par des logiciels malveillants pour vous faire appuyer à votre insu sur un élément, ou pour espionner ce que vous tapez.\n\nNe les autorisez que si vous avez besoin qu\'une application de confiance (un outil de dictée par exemple) s\'affiche par-dessus Olvid.</string>
+    <string name="button_label_allow">Autoriser</string>
     <string name="pref_permanent_foreground_service_title">Utiliser un service d\'avant-plan</string>
     <string name="pref_permanent_foreground_service_summary">Utiliser un service d\'avant plan évite à Olvid de se faire arrêter par le système. Une petite icône est affichée dans la zone de notifications et peut être cachée via les paramètres du système.</string>
     <string name="pref_share_app_version_title">Partager les versions de l\'app et de l\'OS avec Olvid</string>

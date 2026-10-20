@@ -19,7 +19,6 @@
 package io.olvid.messenger.activities
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -27,6 +26,7 @@ import io.olvid.engine.engine.types.identities.ObvMutualScanUrl
 import io.olvid.engine.engine.types.identities.ObvUrlIdentity
 import io.olvid.messenger.App
 import io.olvid.messenger.R.string
+import io.olvid.messenger.customClasses.hideOverlayWindows
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity
@@ -35,9 +35,7 @@ import java.util.regex.Pattern
 class ObvLinkActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            window?.setHideOverlayWindows(true)
-        }
+        window?.hideOverlayWindows(sensitive = true)
         handleIntent(intent)
     }
 

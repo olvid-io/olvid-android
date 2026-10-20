@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">이 장치에서 Olvid 프로필을 다시 활성화하시겠습니까?\n\n다른 활성 장치가 있는 경우 다른 장치가 비활성화될 수 있습니다.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">스크린샷 방지</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">이 기능이 켜지면 Olvid와 최근 앱 목록에서 스크린샷이 비활성화됩니다.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">다른 앱의 오버레이 허용</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">귀하의 조직에서 비활성화했습니다.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">음성 입력 도구나 화면 필터와 같은 앱이 Olvid 위에 표시되도록 합니다. 이러한 앱을 신뢰할 수 있는 경우에만 이 기능을 켜세요. 오버레이는 Olvid에 표시되는 내용을 숨기거나 모방할 수 있습니다.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">파일로 내보내기</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">클라우드 백업</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">새 백업 키를 생성했습니다. 아마도 파일을 백업으로 내보내거나 클라우드 자동 백업을 활성화할 적절한 시점일 것입니다.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">영구적인 WebSocket 활성화</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">푸시 알림 끄기</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">Google 푸시 알림만 비활성화하면 새 메시지에 대한 즉각적인 알림을 받지 못합니다.\n\n대신 Olvid 서버에 영구적인 WebSocket 연결을 활성화하면 동일한 목적을 달성할 수 있습니다(하지만 배터리가 더 빨리 소모될 수 있습니다).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">다른 앱의 오버레이를 허용하시겠습니까?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">일부 악성 프로그램은 오버레이 창을 사용하여 사용자가 의도치 않게 특정 부분을 누르도록 유도하거나 사용자가 입력하는 내용을 염탐합니다.\n\n신뢰할 수 있는 앱(예: 받아쓰기 도구)이 Olvid 위에 표시되어야 하는 경우에만 오버레이 창을 허용하십시오.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">허용</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">전경 서비스를 사용하세요</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">포그라운드 서비스를 실행하면 Olvid이 시스템에 의해 중지되는 것을 방지합니다. 작은 아이콘이 알림 영역에 표시되며 시스템 설정에서 숨길 수 있습니다.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Olvid와 앱 및 OS 버전을 공유하세요.</string>

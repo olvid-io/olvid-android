@@ -24,13 +24,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import io.olvid.messenger.App
 import io.olvid.messenger.appdialogs.AppDialogShowActivity
+import io.olvid.messenger.customClasses.hideOverlayWindows
 import io.olvid.messenger.services.MDMConfigurationSingleton
 import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity
@@ -102,9 +102,7 @@ abstract class LockableActivity : AppCompatActivity() {
             } else {
                 w.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                w.setHideOverlayWindows(true)
-            }
+            w.hideOverlayWindows()
         }
         if (SettingsActivity.useApplicationLockScreen() && UnifiedForegroundService.LockSubService.isApplicationLocked()) {
             showLockScreen(null)

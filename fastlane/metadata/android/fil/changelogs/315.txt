@@ -1,0 +1,3 @@
+- Idinagdag ang isang setting upang payagan ang mga overlay window (kapaki-pakinabang para sa ilang tool sa pagdidikta).
+- Inayos ang isang isyu sa pagdaragdag ng contact sa Keycloak.
+- Inayos ang ilang maliliit na bug.

@@ -1,0 +1,3 @@
+- Eine Einstellung zum Aktivieren von Overlay-Fenstern wurde hinzugefügt (nützlich für einige Diktier-Tools).
+- Ein Problem beim Hinzufügen von Keycloak-Kontakten wurde behoben.
+- Einige kleinere Fehler wurden behoben.

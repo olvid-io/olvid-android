@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">तुम्ही खरोखरच या डिव्हाइसवर तुमचे Olvid प्रोफाइल पुन्हा सक्रिय करू इच्छिता?\n\nतुमच्याकडे इतर सक्रिय डिव्हाइसेस असल्यास, यामुळे त्यापैकी एक डिव्हाइस निष्क्रिय होऊ शकते.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">स्क्रीनशॉट घेणे टाळा</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">हे चालू केल्यावर, Olvid आणि अलीकडील ॲप्सच्या यादीमध्ये स्क्रीनशॉट घेणे अक्षम केले जाईल.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">इतर ॲप्समधून ओव्हरले (स्क्रीनवर दिसणारे घटक) वापरण्याची परवानगी द्या.</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">तुमच्या संस्थेने अक्षम केले.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">ऑल्व्हिडवर डिक्टेशन टूल्स किंवा स्क्रीन फिल्टरसारख्या ॲप्सना प्रदर्शित करण्याची परवानगी द्या. हे फक्त तेव्हाच चालू करा जेव्हा तुम्हाला या ॲप्सवर विश्वास असेल: कारण ओव्हरले (overlay) ऑल्व्हिड जे दाखवते ते लपवू किंवा त्याचे अनुकरण करू शकते.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">फाईलमध्ये एक्सपोर्ट करा</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">क्लाउड बॅकअप</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">तुम्ही एक नवीन बॅकअप की तयार केली आहे. आता बॅकअप फाइलमध्ये एक्सपोर्ट करण्याची किंवा क्लाउडमध्ये ऑटोमॅटिक बॅकअप सक्रिय करण्याची ही योग्य वेळ आहे.</string>
@@ -1042,6 +1045,9 @@
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">कायम वेब सॉकेट सक्षम करा</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">पुश सूचना बंद करा</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">जर तुम्ही फक्त Google पुश नोटिफिकेशन बंद केले, तर तुम्हाला नवीन संदेशांविषयी त्वरित सूचना मिळणार नाही.\n\nत्याऐवजी, तुम्ही Olvid च्या सर्व्हरशी कायमस्वरूपी WebSocket कनेक्शन सुरू ठेवू शकता, जेणेकरून तुम्हाला त्याच प्रकारे सूचना मिळतील (परंतु यामुळे तुमच्या बॅटरीची क्षमता कमी होऊ शकते).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">इतर ॲप्समधून ओव्हरले (स्क्रीनवर दिसणारे घटक) वापरण्याची परवानगी द्यावी?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">ओव्हरले विंडोचा वापर कधीकधी मालवेअरद्वारे तुम्हाला एखाद्या गोष्टीवर टॅप करण्यास किंवा तुम्ही काय टाइप करत आहात हे पाहण्यासाठी केला जातो.\n\nतुम्हाला खात्रीशीर ॲपची (उदाहरणार्थ, व्हॉइस टायपिंग ॲप) गरज असल्यास आणि ते ॲप ओल्विडवर दिसेल असे हवे असल्यास,च ते ॲपला परवानगी द्या.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">परवानगी द्या</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">फोरग्राउंड सेवा वापरा</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">फोरग्राउंड सेवा वापरल्याने, सिस्टीम Olvid ॲप बंद होण्यापासून रोखता येते. एक लहान चिन्ह तुमच्या नोटिफिकेशन क्षेत्रात दिसेल आणि ते सिस्टीम सेटिंग्जमध्ये लपवता येऊ शकते.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">ओल्विडसोबत ॲप आणि ऑपरेटिंग सिस्टम आवृत्ती शेअर करा</string>

@@ -499,6 +499,9 @@
 	<string name="dialog_message_identity_reactivation_confirmation_unknown" state="needs_review" hash="-774018495">Is jy seker dat jy jou Olvid-profiel op hierdie toestel wil heraktiveer?\n\nAs jy ander aktiewe toestelle het, kan dit dalk een van hulle deaktiveer.</string>
 	<string name="pref_prevent_screen_capture_title" state="needs_review" hash="1261976402">Voorkom skermskote</string>
 	<string name="pref_prevent_screen_capture_summary" state="needs_review" hash="-2092979905">Wanneer hier aangeskakel is, word skermskote in Olvid en in die onlangse toepassingslys gedeaktiveer.</string>
+	<string name="pref_allow_overlay_windows_title" state="needs_review" hash="-794401853">Laat oorlegs van ander toepassings toe</string>
+	<string name="pref_allow_overlay_windows_disabled_by_mdm" state="needs_review" hash="699493224">Deur jou organisasie gedeaktiveer.</string>
+	<string name="pref_allow_overlay_windows_summary" state="needs_review" hash="-1695693046">Laat toepassings soos spraakherkenningsprogramme of skermfilters bo-oor Olvid vertoon. Skakel dit slegs in as jy hierdie toepassings vertrou: ’n oorlegslaag kan verberg of namaak wat Olvid wys.</string>
 	<string name="button_label_to_file" state="needs_review" hash="-932576233">Eksporteer na lêer</string>
 	<string name="button_label_to_cloud" state="needs_review" hash="-1825078945">Wolkrugbeveiliging</string>
 	<string name="explanation_backup_key_generated_choose_how_to_backup" state="needs_review" hash="-1713007611">Jy het \'n nuwe rugsteunsleutel gegenereer. Dit is waarskynlik die regte oomblik om \'n rugsteun na \'n lêer uit te voer, of om outomatiese rugsteun na die wolk te aktiveer.</string>
@@ -1044,6 +1047,9 @@ Kontak asseblief jou administrateur vir meer besonderhede.</string>
 	<string name="button_label_enable_permanent_websocket" state="needs_review" hash="138628752">Aktiveer permanente WebSocket</string>
 	<string name="dialog_title_disable_push_confirmation" state="needs_review" hash="-40495232">Skakel stootkennisgewings af</string>
 	<string name="dialog_message_disable_push_confirmation" state="needs_review" hash="1221925262">As jy net Google-kennisgewings uitskakel, sal jy nie onmiddellik van nuwe boodskappe op die hoogte gebring word nie.\n\nJy kan in plaas daarvan \'n permanente WebSocket-verbinding met Olvid se bedieners aktiveer wat dieselfde doel kan dien (maar jou battery vinniger kan leegmaak).</string>
+	<string name="dialog_title_allow_overlay_windows_confirmation" state="needs_review" hash="1119457007">Laat oorlegs van ander toepassings toe?</string>
+	<string name="dialog_message_allow_overlay_windows_confirmation" state="needs_review" hash="-693988270">Oorvleiselsvensters word soms deur kwaadware gebruik om jou te laat op iets tik, of om te spioeneer op wat jy tik.\n\nLaat dit slegs toe as jy ’n toepassing nodig het wat jy vertrou (byvoorbeeld ’n dikteringsprogram) om oor Olvid te vertoon.</string>
+	<string name="button_label_allow" state="needs_review" hash="810824017">Toelaat</string>
 	<string name="pref_permanent_foreground_service_title" state="needs_review" hash="1862903736">Gebruik \'n voorgronddiens</string>
 	<string name="pref_permanent_foreground_service_summary" state="needs_review" hash="357566470">\'n Voorgronddiens keer dat Olvid deur die stelsel gestop word. \'n Kleiner ikoon word in jou kennisgewingsarea vertoon en kan in die stelselinstellings versteek word.</string>
 	<string name="pref_share_app_version_title" state="needs_review" hash="734287979">Deel die app- en OS-weergawe met Olvid</string>

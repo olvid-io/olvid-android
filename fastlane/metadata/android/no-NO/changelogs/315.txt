@@ -1,0 +1,3 @@
+- Vi har lagt til en innstilling for å tillate overlappende vinduer (nyttig for noen dikteringsverktøy).
+- Et problem med Keycloak-kontaktlegging er fikset.
+- Noen mindre feil er rettet.

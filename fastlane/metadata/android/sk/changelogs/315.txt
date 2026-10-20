@@ -1,0 +1,3 @@
+- Pridané nastavenie na povolenie prekryvných okien (užitočné pre niektoré nástroje na diktovanie).
+- Opravená chyba pri pridávaní kontaktov v Keycloak.
+- Opravených niekoľko menších chýb.

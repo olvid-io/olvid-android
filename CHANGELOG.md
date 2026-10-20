@@ -1,3 +1,10 @@
+# Build 315 (4.6.1)
+
+- Added a setting to allow overlay windows (useful for some dictation tools).
+- [MDM] Added a setting to disable the overlay window setting.
+- Update to engine v1.3.0, including some security fixes.
+- Fix a few minor bugs.
+
 # Build 314 (4.6)
 
 - Remove forced portrait orientation in manifest.

@@ -1,0 +1,3 @@
+- Dodana možnost za omogočanje prekrivajočih se oken (koristno za nekatere orodja za prepisovanje).
+- Odpravljena težava pri dodajanju stikov v Keycloak.
+- Odpravljene nekatere manjše napake.

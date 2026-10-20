@@ -41,6 +41,14 @@
             android:title="@string/pref_prevent_screen_capture_title"
             android:order="40"
             />
+        <io.olvid.messenger.customClasses.NoClickSwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_pref_overlay_windows"
+            android:key="pref_key_allow_overlay_windows"
+            android:summary="@string/pref_allow_overlay_windows_summary"
+            android:title="@string/pref_allow_overlay_windows_title"
+            android:order="42"
+            />
         <Preference
             android:icon="@drawable/ic_pref_incognito"
             android:key="pref_key_hidden_profile_close_policy"

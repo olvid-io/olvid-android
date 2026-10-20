@@ -1,0 +1,3 @@
+- Pridėtas nustatymas, leidžiantis naudoti permatomus langus (naudinga kai kurioms diktavimo priemonėms).
+- Išspręsta problema, susijusi su kontaktų pridėjimu iš Keycloak.
+- Ištaisyta keli smulkūs klaidos.

@@ -1,0 +1,3 @@
+- S'ha afegit una opció per permetre finestres superposades (útil per a algunes eines de dictat).
+- S'ha corregit un problema amb l'addició de contactes de Keycloak.
+- S'han corregit alguns errors menors.

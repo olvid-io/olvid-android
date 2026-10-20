@@ -1,0 +1,3 @@
+- Přidáno nastavení pro povolení překrývajících se oken (užitečné pro některé nástroje pro rozpoznávání řeči).
+- Opraven problém s přidáváním kontaktů z Keycloak.
+- Opraveno několik drobných chyb.

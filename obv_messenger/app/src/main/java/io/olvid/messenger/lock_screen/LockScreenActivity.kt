@@ -50,6 +50,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import io.olvid.messenger.App
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.hideOverlayWindows
 import io.olvid.messenger.customClasses.onBackPressed
 import io.olvid.messenger.databases.tasks.DeleteAllLimitedVisibilityMessages
 import io.olvid.messenger.main.MainActivity
@@ -176,9 +177,7 @@ class LockScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         delegate.localNightMode = AppCompatDelegate.MODE_NIGHT_NO
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            window.setHideOverlayWindows(true)
-        }
+        window.hideOverlayWindows(sensitive = true)
 
         val setupMode = MDMConfigurationSingleton.isLockScreenRequired() && !SettingsActivity.isPINConfigured()
         val customMessageResourceId = intent.getIntExtra(CUSTOM_MESSAGE_RESOURCE_ID_INTENT_EXTRA, -1)

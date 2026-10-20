@@ -59,6 +59,7 @@ import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.ConfigurationKeycloakPojo
 import io.olvid.messenger.customClasses.ConfigurationPojo
+import io.olvid.messenger.customClasses.formatMarkdownToAnnotatedString
 import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.OlvidCircularProgress
 import io.olvid.messenger.designsystem.components.OlvidTextButton
@@ -125,7 +126,7 @@ internal fun KeycloakContent(
                 showTimeErrorDialog = false
             },
             title = { Text(stringResource(R.string.dialog_title_authentication_failed_time_offset)) },
-            text = { Text(stringResource(R.string.dialog_message_authentication_failed_time_offset)) },
+            text = { Text(stringResource(R.string.dialog_message_authentication_failed_time_offset).formatMarkdownToAnnotatedString()) },
             confirmButton = {
                 OlvidTextButton(onClick = {
                     try {

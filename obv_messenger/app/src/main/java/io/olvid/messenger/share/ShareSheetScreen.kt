@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.share
 
+import android.content.Intent
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -63,17 +65,18 @@ import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.olvid.engine.Logger
-import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils2
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration
+import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.compose.EphemeralSettingsGroup
 import io.olvid.messenger.discussion.compose.EphemeralViewModel
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.group.components.GroupMembersViewModel
+import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.share.components.FromToCard
 import io.olvid.messenger.share.components.OwnedIdentityPickerSheet
@@ -99,6 +102,7 @@ fun ShareSheetScreen(
     var showRecipientsSheet by rememberSaveable { mutableStateOf(false) }
     var showIdentitySheet by rememberSaveable { mutableStateOf(false) }
     var openEphemeralSettings by rememberSaveable { mutableStateOf(false) }
+    var recipientsNudge by remember { mutableIntStateOf(0) }
     val ephemeralViewModel : EphemeralViewModel = viewModel()
     val hasEphemeralSettings by ephemeralViewModel.getSettingsModified().observeAsState()
 
@@ -191,6 +195,7 @@ fun ShareSheetScreen(
             },
             onPickRecipients = { showRecipientsSheet = true },
             hasOtherIdentities = !otherIdentities.isNullOrEmpty(),
+            recipientsNudge = recipientsNudge,
         )
 
         Box(
@@ -236,14 +241,26 @@ fun ShareSheetScreen(
                     }
 
                     viewModel.send(context, linkPreviewViewModel.openGraph.value, jsonExpiration) {
-                        // after sharing to a single discussion, navigate to it
+                        // after sharing to a single discussion, navigate to it, through MainActivity
+                        // so it opens in the app's task: left in this share task, the next share
+                        // would just bring this task back instead of starting a new share sheet
                         if (viewModel.selectedDiscussions.size == 1) {
                             viewModel.selectedDiscussions.firstOrNull()?.let {
-                                App.openDiscussionActivity(context, it.discussionId)
+                                context.startActivity(
+                                    Intent(context, MainActivity::class.java)
+                                        .setAction(MainActivity.FORWARD_ACTION)
+                                        .putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity::class.java.name)
+                                        .putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, it.discussionId)
+                                )
                             }
                         }
                         onClose()
                     }
+                }
+            },
+            onBlockedSend = {
+                if (viewModel.selectedDiscussions.isEmpty()) {
+                    recipientsNudge++
                 }
             },
         )
@@ -289,6 +306,7 @@ private fun TopBar(
     onPickIdentityLongPress: () -> Unit,
     onPickRecipients: () -> Unit,
     hasOtherIdentities: Boolean,
+    recipientsNudge: Int,
 ) {
     val compact = LocalWindowInfo.current.containerSize.height < 540 * LocalDensity.current.density
 
@@ -317,6 +335,7 @@ private fun TopBar(
             onPickIdentityLongClick = onPickIdentityLongPress,
             onPickRecipients = onPickRecipients,
             hasOtherIdentities = hasOtherIdentities,
+            recipientsNudge = recipientsNudge,
         )
     }
 }
