@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Zobraziť indikátor „dôveryhodného zdroja“ pre kontakty</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Po aktivácii farebná bodka na ich profile ukazuje, či ste osobne overili identitu kontaktu, alebo vám bol predstavený.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Odosielanie správy Olvid</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Prijímanie správ Olvid</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Upozornenie: Používanie widgetu s odkazom so skrytým profilom môže odhaliť existenciu tohto profilu.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Upozornenie: Používanie widgetu s rýchlou skratkou so skrytým profilom môže odhaliť existenciu tohto profilu.\nPrinajmenšom by ste mali nakonfigurovať zámok obrazovky, aby ste obmedzili prístup na stránku konfigurácie widgetu.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Tento widget používa skrytý profil. Zadajte heslo tohto profilu na jeho konfiguráciu.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Nezistená žiadna neznáma služba prístupnosti.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Neznáma služba prístupnosti</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Zistila sa neznáma služba prístupnosti. Skontrolujte, či je bezpečné ju používať:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Poslať diagnostickú správu</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Diagnostická správa Olvid</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Za posledných 7 dní: prijatých %1$d push notifikácií, z ktorých %2$d boli označené ako vysoká priorita (%3$d boli znížené na nižšiu prioritu). %4$d notifikácií dorazilo, keď bolo zariadenie v nečinnosti, %5$d vyžadovali spustenie Olvid.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Oneskorenie medzi push notifikáciou s vysokou prioritou a notifikáciou správy: medián %1$s, najdlhší čas %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d notifikácie s vysokou prioritou sa nezobrazovali (napríklad úpravy, reakcie alebo správy odoslané z vašich ďalších zariadení) a %2$d sa týkali stíšeného alebo otvoreného rozhovoru.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Vyhľadať emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Nedávne</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Obnoviť stav kontaktu</string>

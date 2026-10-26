@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Kişiler için \"güvenilir kaynak\" göstergesi göster</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Etkinleştirildiğinde, portrelerindeki renkli nokta, bir kişinin kimliğini kişisel olarak doğrulayıp doğrulamadığınızı veya size sunulup sunulmadığını gösterir.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Olvid mesajı gönderiliyor</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Olvid mesajları alınıyor</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Uyarı: Gizli bir profil ile kısayol widget\'ı kullanmak, bu profilin varlığını ortaya çıkarabilir.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Uyarı: gizli bir profil ile kısayol widget\'ı kullanmak bu profilin varlığını ortaya çıkarabilir.\nEn azından, widget yapılandırma sayfasına erişimi kısıtlamak için bir ekran kilidi yapılandırmalısınız.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Bu widget gizli bir profil kullanıyor. Lütfen yapılandırmak için bu profilin şifresini girin.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Bilinmeyen bir erişilebilirlik hizmeti algılanmadı.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Bilinmeyen erişilebilirlik hizmeti</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Bilinmeyen bir erişilebilirlik hizmeti algılandı, kullanmasının güvenli olup olmadığını kontrol edin:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Bir teşhis raporu gönderin</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Olvid teşhis raporu</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Son 7 gün: %1$d adet push bildirimi alındı, bunlardan %2$d tanesi yüksek öncelikli (%3$d önceliği düşürüldü). %4$d adet bildirim cihaz boşta iken geldi, %5$d adet bildirim için Olvid başlatılması gerekti.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Yüksek öncelikli bir push bildirimi ile mesaj bildirimi arasındaki gecikme: ortalama %1$s, en uzun %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d yüksek öncelikli bildirimler hiçbir şey göstermedi (örneğin, düzenlemeler, tepkiler veya diğer cihazlarınızdan gönderilen mesajlar) ve %2$d sessize alınmış veya açık bir sohbetle ilgiliydi.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Emoji ara</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Son</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Kişi durumunu yenile</string>

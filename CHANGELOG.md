@@ -1,3 +1,9 @@
+# Build 316 (4.6.2)
+
+- Fix some issues with notifications received while the app is not started.
+- Keep track of received notifications to better analyze potential issues.
+- Added a "Send a diagnostic report" action to the troubleshooting screen.
+
 # Build 315 (4.6.1)
 
 - Added a setting to allow overlay windows (useful for some dictation tools).

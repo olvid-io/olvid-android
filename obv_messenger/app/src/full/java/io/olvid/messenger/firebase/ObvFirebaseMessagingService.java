@@ -24,6 +24,9 @@ import androidx.annotation.NonNull;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import io.olvid.engine.Logger;
@@ -32,58 +35,82 @@ import io.olvid.engine.engine.types.ObvPushNotificationType;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.openid.KeycloakManager;
+import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
+import io.olvid.messenger.troubleshooting.PushDiagnostics;
 
 public class ObvFirebaseMessagingService extends FirebaseMessagingService {
-    private static Long lastPushNotificationTimestamp = null;
-    private static int deprioritizedMessageCount = 0;
-    private static int highPriorityMessageCount = 0;
-
-    public static Long getLastPushNotificationTimestamp() {
-        return lastPushNotificationTimestamp;
-    }
-
-    public static int getDeprioritizedMessageCount() {
-        return deprioritizedMessageCount;
-    }
-
-    public static int getHighPriorityMessageCount() {
-        return highPriorityMessageCount;
-    }
-
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
-        lastPushNotificationTimestamp = System.currentTimeMillis();
-        Logger.d("FIREBASE Message received. Priority: " + ((remoteMessage.getPriority() == RemoteMessage.PRIORITY_HIGH) ? "HIGH" : "NORMAL"));
-        if (remoteMessage.getOriginalPriority() == RemoteMessage.PRIORITY_HIGH) {
-            highPriorityMessageCount++;
-            if (remoteMessage.getPriority() != remoteMessage.getOriginalPriority()) {
-                deprioritizedMessageCount++;
-                Logger.e("message was deprioritized!");
-            }
+        // on a cold start, this is what creates the engine (and sets the Logger level)
+        Engine engine = AppSingleton.getEngine();
+
+        boolean highPriority = remoteMessage.getPriority() == RemoteMessage.PRIORITY_HIGH;
+        boolean sentAsHighPriority = remoteMessage.getOriginalPriority() == RemoteMessage.PRIORITY_HIGH;
+        boolean deprioritized = sentAsHighPriority && !highPriority;
+        Logger.d("FIREBASE Message received. Priority: " + (highPriority ? "HIGH" : "NORMAL"));
+        if (deprioritized) {
+            Logger.e("message was deprioritized!");
         }
         Map<String, String> data = remoteMessage.getData();
         String identityString = data.get("identity");
         String topic = data.get("topic");
         String keycloak = data.get("keycloak");
         String ownedDevices = data.get("ownedDevices");
+
+        // get the ownedIdentity from the engine: since engine version 1.3.1 this call can properly wait for the engine to initialize the masking cache
+        byte[] maskedOwnedIdentity = (identityString == null) ? null : engine.getOwnedIdentityFromMaskingUid(identityString);
+        PushDiagnostics.recordPush(remoteMessage.getSentTime(), sentAsHighPriority, deprioritized, identityString == null || maskedOwnedIdentity != null);
         if (identityString != null) {
             Logger.d("For identity mask: " + identityString);
+            if (maskedOwnedIdentity == null) {
+                Logger.w("FIREBASE unknown identity mask, targeting all active identities");
+            }
+            // if we were not able to get an masked owned identity from the identityString, download for all active identities
+            List<byte[]> bytesOwnedIdentities = (maskedOwnedIdentity != null) ? Collections.singletonList(maskedOwnedIdentity) : getActiveOwnedIdentities(engine);
             if (keycloak != null) {
                 Logger.d("Is keycloak notification");
-                KeycloakManager.forceSyncManagedIdentity(AppSingleton.getEngine().getOwnedIdentityFromMaskingUid(identityString));
+                for (byte[] bytesOwnedIdentity : bytesOwnedIdentities) {
+                    KeycloakManager.forceSyncManagedIdentity(bytesOwnedIdentity);
+                }
             } else if (ownedDevices != null) {
                 Logger.d("Is ownedDevices notification");
-                AppSingleton.getEngine().refreshOwnedDeviceList(AppSingleton.getEngine().getOwnedIdentityFromMaskingUid(identityString));
+                for (byte[] bytesOwnedIdentity : bytesOwnedIdentities) {
+                    engine.refreshOwnedDeviceList(bytesOwnedIdentity);
+                }
             } else {
-                AppSingleton.getEngine().processAndroidPushNotification(identityString);
+                if (highPriority) {
+                    UnifiedForegroundService.PushProcessingSubService.startForPush(bytesOwnedIdentities);
+                }
+                if (maskedOwnedIdentity != null) {
+                    engine.processAndroidPushNotification(identityString);
+                } else {
+                    for (byte[] bytesOwnedIdentity : bytesOwnedIdentities) {
+                        engine.downloadMessages(bytesOwnedIdentity);
+                    }
+                }
             }
         } else if (topic != null) {
             Logger.d("For push topic: " + topic);
             KeycloakManager.processPushTopicNotification(topic);
         }
+    }
+
+    @NonNull
+    private static List<byte[]> getActiveOwnedIdentities(@NonNull Engine engine) {
+        List<byte[]> bytesOwnedIdentities = new ArrayList<>();
+        try {
+            for (ObvIdentity ownedIdentity : engine.getOwnedIdentities()) {
+                if (ownedIdentity.isActive()) {
+                    bytesOwnedIdentities.add(ownedIdentity.getBytesIdentity());
+                }
+            }
+        } catch (Exception e) {
+            Logger.x(e);
+        }
+        return bytesOwnedIdentities;
     }
 
     @Override
@@ -97,10 +124,8 @@ public class ObvFirebaseMessagingService extends FirebaseMessagingService {
 
         try {
             Engine engine = AppSingleton.getEngine();
-            for (ObvIdentity ownedIdentity : engine.getOwnedIdentities()) {
-                if (ownedIdentity.isActive()) {
-                    engine.registerToPushNotification(ownedIdentity.getBytesIdentity(), ObvPushNotificationType.createAndroid(token), false, null);
-                }
+            for (byte[] bytesOwnedIdentity : getActiveOwnedIdentities(engine)) {
+                engine.registerToPushNotification(bytesOwnedIdentity, ObvPushNotificationType.createAndroid(token), false, null);
             }
         } catch (Exception e) {
             Logger.e("An error occurred while updating the push notifications with a new firebase token");

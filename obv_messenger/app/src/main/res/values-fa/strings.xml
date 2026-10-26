@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">نمایش نشانگر «منبع اعتماد» برای مخاطبین</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">با فعال‌سازی این ویژگی، یک نقطه رنگی روی عکس پروفایل مخاطب نشان می‌دهد که آیا هویت آن شخص را شخصاً تأیید کرده‌اید یا اینکه او به شما معرفی شده است.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">ارسال پیام Olvid در حال انجام است</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">دریافت پیام‌های Olvid</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">هشدار: استفاده از یک ویجت میانبر با یک پروفایل پنهان ممکن است وجود این پروفایل را آشکار کند.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">هشدار: استفاده از یک ویجت میانبر با یک پروفایل پنهان ممکن است وجود این پروفایل را آشکار کند.\nحداقل، باید یک صفحه قفل پیکربندی کنید تا دسترسی به صفحه پیکربندی ویجت محدود شود.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">این ویجت از یک پروفایل مخفی استفاده می‌کند. لطفاً رمز عبور این پروفایل را برای پیکربندی آن وارد کنید.</string>
@@ -2243,6 +2244,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">هیچ سرویس دسترسی ناشناخته‌ای یافت نشد.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">سرویس دسترسی ناشناخته</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">یک سرویس دسترسی ناشناس شناسایی شد، لطفاً بررسی کنید که استفاده از آن ایمن است:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">ارسال گزارش تشخیصی</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">گزارش تشخیص اولوید</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">در 7 روز گذشته: %1$d اعلان پوش دریافت شد، که %2$d مورد از آن‌ها اولویت بالایی داشتند (%3$d اولویت آن‌ها کاهش یافت). %4$d اعلان در حالی که دستگاه در حالت غیرفعال بود، دریافت شد، %5$d اعلان نیاز به راه‌اندازی Olvid داشت.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">تاخیر بین یک اعلان پوش با اولویت بالا و اعلان پیام: میانه %1$s، کندترین %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d اعلان‌های فوری با اولویت بالا هیچ چیزی را نمایش ندادند (به عنوان مثال، ویرایش‌ها، واکنش‌ها یا پیام‌هایی که از دستگاه‌های دیگر شما ارسال شده‌اند) و %2$d مربوط به یک گفتگوی بی‌صدا یا باز بود.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">جستجوی ایموجی</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">آخرین‌ها</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">وضعیت مخاطب را به‌روزرسانی کنید</string>

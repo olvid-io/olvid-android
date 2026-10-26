@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">যোগাযোগের জন্য একটি \"বিশ্বস্ত উৎস\" নির্দেশক দেখান</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">সক্রিয় করা হলে, তাদের প্রোফাইল ছবিতে একটি রঙিন বিন্দু নির্দেশ করবে যে আপনি ব্যক্তিগতভাবে কোনো পরিচিতের পরিচয় যাচাই করেছেন নাকি অন্য কেউ তাদের আপনার কাছে উপস্থাপন করেছে।</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Olvid বার্তা পাঠানো হচ্ছে</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">অলভিড থেকে আসা বার্তা গ্রহণ করা হচ্ছে</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">সতর্কতা: একটি লুকানো প্রোফাইল সহ শর্টকাট উইজেট ব্যবহার করলে সেই প্রোফাইলের অস্তিত্ব প্রকাশ পেতে পারে।</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">সতর্কতা: একটি লুকানো প্রোফাইল সহ একটি শর্টকাট উইজেট ব্যবহার করলে সেই প্রোফাইলের অস্তিত্ব প্রকাশ হয়ে যেতে পারে।\nন্যূনতম, আপনাকে একটি লক স্ক্রিন কনফিগার করা উচিত যাতে উইজেট কনফিগারেশন পৃষ্ঠায় অ্যাক্সেস সীমিত করা যায়।</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">এই উইজেটটি একটি লুকানো প্রোফাইল ব্যবহার করছে। এটি কনফিগার করার জন্য অনুগ্রহ করে প্রোফাইলের পাসওয়ার্ডটি প্রবেশ করুন।</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">কোনো অজানা অ্যাক্সেসিবিলিটি পরিষেবা সনাক্ত করা যায়নি।</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">অজানা অ্যাক্সেসিবিলিটি পরিষেবা</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">একটি অজানা অ্যাক্সেসিবিলিটি পরিষেবা সনাক্ত করা হয়েছে, অনুগ্রহ করে নিশ্চিত করুন যে এটি ব্যবহার করা নিরাপদ:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">একটি ডায়াগনস্টিক রিপোর্ট পাঠান</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">অলভিড ডায়াগনস্টিক রিপোর্ট</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">গত ৭ দিনে: %1$d সংখ্যক পুশ বিজ্ঞপ্তি গ্রহণ করা হয়েছে, যার মধ্যে %2$dটি উচ্চ অগ্রাধিকারের (%3$dটির অগ্রাধিকার কমানো হয়েছে)। %4$dটি ডিভাইসটি নিষ্ক্রিয় থাকাকালীন সময়ে এসেছে, এবং %5$dটির জন্য Olvid চালু করতে হয়েছে।</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">উচ্চ অগ্রাধিকারের পুশ বিজ্ঞপ্তি এবং বার্তার বিজ্ঞপ্তির মধ্যে বিলম্ব: মধ্যমা %1$s, সবচেয়ে ধীর %2$s।</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d উচ্চ অগ্রাধিকারের পুশ বিজ্ঞপ্তি কিছুই প্রদর্শন করেনি (উদাহরণস্বরূপ, সম্পাদনা, প্রতিক্রিয়া বা আপনার অন্যান্য ডিভাইস থেকে পাঠানো বার্তা) এবং %2$d একটি মিউট করা বা খোলা কথোপকথনের জন্য ছিল।</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">একটি ইমোজি খুঁজুন</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">সাম্প্রতিক</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">যোগাযোগের স্থিতি রিফ্রেশ করুন</string>

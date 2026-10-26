@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">સંપર્કો માટે \"વિશ્વાસપાત્ર સ્ત્રોત\" સૂચક બતાવો</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">જ્યારે આ સુવિધા સક્રિય કરવામાં આવે છે, ત્યારે તેમના પ્રોફાઇલ ચિત્ર પર એક રંગીન બિંદુ દેખાશે, જે સૂચવે છે કે તમે વ્યક્તિગત રીતે કોઈ સંપર્કની ઓળખ ચકાસી છે કે કેમ અથવા તેઓ તમને રજૂ કરવામાં આવ્યા હતા.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">ઓલ્વિડ સંદેશ મોકલવામાં આવી રહ્યો છે</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">ઓલ્વિડ સંદેશાઓ પ્રાપ્ત થઈ રહ્યા છે</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">ચેતવણી: છુપાયેલ પ્રોફાઇલ સાથે શોર્ટકટ વિજેટનો ઉપયોગ કરવાથી આ પ્રોફાઇલનું અસ્તિત્વ જાહેર થઈ શકે છે.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">ચેતવણી: છુપાયેલ પ્રોફાઇલ સાથે શોર્ટકટ વિજેટનો ઉપયોગ કરવાથી આ પ્રોફાઇલનું અસ્તિત્વ જાહેર થઈ શકે છે.\nઓછામાં ઓછું, તમારે વિજેટ રૂપરેખાંકન પૃષ્ઠની ઍક્સેસને પ્રતિબંધિત કરવા માટે લૉક સ્ક્રીન સેટ કરવી જોઈએ.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">આ વિજેટ એક છુપાયેલ પ્રોફાઇલનો ઉપયોગ કરી રહ્યું છે. કૃપા કરીને તેને ગોઠવવા માટે આ પ્રોફાઇલનો પાસવર્ડ દાખલ કરો.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">કોઈ અજાણી ઍક્સેસિબિલિટી સેવા મળી નથી.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">અજાણી ઍક્સેસિબિલિટી સેવા</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">એક અજાણી ઍક્સેસિબિલિટી સેવા શોધી કાઢવામાં આવી છે, કૃપા કરીને તપાસો કે તેનો ઉપયોગ કરવો સલામત છે કે નહીં:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">નિદાન અહેવાલ મોકલો</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">ઓલ્વિડ ડાયગ્નોસ્ટિક રિપોર્ટ</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">છેલ્લા 7 દિવસમાં: %1$d પુશ સૂચનાઓ પ્રાપ્ત થઈ, જેમાંથી %2$d ઉચ્ચ પ્રાથમિકતાવાળી હતી (%3$d ની પ્રાથમિકતા ઘટાડવામાં આવી). %4$d સૂચનાઓ ત્યારે આવી જ્યારે ઉપકરણ નિષ્ક્રિય હતું, અને %5$d ને Olvid શરૂ કરવાની જરૂર પડી.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">ઉચ્ચ પ્રાથમિકતાવાળા પુશ સૂચના અને સંદેશ સૂચના વચ્ચેનો વિલંબ: મધ્યક %1$s, સૌથી ધીમો %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d ઉચ્ચ પ્રાથમિકતાવાળી પુશ સૂચનાઓ કંઈપણ બતાવતી નથી (ઉદાહરણ તરીકે, ફેરફારો, પ્રતિક્રિયાઓ અથવા તમારા અન્ય ઉપકરણોમાંથી મોકલવામાં આવેલા સંદેશાઓ) અને %2$d મ્યૂટ કરેલી અથવા ખુલ્લી ચર્ચા માટે હતી.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">ઇમોજી શોધો</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">તાજેતરનું</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">સંપર્કની સ્થિતિને તાજું કરો</string>

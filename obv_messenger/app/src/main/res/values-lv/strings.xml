@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Rādīt \"uzticama avota\" indikatoru kontaktu sarakstā</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Kad funkcija būtu aktivizēta, uz viņu profila attēla parādīsies krāsains punkts, kas norāda, vai jūs personīgi esat pārbaudījis kontakta identitāti, vai arī viņš jums tika ieteikts.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Tiek nosūtīts „Olvid“ ziņojums</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Olvid ziņojumu saņemšana</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Brīdinājums: izmantojot paslēpta profila ātrās piekļuves logrīku, var tikt atklāts šī profila pastāvošanas fakts.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Brīdinājums: paslēpta profila izmantošana ātrās piekļuves logrīkā var atklāt šī profila esamību.\nVajadzētu vismaz iestatīt bloķēšanas ekrānu, lai ierobežotu piekļuvi logrīka konfigurācijas lapai.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Šī sīžets izmanto paslēptu profilu. Lūdzu, ievadiet šī profila paroli, lai to konfigurētu.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Nav atrastas nezināmas palīglīdzekļu pakalpojumu funkcijas.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Neizvests piekļūstamības pakalpojums</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Ir atklāta nezināma piekļūstamības pakalpojuma sniedzēja. Lūdzu, pārbaudiet, vai to ir droši izmantot:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Nosūtīt diagnostikas ziņojumu</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Olvid diagnostikas ziņojums</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Pēdējās 7 dienas: saņemtas %1$d paziņojumu, no tām %2$d bija augstas prioritātes (%3$d tika samazināta prioritāte). %4$d tika saņemtas, kad ierīce bija neaktīvā režīmā, un %5$d reizes bija jāaktivizē Olvid.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Laiks starp augstas prioritātes paziņojumu un ziņojuma paziņojumu: vidējais %1$s, lēnākais %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d augstas prioritātes paziņojumi neparādīja nekādu informāciju (piemēram, izmaiņas, reakcijas vai ziņas, kas nosūtītas no citām ierīcēm), un %2$d attiecās uz klusu vai atvērtu sarunu.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Meklēt emocijzīmi</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Pēdējie</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Atjaunināt kontakta statusu</string>

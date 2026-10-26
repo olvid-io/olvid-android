@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Afișează un indicator „sursă de încredere” pentru contacte</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Când este activată, un punct colorat pe fotografia de profil indică dacă ați verificat personal identitatea unui contact sau dacă acesta v-a fost prezentat.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Trimiterea mesajului Olvid</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Se primesc mesaje de la Olvid</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Atenție: utilizarea unui widget de scurtătură cu un profil ascuns poate dezvălui existența acestui profil.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Atenție: utilizarea unui widget de scurtătură cu un profil ascuns poate dezvălui existența acestui profil.\nCel puțin, ar trebui să configurați o blocare a ecranului pentru a restricționa accesul la pagina de configurare a widgetului.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Acest widget folosește un profil ascuns. Vă rugăm să introduceți parola acestui profil pentru a-l configura.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Nu a fost detectat niciun serviciu de accesibilitate necunoscut.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Serviciu de accesibilitate necunoscut</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">A fost detectat un serviciu de accesibilitate necunoscut, vă rugăm să verificați dacă este sigur de utilizat:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Trimite un raport de diagnostic</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Raportul de diagnostic Olvid</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">În ultimele 7 zile: %1$d notificări push primite, dintre care %2$d au fost de înaltă prioritate (%3$d au fost reduse la o prioritate mai mică). %4$d au sosit în timp ce dispozitivul era inactiv, iar %5$d au necesitat pornirea Olvid.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Întârzierea dintre o notificare push de prioritate înaltă și notificarea mesajului: mediană %1$s, cea mai lentă %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d notificările push de înaltă prioritate nu au afișat nimic (de exemplu, modificări, reacții sau mesaje trimise de pe celelalte dispozitive) și %2$d se refereau la o conversație silențioasă sau deschisă.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Caută un emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Recente</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Reîmprospătează starea contactului</string>

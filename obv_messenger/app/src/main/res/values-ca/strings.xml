@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Mostrar un indicador d\'\"origen de confiança\" per als contactes</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Quan s\'activa, un punt de color a la seva foto de perfil indica si has verificat personalment la identitat d\'un contacte o si et van presentar-lo.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">S\'està enviant el missatge Olvid</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Rebent missatges d\'Olvid</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Avís: utilitzar un widget de dreta de pas amb un perfil ocult pot revelar l\'existència d\'aquest perfil.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Avís: utilitzar un widget d\'accés directe amb un perfil ocult pot revelar l\'existència d\'aquest perfil.\nCom a mínim, hauries de configurar una pantalla de bloqueig per restringir l\'accés a la pàgina de configuració del widget.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Aquest widget està utilitzant un perfil ocult. Si us plau, introduïu la contrasenya d\'aquest perfil per configurar-lo.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">No s\'ha detectat cap servei d\'accessibilitat desconegut.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Servei d\'accessibilitat desconegut</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">S\'ha detectat un servei d\'accessibilitat desconegut. Si us plau, comproveu que és segur d\'utilitzar:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Envia un informe de diagnòstic</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Informe de diagnòstic Olvid</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Últims 7 dies: %1$d notificacions push rebudes, de les quals %2$d són d\'alta prioritat (%3$d s\'han reduït la prioritat). %4$d van arribar mentre el dispositiu estava inactiu, %5$d van haver d\'iniciar Olvid.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Temps que transcorre entre una notificació push d\'alta prioritat i la notificació del missatge: mediana %1$s, el més lent %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d les notificacions push d\'alta prioritat no mostraven res (per exemple, edicions, reaccions o missatges enviats des d\'altres dispositius) i %2$d corresponien a una conversa silenciada o oberta.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Cerca un emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Recents</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Actualitza l\'estat del contacte</string>

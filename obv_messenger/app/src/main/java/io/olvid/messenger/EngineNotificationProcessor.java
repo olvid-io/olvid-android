@@ -64,6 +64,7 @@ import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.services.BackupCloudProviderService;
 import io.olvid.messenger.services.MDMConfigurationSingleton;
+import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class EngineNotificationProcessor implements EngineNotificationListener {
@@ -624,6 +625,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
 
                 // we finished processing a non-truncated listing
                 if (status == OwnedIdentitySynchronizationStatus.SYNCHRONIZED) {
+                    UnifiedForegroundService.PushProcessingSubService.onOwnedIdentitySynchronized(bytesOwnedIdentity);
                     App.runThread(() -> {
                         int count = db.onHoldInboxMessageDao().setExpirationOfAllWithoutExpiration(bytesOwnedIdentity, System.currentTimeMillis() + OnHoldInboxMessage.TTL);
                         if (count > 0) {

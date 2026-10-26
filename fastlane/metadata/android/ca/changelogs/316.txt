@@ -1,0 +1,1 @@
+- S'ha afegit l'opció "Envia un informe de diagnòstic" a la pantalla de resolució de problemes.

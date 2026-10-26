@@ -1,0 +1,1 @@
+- Dodata opcija „Pošalji dijagnostički izveštaj“ na ekran za rešavanje problema.

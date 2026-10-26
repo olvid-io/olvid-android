@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Ipakita ang isang \"pinagkakatiwalaang pinagmulan\" na tagapagpahiwatig para sa mga contact</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Kapag aktibo, ang isang kulay na tuldok sa kanilang larawan ay nagpapakita kung personal mong napatunayan ang pagkakakilanlan ng isang contact o kung sila ay ipinakilala sa iyo.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Ipinapadala ang mensahe ng Olvid</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Tumatanggap ng mga mensahe ng Olvid</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Babala: ang paggamit ng shortcut widget na may nakatagong profile ay maaaring ibunyag ang pagkakaroon ng profile na ito.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Babala: ang paggamit ng shortcut widget na may nakatagong profile ay maaaring ibunyag ang pagkakaroon ng profile na ito.\nBilang pinakamababang kinakailangan, dapat mong i-configure ang isang lock screen upang higpitan ang pag-access sa pahina ng configuration ng widget.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Ang widget na ito ay gumagamit ng nakatagong profile. Mangyaring ilagay ang password ng profile na ito upang i-configure ito.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Walang natukoy na hindi kilalang serbisyo ng accessibility.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Hindi kilalang serbisyo ng accessibility</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Natukoy ang isang hindi kilalang serbisyo ng accessibility. Mangyaring suriin kung ligtas itong gamitin:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Magpadala ng ulat ng pag-diagnose</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Ulat ng pagsusuri ng Olvid</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Sa nakaraang 7 araw: %1$d push notification ang natanggap, kung saan %2$d ang may mataas na priyoridad (%3$d ang nabawasan ang priyoridad). %4$d ang dumating habang naka-idle ang device, at %5$d ang kinailangang simulan ang Olvid.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Pagitan ng mataas na prayoridad na push notification at ng notification ng mensahe: median %1$s, pinakamabagal %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d Ang mga push notification na may mataas na priyoridad ay walang ipinapakita (halimbawa, mga pagbabago, reaksyon, o mga mensahe na ipinadala mula sa iyong iba pang mga device) at %2$d ay para sa isang naka-mute o bukas na pag-uusap.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Maghanap ng emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Kamakailan</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">I-refresh ang status ng contact</string>

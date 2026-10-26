@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">ಸಂಪರ್ಕಗಳಿಗಾಗಿ \"ವಿಶ್ವಾಸಾರ್ಹ ಮೂಲ\" ಸೂಚಕವನ್ನು ತೋರಿಸು</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">ಇದನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, ಅವರ ಪ್ರೊಫೈಲ್ ಚಿತ್ರದಲ್ಲಿನ ಬಣ್ಣದ ಚುಕ್ಕಿ, ನೀವು ವೈಯಕ್ತಿಕವಾಗಿ ಒಂದು ಸಂಪರ್ಕದ ಗುರುತನ್ನು ಪರಿಶೀಲಿಸಿದ್ದೀರಾ ಅಥವಾ ಅವರು ನಿಮಗೆ ಪರಿಚಯಿಸಲ್ಪಟ್ಟಿದ್ದಾರೆಯೇ ಎಂದು ಸೂಚಿಸುತ್ತದೆ.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">ಒಲ್ವಿಡ್ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">ಒಲ್ವಿಡ್ ಸಂದೇಶಗಳನ್ನು ಸ್ವೀಕರಿಸಲಾಗುತ್ತಿದೆ</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">ಎಚ್ಚರಿಕೆ: ಗುಪ್ತ ಪ್ರೊಫೈಲ್‌ನೊಂದಿಗೆ ಶಾರ್ಟ್‌ಕಟ್ ವಿಡ್ಜೆಟ್ ಅನ್ನು ಬಳಸುವುದರಿಂದ ಈ ಪ್ರೊಫೈಲ್‌ನ ಅಸ್ತಿತ್ವವನ್ನು ಬಹಿರಂಗಪಡಿಸಬಹುದು.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">ಎಚ್ಚರಿಕೆ: ಗುಪ್ತ ಪ್ರೊಫೈಲ್‌ನೊಂದಿಗೆ ಶಾರ್ಟ್‌ಕಟ್ ವಿಡ್ಜೆಟ್ ಅನ್ನು ಬಳಸುವುದರಿಂದ ಈ ಪ್ರೊಫೈಲ್‌ನ ಅಸ್ತಿತ್ವವನ್ನು ಬಹಿರಂಗಪಡಿಸಬಹುದು.\nಕನಿಷ್ಠ, ನೀವು ವಿಡ್ಜೆಟ್ ಕಾನ್ಫಿಗರೇಶನ್ ಪುಟಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ನಿರ್ಬಂಧಿಸಲು ಲಾಕ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಬೇಕು.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">ಈ ವಿಜೆಟ್ ಒಂದು ಗುಪ್ತ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬಳಸುತ್ತಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಲು ಈ ಪ್ರೊಫೈಲ್‌ನ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ನಮೂದಿಸಿ.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">ಯಾವುದೇ ಅಜ್ಞಾತ ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಯನ್ನು ಪತ್ತೆ ಮಾಡಲಾಗಿಲ್ಲ.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">తెలియని ઍક્સેસિಬಿಲಿಟಿ સેવા</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">ಒಂದು ಅಜ್ಞಾತ ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಯನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗಿದೆ, ದಯವಿಟ್ಟು ಅದನ್ನು ಬಳಸಲು ಸುರಕ್ಷಿತವಾಗಿದೆ ಎಂದು ಪರಿಶೀಲಿಸಿ:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">ರೋಗನಿರ್ಣಯ ವರದಿಯನ್ನು ಕಳುಹಿಸಿ</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">ಒಲ್ವಿಡ್ ಡಯಾಗ್ನೋಸ್ಟಿಕ್ ರಿಪೋರ್ಟ್</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">ಕಳೆದ 7 ದಿನಗಳಲ್ಲಿ: %1$d ಪುಶ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಸ್ವೀಕರಿಸಲಾಗಿದೆ, ಅವುಗಳಲ್ಲಿ %2$d ಹೆಚ್ಚಿನ ಪ್ರಾಮುಖ್ಯತೆಯ ಅಧಿಸೂಚನೆಗಳು (%3$d ಕಡಿಮೆ ಪ್ರಾಮುಖ್ಯತೆಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ). %4$d ಅಧಿಸೂಚನೆಗಳು ಸಾಧನ ನಿಷ್ಕ್ರಿಯವಾಗಿರುವಾಗ ಬಂದವು ಮತ್ತು %5$d ಅಧಿಸೂಚನೆಗಳಿಗೆ Olvid ಅನ್ನು ಪ್ರಾರಂಭಿಸಬೇಕಾಯಿತು.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">ಹೆಚ್ಚಿನ ಆದ್ಯತೆಯ ಪುಶ್ ಅಧಿಸೂಚನೆ ಮತ್ತು ಸಂದೇಶ ಅಧಿಸೂಚನೆ ನಡುವಿನ ವಿಳಂಬ: ಮಧ್ಯಮ %1$s, ನಿಧಾನಗತಿ %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d ಹೆಚ್ಚಿನ ಆದ್ಯತೆಯ ಪುಶ್ ಅಧಿಸೂಚನೆಗಳು ಏನನ್ನೂ ತೋರಿಸಲಿಲ್ಲ (ಉದಾಹರಣೆಗೆ, ನಿಮ್ಮ ಇತರ ಸಾಧನಗಳಿಂದ ಕಳುಹಿಸಲಾದ ಸಂಪಾದನೆಗಳು, ಪ್ರತಿಕ್ರಿಯೆಗಳು ಅಥವಾ ಸಂದೇಶಗಳು) ಮತ್ತು %2$d ಮ್ಯೂಟ್ ಮಾಡಲಾದ ಅಥವಾ ತೆರೆದಿರುವ ಚರ್ಚೆಗೆ ಸಂಬಂಧಿಸಿದವು.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">ಒಂದು ಎಮೋಜಿಗಾಗಿ ಹುಡುಕಿ</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">ಇತ್ತೀಚಿನ</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">ಸಂಪರ್ಕದ ಸ್ಥಿತಿಯನ್ನು ನವೀಕರಿಸಿ</string>

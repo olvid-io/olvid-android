@@ -1,0 +1,1 @@
+- Lisati funktsioon „Saada diagnostikaraaport” tõrkeotsingu ekraanile.

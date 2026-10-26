@@ -92,6 +92,7 @@ import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.services.AvailableSpaceHelper;
 import io.olvid.messenger.settings.SettingsActivity;
+import io.olvid.messenger.troubleshooting.PushDiagnostics;
 import io.olvid.messenger.webrtc.WebrtcCallActivity;
 
 @SuppressLint("UnspecifiedImmutableFlag")
@@ -336,6 +337,10 @@ public class AndroidNotificationManager {
 
     private static int getCurrentMessageChannelVersion() {
         return App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE).getInt(KEY_MESSAGE_NOTIFICATION_CHANNEL_VERSION, 0);
+    }
+
+    public static String getMessageNotificationChannelId() {
+        return MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion();
     }
 
     private static void setCurrentMessageChannelVersion(int value) {
@@ -672,79 +677,93 @@ public class AndroidNotificationManager {
     @SuppressLint("MissingPermission")
     public static void displayReceivedMessageNotification(@NonNull Discussion discussion, @Nullable Message message, @Nullable Contact contact, @Nullable OwnedIdentity ownedIdentity) {
         executor.execute(() -> {
-            if ((currentShowingDiscussionId != null) && (discussion.id == currentShowingDiscussionId)) {
-                return;
+            PushDiagnostics.Outcome outcome = showReceivedMessageNotification(discussion, message, contact, ownedIdentity);
+            if (outcome != null) {
+                PushDiagnostics.recordMessageNotification(outcome);
             }
-            boolean isMentioned = message != null && message.mentioned;
-            boolean unarchiveNeeded = discussion.archived && SettingsActivity.getUnarchiveDiscussionOnNotification();
-            DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussion.id);
-            if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications(isMentioned)) {
-                return;
-            }
-            if (ownedIdentity != null && ownedIdentity.shouldMuteNotifications(isMentioned)) {
-                if (ownedIdentity.shouldShowNeutralNotification(isMentioned)) {
-                    displayNeutralNotification();
-                    if (unarchiveNeeded) {
-                        unarchiveDiscussionAndAutoDownloadAttachmentsIfNeeded(discussion, message);
-                    }
-                }
-                return;
-            }
-            if (SettingsActivity.isNotificationContentHidden()) {
-                displayNeutralNotification();
-                if (unarchiveNeeded) {
-                    unarchiveDiscussionAndAutoDownloadAttachmentsIfNeeded(discussion, message);
-                }
-                return;
-            }
+        });
+    }
 
-            JsonPojoDiscussionNotification discussionNotification;
-            if (message == null) {
-                discussionNotification = loadDiscussionNotification(discussion.id);
-            } else {
-                discussionNotification = addMessageNotification(discussion, message, contact, ownedIdentity);
+    // returns what was decided for the message, for PushDiagnostics
+    @SuppressLint("MissingPermission")
+    @Nullable
+    private static PushDiagnostics.Outcome showReceivedMessageNotification(@NonNull Discussion discussion, @Nullable Message message, @Nullable Contact contact, @Nullable OwnedIdentity ownedIdentity) {
+        if ((currentShowingDiscussionId != null) && (discussion.id == currentShowingDiscussionId)) {
+            return PushDiagnostics.Outcome.DISCUSSION_OPEN;
+        }
+        boolean isMentioned = message != null && message.mentioned;
+        boolean unarchiveNeeded = discussion.archived && SettingsActivity.getUnarchiveDiscussionOnNotification();
+        DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussion.id);
+        if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications(isMentioned)) {
+            return PushDiagnostics.Outcome.DISCUSSION_MUTED;
+        }
+        if (ownedIdentity != null && ownedIdentity.shouldMuteNotifications(isMentioned)) {
+            if (!ownedIdentity.shouldShowNeutralNotification(isMentioned)) {
+                return PushDiagnostics.Outcome.PROFILE_MUTED;
             }
-            if (discussionNotification == null) {
-                clearReceivedMessageAndReactionsNotification(discussion.id);
-                return;
-            }
+            displayNeutralNotification();
             if (unarchiveNeeded) {
                 unarchiveDiscussionAndAutoDownloadAttachmentsIfNeeded(discussion, message);
             }
-
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-            NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(notificationManager, discussion, discussionCustomization, discussionNotification, contact != null);
-
-            populateMessageNotificationBuilder(builder, discussion, discussionNotification);
-
-            if (ownedIdentity != null && ownedIdentity.isHidden()) {
-                hiddenIdentityNotificationDiscussionIdsToClear.add(discussion.id);
+            return PushDiagnostics.Outcome.NEUTRAL_NOTIFICATION;
+        }
+        if (SettingsActivity.isNotificationContentHidden()) {
+            displayNeutralNotification();
+            if (unarchiveNeeded) {
+                unarchiveDiscussionAndAutoDownloadAttachmentsIfNeeded(discussion, message);
             }
+            return PushDiagnostics.Outcome.NEUTRAL_NOTIFICATION;
+        }
 
-            int notificationId = getMessageNotificationId(discussion.id);
+        JsonPojoDiscussionNotification discussionNotification;
+        if (message == null) {
+            discussionNotification = loadDiscussionNotification(discussion.id);
+        } else {
+            discussionNotification = addMessageNotification(discussion, message, contact, ownedIdentity);
+        }
+        if (discussionNotification == null) {
+            clearReceivedMessageAndReactionsNotification(discussion.id);
+            return null;
+        }
+        if (unarchiveNeeded) {
+            unarchiveDiscussionAndAutoDownloadAttachmentsIfNeeded(discussion, message);
+        }
 
-            try {
-                notificationManager.notify(notificationId, builder.build());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            if (contact != null) {
-                if (messageLastVibrationTimestamp.containsKey(notificationId)) {
-                    Long timestamp = messageLastVibrationTimestamp.get(notificationId);
-                    if (timestamp == null || timestamp < (System.currentTimeMillis() - DELAY_BETWEEN_SAME_CHANNEL_VIBRATE)) {
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                            vibrate(discussionCustomization);
-                        }
-                        messageLastVibrationTimestamp.put(notificationId, System.currentTimeMillis());
-                    }
-                } else {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+        NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(notificationManager, discussion, discussionCustomization, discussionNotification, contact != null);
+
+        populateMessageNotificationBuilder(builder, discussion, discussionNotification);
+
+        if (ownedIdentity != null && ownedIdentity.isHidden()) {
+            hiddenIdentityNotificationDiscussionIdsToClear.add(discussion.id);
+        }
+
+        int notificationId = getMessageNotificationId(discussion.id);
+
+        PushDiagnostics.Outcome outcome = null;
+        try {
+            notificationManager.notify(notificationId, builder.build());
+            outcome = PushDiagnostics.Outcome.NOTIFIED;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (contact != null) {
+            if (messageLastVibrationTimestamp.containsKey(notificationId)) {
+                Long timestamp = messageLastVibrationTimestamp.get(notificationId);
+                if (timestamp == null || timestamp < (System.currentTimeMillis() - DELAY_BETWEEN_SAME_CHANNEL_VIBRATE)) {
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                         vibrate(discussionCustomization);
                     }
                     messageLastVibrationTimestamp.put(notificationId, System.currentTimeMillis());
                 }
+            } else {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    vibrate(discussionCustomization);
+                }
+                messageLastVibrationTimestamp.put(notificationId, System.currentTimeMillis());
             }
-        });
+        }
+        return outcome;
     }
 
 

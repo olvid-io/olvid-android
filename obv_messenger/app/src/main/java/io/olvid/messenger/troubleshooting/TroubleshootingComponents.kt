@@ -51,8 +51,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -262,51 +260,28 @@ fun RestartAppButton() {
 
 
 @Composable
-fun FaqLinkHeader(openFaq: () -> Unit, onBack: () -> Unit) {
-    Box(
+fun FaqLinkHeader(openFaq: () -> Unit) {
+    Text(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(end = 16.dp),
-    ) {
-        IconButton(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(start = 6.dp, top = 8.dp)
-                .size(40.dp),
-            onClick = onBack
-        ) {
-            Icon(
-                modifier = Modifier.size(24.dp),
-                painter = painterResource(id = R.drawable.ic_arrow_back_white),
-                tint = colorResource(id = R.color.almostBlack),
-                contentDescription = stringResource(R.string.content_description_back_button)
-            )
-        }
-
-        Text(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(horizontal = 54.dp)
-                .padding(top = 14.dp)
-                .widthIn(max = 400.dp),
-            text = buildAnnotatedString {
-                append(stringResource(id = R.string.troubleshooting_faq_description))
-                append("\n\n")
-                withLink(
-                    LinkAnnotation.Clickable(
-                        tag = "",
-                        styles = TextLinkStyles(SpanStyle(color = colorResource(id = R.color.olvid_gradient_light))),
-                        linkInteractionListener = { openFaq() }
-                    ),
-                ) {
-                    append(stringResource(id = R.string.troubleshooting_faq_link))
-                }
-            },
-            textAlign = TextAlign.Center,
-            color = colorResource(id = R.color.almostBlack),
-            style = OlvidTypography.body1,
-        )
-    }
+            .padding(horizontal = 16.dp)
+            .widthIn(max = 400.dp),
+        text = buildAnnotatedString {
+            append(stringResource(id = R.string.troubleshooting_faq_description))
+            append("\n\n")
+            withLink(
+                LinkAnnotation.Clickable(
+                    tag = "",
+                    styles = TextLinkStyles(SpanStyle(color = colorResource(id = R.color.olvid_gradient_light))),
+                    linkInteractionListener = { openFaq() }
+                ),
+            ) {
+                append(stringResource(id = R.string.troubleshooting_faq_link))
+            }
+        },
+        textAlign = TextAlign.Center,
+        color = colorResource(id = R.color.almostBlack),
+        style = OlvidTypography.body1,
+    )
 }
 
 
@@ -522,7 +497,7 @@ fun TroubleShootItemPreview() {
 @Preview
 @Composable
 fun FaqLinkPreview() {
-    FaqLinkHeader({}, {})
+    FaqLinkHeader {}
 }
 
 

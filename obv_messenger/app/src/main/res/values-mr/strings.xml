@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">संपर्कांसाठी \"विश्वसनीय स्त्रोत\" दर्शक दर्शवा</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">सक्रिय केल्यावर, त्यांच्या प्रोफाइल चित्रावरील रंगीत बिंदू दर्शवेल की तुम्ही स्वतःहून एखाद्या संपर्काच्या ओळखीची पडताळणी केली आहे की ते तुम्हाला सादर केले गेले होते.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">ओल्विड संदेश पाठवत आहे</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">ओल्विड संदेश प्राप्त होत आहेत</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">इशारा: लपवलेल्या प्रोफाइलसह शॉर्टकट विजेट वापरल्याने या प्रोफाइलचे अस्तित्व उघड होऊ शकते.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">इशारा: लपवलेल्या प्रोफाइलसह शॉर्टकट विजेट वापरल्याने त्या प्रोफाइलचे अस्तित्व उघड होऊ शकते.\nकिमान, विजेट कॉन्फिगरेशन पृष्ठावरील प्रवेश प्रतिबंधित करण्यासाठी तुम्ही लॉक स्क्रीन कॉन्फिगर करणे आवश्यक आहे.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">हे विजेट एक लपलेले प्रोफाइल वापरत आहे. कृपया हे प्रोफाइल कॉन्फिगर करण्यासाठी या प्रोफाइलचा पासवर्ड प्रविष्ट करा.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">कोणतीही अज्ञात ॲक्सेसिबिलिटी सेवा आढळली नाही.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">अज्ञात ॲक्सेसिबिलिटी सेवा</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">एक अज्ञात ॲक्सेसिबिलिटी सेवा आढळली आहे, कृपया ती वापरण्यासाठी सुरक्षित आहे का ते तपासा:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">निदान अहवाल पाठवा</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">ओल्विड निदान अहवाल</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">गेल्या ७ दिवसांत: %1$d पुश सूचना प्राप्त झाल्या, त्यापैकी %2$d उच्च प्राधान्याच्या (%3$d कमी प्राधान्यीकृत). %4$d सूचना डिव्हाइस निष्क्रिय असताना आल्या, आणि %5$d वेळा ओल्विड सुरू करावे लागले.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">उच्च प्राधान्य असलेल्या पुश नोटिफिकेशन आणि संदेश नोटिफिकेशनमधील विलंब: मध्यक %1$s, सर्वात जास्त विलंब %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d उच्च प्राधान्य असलेल्या पुश सूचनांमध्ये काहीही दिसत नाही (उदाहरणार्थ, तुमच्या इतर उपकरणांमधून पाठवलेले संपादन, प्रतिक्रिया किंवा संदेश) आणि %2$d हे शांत किंवा उघड्या चर्चेसाठी होते.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">इमोजी शोधा</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">अलीकडील</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">संपर्क स्थिती रीफ्रेश करा</string>

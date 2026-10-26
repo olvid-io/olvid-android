@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">הצג אינדיקטור "מקור אמון" עבור אנשי קשר</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">כאשר מופעל, נקודה צבעונית על תמונת הפרופיל שלהם מציינת האם אימתת באופן אישי את זהות איש הקשר או שהוצג לך.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">הודעת Olvid נשלחת</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">הודעות Olvid מתקבלות</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">אזהרה: שימוש בקיצור דרך עם פרופיל מוסתר עלול לחשוף את קיומו של פרופיל זה.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">אזהרה: שימוש בקיצור דרך עם פרופיל מוסתר עלול לחשוף את קיומו של פרופיל זה.\nלפחות, עליך להגדיר מסך נעילה כדי להגביל את הגישה לדף תצורת הווידג\'ט.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">הווידג\'ט הזה משתמש בפרופיל מוסתר. אנא הזן את הסיסמה של הפרופיל הזה כדי להגדיר אותו.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">לא זוהו שירותי נגישות לא ידועים.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">שירות נגישות לא ידוע</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">זוהתה שירות נגישות לא ידוע. אנא בדוק שהוא בטוח לשימוש:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">שלח דוח אבחון</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">דוח אבחון Olvid</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">בשבעת הימים האחרונים: %1$d הודעות דחיפה שהתקבלו, מתוכן %2$d בעלות עדיפות גבוהה (%3$d הופחתו בעדיפות). %4$d הגיעו בזמן שהמכשיר היה במצב המתנה, %5$d דרשו הפעלה של Olvid.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">השהייה בין הודעת דחיפה בעדיפות גבוהה להודעת ההודעה: חציון %1$s, האיטי ביותר %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d הודעות דחיפה בעדיפות גבוהה לא הציגו דבר (לדוגמה, עריכות, תגובות או הודעות שנשלחו מהמכשירים האחרים שלך) ו-%2$d היו עבור שיחה מושתקת או פתוחה.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">חפש אמוג\'י</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">האחרונים</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">רענן את סטטוס איש הקשר</string>

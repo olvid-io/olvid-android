@@ -1,0 +1,1 @@
+- Sorun giderme ekranına "Tanılama raporu gönder" seçeneği eklendi.

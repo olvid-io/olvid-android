@@ -14,8 +14,8 @@ plugins {
 
 val os: OperatingSystem? = OperatingSystem.current()
 
-val appVersionCode = 315
-val appVersionName = "4.6.1"
+val appVersionCode = 316
+val appVersionName = "4.6.2"
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")

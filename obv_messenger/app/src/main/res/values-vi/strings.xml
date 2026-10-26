@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Hiển thị chỉ báo \"nguồn tin cậy\" cho danh bạ</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Khi được kích hoạt, một chấm màu trên ảnh đại diện của họ cho biết bạn đã xác minh danh tính của liên hệ đó hay họ đã được giới thiệu cho bạn.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Đang gửi tin nhắn Olvid</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Đang nhận tin nhắn Olvid</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Cảnh báo: Sử dụng widget phím tắt với một hồ sơ ẩn có thể tiết lộ sự tồn tại của hồ sơ này.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Cảnh báo: việc sử dụng widget phím tắt với một hồ sơ ẩn có thể tiết lộ sự tồn tại của hồ sơ này.\nÍt nhất, bạn nên cấu hình màn hình khóa để hạn chế quyền truy cập vào trang cấu hình widget.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Tiện ích này đang sử dụng một hồ sơ ẩn. Vui lòng nhập mật khẩu của hồ sơ này để cấu hình.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Không phát hiện dịch vụ hỗ trợ truy cập không xác định.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Dịch vụ hỗ trợ tiếp cận không xác định</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Đã phát hiện một dịch vụ hỗ trợ tiếp cận không xác định. Vui lòng kiểm tra xem nó có an toàn khi sử dụng không:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Gửi báo cáo chẩn đoán</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Báo cáo chẩn đoán Olvid</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">7 ngày qua: %1$d thông báo đẩy đã được nhận, trong đó %2$d là thông báo ưu tiên cao (%3$d đã được giảm mức ưu tiên). %4$d thông báo đến khi thiết bị ở chế độ chờ, %5$d thông báo yêu cầu khởi động Olvid.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Độ trễ giữa thông báo đẩy ưu tiên cao và thông báo tin nhắn: trung bình %1$s, chậm nhất %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d thông báo đẩy ưu tiên cao không hiển thị gì (ví dụ: chỉnh sửa, phản hồi hoặc tin nhắn được gửi từ các thiết bị khác của bạn) và %2$d là dành cho một cuộc trò chuyện bị tắt tiếng hoặc mở.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Tìm biểu tượng cảm xúc</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Gần đây</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Làm mới trạng thái liên hệ</string>

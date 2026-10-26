@@ -1387,6 +1387,7 @@ Kontak asseblief jou administrateur vir meer besonderhede.</string>
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Wys \'n \"vertroubare bron\"-aanduider vir kontakte</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Wanneer geaktiveer, dui \'n gekleurde kol op hul profiel aan of jy die identiteit van \'n kontak self verifieer het, of dat hulle aan jou voorgestel is.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Olvid-boodskap besig om gestuur te word</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Olvid-boodskappe word ontvang</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Waarskuwing: die gebruik van \'n kitsikket met \'n versteekte profiel kan die bestaan van hierdie profiel bekend maak.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Waarskuwing: die gebruik van \'n kitsikortpad met \'n versteekte profiel kan die bestaan van hierdie profiel bekend maak.\nMinstens moet jy \'n sluitskerm opstel om toegang tot die kortpadkonfigurasieblad te beperk.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Hierdie widget gebruik \'n versteekte profiel. Voer asseblief hierdie profiel se wagwoord in om dit te konfigureer.</string>
@@ -2248,6 +2249,11 @@ Olvid sal nie toegang hê tot enige van u lêers op Google Drive nie.</string>
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Geen onbekende toegankingsdiens opgespoor.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Onbekende toeganklikheidsdiens</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">\'n Onbekende toegankingsdiens is opgespoor. Gaan asseblief na of dit veilig is om te gebruik:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Stuur \'n diagnostiese verslag</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Olvid-diagnostiese verslag</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Laaste 7 dae: %1$d stootkennisgewings ontvang, waarvan %2$d van hoë prioriteit (%3$d is van prioriteit ontdaan). %4$d het aangekom toe die toestel in die slaapmodus was, %5$d moes Olvid begin.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Vertraging tussen \'n hoëprioriteit-kennisgewing en die boodskap-kennisgewing: mediaan %1$s, stadigste %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d hoëprioriteit-kennisgewings het niks gewys nie (byvoorbeeld wysigings, reaksies of boodskappe wat vanaf jou ander toestelle gestuur is) en %2$d was vir \'n gedempte of oop gesprek.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Soek \'n emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Onlangse</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Kontakstatus verfris</string>

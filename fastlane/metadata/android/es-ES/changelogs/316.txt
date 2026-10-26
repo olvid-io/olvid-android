@@ -1,0 +1,1 @@
+- Se agregó una opción para "Enviar un informe de diagnóstico" desde la pantalla de solución de problemas.

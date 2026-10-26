@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">为联系人显示“信任来源”指示器</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">启用后，对方头像上的彩色点会显示您是亲自验证了联系人的身份，还是对方是通过其他方式向您展示的。</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Olvid消息发送中</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">正在接收 Olvid 消息</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">警告：在小部件中使用隐藏的资料可能会泄露该资料的存在。</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">警告：使用隐藏资料的快捷方式小部件可能会泄露该资料的存在。\n至少，您应该配置锁屏以限制对小部件配置页面的访问。</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">此小部件使用了隐藏的资料。请输入该资料的密码以进行配置。</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">未检测到未知辅助服务。</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">未知辅助服务</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">检测到未知辅助服务，请检查其安全性。</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">发送诊断报告</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Olvid 诊断报告</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">过去 7 天：收到 %1$d 条推送通知，其中 %2$d 条为高优先级通知（%3$d 条优先级已降低）。%4$d 条通知在设备空闲时收到，%5$d 次需要启动 Olvid。</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">高优先级推送通知和消息通知之间的延迟：中位数 %1$s，最慢 %2$s。</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d 高优先级推送通知未显示任何内容（例如，来自您其他设备的编辑、反应或消息），并且%2$d 是关于已静音或公开的对话。</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">搜索表情符号</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">最近</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">刷新联系人状态</string>

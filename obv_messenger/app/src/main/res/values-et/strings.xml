@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Kuva kontaktide jaoks „usaldusväärse allika” indikaator</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Kui see on aktiveeritud, näitab värviline punkt nende profiilipildil, kas olete isiklikult kontrollinud kontakti identiteeti või kas see kontakt on teile esitatud.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Olvid-sõnumi saatmine</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Olvid-sõnumite vastuvõtmine</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Hoiatus: peidetud profiiliga kiirjuurdepääsu vidina kasutamine võib paljastada selle profiili olemasolu.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Hoiatus: varjatud profiili kasutamine kiirjuurdepääsu vidinas võib paljastada selle profiili olemasolu.\nVähemalt peaksite seadistama lukustuskuva, et piirata juurdepääsu vidina seadete lehele.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">See vidin on kasutusele võtnud peidetud profiili. Palun sisestage selle profiili parool, et seda konfigureerida.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Ühtegi tundmatut juurdepääsuteenust ei leitud.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Tundmatu juurdepääsuteenus</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Tuvastati tundmatu juurdepääsuteenus. Palun kontrollige, kas seda on ohutu kasutada:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Saada diagnostiline aruanne</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Olvid diagnostika aruanne</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Viimased 7 päeva: vastu võetud %1$d tõuketeatist, neist %2$d on kõrge prioriteediga (%3$d on prioriteeti alandatud). %4$d teade saabus, kui seade oli ooterežiimis, %5$d teade nõudis Olvidi käivitamist.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Ajavahe kõrge prioriteediga tõuketeatise ja sõnumiteatise vahel: mediaan %1$s, aeglaseim %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d kõrge prioriteediga tõuketeatised ei näidanud midagi (näiteks muudatusi, reaktsioone või sõnumeid, mis on saadetud teie teistest seadmetest) ja %2$d olid seotud vaigistatud või avatud vestlusega.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Otsi emotikoni</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Viimased</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Värskenda kontakti olekut</string>

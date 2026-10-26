@@ -1,0 +1,1 @@
+- Přidána možnost "Odeslat diagnostickou zprávu" do nabídky řešení problémů.

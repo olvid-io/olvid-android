@@ -1,0 +1,1 @@
+- Pridaná možnosť „Poslať diagnostický report“ na obrazovku na riešenie problémov.

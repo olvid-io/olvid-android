@@ -1386,6 +1386,7 @@
     <string name="pref_show_trust_levels_title">Afficher un indicateur de «\u00a0source de confiance\u00a0» des contacts</string>
     <string name="pref_show_trust_levels_summary">Une fois activé, un point de couleur sur leur portrait permet de distinguer les contacts dont vous avez vous-même vérifié l\'identité de ceux qui vous ont été présentés</string>
     <string name="notification_title_sending_message">Envoi de message Olvid en cours</string>
+    <string name="notification_title_receiving_messages">Réception de messages Olvid en cours</string>
     <string name="dialog_message_widget_open_hidden_profile_warning">Attention\u00a0: l\'utilisation d\'un profil masqué dans un widget pourrait dévoiler l\'existence de ce profil.</string>
     <string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen">Attention\u00a0: l\'utilisation d\'un profil masqué dans un widget pourrait dévoiler l\'existence de ce profil.\nAu minimum, vous devriez configurer un écran de verrouillage afin de protéger l\'accès à la page de configuration du widget.</string>
     <string name="dialog_message_widget_open_initial_hidden_profile">Ce widget utilise un profil masqué. Veuillez saisir le mot de passe du profil afin de le configurer.</string>
@@ -2245,6 +2246,11 @@
     <string name="troubleshooting_accessibility_services_valid_description">Aucun service d\'accessibilité inconnu détecté.</string>
     <string name="troubleshooting_accessibility_services_invalid_title">Service d\'accessibilité inconnu</string>
     <string name="troubleshooting_accessibility_services_invalid_description">Un service d\'accessibilité inconnu a été détecté. Veuillez vérifier s\'il peut être utilisé en toute sécurité :</string>
+    <string name="troubleshooting_send_report">Envoyer un rapport de diagnostic</string>
+    <string name="troubleshooting_report_subject">Rapport de diagnostic Olvid</string>
+    <string name="troubleshooting_push_summary">7 derniers jours\u00a0: %1$d notifications push reçues, dont %2$d de priorité haute (%3$d dépriorisées). %4$d sont arrivées pendant la mise en veille de l\'appareil, %5$d ont dû démarrer Olvid.</string>
+    <string name="troubleshooting_push_delay">Délai entre une notification push de priorité haute et la notification du message\u00a0: médiane %1$s, maximum %2$s.</string>
+    <string name="troubleshooting_push_without_notification">%1$d notifications push de priorité haute n\'ont rien affiché (par exemple des modifications, des réactions ou des messages envoyés depuis vos autres appareils) et %2$d concernaient une discussion en sourdine ou ouverte.</string>
     <string name="hint_search_emoji">Rechercher un émoji</string>
     <string name="label_emoji_recents">Récents</string>
     <string name="menu_action_refresh_status">Actualiser le contact</string>

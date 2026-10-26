@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">為聯絡人顯示「信任來源」指示器</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">啟用後，對方頭像上的彩色點號會顯示您是親自驗證了對方的身分，還是對方是由他人向您介紹的。</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Olvid訊息正在發送</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">正在接收 Olvid 消息</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">警告：使用隱藏個人資料的捷徑小工具可能會洩漏此個人資料的存在。</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">警告：使用隱藏個人資料的快捷方式小工具可能會洩漏該個人資料的存在。\n至少，您應該設定鎖定畫面以限制對小工具設定頁面的存取。</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">這個小工具正在使用隱藏的個人檔案。請輸入此個人檔案的密碼以進行設定。</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">未偵測到未知輔助服務。</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">未知輔助服務</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">偵測到未知的輔助服務，請檢查其安全性。</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">發送診斷報告</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Olvid 診斷報告</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">過去 7 天：收到 %1$d 條推送通知，其中 %2$d 條為高優先級通知（%3$d 條優先級已降低）。%4$d 條通知在設備空閒時收到，%5$d 次需要啟動 Olvid。</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">高優先順序推送通知和訊息通知之間的延遲：中位數 %1$s，最慢 %2$s 。</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d 高優先級推送通知沒有顯示任何內容（例如，來自您其他裝置的編輯、反應或訊息），並且%2$d 是關於已靜音或公開的對話。</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">搜尋表情符號</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">最近</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">更新聯絡人狀態</string>

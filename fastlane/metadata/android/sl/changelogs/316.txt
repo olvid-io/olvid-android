@@ -1,0 +1,1 @@
+- Dodana možnost »Pošlji diagnostično poročilo« na zaslon za odpravljanje težav.

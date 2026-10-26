@@ -1,0 +1,1 @@
+- Lade till en funktion för att skicka en diagnostisk rapport från felsökningsskärmen.

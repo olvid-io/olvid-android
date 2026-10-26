@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">連絡先に対して「信頼の出所」インジケーターを表示する</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">有効にすると、相手のプロフィール写真に色付きの点が表示され、あなたが連絡先の身元を個人的に確認したか、相手があなたに紹介されたかどうかが示されます。</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Olvidメッセージ送信中</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Olvidメッセージを受信中</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">警告：非表示のプロフィールでショートカットウィジェットを使用すると、このプロフィールの存在が明らかになる可能性があります。</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">警告：非表示のプロフィールでショートカットウィジェットを使用すると、そのプロフィールの存在が明らかになる可能性があります。\n最低限、ウィジェット設定ページへのアクセスを制限するために、ロック画面を設定する必要があります。</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">このウィジェットは隠されたプロファイルを使用しています。設定するには、このプロファイルのパスワードを入力してください。</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">不明なアクセシビリティサービスは検出されませんでした。</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">不明なアクセシビリティサービス</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">不明なアクセシビリティサービスが検出されました。安全に使用できるか確認してください。</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">診断レポートを送信する</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">オルビッド診断レポート</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">過去7日間：%1$d件のプッシュ通知を受信。そのうち、%2$d件が高優先度（%3$d件は優先度が下げられました）。%4$d件はデバイスがアイドル状態の間に受信され、%5$d件はOlvidを起動する必要がありました。</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">高優先度のプッシュ通知とメッセージ通知の間の遅延：中央値%1$s、最も遅い%2$s。</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d 優先度の高いプッシュ通知に何も表示されませんでした（たとえば、他のデバイスから送信された編集、リアクション、またはメッセージなど）。%2$d は、ミュートされた会話または開いている会話に関するものでした。</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">絵文字を検索</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">最近</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">連絡先のステータスを更新</string>

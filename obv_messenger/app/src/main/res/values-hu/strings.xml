@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Megjelenít egy „megbízható forrás” jelzőt a kontaktok számára</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Ha bekapcsolja, egy színes pont jelenik meg a profilképükön, amely jelzi, hogy személyesen ellenőrizte-e a kapcsolat azonosítóját, vagy bemutatták Önnek.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Olvid üzenet küldése</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Az Olvid üzenetek fogadása folyamatban</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Figyelem: Ha rejtett profilt használ egy gyorsbillentyű widgettel, az felfedheti a profil létezését.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Figyelem: egy rejtett profillal rendelkező gyorsbillentyű widget használata felfedheti ennek a profilnak a létezését.\nLegalábbis be kell állítania egy képernyőzárást a widget konfigurációs oldalának hozzáférésének korlátozása érdekében.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Ez a widget egy rejtett profilt használ. Kérjük, adja meg a profil jelszavát a konfiguráláshoz.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Nem találtunk ismeretlen akadálymentesítési szolgáltatást.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Ismeretlen akadálymentesítési szolgáltatás</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Egy ismeretlen akadálymentesítési szolgáltatást észleltünk, kérjük ellenőrizze, hogy biztonságos-e a használata:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Diagnosztikai jelentés küldése</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Olvid diagnosztikai jelentés</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Az elmúlt 7 napban: %1$d push értesítést fogadott, amelyek közül %2$d volt magas prioritású (%3$d alacsonyabb prioritásúra állítva). %4$d értesítés akkor érkezett, amikor a készülék készenléti állapotban volt, és %5$d esetén az Olvid alkalmazást kellett elindítani.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">A magas prioritású push-értesítés és az üzenetértesítés közötti késés: medián %1$s, leglassabb %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">A %1$d magas prioritású push-értesítések nem jelenítettek meg semmit (például szerkesztéseket, reakciókat vagy más eszközökről küldött üzeneteket), és a %2$d egy némított vagy nyitott beszélgetéshez kapcsolódott.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Emoji keresése</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Legutóbbi</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Frissítsd a kapcsolat állapotát</string>

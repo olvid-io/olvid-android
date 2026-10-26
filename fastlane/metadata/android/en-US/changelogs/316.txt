@@ -1,0 +1,1 @@
+- Added a "Send a diagnostic report" action to the troubleshooting screen.

@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Toon een \"vertrouwbaarheidsindicator\" voor contacten</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Wanneer geactiveerd, geeft een gekleurde punt op hun profielfoto aan of je de identiteit van een contactpersoon persoonlijk hebt geverifieerd of dat deze aan je is voorgesteld.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Olvid-bericht wordt verzonden</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Olvid-berichten worden ontvangen</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Waarschuwing: het gebruik van een sneltoetswidget met een verborgen profiel kan het bestaan van dit profiel onthullen.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Waarschuwing: het gebruik van een snelkoppelingwidget met een verborgen profiel kan het bestaan van dit profiel onthullen.\nConfigureer minimaal een vergrendelscherm om de toegang tot de widgetconfiguratiepagina te beperken.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Deze widget gebruikt een verborgen profiel. Voer het wachtwoord van dit profiel in om het te configureren.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Er is geen onbekende toegankelijkheidsservice gedetecteerd.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Onbekende toegankelijkheidsservice</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Een onbekende toegankelijkheidsservice is gedetecteerd. Controleer of deze veilig te gebruiken is:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Stuur een diagnostisch rapport</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Olvid diagnostisch rapport</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Afgelopen 7 dagen: %1$d pushmeldingen ontvangen, waarvan %2$d van hoge prioriteit (%3$d gedeprioriteerd). %4$d meldingen kwamen binnen terwijl het apparaat inactief was, en %5$d keer moest Olvid worden gestart.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">De vertraging tussen een pushnotificatie met hoge prioriteit en de melding van het bericht: mediaan %1$s, langzaamste %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d pushmeldingen met hoge prioriteit toonden niets aan (bijvoorbeeld bewerkingen, reacties of berichten die vanaf uw andere apparaten zijn verzonden) en %2$d betrof een gedempt of open gesprek.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Zoek een emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Recent</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Contactstatus vernieuwen</string>

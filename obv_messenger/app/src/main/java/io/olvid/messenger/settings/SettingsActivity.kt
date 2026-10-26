@@ -80,7 +80,6 @@ import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.openStoreUrlOrFallback
 import io.olvid.messenger.databases.AppDatabase
-import io.olvid.messenger.firebase.ObvFirebaseMessagingService
 import io.olvid.messenger.google_services.GoogleServicesUtils
 import io.olvid.messenger.lock_screen.LockScreenActivity
 import io.olvid.messenger.main.Utils
@@ -100,6 +99,7 @@ import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.OSM
 import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.NONE
 import io.olvid.messenger.settings.backupV2.BackupV2PreferenceFragment
 import io.olvid.messenger.settings.backupV2.BackupV2ViewModel
+import io.olvid.messenger.troubleshooting.PushDiagnostics
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 import java.security.spec.InvalidKeySpecException
@@ -168,6 +168,8 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         )
 
         delegate.onCreate(savedInstanceState)
+        // loaded off the main thread for the About dialog
+        PushDiagnostics.refresh()
         super.onCreate(savedInstanceState)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -303,23 +305,18 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 ) && !disablePushNotifications()
             ) {
                 sb.append("\n")
-                val date: CharSequence
-                if (ObvFirebaseMessagingService.getLastPushNotificationTimestamp() == null) {
-                    date = "-"
-                } else {
-                    date = StringUtils.getLongNiceDateString(
-                        this,
-                        ObvFirebaseMessagingService.getLastPushNotificationTimestamp()
-                    )
-                }
+                val pushSummary = PushDiagnostics.summary.value
+                val date: CharSequence = pushSummary?.lastPushTimestamp?.let {
+                    StringUtils.getLongNiceDateString(this, it)
+                } ?: "-"
                 sb.append(getString(R.string.dialog_message_about_last_push_notification, date))
 
                 sb.append("\n")
                 sb.append(
                     getString(
                         R.string.dialog_message_about_deprioritized_push_notification,
-                        ObvFirebaseMessagingService.getDeprioritizedMessageCount(),
-                        ObvFirebaseMessagingService.getHighPriorityMessageCount()
+                        pushSummary?.deprioritizedCount ?: 0,
+                        pushSummary?.highPriorityCount ?: 0
                     )
                 )
             }

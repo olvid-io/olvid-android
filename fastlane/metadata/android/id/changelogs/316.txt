@@ -1,0 +1,1 @@
+- Ditambahkan opsi "Kirim laporan diagnostik" ke layar pemecahan masalah.

@@ -1404,6 +1404,7 @@
     <string name="pref_show_trust_levels_title">Show a \"trust origin\" indicator for contacts</string>
     <string name="pref_show_trust_levels_summary">When activated, a colored dot on their portrait indicates whether you personally verified a contact\'s identity or they were presented to you</string>
     <string name="notification_title_sending_message">Olvid message being sent</string>
+    <string name="notification_title_receiving_messages">Receiving Olvid messages</string>
     <string name="dialog_message_widget_open_hidden_profile_warning">Warning: using a shortcut widget with a hidden profile may disclose the existence of this profile.</string>
     <string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen">Warning: using a shortcut widget with a hidden profile may disclose the existence of this profile.\nAs a bare minimum, you should configure a lock screen to restrict access to the widget configuration page.</string>
     <string name="dialog_message_widget_open_initial_hidden_profile">This widget is using a hidden profile. Please enter this profile\'s password to configure it.</string>
@@ -2291,6 +2292,11 @@
     <string name="troubleshooting_accessibility_services_valid_description">No unknown accessibility service detected.</string>
     <string name="troubleshooting_accessibility_services_invalid_title">Unknown accessibility service</string>
     <string name="troubleshooting_accessibility_services_invalid_description">An unknown accessibility service has been detected, please check that it is safe to use:</string>
+    <string name="troubleshooting_send_report">Send a diagnostic report</string>
+    <string name="troubleshooting_report_subject">Olvid diagnostic report</string>
+    <string name="troubleshooting_push_summary">Last 7 days: %1$d push notifications received, %2$d of them high priority (%3$d deprioritized). %4$d arrived while the device was idle, %5$d had to start Olvid.</string>
+    <string name="troubleshooting_push_delay">Delay between a high priority push notification and the message notification: median %1$s, slowest %2$s.</string>
+    <string name="troubleshooting_push_without_notification">%1$d high priority push notifications displayed nothing (for instance edits, reactions or messages sent from your other devices) and %2$d were for a muted or open discussion.</string>
     <string name="hint_search_emoji">Search an emoji</string>
     <string name="label_emoji_recents">Recent</string>
     <string name="menu_action_refresh_status">Refresh contact status</string>

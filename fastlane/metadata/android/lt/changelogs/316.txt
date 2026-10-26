@@ -1,0 +1,1 @@
+- Pridėta funkcija „Siųsti diagnostikos ataskaitą“ trikčių šalinimo ekrane.

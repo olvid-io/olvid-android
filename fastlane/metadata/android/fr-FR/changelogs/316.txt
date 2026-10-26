@@ -1,0 +1,1 @@
+- Ajout d'une option pour « Envoyer un rapport de diagnostic » depuis l'écran de dépannage.

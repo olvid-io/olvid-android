@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">ബന്ധപ്പെട്ട ആളുകളുടെ \"വിശ്വാസയോഗ്യമായ ഉറവിടം\" എന്ന സൂചകം കാണിക്കുക</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">സജീവമാക്കുമ്പോൾ, അവരുടെ പ്രൊഫൈൽ ചിത്രത്തിൽ കാണുന്ന ഒരു വർണ്ണമുള്ള ബിന്ദു, നിങ്ങൾ വ്യക്തിപരമായി ഒരു കോൺടാക്റ്റിന്റെ ഐഡന്റിറ്റി പരിശോധിച്ചതാണോ അതോ അവർക്ക് നിങ്ങളെ പരിചയപ്പെടുത്തിയതാണോ എന്ന് സൂചിപ്പിക്കും.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">ഒൽവിഡ് സന്ദേശം അയയ്ക്കുന്നു</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">ഒൽവിഡ് സന്ദേശങ്ങൾ സ്വീകരിക്കുന്നു</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">ശ്രദ്ധിക്കുക: ഒളിപ്പിച്ച പ്രൊഫൈൽ ഉപയോഗിച്ച് ഒരു ഷോർട്ട്‌കട്ട് വിജറ്റ് ഉപയോഗിക്കുന്നതിലൂടെ ഈ പ്രൊഫൈലിന്റെ സാന്നിധ്യം വെളിപ്പെടുത്താൻ സാധ്യതയുണ്ട്.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">ശ്രദ്ധിക്കുക: ഒളിപ്പിച്ച പ്രൊഫൈൽ ഉപയോഗിച്ച് ഒരു ഷോർട്ട്‌കട്ട് വിജറ്റ് ഉപയോഗിക്കുന്നത് ഈ പ്രൊഫൈലിന്റെ സാന്നിധ്യം വെളിപ്പെടുത്താൻ ഇടയാക്കും.\nകുറഞ്ഞത്, വിജറ്റ് കോൺഫിഗറേഷൻ പേജിലേക്കുള്ള പ്രവേശനം നിയന്ത്രിക്കുന്നതിന് നിങ്ങൾ ഒരു ലോക്ക് സ്‌ക്രീൻ കോൺഫിഗർ ചെയ്യണം.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">ഈ വിജറ്റ് ഒരു മറഞ്ഞിരിക്കുന്ന പ്രൊഫൈൽ ഉപയോഗിക്കുന്നു. ഇതിന്റെ കോൺഫിഗറേഷൻ പൂർത്തിയാക്കാൻ, പ്രൊഫൈലിന്റെ പാസ്‌വേഡ് നൽകുക.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">അറിയാത്ത ആക്സസിബിലിറ്റി സേവനം കണ്ടെത്തിയില്ല.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">അറിയാത്ത ആക്സസിബിലിറ്റി സേവനം</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">ഒരു അജ്ഞാതമായ ആക്സസിബിലിറ്റി സേവനം കണ്ടെത്തിയിരിക്കുന്നു, ഇത് ഉപയോഗിക്കാൻ സുരക്ഷിതമാണോ എന്ന് പരിശോധിക്കുക:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">ഒരു രോഗനിർണയ റിപ്പോർട്ട് അയയ്ക്കുക</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">ഒൽവിഡ് രോഗനിർണയ റിപ്പോർട്ട്</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">കഴിഞ്ഞ 7 ദിവസങ്ങളിൽ: %1$d പുഷ് അറിയിപ്പുകൾ ലഭിച്ചു, അതിൽ %2$d ഉയർന്ന മുൻഗണനയുള്ള അറിയിപ്പുകളാണ് (%3$d മുൻഗണന കുറയ്ക്കുക). %4$d അറിയിപ്പുകൾ ഉപകരണം നിഷ്‌ക്രിയമായിരിക്കുമ്പോൾ ലഭിച്ചു, %5$d തവണ Olvid ആരംഭിക്കേണ്ടി വന്നു.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">ഉയർന്ന മുൻഗണനയുള്ള പുഷ് അറിയിപ്പிற்கும், സന്ദേശ അറിയിപ്പிற்கும் ഇടയിലുള്ള കാലതാമസം: ശരാசரி %1$s, ഏറ്റവും കുറഞ്ഞ വേഗത %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d ഉയർന്ന മുൻഗണനയുള്ള പുഷ് അറിയിപ്പുകൾ ഒന്നും കാണിച്ചില്ല (ഉദാഹരണത്തിന്, നിങ്ങളുടെ മറ്റ് ഉപകരണങ്ങളിൽ നിന്ന് അയച്ച എഡിറ്റുകൾ, പ്രതികരണങ്ങൾ അല്ലെങ്കിൽ സന്ദേശങ്ങൾ) കൂടാതെ %2$d നിശ്ശബ്ദമായ അല്ലെങ്കിൽ തുറന്ന സംഭാഷണവുമായി ബന്ധപ്പെട്ടതാണ്.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">ഒരു ഇമോജി തിരയുക</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">സമീപകാലത്ത്</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">ബന്ധപ്പെട്ടയാളുടെ നില പുതുക്കുക</string>

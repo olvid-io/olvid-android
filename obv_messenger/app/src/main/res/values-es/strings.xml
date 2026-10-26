@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Mostrar un indicador de \"origen de confianza\" para los contactos</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Cuando se activa, un punto de color en su foto de perfil indica si verificaste personalmente la identidad de un contacto o si te lo presentaron.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Enviando mensaje Olvid</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Recibiendo mensajes de Olvid</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Advertencia: usar un widget de acceso directo con un perfil oculto puede revelar la existencia de este perfil.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Advertencia: usar un widget de acceso directo con un perfil oculto puede revelar la existencia de este perfil.\nComo mínimo, deberías configurar una pantalla de bloqueo para restringir el acceso a la página de configuración del widget.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Este widget está utilizando un perfil oculto. Por favor, introduce la contraseña de este perfil para configurarlo.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">No se detectaron servicios de accesibilidad desconocidos.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Servicio de accesibilidad desconocido</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Se ha detectado un servicio de accesibilidad desconocido. Compruebe que es seguro utilizarlo:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Enviar un informe de diagnóstico</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Informe del diagnóstico Olvid</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Últimos 7 días: se recibieron %1$d notificaciones push, de las cuales %2$d fueron de alta prioridad (%3$d se redujo su prioridad). %4$d llegaron mientras el dispositivo estaba inactivo, %5$d tuvieron que iniciar Olvid.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Retraso entre una notificación push de alta prioridad y la notificación del mensaje: mediana %1$s, más lento %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d las notificaciones push de alta prioridad no mostraron nada (por ejemplo, ediciones, reacciones o mensajes enviados desde tus otros dispositivos) y %2$d correspondieron a una conversación silenciada o abierta.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Buscar un emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Recientes</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Actualizar estado del contacto</string>

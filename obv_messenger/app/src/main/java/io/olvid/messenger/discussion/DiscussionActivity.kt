@@ -84,6 +84,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -904,7 +905,11 @@ class DiscussionActivity : LockableActivity() {
     }
 
     private fun setDiscussionId(discussionId: Long, intent: Intent) {
-        AndroidNotificationManager.setCurrentShowingDiscussionId(discussionId)
+        // the discussion is looked up on a background thread: if we were paused meanwhile, onPause already cleared
+        // the flag and setting it now would silence this discussion's notifications (onResume sets it again)
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            AndroidNotificationManager.setCurrentShowingDiscussionId(discussionId)
+        }
         AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussionId)
         AndroidNotificationManager.clearMissedCallNotification(discussionId)
         AndroidNotificationManager.clearNeutralNotification()

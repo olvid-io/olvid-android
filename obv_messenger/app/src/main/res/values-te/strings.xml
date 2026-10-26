@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">సంప్రదింపుల కోసం \"నమ్మకమైన మూలం\" సూచికను చూపించు</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">దీనిని సక్రియం చేసినప్పుడు, వారి ప్రొఫైల్ చిత్రంపై రంగుల చుక్క, మీరు వ్యక్తిగతంగా ఒక పరిచయం యొక్క గుర్తింపును ధృవీకరించారా లేదా వారు మీకు పరిచయం చేయబడ్డారా అని సూచిస్తుంది.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Olvid సందేశం పంపబడుతోంది</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">ఒల్విడ్ సందేశాలను స్వీకరించడం</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">హెచ్చరిక: దాచిన ప్రొఫైల్‌తో షార్ట్‌కట్ విడ్జెట్‌ను ఉపయోగించడం వలన ఈ ప్రొఫైల్ ఉనికిని బహిర్గతం చేయవచ్చు.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">హెచ్చరిక: దాచిన ప్రొఫైల్‌తో షార్ట్‌కట్ విడ్జెట్‌ను ఉపయోగించడం వలన ఈ ప్రొఫైల్ ఉనికిని బహిర్గతం చేయవచ్చు. కనీసం, మీరు విడ్జెట్ కాన్ఫిగరేషన్ పేజీకి ప్రాప్యతను పరిమితం చేయడానికి లాక్ స్క్రీన్‌ను కాన్ఫిగర్ చేయాలి.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">ఈ విడ్జెట్ ఒక దాచిన ప్రొఫైల్‌ను ఉపయోగిస్తోంది. దయచేసి దీన్ని కాన్ఫిగర్ చేయడానికి ఈ ప్రొఫైల్ యొక్క పాస్‌వర్డ్‌ను నమోదు చేయండి.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">తెలియని యాక్సెసిబిలిటీ సేవ ఏదీ కనుగొనబడలేదు.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">తెలియని సహాయక సేవ</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">తెలియని యాక్సెసిబిలిటీ సేవ కనుగొనబడింది, దయచేసి అది ఉపయోగించడానికి సురక్షితంగా ఉందో లేదో తనిఖీ చేయండి:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">ఒక నిర్ధారణ నివేదికను పంపండి</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">ఒల్విడ్ డయాగ్నస్టిక్ నివేదిక</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">గత 7 రోజులలో: %1$d పుష్ నోటిఫికేషన్‌లు స్వీకరించబడ్డాయి, వాటిలో %2$d అధిక ప్రాధాన్యత కలిగినవి (%3$d తక్కువ ప్రాధాన్యత కలిగినవిగా మార్చబడ్డాయి). %4$d పరికరం செயலற்ற நிலையில் ఉన్నప్పుడు వచ్చాయి, %5$d ఓల్విడ్‌ను ప్రారంభించాల్సి వచ్చింది.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">అధిక ప్రాధాన్యత కలిగిన పుష్ నోటిఫికేషన్ మరియు సందేశ నోటిఫికేషన్ మధ్య ఆలస్యం: మధ్యగతం %1$s, నెమ్మదిగా %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d అత్యధిక ప్రాధాన్యత కలిగిన పుష్ నోటిఫికేషన్‌లు ఏమీ చూపించలేదు (ఉదాహరణకు, సవరణలు, ప్రతిస్పందనలు లేదా మీ ఇతర పరికరాల నుండి పంపబడిన సందేశాలు) మరియు %2$d నిశ్శబ్దంగా లేదా బహిరంగంగా ఉన్న సంభాషణకు సంబంధించినవి.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">ఒక ఎమోజీని వెతకండి</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">ఇటీవలి</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">సంప్రదింపు స్థితిని రిఫ్రెష్ చేయండి</string>

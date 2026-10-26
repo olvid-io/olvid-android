@@ -1,0 +1,1 @@
+- Eine Option zum Senden eines Diagnoseberichts wurde zum Bildschirm für die Fehlerbehebung hinzugefügt.

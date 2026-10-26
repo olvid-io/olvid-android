@@ -1,0 +1,1 @@
+- Dodano opcję "Wyślij raport diagnostyczny" w ekranie rozwiązywania problemów.

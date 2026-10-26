@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Εμφάνιση ένδειξης «αξιόπιστης πηγής» για τις επαφές</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Όταν ενεργοποιηθεί, μια χρωματιστή κουκκίδα στην εικόνα προφίλ τους υποδεικνύει αν έχετε επαληθεύσει προσωπικά την ταυτότητα της επαφής ή αν σας παρουσιάστηκε.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Αποστολή μηνύματος Olvid</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Λήψη μηνυμάτων Olvid</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Προειδοποίηση: Η χρήση ενός συντομευτή widget με ένα κρυφό προφίλ ενδέχεται να αποκαλύψει την ύπαρξη αυτού του προφίλ.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Προειδοποίηση: Η χρήση ενός widget συντόμευσης με ένα κρυφό προφίλ ενδέχεται να αποκαλύψει την ύπαρξη αυτού του προφίλ.\nΤουλάχιστον, θα πρέπει να διαμορφώσετε μια οθόνη κλειδώματος για να περιορίσετε την πρόσβαση στη σελίδα διαμόρφωσης του widget.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Αυτό το widget χρησιμοποιεί ένα κρυφό προφίλ. Παρακαλώ εισαγάγετε τον κωδικό πρόσβασης αυτού του προφίλ για να το ρυθμίσετε.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Δεν βρέθηκαν άγνωστες υπηρεσίες προσβασιμότητας.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Άγνωστη υπηρεσία προσβασιμότητας</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Έχει ανιχνευθεί μια άγνωστη υπηρεσία προσβασιμότητας. Ελέγξτε αν είναι ασφαλής στη χρήση:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Αποστολή αναφοράς διαγνωστικού ελέγχου</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Αναφορά διαγνωστικού ελέγχου Olvid</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Τα τελευταία 7 ημερολόγια: Λήφθηκαν %1$d ειδοποιήσεις push, εκ των οποίων %2$d ήταν υψηλής προτεραιότητας (%3$d υποβαθμίστηκαν). %4$d ειδοποιήσεις έφτασαν ενώ η συσκευή ήταν σε αδράνεια, %5$d χρειάστηκε να ξεκινήσουν το Olvid.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Χρονική καθυστέρηση μεταξύ μιας ειδοποίησης push υψηλής προτεραιότητας και της ειδοποίησης του μηνύματος: μέση τιμή %1$s, μέγιστη τιμή %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d οι ειδοποιήσεις push υψηλής προτεραιότητας δεν εμφάνισαν τίποτα (για παράδειγμα, επεξεργασίες, αντιδράσεις ή μηνύματα που εστάλησαν από τις άλλες σας συσκευές) και %2$d αφορούσαν μια σιωπηλή ή ανοιχτή συζήτηση.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Αναζήτηση emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Πρόσφατα</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Ανανέωση κατάστασης επαφής</string>

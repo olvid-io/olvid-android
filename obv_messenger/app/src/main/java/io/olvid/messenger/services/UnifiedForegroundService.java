@@ -102,6 +102,7 @@ public class UnifiedForegroundService extends Service {
     public static final int SUB_SERVICE_WEB_CLIENT = 2;
     public static final int SUB_SERVICE_MESSAGE_SENDING = 3;
     public static final int SUB_SERVICE_LOCATION_SHARING = 4;
+    public static final int SUB_SERVICE_PUSH_PROCESSING = 5;
 
     final NoExceptionSingleThreadExecutor executor = new NoExceptionSingleThreadExecutor("UnifiedForegroundService-Executor");
 
@@ -111,7 +112,12 @@ public class UnifiedForegroundService extends Service {
     private WebClientSubService webClientSubService = null;
     private MessageSendingSubService messageSendingSubService = null;
     private LocationSharingSubService locationSharingSubService = null;
-    private volatile boolean isForeground = false;
+    private PushProcessingSubService pushProcessingSubService = null;
+    private static volatile boolean isForeground = false;
+
+    public static boolean isInForeground() {
+        return isForeground;
+    }
 
     public static void onAppForeground(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -192,6 +198,11 @@ public class UnifiedForegroundService extends Service {
             locationSharingSubService.onDestroy();
             locationSharingSubService = null;
         }
+        if (pushProcessingSubService != null) {
+            pushProcessingSubService.onDestroy();
+            pushProcessingSubService = null;
+        }
+        isForeground = false;
         executor.shutdownNow();
     }
 
@@ -261,7 +272,11 @@ public class UnifiedForegroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && intent.getBooleanExtra(STARTED_AS_FOREGROUND_SERVICE_INTENT_EXTRA, false) && !isForeground) {
-            fulfillStartForegroundServiceContract();
+            // go to the foreground right away if a sub-service needs it, else just honor the startForegroundService() contract
+            stopOrRestartForegroundService();
+            if (!isForeground) {
+                fulfillStartForegroundServiceContract();
+            }
         }
         executor.execute(() -> {
             if (intent != null && intent.hasExtra(SUB_SERVICE_INTENT_EXTRA)) {
@@ -304,6 +319,16 @@ public class UnifiedForegroundService extends Service {
                             }
                             locationSharingSubService.onStartCommand(intent.getAction(), intent);
                         }
+                        break;
+                    }
+                    case SUB_SERVICE_PUSH_PROCESSING: {
+                        if (intent.getAction() != null) {
+                            if (pushProcessingSubService == null) {
+                                pushProcessingSubService = new PushProcessingSubService(this);
+                            }
+                            pushProcessingSubService.onStartCommand(intent.getAction());
+                        }
+                        break;
                     }
                 }
             } else {
@@ -334,8 +359,9 @@ public class UnifiedForegroundService extends Service {
         boolean showPermanentNotification = SettingsActivity.usePermanentWebSocket() || SettingsActivity.usePermanentForegroundService();
         boolean showMessageSendingNotification = MessageSendingSubService.isSendingMessage;
         boolean showLocationSharingNotification = LocationSharingSubService.isSharingLocation;
+        boolean showPushProcessingNotification = PushProcessingSubService.isProcessingPush;
 
-        return showLockScreenNotification || showWebClientNotification || showPermanentNotification || showMessageSendingNotification || showLocationSharingNotification;
+        return showLockScreenNotification || showWebClientNotification || showPermanentNotification || showMessageSendingNotification || showLocationSharingNotification || showPushProcessingNotification;
     }
 
     @SuppressLint("ForegroundServiceType")
@@ -345,8 +371,9 @@ public class UnifiedForegroundService extends Service {
         boolean showPermanentNotification = SettingsActivity.usePermanentWebSocket() || SettingsActivity.usePermanentForegroundService();
         boolean showMessageSendingNotification = SettingsActivity.useSendingForegroundService() && MessageSendingSubService.isSendingMessage;
         boolean showLocationSharingNotification = locationSharingSubService != null && LocationSharingSubService.isSharingLocation;
+        boolean showPushProcessingNotification = PushProcessingSubService.isProcessingPush;
 
-        if (!showLockScreenNotification && !showWebClientNotification && !showPermanentNotification && !showMessageSendingNotification && !showLocationSharingNotification) {
+        if (!showLockScreenNotification && !showWebClientNotification && !showPermanentNotification && !showMessageSendingNotification && !showLocationSharingNotification && !showPushProcessingNotification) {
             stopForeground(true);
             isForeground = false;
             return;
@@ -370,6 +397,9 @@ public class UnifiedForegroundService extends Service {
         } else if (showLocationSharingNotification) {
             builder.setContentTitle(getString(R.string.notification_title_sharing_location))
                     .setSmallIcon(R.drawable.ic_satelite_animated);
+        } else if (showPushProcessingNotification && !showPermanentNotification && !showLockScreenNotification) {
+            builder.setContentTitle(getString(R.string.notification_title_receiving_messages))
+                    .setSmallIcon(R.drawable.ic_sending_animated);
         } else if (showLockScreenNotification) {
             if (LockSubService.locked) {
                 builder.setContentTitle(getString(R.string.notification_title_olvid_is_locked))
@@ -1020,6 +1050,115 @@ public class UnifiedForegroundService extends Service {
             isSendingMessage = false;
             currentlySendingMessages.clear();
             finishedSendingMessages.clear();
+        }
+    }
+
+
+    // A high priority push only grants a short network allowlist. Without the permanent foreground service, a
+    // listing slower than that (slow network, cold start) would wait for the device to leave Doze: stay in the
+    // foreground until the targeted identities are synchronized.
+    public static class PushProcessingSubService {
+        private static final String START_ACTION = "start";
+        private static final String SYNCHRONIZED_ACTION = "synchronized";
+        private static final long TIMEOUT_MILLIS = 60_000;
+        // let the app process the downloaded messages and post their notifications
+        private static final long STOP_DELAY_MILLIS = 2_000;
+
+        static volatile boolean isProcessingPush = false;
+        private static final HashSet<BytesKey> pendingOwnedIdentities = new HashSet<>();
+
+        @NonNull private final UnifiedForegroundService unifiedForegroundService;
+        @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
+        @NonNull private final Runnable stopRunnable = this::stop;
+
+        PushProcessingSubService(@NonNull UnifiedForegroundService unifiedForegroundService) {
+            this.unifiedForegroundService = unifiedForegroundService;
+        }
+
+        // called from a high priority push: the push makes starting a foreground service from the background possible
+        public static void startForPush(@NonNull List<byte[]> bytesOwnedIdentities) {
+            if (isForeground || App.isVisible() || bytesOwnedIdentities.isEmpty()) {
+                return;
+            }
+            synchronized (pendingOwnedIdentities) {
+                for (byte[] bytesOwnedIdentity : bytesOwnedIdentities) {
+                    pendingOwnedIdentities.add(new BytesKey(bytesOwnedIdentity));
+                }
+            }
+            Intent intent = new Intent(App.getContext(), UnifiedForegroundService.class)
+                    .setAction(START_ACTION)
+                    .putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_PUSH_PROCESSING);
+            // set now so that a newly created service goes to the foreground in its onCreate
+            isProcessingPush = true;
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    App.getContext().startForegroundService(intent.putExtra(STARTED_AS_FOREGROUND_SERVICE_INTENT_EXTRA, true));
+                } else {
+                    App.getContext().startService(intent);
+                }
+            } catch (Exception e) {
+                isProcessingPush = false;
+                synchronized (pendingOwnedIdentities) {
+                    pendingOwnedIdentities.clear();
+                }
+                Logger.w("PushProcessingSubService: unable to start the foreground service");
+                Logger.x(e);
+            }
+        }
+
+        public static void onOwnedIdentitySynchronized(@NonNull byte[] bytesOwnedIdentity) {
+            if (!isProcessingPush) {
+                return;
+            }
+            synchronized (pendingOwnedIdentities) {
+                if (!pendingOwnedIdentities.remove(new BytesKey(bytesOwnedIdentity)) || !pendingOwnedIdentities.isEmpty()) {
+                    return;
+                }
+            }
+            try {
+                App.getContext().startService(new Intent(App.getContext(), UnifiedForegroundService.class)
+                        .setAction(SYNCHRONIZED_ACTION)
+                        .putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_PUSH_PROCESSING));
+            } catch (Exception e) {
+                Logger.x(e);
+            }
+        }
+
+        void onStartCommand(@NonNull String action) {
+            switch (action) {
+                case START_ACTION: {
+                    isProcessingPush = true;
+                    if (!isForeground) {
+                        unifiedForegroundService.stopOrRestartForegroundService();
+                    }
+                    handler.removeCallbacks(stopRunnable);
+                    handler.postDelayed(stopRunnable, TIMEOUT_MILLIS);
+                    break;
+                }
+                case SYNCHRONIZED_ACTION: {
+                    handler.removeCallbacks(stopRunnable);
+                    handler.postDelayed(stopRunnable, STOP_DELAY_MILLIS);
+                    break;
+                }
+            }
+        }
+
+        private void stop() {
+            synchronized (pendingOwnedIdentities) {
+                pendingOwnedIdentities.clear();
+            }
+            if (isProcessingPush) {
+                isProcessingPush = false;
+                unifiedForegroundService.stopOrRestartForegroundService();
+            }
+        }
+
+        void onDestroy() {
+            handler.removeCallbacks(stopRunnable);
+            synchronized (pendingOwnedIdentities) {
+                pendingOwnedIdentities.clear();
+            }
+            isProcessingPush = false;
         }
     }
 

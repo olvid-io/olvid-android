@@ -1,0 +1,1 @@
+- Hozzáadtunk egy "Diagnosztikai jelentés küldése" opciót a hibaelhárítási képernyőhöz.

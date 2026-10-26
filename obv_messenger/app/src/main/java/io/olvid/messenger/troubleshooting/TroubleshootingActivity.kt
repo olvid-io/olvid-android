@@ -46,22 +46,24 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.displayCutoutPadding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -84,6 +86,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
@@ -95,14 +98,15 @@ import io.olvid.messenger.customClasses.openStoreUrlOrFallback
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.AppDatabaseOpenCallback
 import io.olvid.messenger.designsystem.components.OlvidTextButton
+import io.olvid.messenger.designsystem.components.OlvidTopAppBar
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.firebase.ObvFirebaseMessagingService
 import io.olvid.messenger.google_services.GoogleServicesUtils
 import io.olvid.messenger.services.AvailableSpaceHelper
 import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
 
 
@@ -159,6 +163,11 @@ class TroubleshootingActivity : AppCompatActivity() {
             }
             val locationState = remember {
                 CheckState(LOCATION_CHECK_STATE, troubleshootingDataStore) { getLocationState() }
+            }
+
+            val pushSummary by PushDiagnostics.summary.collectAsState()
+            LaunchedEffect(Unit) {
+                PushDiagnostics.refresh()
             }
 
             val postNotificationsState = rememberPermissionState(permission.POST_NOTIFICATIONS)
@@ -286,630 +295,641 @@ class TroubleshootingActivity : AppCompatActivity() {
                 }
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .systemBarsPadding()
-                    .displayCutoutPadding(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            Scaffold(
+                containerColor = colorResource(R.color.almostWhite),
+                contentWindowInsets = WindowInsets.safeDrawing,
+                topBar = {
+                    OlvidTopAppBar(
+                        titleText = stringResource(R.string.menu_action_troubleshooting),
+                        onBackPressed = { onBackPressedDispatcher.onBackPressed() }
+                    )
+                }
+            ) { contentPadding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(contentPadding)
+                        .padding(top = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
 
-                FaqLinkHeader(
-                    openFaq = {
-                        startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                "https://olvid.io/faq/".toUri()
+                    FaqLinkHeader(
+                        openFaq = {
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    "https://olvid.io/faq/".toUri()
+                                )
                             )
-                        )
-                    },
-                    onBack = {
-                        onBackPressedDispatcher.onBackPressed()
-                    }
-                )
+                        }
+                    )
 
-                troubleshootingItems.value.forEach { troubleshootingItem ->
-                    when (troubleshootingItem) {
+                    troubleshootingItems.value.forEach { troubleshootingItem ->
+                        when (troubleshootingItem) {
 
-                        TroubleshootingItemType.NOTIFICATIONS -> {
-                            val notificationsPermissionLauncher = rememberLauncherForActivityResult(
-                                contract = RequestPermission(),
-                                onResult = { granted ->
-                                    if (granted.not() && postNotificationsState.status.shouldShowRationale.not() && shouldShowRequestPermissionRationale(
-                                            permission.POST_NOTIFICATIONS
-                                        ).not()
+                            TroubleshootingItemType.NOTIFICATIONS -> {
+                                val notificationsPermissionLauncher = rememberLauncherForActivityResult(
+                                    contract = RequestPermission(),
+                                    onResult = { granted ->
+                                        if (granted.not() && postNotificationsState.status.shouldShowRationale.not() && shouldShowRequestPermissionRationale(
+                                                permission.POST_NOTIFICATIONS
+                                            ).not()
+                                        ) {
+                                            openAppNotificationSettings(context = context)
+                                        }
+                                    }
+                                )
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_notifications_valid_title),
+                                    description = stringResource(
+                                        id = R.string.troubleshooting_notifications_valid_description
+                                    ) + if (BuildConfig.USE_FIREBASE_LIB && GoogleServicesUtils.googleServicesAvailable(
+                                            context
+                                        ) && !SettingsActivity.disablePushNotifications()
                                     ) {
-                                        openAppNotificationSettings(context = context)
-                                    }
-                                }
-                            )
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_notifications_valid_title),
-                                description = stringResource(
-                                    id = R.string.troubleshooting_notifications_valid_description
-                                ) + if (BuildConfig.USE_FIREBASE_LIB && GoogleServicesUtils.googleServicesAvailable(
-                                        context
-                                    ) && !SettingsActivity.disablePushNotifications()
-                                ) {
-                                    "\n\n" + stringResource(
-                                        R.string.dialog_message_about_last_push_notification,
-                                        if (ObvFirebaseMessagingService.getLastPushNotificationTimestamp() == null) {
-                                            "-"
-                                        } else {
-                                            StringUtils.getLongNiceDateString(
-                                                context,
-                                                ObvFirebaseMessagingService.getLastPushNotificationTimestamp()
-                                            )
-                                        }
-                                    ) + "\n" + stringResource(
-                                        id = R.string.dialog_message_about_deprioritized_push_notification,
-                                        ObvFirebaseMessagingService.getDeprioritizedMessageCount(),
-                                        ObvFirebaseMessagingService.getHighPriorityMessageCount()
-                                    )
-                                } else "",
-                                titleInvalid = stringResource(id = R.string.troubleshooting_notifications_invalid_title),
-                                descriptionInvalid = stringResource(id = R.string.troubleshooting_notifications_invalid_description),
-                                valid = postNotificationsState.status.isGranted
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
-                                            notificationsPermissionLauncher.launch(permission.POST_NOTIFICATIONS)
-                                        }
+                                        "\n\n" + context.pushDiagnosticsDescription(pushSummary)
+                                    } else {
+                                        ""
                                     },
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    )
+                                    titleInvalid = stringResource(id = R.string.troubleshooting_notifications_invalid_title),
+                                    descriptionInvalid = stringResource(id = R.string.troubleshooting_notifications_invalid_description),
+                                    valid = postNotificationsState.status.isGranted
                                 ) {
-                                    Text(text = stringResource(id = R.string.troubleshooting_request_permission))
-                                }
-                            }
-                        }
-
-                        TroubleshootingItemType.CAMERA -> {
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_camera_valid_title),
-                                description = stringResource(id = R.string.troubleshooting_camera_valid_description),
-                                titleInvalid = stringResource(id = R.string.troubleshooting_camera_invalid_title),
-                                valid = cameraState.status.isGranted,
-                                critical = false,
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        cameraState.launchPermissionRequest()
-                                        coroutineScope.launch {
-                                            delay(100.milliseconds)
-                                            if (lifecycle.currentState == RESUMED) {
-                                                startSettingsActivity()
+                                    TextButton(
+                                        onClick = {
+                                            if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
+                                                notificationsPermissionLauncher.launch(permission.POST_NOTIFICATIONS)
                                             }
-                                        }
-                                    },
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    )
-                                ) {
-                                    Text(text = stringResource(id = R.string.troubleshooting_request_permission))
-                                }
-                            }
-                        }
-
-                        TroubleshootingItemType.MICROPHONE -> {
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_audio_recording_valid_title),
-                                description = stringResource(id = R.string.troubleshooting_audio_recording_valid_description),
-                                titleInvalid = stringResource(id = R.string.troubleshooting_audio_recording_invalid_title),
-                                valid = microphoneState.status.isGranted,
-                                critical = false,
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        microphoneState.launchPermissionRequest()
-                                        coroutineScope.launch {
-                                            delay(100.milliseconds)
-                                            if (lifecycle.currentState == RESUMED) {
-                                                startSettingsActivity()
-                                            }
-                                        }
-                                    },
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    )
-                                ) {
-                                    Text(text = stringResource(id = R.string.troubleshooting_request_permission))
-                                }
-                            }
-                        }
-
-                        TroubleshootingItemType.LOCATION -> {
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_location_valid_title),
-                                description = stringResource(id = R.string.troubleshooting_location_valid_description),
-                                titleInvalid = stringResource(id = R.string.troubleshooting_location_invalid_title),
-                                valid = locationState.valid,
-                                critical = false,
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        startActivity(Intent(ACTION_LOCATION_SOURCE_SETTINGS))
-                                    },
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    )
-                                ) {
-                                    Text(text = stringResource(id = R.string.dialog_title_enable_location))
-                                }
-                            }
-                        }
-
-                        TroubleshootingItemType.LOCATION_PERMISSIONS -> {
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_location_permissions_valid_title),
-                                description = stringResource(id = R.string.troubleshooting_location_permissions_valid_description),
-                                titleInvalid = stringResource(id = R.string.troubleshooting_location_permissions_invalid_title),
-                                valid = locationPermissionState.allPermissionsGranted,
-                                critical = false,
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        locationPermissionState.launchMultiplePermissionRequest()
-                                        coroutineScope.launch {
-                                            delay(100.milliseconds)
-                                            if (lifecycle.currentState == RESUMED) {
-                                                startSettingsActivity()
-                                            }
-                                        }
-                                    },
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    )
-                                ) {
-                                    Text(text = stringResource(id = R.string.troubleshooting_request_permission))
-                                }
-                            }
-                        }
-
-                        TroubleshootingItemType.BATTERY_OPTIMIZATION -> {
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_battery_optimization_valid_title),
-                                description = stringResource(id = R.string.troubleshooting_battery_optimization_valid_description),
-                                descriptionInvalid = stringResource(id = R.string.troubleshooting_battery_optimization_invalid_description),
-                                valid = batteryOptimizationState.valid,
-                                checkState = batteryOptimizationState
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        startSettingsActivity(
-                                            ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                                        },
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
                                         )
-                                    },
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    )
-                                ) {
-                                    Text(text = stringResource(id = R.string.troubleshooting_request_permission))
-                                }
-                            }
-                        }
-
-                        TroubleshootingItemType.BACKGROUND_RESTRICTION -> {
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_background_restriction_valid_title),
-                                description = stringResource(
-                                    id = R.string.troubleshooting_background_restriction_valid_description
-                                ),
-                                descriptionInvalid = stringResource(id = R.string.troubleshooting_background_restriction_invalid_description),
-                                valid = backgroundRestrictionState.valid,
-                                checkState = backgroundRestrictionState
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        startSettingsActivity()
-                                    },
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    )
-                                ) {
-                                    Text(text = stringResource(id = R.string.button_label_app_settings))
-                                }
-                            }
-                        }
-
-                        TroubleshootingItemType.ALARM -> {
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_alarm_valid_title),
-                                description = stringResource(
-                                    id = R.string.troubleshooting_alarm_valid_description
-                                ),
-                                descriptionInvalid = stringResource(id = R.string.troubleshooting_alarm_invalid_description),
-                                valid = alarmState.valid,
-                                checkState = alarmState
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        startSettingsActivity(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                                    },
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    )
-                                ) {
-                                    Text(text = stringResource(id = R.string.button_label_app_settings))
-                                }
-                            }
-                        }
-
-                        TroubleshootingItemType.FULL_SCREEN_INTENT -> {
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_incoming_call_valid_title),
-                                description = stringResource(id = R.string.troubleshooting_incoming_call_valid_description),
-                                descriptionInvalid = stringResource(id = R.string.troubleshooting_incoming_call_invalid_description),
-                                valid = fullScreenIntentState.valid,
-                                checkState = fullScreenIntentState
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        startSettingsActivity(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT)
-                                    },
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    )
-                                ) {
-                                    Text(text = stringResource(id = R.string.button_label_app_settings))
-                                }
-                            }
-                        }
-
-                        TroubleshootingItemType.PERMANENT_WEBSOCKET -> {
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_google_valid_title),
-                                description = stringResource(id = R.string.troubleshooting_google_valid_description),
-                                descriptionInvalid = stringResource(id = R.string.troubleshooting_google_invalid_description),
-                                valid = permanentSocketState.valid,
-                                checkState = permanentSocketState
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        SettingsActivity.setUsePermanentWebSocket(true)
-                                        startService(
-                                            Intent(
-                                                this@TroubleshootingActivity,
-                                                UnifiedForegroundService::class.java
-                                            )
-                                        )
-                                        permanentSocketState.refreshStatus()
-                                    },
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    )
-                                ) {
-                                    Text(text = stringResource(id = R.string.button_label_enable_websocket))
-                                }
-                            }
-                        }
-
-                        TroubleshootingItemType.BACKUPS -> {
-                            val backupsStateInfo = remember(backupState.getStatus()) {
-                                getBackupStateInfo()
-                            }
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_olvid_backups_title),
-                                description = stringResource(id = R.string.troubleshooting_backup_valid_description),
-                                titleInvalid = backupsStateInfo?.title,
-                                descriptionInvalid = backupsStateInfo?.description,
-                                valid = backupState.valid,
-                                critical = backupState.getStatus() == 2
-                                        || SettingsActivity.backupsV2Status == SettingsActivity.PREF_KEY_BACKUPS_V2_STATUS_NOT_CONFIGURED,
-                                checkState = backupState
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        val intent = Intent(
-                                            this@TroubleshootingActivity,
-                                            SettingsActivity::class.java
-                                        )
-                                        intent.putExtra(
-                                            SettingsActivity.SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA,
-                                            SettingsActivity.PREF_HEADER_KEY_BACKUP
-                                        )
-                                        startActivity(intent)
-                                    },
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    )
-                                ) {
-                                    Text(text = stringResource(id = R.string.button_label_backup_settings))
-                                }
-                            }
-                        }
-
-                        TroubleshootingItemType.CONNECTIVITY -> {
-                            var ping by remember {
-                                mutableStateOf("-")
-                            }
-                            val connectivityState by AppSingleton.getWebsocketConnectivityStateLiveData()
-                                .observeAsState()
-                            PingListener(connectivityState == 2) { pingValue ->
-                                ping = when (pingValue) {
-                                    -1L -> {
-                                        getString(R.string.label_over_max_ping_delay, 5)
-                                    }
-
-                                    0L -> {
-                                        "-"
-                                    }
-
-                                    else -> {
-                                        getString(R.string.label_ping_delay, pingValue)
+                                    ) {
+                                        Text(text = stringResource(id = R.string.troubleshooting_request_permission))
                                     }
                                 }
                             }
-                            TroubleShootItem(
-                                title = when (connectivityState) {
-                                    2 -> stringResource(id = R.string.label_ping_connectivity_connected)
-                                    1 -> stringResource(id = R.string.label_ping_connectivity_connecting)
-                                    else -> stringResource(id = R.string.label_ping_connectivity_none)
-                                },
-                                description = ping, valid = connectivityState == 2
-                            ) {
-                            }
-                        }
 
-
-                        TroubleshootingItemType.STORAGE -> {
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_storage_valid_title),
-                                description = stringResource(
-                                    id = R.string.troubleshooting_storage_valid_description,
-                                    Formatter.formatShortFileSize(
-                                        context,
-                                        AvailableSpaceHelper.getAvailableSpace() ?: 0
-                                    )
-                                ),
-                                titleInvalid = stringResource(id = R.string.troubleshooting_storage_invalid_title),
-                                descriptionInvalid = stringResource(
-                                    id = R.string.troubleshooting_storage_invalid_description,
-                                    Formatter.formatShortFileSize(
-                                        context,
-                                        AvailableSpaceHelper.getAvailableSpace() ?: 0
-                                    )
-                                ),
-                                valid = storageState.valid,
-                                checkState = storageState
-                            ) {
-                                TextButton(
-                                    onClick = {
-                                        if (VERSION.SDK_INT >= VERSION_CODES.N_MR1) {
-                                            startActivity(Intent(StorageManager.ACTION_MANAGE_STORAGE))
-                                        }
-                                    },
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    )
+                            TroubleshootingItemType.CAMERA -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_camera_valid_title),
+                                    description = stringResource(id = R.string.troubleshooting_camera_valid_description),
+                                    titleInvalid = stringResource(id = R.string.troubleshooting_camera_invalid_title),
+                                    valid = cameraState.status.isGranted,
+                                    critical = false,
                                 ) {
-                                    Text(text = stringResource(id = R.string.button_label_manage_storage))
-                                }
-                            }
-                        }
-
-                        TroubleshootingItemType.DB_SYNC -> {
-                            TroubleShootItem(
-                                title = stringResource(id = R.string.troubleshooting_storage_db_sync_title),
-                                description = stringResource(id = R.string.troubleshooting_storage_db_sync_description),
-                                valid = true,
-                                additionalContent = {
-                                    var inProgress by remember { mutableStateOf(false) }
-                                    AnimatedVisibility(visible = !inProgress) {
-                                        TextButton(
-                                            onClick = {
-                                                inProgress = true
-                                                App.runThread {
-                                                    try {
-                                                        AppDatabaseOpenCallback.syncEngineDatabases(
-                                                            AppSingleton.getEngine(),
-                                                            AppDatabase.getInstance()
-                                                        )
-                                                        Thread.sleep(1000)
-                                                    } catch (_: Exception) { }
-                                                    inProgress = false
-                                                }
-                                            },
-                                            shape = RoundedCornerShape(6.dp),
-                                            colors = ButtonDefaults.textButtonColors(
-                                                contentColor = colorResource(R.color.almostBlack)
-                                            )
-                                        ) {
-                                            Text(text = stringResource(id = R.string.button_label_check_now))
-                                        }
-                                    }
-                                    AnimatedVisibility(visible = inProgress) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier
-                                                .padding(horizontal = 16.dp, vertical = 12.dp)
-                                                .size(24.dp),
-                                            color = colorResource(id = R.color.olvid_gradient_light),
-                                            strokeWidth = 2.dp
-                                        )
-                                    }
-                                }
-                            ) { }
-                        }
-
-                        TroubleshootingItemType.ACCESSIBILITY_SERVICES -> {
-                            var whitelist by remember { mutableStateOf(AccessibilityManager.getWhitelist(context)) }
-                            val valid = AccessibilityManager.untrustedAccessibilityServices.isEmpty()
-
-                            TroubleShootItem(
-                                title = stringResource(id = if (valid) R.string.troubleshooting_accessibility_services_valid_title else R.string.troubleshooting_accessibility_services_invalid_title),
-                                description = stringResource(id = if (valid) R.string.troubleshooting_accessibility_services_valid_description else R.string.troubleshooting_accessibility_services_invalid_description),
-                                valid = valid,
-                                critical = true,
-                                additionalContent = {
-                                        Column(
-                                            modifier = Modifier.padding(
-                                                vertical = 8.dp
-                                            )
-                                        ) {
-                                            AccessibilityManager.untrustedAccessibilityServices.forEach { serviceId ->
-                                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                                    Text(
-                                                        text = serviceId,
-                                                        modifier = Modifier.weight(1f, true),
-                                                        style = OlvidTypography.body2.copy(
-                                                            color = colorResource(R.color.red),
-                                                        )
-                                                    )
-                                                    OlvidTextButton(
-                                                        modifier = Modifier.weight(.8f, false),
-                                                        allowTwoLines = true,
-                                                        text = stringResource(id = R.string.button_label_trust_service)
-                                                    ) {
-                                                        AccessibilityManager.addToWhitelist(context, serviceId)
-                                                        whitelist = AccessibilityManager.getWhitelist(context)
-                                                    }
+                                    TextButton(
+                                        onClick = {
+                                            cameraState.launchPermissionRequest()
+                                            coroutineScope.launch {
+                                                delay(100.milliseconds)
+                                                if (lifecycle.currentState == RESUMED) {
+                                                    startSettingsActivity()
                                                 }
                                             }
-                                            if (whitelist.isNotEmpty()) {
-                                                Spacer(modifier = Modifier.height(8.dp))
-                                                Text(
-                                                    stringResource(R.string.troubleshooting_accessibility_services_whitelist_description),
-                                                    color = colorResource(R.color.greyTint),
-                                                    style = OlvidTypography.h3
+                                        },
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.troubleshooting_request_permission))
+                                    }
+                                }
+                            }
+
+                            TroubleshootingItemType.MICROPHONE -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_audio_recording_valid_title),
+                                    description = stringResource(id = R.string.troubleshooting_audio_recording_valid_description),
+                                    titleInvalid = stringResource(id = R.string.troubleshooting_audio_recording_invalid_title),
+                                    valid = microphoneState.status.isGranted,
+                                    critical = false,
+                                ) {
+                                    TextButton(
+                                        onClick = {
+                                            microphoneState.launchPermissionRequest()
+                                            coroutineScope.launch {
+                                                delay(100.milliseconds)
+                                                if (lifecycle.currentState == RESUMED) {
+                                                    startSettingsActivity()
+                                                }
+                                            }
+                                        },
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.troubleshooting_request_permission))
+                                    }
+                                }
+                            }
+
+                            TroubleshootingItemType.LOCATION -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_location_valid_title),
+                                    description = stringResource(id = R.string.troubleshooting_location_valid_description),
+                                    titleInvalid = stringResource(id = R.string.troubleshooting_location_invalid_title),
+                                    valid = locationState.valid,
+                                    critical = false,
+                                ) {
+                                    TextButton(
+                                        onClick = {
+                                            startActivity(Intent(ACTION_LOCATION_SOURCE_SETTINGS))
+                                        },
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.dialog_title_enable_location))
+                                    }
+                                }
+                            }
+
+                            TroubleshootingItemType.LOCATION_PERMISSIONS -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_location_permissions_valid_title),
+                                    description = stringResource(id = R.string.troubleshooting_location_permissions_valid_description),
+                                    titleInvalid = stringResource(id = R.string.troubleshooting_location_permissions_invalid_title),
+                                    valid = locationPermissionState.allPermissionsGranted,
+                                    critical = false,
+                                ) {
+                                    TextButton(
+                                        onClick = {
+                                            locationPermissionState.launchMultiplePermissionRequest()
+                                            coroutineScope.launch {
+                                                delay(100.milliseconds)
+                                                if (lifecycle.currentState == RESUMED) {
+                                                    startSettingsActivity()
+                                                }
+                                            }
+                                        },
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.troubleshooting_request_permission))
+                                    }
+                                }
+                            }
+
+                            TroubleshootingItemType.BATTERY_OPTIMIZATION -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_battery_optimization_valid_title),
+                                    description = stringResource(id = R.string.troubleshooting_battery_optimization_valid_description),
+                                    descriptionInvalid = stringResource(id = R.string.troubleshooting_battery_optimization_invalid_description),
+                                    valid = batteryOptimizationState.valid,
+                                    checkState = batteryOptimizationState
+                                ) {
+                                    TextButton(
+                                        onClick = {
+                                            startSettingsActivity(
+                                                ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                                            )
+                                        },
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.troubleshooting_request_permission))
+                                    }
+                                }
+                            }
+
+                            TroubleshootingItemType.BACKGROUND_RESTRICTION -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_background_restriction_valid_title),
+                                    description = stringResource(
+                                        id = R.string.troubleshooting_background_restriction_valid_description
+                                    ),
+                                    descriptionInvalid = stringResource(id = R.string.troubleshooting_background_restriction_invalid_description),
+                                    valid = backgroundRestrictionState.valid,
+                                    checkState = backgroundRestrictionState
+                                ) {
+                                    TextButton(
+                                        onClick = {
+                                            startSettingsActivity()
+                                        },
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.button_label_app_settings))
+                                    }
+                                }
+                            }
+
+                            TroubleshootingItemType.ALARM -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_alarm_valid_title),
+                                    description = stringResource(
+                                        id = R.string.troubleshooting_alarm_valid_description
+                                    ),
+                                    descriptionInvalid = stringResource(id = R.string.troubleshooting_alarm_invalid_description),
+                                    valid = alarmState.valid,
+                                    checkState = alarmState
+                                ) {
+                                    TextButton(
+                                        onClick = {
+                                            startSettingsActivity(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                                        },
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.button_label_app_settings))
+                                    }
+                                }
+                            }
+
+                            TroubleshootingItemType.FULL_SCREEN_INTENT -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_incoming_call_valid_title),
+                                    description = stringResource(id = R.string.troubleshooting_incoming_call_valid_description),
+                                    descriptionInvalid = stringResource(id = R.string.troubleshooting_incoming_call_invalid_description),
+                                    valid = fullScreenIntentState.valid,
+                                    checkState = fullScreenIntentState
+                                ) {
+                                    TextButton(
+                                        onClick = {
+                                            startSettingsActivity(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT)
+                                        },
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.button_label_app_settings))
+                                    }
+                                }
+                            }
+
+                            TroubleshootingItemType.PERMANENT_WEBSOCKET -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_google_valid_title),
+                                    description = stringResource(id = R.string.troubleshooting_google_valid_description),
+                                    descriptionInvalid = stringResource(id = R.string.troubleshooting_google_invalid_description),
+                                    valid = permanentSocketState.valid,
+                                    checkState = permanentSocketState
+                                ) {
+                                    TextButton(
+                                        onClick = {
+                                            SettingsActivity.setUsePermanentWebSocket(true)
+                                            startService(
+                                                Intent(
+                                                    this@TroubleshootingActivity,
+                                                    UnifiedForegroundService::class.java
                                                 )
-                                                whitelist.forEach { serviceId ->
-                                                    Row(
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                                        modifier = Modifier.fillMaxWidth()
-                                                    ) {
+                                            )
+                                            permanentSocketState.refreshStatus()
+                                        },
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.button_label_enable_websocket))
+                                    }
+                                }
+                            }
+
+                            TroubleshootingItemType.BACKUPS -> {
+                                val backupsStateInfo = remember(backupState.getStatus()) {
+                                    getBackupStateInfo()
+                                }
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_olvid_backups_title),
+                                    description = stringResource(id = R.string.troubleshooting_backup_valid_description),
+                                    titleInvalid = backupsStateInfo?.title,
+                                    descriptionInvalid = backupsStateInfo?.description,
+                                    valid = backupState.valid,
+                                    critical = backupState.getStatus() == 2
+                                            || SettingsActivity.backupsV2Status == SettingsActivity.PREF_KEY_BACKUPS_V2_STATUS_NOT_CONFIGURED,
+                                    checkState = backupState
+                                ) {
+                                    TextButton(
+                                        onClick = {
+                                            val intent = Intent(
+                                                this@TroubleshootingActivity,
+                                                SettingsActivity::class.java
+                                            )
+                                            intent.putExtra(
+                                                SettingsActivity.SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA,
+                                                SettingsActivity.PREF_HEADER_KEY_BACKUP
+                                            )
+                                            startActivity(intent)
+                                        },
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.button_label_backup_settings))
+                                    }
+                                }
+                            }
+
+                            TroubleshootingItemType.CONNECTIVITY -> {
+                                var ping by remember {
+                                    mutableStateOf("-")
+                                }
+                                val connectivityState by AppSingleton.getWebsocketConnectivityStateLiveData()
+                                    .observeAsState()
+                                PingListener(connectivityState == 2) { pingValue ->
+                                    ping = when (pingValue) {
+                                        -1L -> {
+                                            getString(R.string.label_over_max_ping_delay, 5)
+                                        }
+
+                                        0L -> {
+                                            "-"
+                                        }
+
+                                        else -> {
+                                            getString(R.string.label_ping_delay, pingValue)
+                                        }
+                                    }
+                                }
+                                TroubleShootItem(
+                                    title = when (connectivityState) {
+                                        2 -> stringResource(id = R.string.label_ping_connectivity_connected)
+                                        1 -> stringResource(id = R.string.label_ping_connectivity_connecting)
+                                        else -> stringResource(id = R.string.label_ping_connectivity_none)
+                                    },
+                                    description = ping, valid = connectivityState == 2
+                                ) {
+                                }
+                            }
+
+
+                            TroubleshootingItemType.STORAGE -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_storage_valid_title),
+                                    description = stringResource(
+                                        id = R.string.troubleshooting_storage_valid_description,
+                                        Formatter.formatShortFileSize(
+                                            context,
+                                            AvailableSpaceHelper.getAvailableSpace() ?: 0
+                                        )
+                                    ),
+                                    titleInvalid = stringResource(id = R.string.troubleshooting_storage_invalid_title),
+                                    descriptionInvalid = stringResource(
+                                        id = R.string.troubleshooting_storage_invalid_description,
+                                        Formatter.formatShortFileSize(
+                                            context,
+                                            AvailableSpaceHelper.getAvailableSpace() ?: 0
+                                        )
+                                    ),
+                                    valid = storageState.valid,
+                                    checkState = storageState
+                                ) {
+                                    TextButton(
+                                        onClick = {
+                                            if (VERSION.SDK_INT >= VERSION_CODES.N_MR1) {
+                                                startActivity(Intent(StorageManager.ACTION_MANAGE_STORAGE))
+                                            }
+                                        },
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.button_label_manage_storage))
+                                    }
+                                }
+                            }
+
+                            TroubleshootingItemType.DB_SYNC -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_storage_db_sync_title),
+                                    description = stringResource(id = R.string.troubleshooting_storage_db_sync_description),
+                                    valid = true,
+                                    additionalContent = {
+                                        var inProgress by remember { mutableStateOf(false) }
+                                        AnimatedVisibility(visible = !inProgress) {
+                                            TextButton(
+                                                onClick = {
+                                                    inProgress = true
+                                                    App.runThread {
+                                                        try {
+                                                            AppDatabaseOpenCallback.syncEngineDatabases(
+                                                                AppSingleton.getEngine(),
+                                                                AppDatabase.getInstance()
+                                                            )
+                                                            Thread.sleep(1000)
+                                                        } catch (_: Exception) { }
+                                                        inProgress = false
+                                                    }
+                                                },
+                                                shape = RoundedCornerShape(6.dp),
+                                                colors = ButtonDefaults.textButtonColors(
+                                                    contentColor = colorResource(R.color.almostBlack)
+                                                )
+                                            ) {
+                                                Text(text = stringResource(id = R.string.button_label_check_now))
+                                            }
+                                        }
+                                        AnimatedVisibility(visible = inProgress) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier
+                                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                                                    .size(24.dp),
+                                                color = colorResource(id = R.color.olvid_gradient_light),
+                                                strokeWidth = 2.dp
+                                            )
+                                        }
+                                    }
+                                ) { }
+                            }
+
+                            TroubleshootingItemType.ACCESSIBILITY_SERVICES -> {
+                                var whitelist by remember { mutableStateOf(AccessibilityManager.getWhitelist(context)) }
+                                val valid = AccessibilityManager.untrustedAccessibilityServices.isEmpty()
+
+                                TroubleShootItem(
+                                    title = stringResource(id = if (valid) R.string.troubleshooting_accessibility_services_valid_title else R.string.troubleshooting_accessibility_services_invalid_title),
+                                    description = stringResource(id = if (valid) R.string.troubleshooting_accessibility_services_valid_description else R.string.troubleshooting_accessibility_services_invalid_description),
+                                    valid = valid,
+                                    critical = true,
+                                    additionalContent = {
+                                            Column(
+                                                modifier = Modifier.padding(
+                                                    vertical = 8.dp
+                                                )
+                                            ) {
+                                                AccessibilityManager.untrustedAccessibilityServices.forEach { serviceId ->
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
                                                         Text(
                                                             text = serviceId,
                                                             modifier = Modifier.weight(1f, true),
                                                             style = OlvidTypography.body2.copy(
-                                                                color = colorResource(R.color.almostBlack),
+                                                                color = colorResource(R.color.red),
                                                             )
                                                         )
                                                         OlvidTextButton(
-                                                            text = stringResource(id = R.string.button_label_remove),
-                                                            contentColor = colorResource(R.color.red),
+                                                            modifier = Modifier.weight(.8f, false),
+                                                            allowTwoLines = true,
+                                                            text = stringResource(id = R.string.button_label_trust_service)
                                                         ) {
-                                                            AccessibilityManager.removeFromWhitelist(context, serviceId)
+                                                            AccessibilityManager.addToWhitelist(context, serviceId)
                                                             whitelist = AccessibilityManager.getWhitelist(context)
+                                                        }
+                                                    }
+                                                }
+                                                if (whitelist.isNotEmpty()) {
+                                                    Spacer(modifier = Modifier.height(8.dp))
+                                                    Text(
+                                                        stringResource(R.string.troubleshooting_accessibility_services_whitelist_description),
+                                                        color = colorResource(R.color.greyTint),
+                                                        style = OlvidTypography.h3
+                                                    )
+                                                    whitelist.forEach { serviceId ->
+                                                        Row(
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                                            modifier = Modifier.fillMaxWidth()
+                                                        ) {
+                                                            Text(
+                                                                text = serviceId,
+                                                                modifier = Modifier.weight(1f, true),
+                                                                style = OlvidTypography.body2.copy(
+                                                                    color = colorResource(R.color.almostBlack),
+                                                                )
+                                                            )
+                                                            OlvidTextButton(
+                                                                text = stringResource(id = R.string.button_label_remove),
+                                                                contentColor = colorResource(R.color.red),
+                                                            ) {
+                                                                AccessibilityManager.removeFromWhitelist(context, serviceId)
+                                                                whitelist = AccessibilityManager.getWhitelist(context)
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
                                         }
-                                    }
-                            ) {}
-                        }
-
-                        TroubleshootingItemType.UPDATE_AVAILABLE -> {
-                            val isUpdateAvailable = SettingsActivity.isUpdateAvailable()
-                            val isOutdated = SettingsActivity.isVersionOutdated()
-                            TroubleShootItem(
-                                title = when {
-                                    isOutdated -> stringResource(R.string.dialog_title_outdated_version)
-                                    isUpdateAvailable -> stringResource(R.string.dialog_title_update_available)
-                                    else -> stringResource(R.string.troubleshooting_update_valid_title)
-                                },
-                                description = when {
-                                    isOutdated -> stringResource(R.string.dialog_message_outdated_version)
-                                    isUpdateAvailable -> stringResource(R.string.dialog_message_update_available)
-                                    else -> stringResource(R.string.explanation_latest_olvid_version)
-                                },
-                                valid = !isUpdateAvailable && !isOutdated,
-                                critical = isOutdated
-                            ) {
-                                TextButton(
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = colorResource(R.color.almostBlack)
-                                    ),
-                                    onClick = {
-                                        context.openStoreUrlOrFallback()
-                                    }
-                                ) {
-                                    Text(text = stringResource(R.string.menu_check_update))
-                                }
-
+                                ) {}
                             }
-                        }
 
-                        TroubleshootingItemType.RECREATE_ALL_CHANNELS -> {
-                            TroubleShootItem(
-                                title = stringResource(R.string.recreate_all_secure_channels),
-                                description = stringResource(R.string.recreate_all_secure_channels_explanation),
-                                valid = true,
-                                critical = false,
-                                additionalContent = {
-                                    var inProgress by remember { mutableStateOf(false) }
-                                    AnimatedVisibility(visible = inProgress) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier
-                                                .padding(horizontal = 16.dp, vertical = 12.dp)
-                                                .size(24.dp),
-                                            color = colorResource(id = R.color.red),
-                                            strokeWidth = 2.dp
-                                        )
+                            TroubleshootingItemType.UPDATE_AVAILABLE -> {
+                                val isUpdateAvailable = SettingsActivity.isUpdateAvailable()
+                                val isOutdated = SettingsActivity.isVersionOutdated()
+                                TroubleShootItem(
+                                    title = when {
+                                        isOutdated -> stringResource(R.string.dialog_title_outdated_version)
+                                        isUpdateAvailable -> stringResource(R.string.dialog_title_update_available)
+                                        else -> stringResource(R.string.troubleshooting_update_valid_title)
+                                    },
+                                    description = when {
+                                        isOutdated -> stringResource(R.string.dialog_message_outdated_version)
+                                        isUpdateAvailable -> stringResource(R.string.dialog_message_update_available)
+                                        else -> stringResource(R.string.explanation_latest_olvid_version)
+                                    },
+                                    valid = !isUpdateAvailable && !isOutdated,
+                                    critical = isOutdated
+                                ) {
+                                    TextButton(
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = colorResource(R.color.almostBlack)
+                                        ),
+                                        onClick = {
+                                            context.openStoreUrlOrFallback()
+                                        }
+                                    ) {
+                                        Text(text = stringResource(R.string.menu_check_update))
                                     }
-                                    AnimatedVisibility(visible = !inProgress) {
-                                        OlvidTextButton(
-                                            text = stringResource(R.string.recreate_all_secure_channels),
-                                            contentColor = colorResource(R.color.red),
-                                            allowTwoLines = true
-                                        ) {
-                                            App.runThread {
-                                                runCatching {
-                                                    inProgress = true
-                                                    AppSingleton.getBytesCurrentIdentity()
-                                                        ?.let { bytesCurrentIdentity ->
-                                                            AppSingleton.getEngine()
-                                                                .recreateAllChannels(
-                                                                    bytesCurrentIdentity
-                                                                )
-                                                        }
-                                                }.onSuccess {
-                                                    App.toast(
-                                                        R.string.toast_message_channel_restart_sucessful,
-                                                        Toast.LENGTH_SHORT
-                                                    )
-                                                    inProgress = false
-                                                }.onFailure {
-                                                    App.toast(
-                                                        R.string.toast_message_channel_restart_failed,
-                                                        Toast.LENGTH_SHORT
-                                                    )
-                                                    inProgress = false
+
+                                }
+                            }
+
+                            TroubleshootingItemType.RECREATE_ALL_CHANNELS -> {
+                                TroubleShootItem(
+                                    title = stringResource(R.string.recreate_all_secure_channels),
+                                    description = stringResource(R.string.recreate_all_secure_channels_explanation),
+                                    valid = true,
+                                    critical = false,
+                                    additionalContent = {
+                                        var inProgress by remember { mutableStateOf(false) }
+                                        AnimatedVisibility(visible = inProgress) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier
+                                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                                                    .size(24.dp),
+                                                color = colorResource(id = R.color.red),
+                                                strokeWidth = 2.dp
+                                            )
+                                        }
+                                        AnimatedVisibility(visible = !inProgress) {
+                                            OlvidTextButton(
+                                                text = stringResource(R.string.recreate_all_secure_channels),
+                                                contentColor = colorResource(R.color.red),
+                                                allowTwoLines = true
+                                            ) {
+                                                App.runThread {
+                                                    runCatching {
+                                                        inProgress = true
+                                                        AppSingleton.getBytesCurrentIdentity()
+                                                            ?.let { bytesCurrentIdentity ->
+                                                                AppSingleton.getEngine()
+                                                                    .recreateAllChannels(
+                                                                        bytesCurrentIdentity
+                                                                    )
+                                                            }
+                                                    }.onSuccess {
+                                                        App.toast(
+                                                            R.string.toast_message_channel_restart_sucessful,
+                                                            Toast.LENGTH_SHORT
+                                                        )
+                                                        inProgress = false
+                                                    }.onFailure {
+                                                        App.toast(
+                                                            R.string.toast_message_channel_restart_failed,
+                                                            Toast.LENGTH_SHORT
+                                                        )
+                                                        inProgress = false
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                },
-                            ) {}
+                                    },
+                                ) {}
+                            }
                         }
                     }
+
+                    AppVersionHeader(betaEnabled = SettingsActivity.betaFeaturesEnabled)
+
+                    OlvidTextButton(
+                        text = stringResource(R.string.troubleshooting_send_report),
+                        large = true,
+                        allowTwoLines = true
+                    ) {
+                        App.runThread {
+                            val report = buildDiagnosticReport()
+                            runOnUiThread {
+                                sendDiagnosticReport(report)
+                            }
+                        }
+                    }
+
+                    RestartAppButton()
                 }
-
-                AppVersionHeader(betaEnabled = SettingsActivity.betaFeaturesEnabled)
-
-                RestartAppButton()
             }
         }
     }
 }
+
+private const val DIAGNOSTIC_REPORT_EMAIL = "feedback@olvid.io"
 
 fun Activity.startSettingsActivity(action: String = ACTION_APPLICATION_DETAILS_SETTINGS) =
     startActivity(
@@ -935,4 +955,46 @@ private fun openAppNotificationSettings(context: Context) {
         }
     }
     context.startActivity(intent)
+}
+
+private fun Activity.sendDiagnosticReport(report: String) {
+    val subject = getString(R.string.troubleshooting_report_subject)
+    // prefer an email app, otherwise let the user pick any app that can share text
+    val emailIntent = Intent(Intent.ACTION_SENDTO, "mailto:$DIAGNOSTIC_REPORT_EMAIL?subject=${Uri.encode(subject)}&body=${Uri.encode(report)}".toUri())
+    if (emailIntent.resolveActivity(packageManager) != null) {
+        startActivity(emailIntent)
+    } else {
+        val shareIntent = Intent(Intent.ACTION_SEND)
+            .setType("text/plain")
+            .putExtra(Intent.EXTRA_EMAIL, arrayOf(DIAGNOSTIC_REPORT_EMAIL))
+            .putExtra(Intent.EXTRA_SUBJECT, subject)
+            .putExtra(Intent.EXTRA_TEXT, report)
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.troubleshooting_send_report)))
+    }
+}
+
+private fun Context.pushDiagnosticsDescription(summary: PushDiagnostics.Summary?): String {
+    val lastPush = summary?.lastPushTimestamp?.let { StringUtils.getLongNiceDateString(this, it) } ?: "-"
+    return buildString {
+        append(getString(R.string.dialog_message_about_last_push_notification, lastPush))
+        if (summary == null || summary.pushCount == 0) {
+            return@buildString
+        }
+        append("\n")
+        append(getString(R.string.troubleshooting_push_summary, summary.pushCount, summary.highPriorityCount, summary.deprioritizedCount, summary.dozeCount, summary.coldStartCount))
+        if (summary.medianDelayMillis != null && summary.maxDelayMillis != null) {
+            append("\n")
+            append(getString(R.string.troubleshooting_push_delay, formatDelay(summary.medianDelayMillis), formatDelay(summary.maxDelayMillis)))
+        }
+        if (summary.withoutNotificationCount + summary.suppressedCount > 0) {
+            append("\n")
+            append(getString(R.string.troubleshooting_push_without_notification, summary.withoutNotificationCount, summary.suppressedCount))
+        }
+    }
+}
+
+private fun formatDelay(millis: Long): String = when {
+    millis < 1_000 -> "$millis ms"
+    millis < 60_000 -> String.format(Locale.getDefault(), "%.1f s", millis / 1_000f)
+    else -> "${millis / 60_000} min"
 }

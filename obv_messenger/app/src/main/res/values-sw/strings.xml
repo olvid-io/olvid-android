@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Onyesha kiashirio cha \"chanzo cha kuaminika\" kwa anwani</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Wakati imewashwa, nukta ya rangi kwenye picha yao inaonyesha kama umethibitisha kibinafsi utambulisho wa mwasiliani au wamekuletewa kwako.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Inatumwa ujumbe wa Olvid</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Inapokea ujumbe wa Olvid</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Onyo: kutumia wijeti ya njia ya mkato na wasifu uliofichwa kunaweza kufichua uwepo wa wasifu huu.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Onyo: kutumia wijeti ya njia ya mkato na wasifu uliofichwa kunaweza kufichua uwepo wa wasifu huu.\nKwa kiwango cha chini, unapaswa kusanidi skrini ya kufunga ili kudhibiti ufikiaji wa ukurasa wa usanidi wa wijeti.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Wijeti hii inatumia wasifu uliofichwa. Tafadhali ingiza nenosiri la wasifu huu ili uweze kuipangilia.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Hakuna huduma yoyote isiyojulikana ya ufikiaji iliyogunduliwa.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Huduma isiyojulikana ya ufikiaji</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Huduma isiyojulikana ya ufikiaji imegunduliwa, tafadhali hakikisha kuwa ni salama kutumia:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Tuma ripoti ya uchunguzi</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Ripoti ya uchunguzi wa Olvid</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Katika siku 7 zilizopita: %1$d arifa za push zilizopokelewa, kati ya hizo %2$d zilikuwa za kipaumbele cha juu (%3$d zilipunguzwa kipaumbele). %4$d ziliwasili wakati kifaa kilikuwa kimelala, %5$d ililazimisha Olvid kuanza.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Ucheleweshaji kati ya arifa ya pushi ya kipaumbele cha juu na arifa ya ujumbe: wastani %1$s, pole zaidi %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d arifa za push zenye kipaumbele cha juu hazikuonyesha chochote (kwa mfano, marekebisho, majibu au ujumbe uliotumwa kutoka kwa vifaa vingine vyako) na %2$d ilihusu mazungumzo yaliyozimwa au yaliyo wazi.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Tafuta emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Hivi majuzi</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Sasisha hali ya mwasiliani</string>

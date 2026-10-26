@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Rodyti „patikimo šaltinio“ indikatorių kontaktų sąraše</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Įjungus, spalvotas taškas ant jų profilio nuotraukos rodo, ar asmeniškai patvirtinote kontakto tapatybę, ar jis buvo jums pristatytas.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Siunčiamas „Olvid“ pranešimas</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Gaunami Olvid pranešimai</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Įspėjimas: naudojant paslėpto profilio sparčiosios prieigos valdiklį, gali būti atskleista šio profilio egzistavimas.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Įspėjimas: paslėpto profilio naudojimas sparčiosios prieigos valdiklyje gali atskleisti šio profilio egzistavimą.\nMažiausiai, turėtumėte nustatyti užrakto ekraną, kad apribotumėte prieigą prie valdiklio konfigūracijos puslapio.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Šis valdiklis naudoja paslėptą profilį. Norėdami jį konfigūruoti, įveskite šio profilio slaptažodį.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Nėra aptikta nežinomų prieinamumo paslaugų.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Nežinomas prieinamumo paslaugos pavadinimas</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Aptikta nežinomas prieinamumo paslaugos teikėjas. Patikrinkite, ar jį saugu naudoti:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Siųsti diagnostikos ataskaitą</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Olvid diagnostikos ataskaita</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Per pastarąsias 7 dienas: gauta %1$d pranešimų, iš jų %2$d buvo aukšto prioriteto (%3$d pranešimų prioritetas sumažintas). %4$d pranešimai buvo gauti, kai įrenginys buvo neaktyvus, %5$d pranešimų atsiuntimui reikėjo paleisti Olvid.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Aukšto prioriteto pranešimo ir žinutės pranešimo atidėjimo laikas: vidurkis %1$s, didžiausias atidėjimo laikas %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d aukščiausios prioritetas turinčios tiesioginės žinutės nebuvo rodomos (pvz., redagavimai, reakcijos arba žinutės, siunčiamos iš kitų jūsų įrenginių), o %2$d buvo skirtos nutildytai arba atidarytai diskusijai.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Ieškoti jausmų simbolio</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Naujausi</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Atnaujinti kontakto būseną</string>

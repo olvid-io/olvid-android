@@ -1,0 +1,1 @@
+- Tilføjet en "Send en diagnostisk rapport"-handling til fejlfindingsskærmen.

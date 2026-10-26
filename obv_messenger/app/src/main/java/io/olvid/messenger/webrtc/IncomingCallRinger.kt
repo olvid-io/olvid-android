@@ -51,21 +51,19 @@ class IncomingCallRinger(private val context: Context) {
     private var mediaSession: MediaSession? = null
 
     init {
-        if (VERSION.SDK_INT >= VERSION_CODES.M) {
-            cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager?
-            cameraManager?.let {
-                try {
-                    for (cameraId in it.cameraIdList) {
-                        val cameraCharacteristics = cameraManager?.getCameraCharacteristics(cameraId)
-                        val hasFlash =
-                            cameraCharacteristics?.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)
-                        if (hasFlash != null && hasFlash) {
-                            cameraIdsToFlash.add(cameraId)
-                        }
+        cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager?
+        cameraManager?.let {
+            try {
+                for (cameraId in it.cameraIdList) {
+                    val cameraCharacteristics = cameraManager?.getCameraCharacteristics(cameraId)
+                    val hasFlash =
+                        cameraCharacteristics?.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)
+                    if (hasFlash != null && hasFlash) {
+                        cameraIdsToFlash.add(cameraId)
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
@@ -185,7 +183,6 @@ class IncomingCallRinger(private val context: Context) {
         mediaSession = null
     }
 
-    @RequiresApi(api = VERSION_CODES.M)
     private inner class CameraFlashThread(val cameraId: String) : Thread() {
         override fun run() {
             while (true) {

@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Tampilkan indikator \"sumber terpercaya\" untuk kontak</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Saat diaktifkan, titik berwarna pada foto profil mereka menunjukkan apakah Anda secara pribadi memverifikasi identitas kontak atau apakah kontak tersebut diperkenalkan kepada Anda.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Pesan Olvid sedang dikirim</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Menerima pesan Olvid</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Peringatan: menggunakan widget pintasan dengan profil tersembunyi dapat mengungkapkan keberadaan profil ini.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Peringatan: menggunakan widget pintasan dengan profil tersembunyi dapat mengungkapkan keberadaan profil ini.\nSetidaknya, Anda harus mengonfigurasi layar kunci untuk membatasi akses ke halaman konfigurasi widget.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Widget ini menggunakan profil tersembunyi. Silakan masukkan kata sandi profil ini untuk mengonfigurasinya.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Tidak ada layanan aksesibilitas yang tidak dikenal terdeteksi.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Layanan aksesibilitas tidak dikenal</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Layanan aksesibilitas yang tidak dikenal telah terdeteksi. Harap periksa apakah aman untuk digunakan:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Kirim laporan diagnostik</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Laporan diagnostik Olvid</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">7 hari terakhir: %1$d notifikasi push diterima, di antaranya %2$d dengan prioritas tinggi (%3$d diprioritaskan lebih rendah). %4$d notifikasi tiba saat perangkat tidak aktif, %5$d mengharuskan Olvid untuk dijalankan.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Penundaan antara notifikasi push prioritas tinggi dan notifikasi pesan: median %1$s, terlama %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d notifikasi prioritas tinggi tidak menampilkan apa pun (misalnya, pengeditan, reaksi, atau pesan yang dikirim dari perangkat lain Anda), dan %2$d adalah untuk diskusi yang dibisukan atau terbuka.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Cari emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Terbaru</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Perbarui status kontak</string>

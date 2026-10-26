@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">Näytä \"luotettavan lähteen\" indikaattori kontakteille</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">Kun se on käytössä, värillinen piste heidän profiilikuvassaan osoittaa, oletko henkilökohtaisesti vahvistanut kontaktin henkilöllisyyden vai onko hän esitelty sinulle.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Olvid-viestin lähettäminen</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Olvid-viestien vastaanotto</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">Varoitus: Piilotetun profiilin käyttäminen pikakuvakewidgetin kanssa voi paljastaa tämän profiilin olemassaolon.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">Varoitus: Piilotetun profiilin käyttäminen pikakuvakewidgetissä voi paljastaa tämän profiilin olemassaolon.\nSinun tulisi vähintään määrittää näytön lukitus rajoittaaksesi pääsyä widgetin kokoonpanosivulle.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">Tämä widget käyttää piilotettua profiilia. Anna tämän profiilin salasana sen määrittämiseksi.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Tuntemattomia saavutettavuuspalveluita ei havaittu.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Tuntematon saavutettavuuspalvelu</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Tuntematon saavutettavuuspalvelu on havaittu. Tarkista, että sen käyttö on turvallista:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">Lähetä vianmääritysloki</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">Olvid-diagnostinen raportti</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">Viimeisten 7 päivän aikana: %1$d push-ilmoitusta vastaanotettu, joista %2$d oli korkean prioriteetin (%3$d alennettu prioriteetti). %4$d ilmoitusta saapui, kun laite oli käyttämättömänä, ja %5$d vaati Olvidin käynnistämisen.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">Viive korkean prioriteetin push-ilmoituksen ja viesti-ilmoituksen välillä: mediaani %1$s, hitain %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d korkean prioriteetin push-ilmoitukset eivät näyttäneet mitään (esimerkiksi muokkauksia, reaktioita tai viestejä, jotka on lähetetty muista laitteistasi), ja %2$d koskivat vaimennettua tai avointa keskustelua.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Etsi emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Viimeisimmät</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Päivitä kontaktin tila</string>

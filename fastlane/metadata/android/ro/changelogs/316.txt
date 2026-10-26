@@ -1,0 +1,1 @@
+- Adăugat un element "Trimite un raport de diagnostic" în ecranul de depanare.

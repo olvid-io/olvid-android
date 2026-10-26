@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">ਸੰਪਰਕਾਂ ਲਈ ਇੱਕ \"ਭਰੋਸੇਯੋਗ ਸਰੋਤ\" ਸੰਕੇਤ ਦਿਖਾਓ</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">ਜਦੋਂ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਚਾਲੂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ, ਤਾਂ ਉਹਨਾਂ ਦੇ ਪ੍ਰੋਫਾਈਲ ਚਿੱਤਰ \'ਤੇ ਇੱਕ ਰੰਗੀਨ ਬਿੰਦੀ ਇਹ ਦਰਸਾਉਂਦੀ ਹੈ ਕਿ ਤੁਸੀਂ ਨਿੱਜੀ ਤੌਰ \'ਤੇ ਕਿਸੇ ਸੰਪਰਕ ਦੀ ਪਛਾਣ ਦੀ ਪੁਸ਼ਟੀ ਕੀਤੀ ਹੈ ਜਾਂ ਉਹ ਤੁਹਾਡੇ ਸਾਹਮਣੇ ਪੇਸ਼ ਕੀਤੇ ਗਏ ਸਨ।</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">ਓਲਵੀਡ ਸੁਨੇਹਾ ਭੇਜਿਆ ਜਾ ਰਿਹਾ ਹੈ</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">ਓਲਵੀਡ ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਕਰ ਰਿਹਾ ਹੈ</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">ਸਾਵਧਾਨ: ਇੱਕ ਛੁਪੀ ਹੋਈ ਪ੍ਰੋਫਾਈਲ ਨਾਲ ਇੱਕ ਸ਼ਾਰਟਕੱਟ ਵਿਜੇਟ ਦੀ ਵਰਤੋਂ ਕਰਨ ਨਾਲ ਇਸ ਪ੍ਰੋਫਾਈਲ ਦੇ ਮੌਜੂਦ ਹੋਣ ਦਾ ਖੁਲਾਸਾ ਹੋ ਸਕਦਾ ਹੈ।</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">ਸਾਵਧਾਨ: ਇੱਕ ਛੁਪੀ ਹੋਈ ਪ੍ਰੋਫਾਈਲ ਵਾਲੀ ਸ਼ਾਰਟਕੱਟ ਵਿਜੇਟ ਦੀ ਵਰਤੋਂ ਕਰਨ ਨਾਲ ਇਸ ਪ੍ਰੋਫਾਈਲ ਦੇ ਮੌਜੂਦ ਹੋਣ ਦਾ ਖੁਲਾਸਾ ਹੋ ਸਕਦਾ ਹੈ। ਘੱਟੋ-ਘੱਟ, ਤੁਹਾਨੂੰ ਵਿਜੇਟ ਕੌਂਫਿਗਰੇਸ਼ਨ ਪੇਜ ਤੱਕ ਪਹੁੰਚ ਨੂੰ ਸੀਮਤ ਕਰਨ ਲਈ ਇੱਕ ਲੌਕ ਸਕ੍ਰੀਨ ਨੂੰ ਕੌਂਫਿਗਰ ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ।</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">ਇਹ ਵਿਜੇਟ ਇੱਕ ਛੁਪੀ ਹੋਈ ਪ੍ਰੋਫਾਈਲ ਦੀ ਵਰਤੋਂ ਕਰ ਰਿਹਾ ਹੈ। ਇਸਨੂੰ ਕੌਂਫਿਗਰ ਕਰਨ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਇਸ ਪ੍ਰੋਫਾਈਲ ਦਾ ਪਾਸਵਰਡ ਦਰਜ ਕਰੋ।</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">ਕੋਈ ਵੀ ਅਣਜਾਣ ਐਕ্সেਸਿਬਿਲਟੀ ਸੇਵਾ ਨਹੀਂ ਮਿਲੀ।</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">ਅਣਜਾਣ ਪਹੁੰਚਯੋਗਤਾ ਸੇਵਾ</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">ਇੱਕ ਅਣਜਾਣ ਐਕ্সেਸਿਬਿਲਟੀ ਸੇਵਾ ਦਾ ਪਤਾ ਲਗਾਇਆ ਗਿਆ ਹੈ, ਕਿਰਪਾ ਕਰਕੇ ਜਾਂਚ ਕਰੋ ਕਿ ਇਸਦੀ ਵਰਤੋਂ ਕਰਨਾ ਸੁਰੱਖਿਅਤ ਹੈ:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">ਇੱਕ ਡਾਇਗਨੌਸਟਿਕ ਰਿਪੋਰਟ ਭੇਜੋ</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">ਓਲਵੀਡ ਡਾਇਗਨੌਸਟਿਕ ਰਿਪੋਰਟ</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">ਪਿਛਲੇ 7 ਦਿਨ: %1$d ਪੁਸ਼ ਸੂਚਨਾਵਾਂ ਪ੍ਰਾਪਤ ਹੋਈਆਂ, ਜਿਨ੍ਹਾਂ ਵਿੱਚੋਂ %2$d ਉੱਚ ਪੱਧਰ ਦੀਆਂ ਸਨ (%3$d ਨੂੰ ਘੱਟ ਪੱਧਰ ਦਿੱਤਾ ਗਿਆ)। %4$d ਉਦੋਂ ਆਈਆਂ ਜਦੋਂ ਡਿਵਾਈਸ ਨਿਸ਼ਕ੍ਰਿਯ ਸੀ, %5$d ਨੂੰ ਓਲਵੀਡ ਸ਼ੁਰੂ ਕਰਨ ਦੀ ਲੋੜ ਪਈ।</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">ਉੱਚ ਪਹਿਲ ਦੇ ਪੁਸ਼ ਨੋਟੀਫਿਕੇਸ਼ਨ ਅਤੇ ਮੈਸੇਜ ਨੋਟੀਫਿਕੇਸ਼ਨ ਦੇ ਵਿਚਕਾਰ ਦੇਰੀ: ਮੱਧਕ %1$s, ਸਭ ਤੋਂ ਹੌਲੀ %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d ਉੱਚ ਪੱਧਰੀ ਪੁਸ਼ ਸੂਚਨਾਵਾਂ ਕੁਝ ਵੀ ਨਹੀਂ ਦਿਖਾ ਰਹੀਆਂ ਹਨ (ਉਦਾਹਰਨ ਲਈ, ਤੁਹਾਡੇ ਹੋਰ ਡਿਵਾਈਸਾਂ ਤੋਂ ਭੇਜੇ ਗਏ ਸੰਪਾਦਨ, ਪ੍ਰਤੀਕਿਰਿਆਵਾਂ ਜਾਂ ਸੰਦੇਸ਼) ਅਤੇ %2$d ਇੱਕ ਮਿਊਟ ਕੀਤੀ ਜਾਂ ਖੁੱਲ੍ਹੀ ਚਰਚਾ ਲਈ ਹਨ।</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">ਇੱਕ ਇਮੋਜੀ ਦੀ ਭਾਲ ਕਰੋ</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">ਤਾਜ਼ਾ</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">ਸੰਪਰਕ ਦੀ ਸਥਿਤੀ ਨੂੰ ਅੱਪਡੇਟ ਕਰੋ</string>

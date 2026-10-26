@@ -1385,6 +1385,7 @@
 	<string name="pref_show_trust_levels_title" state="needs_review" hash="948801258">연락처에 "신뢰 출처" 표시기 표시</string>
 	<string name="pref_show_trust_levels_summary" state="needs_review" hash="1392702359">활성화되면 상대방의 프로필 사진에 색상이 있는 점이 표시되어 연락처의 신원을 직접 확인했는지 아니면 상대방이 귀하에게 소개되었는지 여부를 나타냅니다.</string>
 	<string name="notification_title_sending_message" state="needs_review" hash="-2132863296">Olvid 메시지 전송 중</string>
+	<string name="notification_title_receiving_messages" state="needs_review" hash="-1228336223">Olvid 메시지 수신 중</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning" state="needs_review" hash="-793756010">경고: 숨겨진 프로필로 바로 가기 위젯을 사용하면 해당 프로필의 존재가 드러날 수 있습니다.</string>
 	<string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen" state="needs_review" hash="-47584891">경고: 숨겨진 프로필로 바로 가기 위젯을 사용하면 해당 프로필의 존재가 드러날 수 있습니다.\n최소한 위젯 구성 페이지에 대한 액세스를 제한하려면 잠금 화면을 구성해야 합니다.</string>
 	<string name="dialog_message_widget_open_initial_hidden_profile" state="needs_review" hash="-1809745944">이 위젯은 숨겨진 프로필을 사용 중입니다. 구성을 위해 이 프로필의 비밀번호를 입력하세요.</string>
@@ -2242,6 +2243,11 @@
 	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">알 수 없는 접근성 서비스가 감지되지 않았습니다.</string>
 	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">알 수 없는 접근성 서비스</string>
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">알 수 없는 접근성 서비스가 감지되었습니다. 사용하기에 안전한지 확인해 주세요:</string>
+	<string name="troubleshooting_send_report" state="needs_review" hash="-1704839565">진단 보고서 보내기</string>
+	<string name="troubleshooting_report_subject" state="needs_review" hash="80228251">올비드 진단 보고서</string>
+	<string name="troubleshooting_push_summary" state="needs_review" hash="384591866">지난 7일 동안: %1$d개의 푸시 알림을 받았고, 그중 %2$d개는 높은 우선순위를 가졌습니다(%3$d개는 우선순위가 낮아짐). %4$d개의 알림은 기기가 유휴 상태일 때 도착했고, %5$d개의 알림은 Olvid를 시작해야 했습니다.</string>
+	<string name="troubleshooting_push_delay" state="needs_review" hash="1231633382">우선순위가 높은 푸시 알림과 메시지 알림 사이의 지연 시간: 중앙값 %1$s, 가장 느린 시간 %2$s.</string>
+	<string name="troubleshooting_push_without_notification" state="needs_review" hash="1393517292">%1$d 우선순위가 높은 푸시 알림이 아무것도 표시되지 않았습니다(예: 다른 기기에서 보낸 편집, 반응 또는 메시지). %2$d는 음소거되거나 공개된 대화에 대한 알림이었습니다.</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">이모지 검색</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">최근</string>
 	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">연락처 상태 새로 고침</string>
