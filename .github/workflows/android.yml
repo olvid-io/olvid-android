@@ -1,0 +1,105 @@
+name: Build & Publish Release APK
+
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      ref:
+        type: string
+        description: "The tag to use"
+
+jobs:
+  build:
+    name: Build/Test APK
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: setup jdk
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      # - name: Run Tests
+      #   run: cd obv_messenger/ && ./gradlew test --stacktrace
+
+      - name: Build Release APK
+        run: cd obv_messenger/ && ./gradlew assembleRelease --stacktrace
+
+      - name: Rename APK
+        run: |
+          find . -name '*.apk'
+          mv ./obv_messenger/app/build/outputs/apk/prodFull/release/app-prod-full-release-unsigned.apk Olvid.apk
+          mv ./obv_messenger/app/build/outputs/apk/prodNogoogle/release/app-prod-nogoogle-release-unsigned.apk Olvid-nogoogle.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: Olvid*.apk
+
+  release:
+    name: Sign/Release APK
+    needs: build
+    if: startsWith(inputs.ref || github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+
+      - name: Setup build tool version variable
+        shell: bash
+        run: |
+          BUILD_TOOL_VERSION=$(ls /usr/local/lib/android/sdk/build-tools/ | tail -n 1)
+          echo "BUILD_TOOL_VERSION=$BUILD_TOOL_VERSION" >> $GITHUB_ENV
+          echo Last build tool version is: $BUILD_TOOL_VERSION
+
+      - name: Download APK from build
+        uses: actions/download-artifact@v4
+        with:
+          name: apk
+
+      - name: setup jdk
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: .
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
+
+      - name: 'Get Previous tag'
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+
+      - name: Upload Release APK
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.previoustag.outputs.tag }}
+          files: |
+            Olvid.apk
+            Olvid-nogoogle.apk
+            Olvid-signed.apk
+            Olvid-nogoogle-signed.apk
